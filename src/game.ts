@@ -103,7 +103,7 @@ export type Projectile = Entity & {
   hitChance?: number;
   homing?: boolean;
 };
-export type Drop = Entity & { exp: number; gold: number; born: number };
+export type Drop = Entity & { exp: number; gold: number; born: number; itemId?: string };
 export type Fx = Entity & {
   kind: SkillId | "hit" | "cast" | "beastflame" | "talismanHit";
   dir?: number;
@@ -650,6 +650,28 @@ export class Game {
           this.waveGold += d.gold;
           this.totalGold += d.gold;
           this.exp += d.exp;
+          if (d.itemId) {
+            const item = getItem(d.itemId);
+            const slot = SLOT_KEYS.find(
+              (s) =>
+                (s === item.slot ||
+                  s.startsWith(
+                    item.slot === "bracelet"
+                      ? "bracelet"
+                      : item.slot === "ring"
+                        ? "ring"
+                        : "~",
+                  )) &&
+                !this.equipment[s],
+            );
+            if (slot) {
+              this.equipment[slot] = { itemId: item.id, paid: 0 };
+              this.recompute();
+            } else {
+              // no empty slot: sell for gold
+              this.gold += sellPrice(0, item.price);
+            }
+          }
           this.drops.splice(i, 1);
         }
       }
@@ -1479,6 +1501,18 @@ export class Game {
             (1 + (this.stats.gold_gain ?? 0) / 100),
         ) * (e.elite ? 4 : 1);
       const exp = Math.round(e.exp * (1 + (this.stats.exp_gain ?? 0) / 100));
+      // Elite drops a class-appropriate equipment item (GDD §10.4).
+      let itemId: string | undefined;
+      if (e.elite) {
+        const candidates = ITEMS.filter(
+          (it) =>
+            it.kind === "equipment" &&
+            (!it.classId || it.classId === this.classId) &&
+            it.tier <= (this.wave >= 7 ? 4 : this.wave >= 3 ? 3 : 2),
+        );
+        if (candidates.length)
+          itemId = this.rng.pick(candidates).id;
+      }
       if (this.drops.length >= 300) {
         this.drops[0].exp += exp;
         this.drops[0].gold += gold;
@@ -1490,6 +1524,7 @@ export class Game {
           exp,
           gold,
           born: this.clock,
+          itemId,
         });
     }
   }
