@@ -289,6 +289,8 @@ export const MONSTERS = [
   { id: "cat", name: "多钩猫", hp: 22, damage: 2, speed: 54, exp: 2 },
   { id: "rakecat", name: "钉耙猫", hp: 26, damage: 3, speed: 48, exp: 3 },
   { id: "orc", name: "半兽人", hp: 42, damage: 4, speed: 40, exp: 4 },
+  { id: "zombie", name: "僵尸", hp: 110, damage: 10, speed: 26, exp: 5 },
+  { id: "skeleton", name: "骷髅", hp: 50, damage: 6, speed: 44, exp: 3 },
   { id: "boss", name: "骷髅精灵", hp: 950, damage: 18, speed: 58, exp: 60 },
 ];
 export const getItem = (id: string) => {

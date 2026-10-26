@@ -676,7 +676,8 @@ export class Game {
     let m;
     if (kind) m = MONSTERS.find((x) => x.id === kind)!;
     else {
-      const pool = MONSTERS.slice(0, Math.min(4, 1 + Math.ceil(this.wave / 2)));
+      const nonBoss = MONSTERS.filter((x) => x.id !== "boss");
+      const pool = nonBoss.slice(0, Math.min(nonBoss.length, 1 + Math.ceil(this.wave / 2)));
       m = this.rng.pick(pool);
     }
     const a = this.rng.next() * Math.PI * 2,
@@ -1080,7 +1081,7 @@ export class Game {
     return this.effects.at(-1)!;
   }
   private isUndead(e: Enemy) {
-    return ["scarecrow", "boss"].includes(e.kind);
+    return ["scarecrow", "zombie", "skeleton", "boss"].includes(e.kind);
   }
   private canTame(e: Enemy) {
     return (
