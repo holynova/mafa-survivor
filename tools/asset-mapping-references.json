@@ -1,0 +1,26 @@
+{
+  "reviewedOn": "2026-10-26",
+  "resourceRef": "9e21ea6631317d06e064fbfa7e1ea43af6a2d3e6",
+  "references": [
+    {
+      "url": "https://github.com/etorth/mir2x/blob/main/common/src/magicrecord.inc",
+      "sha256": "0002588851cf2f9288261713df8735ed0ed3b645c7139680ae25b107a41dab70",
+      "use": "asset identity and encoding reference; not original-art rights evidence"
+    },
+    {
+      "url": "https://github.com/etorth/mir2x/blob/main/common/src/itemrecord.inc",
+      "sha256": "53e4934df73397696a481f4743a3fb493726fb9e755c4a3908dae740d75dffaa",
+      "use": "asset identity and encoding reference; not original-art rights evidence"
+    },
+    {
+      "url": "https://github.com/etorth/mir2x/blob/main/tools/herowil2png/src/main.cpp",
+      "sha256": "eb8327d2fce2321bc5f2e59614fd358910333e0e2a894c956fd7e64e01becc27",
+      "use": "asset identity and encoding reference; not original-art rights evidence"
+    },
+    {
+      "url": "https://github.com/etorth/mir2x/blob/main/common/src/motion.hpp",
+      "sha256": "e3cb07a48f8aada78003b08bac342bc2db9511800580e4e62c13879aed3fbdcc",
+      "use": "asset identity and encoding reference; not original-art rights evidence"
+    }
+  ]
+}

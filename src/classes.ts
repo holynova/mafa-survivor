@@ -1,0 +1,77 @@
+import type { Bonuses } from "./content";
+
+export const CLASS_IDS = ["wizard", "warrior", "taoist"] as const;
+export type ClassId = (typeof CLASS_IDS)[number];
+// HP, movement, defense and dodge follow GDD §2.1. Attack ranges and swing
+// intervals are explicit survivor-mode balance parameters, not historical stats.
+export const CLASSES = {
+  wizard: {
+    name: "法师",
+    seal: "法",
+    hp: 100,
+    speed: 220,
+    dodge: 5,
+    startingSkill: "fireball",
+    role: "远程施法 · 范围压制",
+    interval: 1.2,
+    base: {
+      dc_min: 2,
+      dc_max: 4,
+      mc_min: 3,
+      mc_max: 7,
+      sc_min: 0,
+      sc_max: 1,
+      def_min: 0,
+      def_max: 0,
+      mdef_min: 2,
+      mdef_max: 2,
+      accuracy: 90,
+    } satisfies Bonuses,
+  },
+  taoist: {
+    name: "道士",
+    seal: "道",
+    hp: 135,
+    speed: 215,
+    dodge: 5,
+    startingSkill: "talisman",
+    role: "符毒牵制 · 治疗召唤",
+    interval: 1.2,
+    base: {
+      dc_min: 3,
+      dc_max: 5,
+      mc_min: 0,
+      mc_max: 1,
+      sc_min: 3,
+      sc_max: 7,
+      def_min: 2,
+      def_max: 2,
+      mdef_min: 3,
+      mdef_max: 3,
+      accuracy: 90,
+    } satisfies Bonuses,
+  },
+  warrior: {
+    name: "战士",
+    seal: "战",
+    hp: 185,
+    speed: 205,
+    dodge: 3,
+    startingSkill: "powerstrike",
+    role: "近身挥砍 · 强韧突围",
+    interval: 0.9,
+    base: {
+      dc_min: 8,
+      dc_max: 12,
+      mc_min: 0,
+      mc_max: 1,
+      sc_min: 0,
+      sc_max: 1,
+      def_min: 5,
+      def_max: 5,
+      mdef_min: 1,
+      mdef_max: 1,
+      accuracy: 90,
+    } satisfies Bonuses,
+  },
+} as const;

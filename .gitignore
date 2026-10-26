@@ -1,0 +1,10 @@
+node_modules/
+dist/
+public/assets/mir/
+.artifacts/
+.DS_Store
+
+.venv/
+.cache/
+
+__pycache__/
