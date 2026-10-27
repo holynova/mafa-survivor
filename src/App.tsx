@@ -14,6 +14,7 @@ import {
   isReady,
   readyListeners,
   frameMS,
+  appearanceStatus,
   setAssetManifest,
 } from "./renderer";
 import { CLASSES, CLASS_IDS } from "./classes";
@@ -75,7 +76,7 @@ export async function loadArtPositions() {
   setAssetManifest(manifest);
   framePositions = {};
   await Promise.all(
-    manifest.pages.map(async (page: { data: string }) => {
+    manifest.pages.filter((page: { lazy?: boolean }) => !page.lazy).map(async (page: { data: string }) => {
       const response = await fetch(assetUrl(page.data));
       if (!response.ok) throw new Error("无法读取素材图集");
       const atlas = await response.json();
@@ -188,6 +189,12 @@ export function App() {
     <main>
       <div className="vignette" />
       <TestTools />
+      {game.mode !== "test" && (appearanceStatus.loading || appearanceStatus.error) && (
+        <div className="appearance-notice" role="status">
+          {appearanceStatus.error || "正在载入原版外观…"}
+          {appearanceStatus.error && <button onClick={() => document.dispatchEvent(new Event("retry-appearance"))}>重试</button>}
+        </div>
+      )}
       <div className="release-badge">
         <span>
           {releaseVersion} · {releaseCommit}
@@ -840,6 +847,32 @@ export function App() {
                 </div>
               ))}
             </div>
+            {game.classId === "taoist" && (
+              <div className="taoist-status">
+                <h3>道士修为</h3>
+                <div className="taoist-status-row">
+                  <span>毒素模式</span>
+                  <b>
+                    {game.tao.poisonMode === "green" ? "绿毒·持续伤害" : "红毒·减防"}
+                  </b>
+                </div>
+                <div className="taoist-status-row">
+                  <span>治疗优先级</span>
+                  <b>
+                    {game.tao.healPriority === "self" ? "优先自身" : "优先宝宝"}
+                  </b>
+                </div>
+                <div className="taoist-status-row">
+                  <span>召唤宝宝</span>
+                  <b>
+                    {game.pets.filter((p) => p.hp > 0 && p.source === "skeleton").length}
+                    骷髅 /
+                    {game.pets.filter((p) => p.hp > 0 && p.source === "beast").length}
+                    神兽
+                  </b>
+                </div>
+              </div>
+            )}
             <h3>
               无格道具 <small>同类合并显示</small>
             </h3>
