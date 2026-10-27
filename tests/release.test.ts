@@ -7,9 +7,10 @@ import { validateAuthorization } from "../tools/asset-authorization.mjs";
 afterEach(() => vi.unstubAllEnvs());
 it("keeps atlas and audio requests under the GitHub Pages project prefix", () => {
   vi.stubEnv("BASE_URL", "/mafa-survivor/");
-  expect(assetUrl("atlas-0.png")).toBe("/mafa-survivor/assets/mir/atlas-0.png");
+  vi.stubEnv("VITE_GIT_SHA", "test-stage");
+  expect(assetUrl("atlas-0.png")).toBe("/mafa-survivor/assets/mir/atlas-0.png?rev=test-stage");
   expect(assetUrl("audio/manifest.json")).toBe(
-    "/mafa-survivor/assets/mir/audio/manifest.json",
+    "/mafa-survivor/assets/mir/audio/manifest.json?rev=test-stage",
   );
 });
 it("refuses a public build with an unconfirmed asset profile", () => {
@@ -37,4 +38,12 @@ it("does not treat an original profile or status alone as permission", () => {
 it("requires confirmation to cover audio and public stage distribution", () => {
   expect(validateAuthorization({ ...confirmation, assetKinds: ["images", "map"] }, resource, ["audio"])).toBe(false);
   expect(validateAuthorization({ ...confirmation, scope: ["local"] }, resource, ["images"])).toBe(false);
+});
+
+it("changes image and manifest URLs between releases so stale atlas coordinates cannot mix", () => {
+  vi.stubEnv("VITE_GIT_SHA", "old-stage"); const before = assetUrl("manifest.json");
+  vi.stubEnv("VITE_GIT_SHA", "new-stage");
+  expect(assetUrl("manifest.json")).not.toBe(before);
+  expect(assetUrl("atlas-0.png")).toContain("rev=new-stage");
+  expect(assetUrl("audio/manifest.json")).toContain("rev=new-stage");
 });

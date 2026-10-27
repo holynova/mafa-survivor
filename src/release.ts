@@ -8,5 +8,7 @@ export const releaseCommit = (import.meta.env.VITE_GIT_SHA || "local").slice(
   7,
 );
 export const repositoryUrl = "https://github.com/holynova/mafa-survivor";
-export const assetUrl = (file: string) =>
-  `${import.meta.env.BASE_URL}assets/mir/${file}`;
+export const assetUrl = (file: string) => {
+  const revision = import.meta.env.VITE_GIT_SHA || releaseVersion;
+  return `${import.meta.env.BASE_URL}assets/mir/${file}?rev=${encodeURIComponent(revision)}`;
+};
