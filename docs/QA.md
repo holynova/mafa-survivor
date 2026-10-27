@@ -128,3 +128,13 @@ alpha.1 的首次 Actions 发布在获取上游地图目录树时返回 HTTP 504
 ### alpha.3 首次下载缓存修复
 
 alpha.2 已成功绕过超大地图目录，但多个技能书共用 `texture/item/00000130.PNG`，冷缓存的并发线程可能同时写同一文件，导致另一个线程读取部分内容，哈希门禁阻止了错误产物部署。新增单文件互斥与哈希验证后原子替换，并自动修复部分缓存；图片与音效共用此机制。3项 Python 回归覆盖36并发消费者只下载一次、损坏缓存修复和错误源不落盘。113项游戏测试、3项缓存测试及本地原版构建通过；采用手动工作流先验证云端完整导入，成功后再推 alpha.3 阶段标签。
+
+### alpha.3 线上验收完成 · 2026-10-27
+
+- 手动首部署 [40444312680](https://github.com/holynova/mafa-survivor/actions/runs/40444312680) 成功，随后相同提交的标签发布 [40444757275](https://github.com/holynova/mafa-survivor/actions/runs/40444757275) build/deploy/release 全部成功。
+- 正式预发布：[v0.1.0-alpha.3](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.3)。公开 Pages：<https://holynova.github.io/mafa-survivor/>。线上 version.json 返回 v0.1.0-alpha.3 / original / `8c8bd3de518de4a4236a88a429edf489c6a184db`，与标签提交一致。
+- 公网资源清单、音频清单返回200；实际下载一个原版 WAV，其 SHA-256 与清单一致，Content-Type 为 audio/wav。
+- 内置浏览器的自动化连接在公网导航后超时，改用原生 Chrome UI 完成线上试玩；未把连接超时冒作游戏资源失败。Chrome 首页完整加载原版资源并显示正确版本。
+- 进入快速测试模式，实际 D 键500ms：X1104.0 →1210.3，Y768.0，KeyD/d；松开后按住集合为空。原版音效已解锁，Chrome 标记正在播放音频，计数8→32。
+- 生成10个半兽人、暂停后画面13怪物，工具、人物、地面、树木与火球效果可见。全屏查看截图 `.artifacts/pages-original-live-fullscreen.png`（Release 附件同名）：未见人物衣服碎层或地面黑网格；截图保留版本、坐标、音频计数和工具状态。
+- 这些是短时功能/视觉验收，16.7ms 面板采样不代表目标设备P95性能达标。武器/头发/头盔、完整章节/AI、道士最终验收与平衡仍见 STATUS.md；此版本为开发测试版。

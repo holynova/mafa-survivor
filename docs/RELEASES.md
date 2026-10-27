@@ -26,3 +26,7 @@ Pages 测试地址：https://holynova.github.io/mafa-survivor/
 ## 首次发布核验记录
 
 2026-10-27：完整源码已推送，保留原远端 GDD 提交历史；源码提交 `f04a5f15d24de1160dccc0947503ae15571fb149` 的 [Source checks](https://github.com/holynova/mafa-survivor/actions/runs/40439650523) 已成功。GitHub Pages API 返回 build_type=workflow，配置已启用；这是授权确认前的源码准备记录。随后用户确认原版授权，alpha.1 首次部署受上游超大目录超时阻断；alpha.2 修复目录问题后暴露了共享源贴图并发缓存冲突，未部署；alpha.3 修复并加入回归测试后重新发布。线上核验以 QA.md 的实测记录及 Actions 成功状态为准。
+
+## 当前公开版本
+
+[v0.1.0-alpha.3](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.3) 已于2026-10-27完成 build/deploy/release，标签提交 `8c8bd3d`。真实 Chrome 线上试玩、D 键、音效、测试工具和截图验收记录见 QA.md。后续每阶段沿用递增 alpha 标签流程，不重写历史标签。
