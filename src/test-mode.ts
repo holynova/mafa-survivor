@@ -4,9 +4,11 @@ import { hasWorldAppearance } from "./appearance";
 import { clearTaoSkill } from "./taoist";
 import type { Game } from "./game";
 import type { SkillId } from "./spells";
+import { canStand } from "./world";
 export const newTestSettings = () => ({
   god: true,
   autowalk: false,
+  spawning: true,
   speed: 1,
   pose: "live",
   direction: 4,
@@ -63,6 +65,30 @@ export function testClear(g: Game) {
   g.drops = [];
   g.floating = [];
   g.emit();
+}
+/** Isolated, source-map wall probe. No ordinary run can load this scenario. */
+export function testMeleeWall(g: Game) {
+  if (g.mode !== "test" || g.classId !== "warrior" ||
+      !["battle", "paused"].includes(g.phase) || !g.navigation) return false;
+  const nav=g.navigation;
+  const homes=[...nav.points].sort((a,b)=>
+    Math.hypot(a.x-g.player.x,a.y-g.player.y)-Math.hypot(b.x-g.player.x,b.y-g.player.y));
+  for (const home of homes) for (const sign of [-1,1]) {
+    const targets=[-24,24].map(dx=>({x:home.x+dx,y:home.y+sign*64}));
+    if (!targets.every(p=>canStand(p.x,p.y,12,nav.layout) && nav.connected(home,p) && !nav.lineClear(home,p,0))) continue;
+    testClear(g);
+    Object.assign(g.player,home,{dir:sign>0 ? 4 : 0,moving:false,attackUntil:0});
+    g.input={x:0,y:0};g.basicCD=0;g.charges={};
+    g.skills=[g.newSkill("cleave"),g.newSkill("thrust")];
+    g.skills.forEach(s=>s.cd=0);
+    Object.assign(g.test,{spawning:false,autowalk:false,pose:"idle",direction:sign>0 ? 4 : 0});
+    for (const point of targets) {
+      const e=g.spawnEnemy("skeletonWarrior");
+      Object.assign(e,point,{speed:0});
+    }
+    g.recompute();g.emit();return true;
+  }
+  return false;
 }
 /** Prepare the real Boss AI transition without skipping time or awarding loot. */
 export function testBossPhase(g: Game) {

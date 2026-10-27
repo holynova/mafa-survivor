@@ -545,11 +545,13 @@ export class Game {
     }
     if (this.player.moving) revealActor(this, 0);
     updateTaoist(this);
-    this.spawnTimer -= dt;
+    const spawning = this.mode !== "test" || this.test.spawning;
+    if (spawning) this.spawnTimer -= dt;
     const budget=this.spawnBudget;
     if (
       this.spawnTimer <= 0 &&
       this.spawned < budget &&
+      spawning &&
       this.enemies.length < 300
     ) {
       this.spawnEnemy();
@@ -558,6 +560,7 @@ export class Game {
     }
     if (
       this.wave === this.maxWaves &&
+      spawning &&
       !this.bossSpawned &&
       this.waveTime > Math.min(25, this.duration * 0.45)
     ) {
@@ -1043,6 +1046,9 @@ export class Game {
     const angle = ((this.player.dir - 2) * Math.PI) / 4;
     return { x: Math.cos(angle), y: Math.sin(angle) };
   }
+  private meleeReachable(e: Enemy) {
+    return !this.navigation || this.navigation.lineClear(this.player, e, 0);
+  }
   private meleeAim(targets: Enemy[]) {
     if (this.player.moving || !targets.length) return this.facing();
     const target = targets[0],
@@ -1095,6 +1101,7 @@ export class Game {
       (e) =>
         e.hp > 0 &&
         Math.hypot(e.x - this.player.x, e.y - this.player.y) <= range &&
+        this.meleeReachable(e) &&
         (!this.player.moving ||
           (e.x - this.player.x) * front.x + (e.y - this.player.y) * front.y >=
             0),
@@ -1268,7 +1275,7 @@ export class Game {
         !targets.some(
           (e) =>
             Math.hypot(e.x - this.player.x, e.y - this.player.y) <=
-            48 + (s.id === "firesword" ? s.range : 0),
+            48 + (s.id === "firesword" ? s.range : 0) && this.meleeReachable(e),
         )
       )
         return false;
@@ -1280,7 +1287,7 @@ export class Game {
       (s.id === "thrust" ? 96 + s.range : 70) *
       (1 + (this.stats.skill_radius ?? 0) / 100);
     const near = targets.filter(
-      (e) => Math.hypot(e.x - this.player.x, e.y - this.player.y) <= radius,
+      (e) => Math.hypot(e.x - this.player.x, e.y - this.player.y) <= radius && this.meleeReachable(e),
     );
     if (near.length < 2) return false;
     const aim = this.meleeAim(near);

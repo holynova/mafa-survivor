@@ -72,7 +72,7 @@ export function simulationInput(g:Game,previous={x:0,y:0}) {
       const predicted={x:e.x+(committed ? 0 : (p.x-e.x)/Math.max(1,d)*e.speed*horizon),
         y:e.y+(committed ? 0 : (p.y-e.y)/Math.max(1,d)*e.speed*horizon)};
       if(!g.navigation || g.navigation.lineClear(future,predicted,0)) {
-        const radius=e.ranged ? 75 : g.classId==="warrior" ? e.windup>0 ? 75 : 42 : 105;
+        const radius=g.classId==="warrior" ? e.windup>0 ? 75 : 42 : e.ranged ? 75 : 105;
         score-=Math.max(0,1-distance(future,predicted)/radius)**2*50;
         if(distance(future,e)<30)score-=40;
       }

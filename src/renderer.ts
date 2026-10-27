@@ -145,8 +145,12 @@ class BattleScene extends Phaser.Scene {
       }
     });
     this.input.on("pointerdown", (p: Phaser.Input.Pointer) => {
-      if (game.phase === "battle" && p.downElement?.tagName === "CANVAS")
+      if (game.phase === "battle" && p.downElement?.tagName === "CANVAS") {
+        // Phaser prevents the browser's default pointer focus. Return keyboard
+        // control after the user finishes editing a test input or checkbox.
+        this.game.canvas.focus({ preventScroll: true });
         this.drag = { id: p.id, x: p.x, y: p.y };
+      }
     });
     this.input.on("pointerup", (p: Phaser.Input.Pointer) => {
       if (this.drag?.id === p.id) this.drag = null;

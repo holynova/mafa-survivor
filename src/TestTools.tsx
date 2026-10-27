@@ -8,7 +8,7 @@ import { inputDiagnostics } from "./input";
 import { hasWorldAppearance } from "./appearance";
 import { appearanceStatus } from "./renderer";
 import { ITEMS, getItem } from "./content";
-import { testWear, testSpawn, testEquip, testClear, testBossPhase } from "./test-mode";
+import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall } from "./test-mode";
 export function TestTools() {
   const [open, setOpen] = useState(true),
     [kind, setKind] = useState("orc"),
@@ -17,6 +17,8 @@ export function TestTools() {
       game.classInfo.startingSkill,
     ),
     [slot, setSlot] = useState(0);
+  const [scenarioNotice,setScenarioNotice]=useState("");
+  useEffect(()=>setScenarioNotice(""),[game.runId]);
   useEffect(() => {
     if (["upgrade", "replace", "shop", "won", "dead"].includes(game.phase)) {
       setOpen(false);
@@ -54,6 +56,11 @@ export function TestTools() {
             {isGraybox ? "此版未提供音效试听" : "试听原版火球音效"}
           </button>
           <div className="test-row">
+            <label>
+              <input type="checkbox" checked={game.test.spawning}
+                onChange={(e)=>{game.test.spawning=e.target.checked;game.emit();}} />
+              自然刷怪
+            </label>
             <label>
               <input
                 type="checkbox"
@@ -95,6 +102,12 @@ export function TestTools() {
             </button>
           </div>
           {game.test.autowalk && <p>自动避敌和拾取；按方向键或拖动可接管。升级和商店仍由你选择。</p>}
+          {!game.test.spawning && <p>波次投放已关闭，场上怪物和 Boss 仍会行动。</p>}
+          {game.classId==="warrior" && <>
+            <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>
+              setScenarioNotice(testMeleeWall(game) ? "已固定两只骷髅战士，装配半月和刺杀并关闭自然刷怪。切回实战，观察墙后敌人不受伤；可手动绕墙接敌。" : "此地图未找到合适的隔墙位置，请切换到矿洞重试。")}>载入隔墙近战样例</button>
+            {scenarioNotice && <p role="status">{scenarioNotice}</p>}
+          </>}
           <label>
             地图{" "}
             <select aria-label="测试地图" value={game.mapId}
