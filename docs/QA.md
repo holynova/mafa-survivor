@@ -289,3 +289,13 @@ alpha.2 已成功绕过超大地图目录，但多个技能书共用 `texture/it
 - 测试无敌／固定动作／加金币／跳波仅用于相应界面和模型验收，完整36局使用真实正常规则。用户现有测试页和前台Chrome未操作。正式发布和公网结果另记。
 
 - 补充封顶锁定边界：保留的拾取道具在属性封顶后已不可购，不能代替可用强化保底。新增同源库存50次刷新用例先红后绿，保留旧锁定实例并补合法强化；最终10项成长回归／268项总测试通过。
+
+- 最终库存封顶边界修复后重建，并再次从菜单实测锁玻璃戒指／布衣及刷新，alpha10-shop-locks.jpg覆盖为最终生产截图。固定提交1bab703469a1f00f208b70c7373f27f581b21a7f在干净工作树上重跑36局，与冻结前结果逐项一致；1通关／0不变量异常，V4哈希不变。
+
+
+### alpha.10 正式发布与公网核验
+
+- 固定提交`1bab703469a1f00f208b70c7373f27f581b21a7f`；[工作流40603853104](https://github.com/holynova/mafa-survivor/actions/runs/40603853104)build／deploy／release全部成功，Source checks 40603811513成功。[v0.1.0-alpha.10](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.10)公开预发布。
+- 公网version.json为alpha.10／original／1bab703；22,709帧／42图集，四源地图路径／SHA／walk夹具一致，42张PNG逐一HEAD200/image/png；28原WAV实际下载SHA256全部匹配，JS入口200且类型正确。alpha10-online-http.json已附Release。
+- 独立后台IAB真实导航?stage=v0.1.0-alpha.10，截图alpha10-online-menu.jpg显示alpha.10／1bab703；随后尝试选战士15秒超时、连接重置，alpha.10公网战斗／商店交互未完成。alpha.9的31秒公网试玩不作为新版交互证据；用户现有页面和前台Chrome未操作。
+- Release附四张本地生产图片（最终商店、基础拾取、购买后拾取、完整模型／阴影）、一张真实公网菜单，以及完整冻结36局、冻结汇总、同策略前后对照与公网HTTP共四份JSON；本地与公网、冻结结果与旧版对照分别标注。完整平衡／10k种子／经济总预算／速度单位和精英奖励等数值审计／性能／存档／高级外观继续开发。

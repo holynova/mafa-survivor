@@ -95,3 +95,5 @@ V4控制器和SHA保持不变，直接对照alpha.9冻结36局。怪物成长、
 | zuma／taoist | 8／40／Lv7 | 7／46／Lv8 |
 
 完整36局对照为alpha10-comparison-summary.json。部分矿洞／祖玛角色到达更后波，但部分种子回退，战士仍未通关；应继续记录高阶武器候选／购买决策、近战Boss窗口与多构筑收益，不能仅凭这一小样本调整到目标胜率。
+
+alpha.10冻结复测提交`1bab703469a1f00f208b70c7373f27f581b21a7f`、sourceDirty=false、V4策略哈希不变；36局与冻结前逐项完全一致，1通关、0不变量异常。报告alpha10-frozen-matrix.json／alpha10-frozen-summary.json附本阶段Release。
