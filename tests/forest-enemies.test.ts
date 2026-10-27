@@ -64,7 +64,7 @@ describe("first chapter roster", () => {
     const e = elites[0];
     expect(e.kind).toBe("orcBrave");
     expect(e.elite).toBe(true);
-    expect(e.maxHp).toBeCloseTo(280 * 1.39); // No second 4x elite multiplier.
+    expect(e.maxHp).toBeCloseTo(280 * 1.36); // GDD wave-four HP; no second 4x elite multiplier.
   });
   it("spider fires a slow hostile poison shot that hurts without poisoning other monsters", () => {
     const { g, e } = arena("spider");

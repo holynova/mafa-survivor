@@ -709,7 +709,7 @@ export function App() {
               </div>
             </header>
             <div className="shop-toolbar">
-              <p>锁定商品可跨刷新与波次保留；购买装备会自动穿戴。</p>
+              <p>已锁定 {2-game.shopLocksRemaining}/2 件 · 可跨刷新与波次保留；购买装备会自动穿戴。</p>
               <button
                 disabled={game.gold < game.cooldownCost}
                 onClick={() => game.reroll()}
@@ -740,7 +740,7 @@ export function App() {
                             : "消耗品"}
                       </small>
                       <button
-                        disabled={o.sold}
+                        disabled={o.sold || (!o.locked && game.shopLocksRemaining===0)}
                         className={o.locked ? "locked" : ""}
                         aria-label={`${o.locked ? "解锁" : "锁定"}${item.name}`}
                         onClick={() => game.lock(o.id)}

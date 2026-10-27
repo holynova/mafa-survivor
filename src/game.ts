@@ -371,11 +371,14 @@ export class Game {
   get cooldownCost() {
     return rerollPrice(this.rerolls);
   }
+  get shopLocksRemaining() {
+    return Math.max(0,2-this.offers.filter(o=>o.locked && !o.sold).length);
+  }
   get moveSpeed() {
     return this.classInfo.speed * (1 + (this.stats.move_speed ?? 0) / 100);
   }
   get pickupRadius() {
-    return 48 * (1 + (this.stats.pickup_radius ?? 0) / 100);
+    return 70 * (1 + (this.stats.pickup_radius ?? 0) / 100);
   }
   newSkill(id: SkillId): Skill {
     return {
@@ -899,7 +902,7 @@ export class Game {
       r = 440 + this.rng.next() * 140;
     const nativeElite = NATIVE_ELITES.includes(m.id);
     const elite = nativeElite || (!summoned && !isBossKind(m.id) && scheduledElite);
-    const mult = 1 + (this.wave - 1) * 0.13;
+    const mult = 1 + (this.wave - 1) * 0.12;
     const hp = m.hp * (elite && !nativeElite ? 4 : 1) * mult;
     const candidates = this.navigation?.reachablePoints(this.player, 300, 620) ?? [];
     const point = candidates.length ? this.rng.pick(candidates) : {
@@ -916,7 +919,7 @@ export class Game {
       hp,
       maxHp: hp,
       speed: m.speed * (1 + this.wave * 0.025),
-      damage: m.damage * (1 + (this.wave - 1) * 0.13),
+      damage: m.damage * (1 + (this.wave - 1) * 0.07),
       exp: m.exp * (elite && !nativeElite ? 5 : 1),
       dir: 4,
       windup: 0,
@@ -2008,17 +2011,17 @@ export class Game {
           id: "stat-pickup",
           kind: "stat",
           name: "拾取强化",
-          description: "拾取范围 +20%，受软硬上限约束。",
+          description: "拾取范围 +25%，受软硬上限约束。",
           stat: "pickup_radius",
-          value: 20,
+          value: 25,
         },
         {
           id: "stat-speed",
           kind: "stat",
           name: "轻装强化",
-          description: "移动速度 +5%，最高有效加成 35%。",
+          description: "移动速度 +8%，最高有效加成 35%。",
           stat: "move_speed",
-          value: 5,
+          value: 8,
         },
         {
           id: "stat-def",
@@ -2177,11 +2180,13 @@ export class Game {
     const pool = ITEMS.filter((x) => x.tier <= tier && this.validItem(x));
     this.offers = retained;
     for (let i = retained.length; i < 4; i++) {
-      const choices = pool.filter(
+      const available = pool.filter(
         (x) =>
-          !this.offers.some((o) => o.itemId === x.id) &&
-          (i !== 0 || x.kind === "passive"),
+          !this.offers.some((o) => o.itemId === x.id),
       );
+      const needsPassive=!this.offers.some(o=>!o.sold && getItem(o.itemId).kind==="passive" && this.validItem(getItem(o.itemId)));
+      const passives=available.filter(x=>x.kind==="passive");
+      const choices=needsPassive && passives.length ? passives : available;
       const item = this.rng.pick(choices.length ? choices : pool);
       this.offers.push({
         id: ++this.id,
@@ -2241,6 +2246,7 @@ export class Game {
     if (this.phase !== "shop") return;
     const o = this.offers.find((o) => o.id === id);
     if (o && !o.sold) {
+      if (!o.locked && this.shopLocksRemaining===0) return;
       o.locked = !o.locked;
       this.emit();
     }

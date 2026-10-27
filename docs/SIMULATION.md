@@ -73,3 +73,25 @@ V4控制器SHA256为`54bbfa14f07727d3708325cb0cf43b6a1e5c7d0544b4628afe758132c8d
 对照原始报告为alpha9-before-melee.json、alpha9-after-melee.json与alpha9-comparison-summary.json。修复提升了特定接敌与隔墙行为的正确性，部分种子表现也回退；未改怪物基础数值／经济或宣称整体难度达标。
 
 alpha.9最终冻结复测：提交`56525d7cb8cf794fff396231537403de603e886e`、sourceDirty=false、V4哈希不变。三职业四场景三种子36局全部终结、0不变量异常、2局比奇法师通关；12局战士与冻结前逐项完全一致，0通关。报告alpha9-frozen-matrix.json与alpha9-frozen-summary.json附于本阶段Release；重复复测不增加独立种子数。
+
+
+## alpha.10 GDD数值修正对照
+
+V4控制器和SHA保持不变，直接对照alpha.9冻结36局。怪物成长、基础拾取和升级奖励按GDD修正；商店锁定规则修复不向机器人提供额外金币、装备或控制能力。当前36局全部真实终结、0不变量异常，仅种子176比奇法师通关（1／36，alpha.9为2／36），不能宣称整体通关率改善。
+
+| 种子176／场景／职业 | alpha.9 波／击杀／等级 | alpha.10 波／击杀／等级 |
+|---|---|---|
+| biche／wizard | 12／1906／Lv39 | 12／1908／Lv39 |
+| biche／warrior | 10／346／Lv14 | 11／321／Lv13 |
+| biche／taoist | 12／654／Lv20 | 12／347／Lv15 |
+| mine／wizard | 7／336／Lv16 | 11／871／Lv28 |
+| mine／warrior | 6／122／Lv9 | 6／119／Lv9 |
+| mine／taoist | 8／208／Lv12 | 12／298／Lv14 |
+| woma／wizard | 12／538／Lv28 | 12／558／Lv30 |
+| woma／warrior | 7／48／Lv7 | 7／48／Lv7 |
+| woma／taoist | 12／86／Lv10 | 12／80／Lv10 |
+| zuma／wizard | 7／74／Lv10 | 10／149／Lv15 |
+| zuma／warrior | 6／9／Lv3 | 5／8／Lv3 |
+| zuma／taoist | 8／40／Lv7 | 7／46／Lv8 |
+
+完整36局对照为alpha10-comparison-summary.json。部分矿洞／祖玛角色到达更后波，但部分种子回退，战士仍未通关；应继续记录高阶武器候选／购买决策、近战Boss窗口与多构筑收益，不能仅凭这一小样本调整到目标胜率。
