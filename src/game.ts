@@ -7,11 +7,14 @@ import {
   SLOT_KEYS,
   getItem,
   getSkill,
+  MAPS,
+  MAP_SCENERY,
   type Bonuses,
   type SkillId,
   type StatKey,
   type Slot,
   type Item,
+  type MapId,
 } from "./content";
 import type { SkillField } from "./spells";
 import {
@@ -176,6 +179,7 @@ export type Offer = {
 export type Equipped = { itemId: string; paid: number };
 export type RunResult = {
   classId?: ClassId;
+  mapId?: MapId;
   runId: string;
   mode: Mode;
   seed: number;
@@ -192,6 +196,9 @@ export type RunResult = {
 };
 export class Game {
   classId: ClassId = "wizard";
+  mapId: MapId = "biche";
+  unlockedMaps: Set<MapId> = new Set(["biche"]);
+  crystals = 0;
   tao = createTaoState();
   test = newTestSettings();
   audioEvents: string[] = [];
@@ -272,6 +279,9 @@ export class Game {
   get maxSkills() {
     return this.classId === "warrior" && this.warriorFourSlot ? 4 : 6;
   }
+  get scenery() {
+    return MAP_SCENERY[this.mapId];
+  }
   sound(key: string) {
     if (this.audioEvents.length < 24) this.audioEvents.push(key);
   }
@@ -294,8 +304,8 @@ export class Game {
         ((e.redPoison?.until ?? 0) > this.clock ? e.redPoison!.reduction : 0))
     );
   }
-  get obstacles() {
-    return worldLayout ? [] : SCENERY;
+  get obstacles(): typeof SCENERY {
+    return worldLayout ? [] : this.scenery;
   }
   get classInfo() {
     return CLASSES[this.classId];
@@ -305,6 +315,15 @@ export class Game {
     this.classId = id;
     this.recompute();
     this.emit();
+  }
+  unlockMap(mapId: MapId): boolean {
+    if (this.unlockedMaps.has(mapId)) return false;
+    const cost = MAPS[mapId].unlockCost;
+    if (this.crystals < cost) return false;
+    this.crystals -= cost;
+    this.unlockedMaps.add(mapId);
+    this.emit();
+    return true;
   }
   get duration() {
     return this.mode === "trial" ? 35 : 75;
@@ -346,8 +365,10 @@ export class Game {
       summonHP: 0,
     };
   }
-  start(mode: Mode, seed = 176, classId: ClassId = this.classId, warriorFourSlot = false) {
+  start(mode: Mode, seed = 176, classId: ClassId = this.classId, warriorFourSlot = false, mapId: MapId = "biche") {
+    if (!this.unlockedMaps.has(mapId)) return;
     this.classId = classId;
+    this.mapId = mapId;
     this.mode = mode;
     this.warriorFourSlot = warriorFourSlot;
     this.test = newTestSettings();
@@ -795,7 +816,10 @@ export class Game {
     let m;
     if (kind) m = MONSTERS.find((x) => x.id === kind)!;
     else {
-      const nonBoss = MONSTERS.filter((x) => x.id !== "boss");
+      const map = MAPS[this.mapId];
+      const nonBoss = MONSTERS.filter(
+        (x) => x.id !== "boss" && map.monsterPool.includes(x.id),
+      );
       const pool = nonBoss.slice(
         0,
         Math.min(nonBoss.length, 1 + Math.ceil(this.wave / 2)),
@@ -2113,8 +2137,11 @@ export class Game {
   finish(won: boolean) {
     if (this.result) return;
     this.phase = won ? "won" : "dead";
+    const runCrystals = this.mode === "normal" && won ? 3 : 0;
+    this.crystals += runCrystals;
     this.result = {
       classId: this.classId,
+      mapId: this.mapId,
       runId: this.runId,
       mode: this.mode,
       seed: this.seed,
@@ -2124,7 +2151,7 @@ export class Game {
       seconds: this.clock,
       level: this.level,
       gold: this.totalGold,
-      crystals: this.mode === "normal" && won ? 3 : 0,
+      crystals: runCrystals,
       skillDamage: { ...this.damageDealt },
       healing: { ...this.tao.healing },
       skills: this.skills.map((s) => `${getSkill(s.id).name} Lv.${s.rank}`),

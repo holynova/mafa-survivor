@@ -313,3 +313,66 @@ export const SCENERY = [
   { id: "shrub", x: 1520, y: 350, r: 10 },
   { id: "shrub", x: 780, y: 300, r: 10 },
 ];
+
+// ---------------------------------------------------------------------------
+// Chapter map data (GDD §11). Each chapter has its own scenery obstacle set
+// and monster pool; chapters are unlocked out-of-run with Mafa Crystals.
+// ---------------------------------------------------------------------------
+export type MapId = "biche" | "mine" | "zuma";
+
+export const MAP_IDS: MapId[] = ["biche", "mine", "zuma"];
+
+export const MAP_SCENERY: Record<MapId, typeof SCENERY> = {
+  biche: SCENERY,
+  mine: [
+    // 矿洞：更多岩石障碍，狭窄通道
+    { id: "rock", x: 500, y: 500, r: 22 },
+    { id: "rock", x: 1700, y: 500, r: 22 },
+    { id: "rock", x: 500, y: 1100, r: 22 },
+    { id: "rock", x: 1700, y: 1100, r: 22 },
+    { id: "rock", x: 1104, y: 800, r: 28 },
+    { id: "rock", x: 1104, y: 280, r: 28 },
+    { id: "rock", x: 300, y: 768, r: 20 },
+    { id: "rock", x: 1908, y: 768, r: 20 },
+  ],
+  zuma: [
+    // 沃玛/祖玛：祭坛墙体与断桥，房间边缘
+    { id: "altar", x: 500, y: 500, r: 20 },
+    { id: "altar", x: 1700, y: 500, r: 20 },
+    { id: "altar", x: 500, y: 1100, r: 20 },
+    { id: "altar", x: 1700, y: 1100, r: 20 },
+    { id: "altar", x: 1104, y: 300, r: 30 },
+    { id: "altar", x: 1104, y: 1236, r: 30 },
+    { id: "pillar", x: 300, y: 500, r: 18 },
+    { id: "pillar", x: 1908, y: 500, r: 18 },
+    { id: "pillar", x: 300, y: 1036, r: 18 },
+    { id: "pillar", x: 1908, y: 1036, r: 18 },
+  ],
+};
+
+export const MAPS: Record<MapId, { id: MapId; name: string; theme: string; monsterPool: string[]; boss: string; unlockCost: number }> = {
+  biche: {
+    id: "biche",
+    name: "比奇郊外",
+    theme: "草地、林地、村口；开阔通道，适合新手走位",
+    monsterPool: ["scarecrow", "cat", "rakecat", "orc"],
+    boss: "boss",
+    unlockCost: 0,
+  },
+  mine: {
+    id: "mine",
+    name: "矿洞与骷髅洞",
+    theme: "狭窄走廊、坍塌岩石、转角；远程压制与圣言克制",
+    monsterPool: ["skeleton", "zombie", "orc"],
+    boss: "boss",
+    unlockCost: 50,
+  },
+  zuma: {
+    id: "zuma",
+    name: "沃玛/祖玛进阶",
+    theme: "祭坛墙体、断桥、房间边缘；混合远近，高压Boss",
+    monsterPool: ["zombie", "skeleton", "orc"],
+    boss: "boss",
+    unlockCost: 150,
+  },
+} as const;
