@@ -1547,6 +1547,26 @@ export class Game {
             it.tier <= (this.wave >= 7 ? 4 : this.wave >= 3 ? 3 : 2),
         );
         if (candidates.length) itemId = this.rng.pick(candidates).id;
+      } else if (e.kind === "boss") {
+        // Boss: one high-quality equipment draw (GDD §10.4).
+        const candidates = ITEMS.filter(
+          (it) =>
+            it.kind === "equipment" &&
+            hasWorldAppearance(it) &&
+            (!it.classId || it.classId === this.classId) &&
+            it.tier >= 3,
+        );
+        if (candidates.length) itemId = this.rng.pick(candidates).id;
+      } else if (this.rng.next() < 0.005) {
+        // Ordinary monster: ~0.5% low-tier equipment drop (within GDD 0.2-0.8%).
+        const candidates = ITEMS.filter(
+          (it) =>
+            it.kind === "equipment" &&
+            hasWorldAppearance(it) &&
+            (!it.classId || it.classId === this.classId) &&
+            it.tier <= 1,
+        );
+        if (candidates.length) itemId = this.rng.pick(candidates).id;
       }
       if (this.drops.length >= 300) {
         this.drops[0].exp += exp;
