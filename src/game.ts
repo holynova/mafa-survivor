@@ -80,6 +80,21 @@ export type Enemy = Entity & {
   revealUntil?: number;
   revealTags?: boolean;
   lastSeen?: { id: number; x: number; y: number; until: number };
+  /** Boss 当前阶段（1=普通，2=狂暴） */
+  bossPhase?: number;
+  /** Boss 跳跃：目标位置与下次可跳时间（>clock 为空中中） */
+  bossJumpTarget?: { x: number; y: number };
+  bossJumpUntil?: number;
+  /** Boss 召唤冷却 */
+  bossSummonCD?: number;
+  /** Boss 跳跃冷却 */
+  bossJumpCD?: number;
+  /** 精英远程攻击 */
+  ranged?: boolean;
+  rangedCD?: number;
+  /** 精英冲锋 */
+  chargeUntil?: number;
+  chargeTarget?: { x: number; y: number };
 };
 export type Pet = Entity & {
   source?: "charm" | "skeleton" | "beast";
@@ -504,10 +519,64 @@ export class Game {
         continue;
       }
       if (!victim.visible) e.windup = 0;
+      // --- Boss special behaviors (GDD §11 / P4) ---
+      if (e.kind === "boss") {
+        if (e.hp <= e.maxHp * 0.5 && (e.bossPhase ?? 1) === 1) {
+          e.bossPhase = 2;
+          e.speed *= 1.25;
+          e.damage *= 1.25;
+        }
+        if ((e.bossSummonCD ?? 0) <= 0) {
+          this.summonBossMinion(e);
+          e.bossSummonCD = (e.bossPhase ?? 1) === 2 ? 10 : 15;
+        } else {
+          e.bossSummonCD = Math.max(0, (e.bossSummonCD ?? 0) - dt);
+        }
+        const airborne = (e.bossJumpUntil ?? 0) > this.clock;
+        if (airborne) {
+          const tj = e.bossJumpTarget!;
+          const dxj = tj.x - e.x,
+            dyj = tj.y - e.y,
+            dj = Math.max(1, Math.hypot(dxj, dyj));
+          e.x = clamp(e.x + (dxj / dj) * e.speed * 1.6 * dt, 25, WORLD.w - 25);
+          e.y = clamp(e.y + (dyj / dj) * e.speed * 1.6 * dt, 30, WORLD.h - 20);
+          e.windup = 0;
+          continue;
+        }
+        // Just landed: area damage on landing
+        if (e.bossJumpTarget) {
+          const radius = 110;
+          if (
+            Math.hypot(this.player.x - e.x, this.player.y - e.y) < radius
+          ) {
+            this.hurt(e.damage * 1.5, "magic", true);
+          }
+          e.bossJumpTarget = undefined;
+        }
+        if ((e.bossJumpCD ?? 0) <= 0) {
+          this.startBossJump(e);
+          e.bossJumpCD = 20;
+        } else {
+          e.bossJumpCD = Math.max(0, (e.bossJumpCD ?? 0) - dt);
+        }
+      }
       const dx = victim.x - e.x,
         dy = victim.y - e.y,
         d = Math.hypot(dx, dy);
       e.dir = this.direction(dx, dy);
+      // --- Elite special behaviors (GDD §11 / P4) ---
+      if (
+        e.elite &&
+        e.ranged &&
+        (e.rangedCD ?? 0) <= 0 &&
+        e.windup === 0 &&
+        d < 420
+      ) {
+        this.fireEliteProjectile(e);
+        e.rangedCD = 2.5;
+      } else if (e.elite && e.ranged) {
+        e.rangedCD = Math.max(0, (e.rangedCD ?? 0) - dt);
+      }
       if (e.windup > 0) {
         e.windup -= dt;
         if (e.windup <= 0) {
@@ -761,7 +830,74 @@ export class Game {
       level: this.wave,
       defense: m.id === "boss" ? 12 : m.id === "orc" ? 4 : 2,
       magicDefense: m.id === "boss" ? 8 : m.id === "orc" ? 2 : 1,
+      ...(m.id === "boss"
+        ? { bossPhase: 1, bossJumpUntil: 0 }
+        : elite
+          ? {
+              ranged: this.rng.next() < 0.3,
+              rangedCD: 0,
+              chargeUntil: 0,
+            }
+          : {}),
     });
+  }
+  private summonBossMinion(boss: Enemy) {
+    for (let i = 0; i < 3; i++) {
+      const a = this.rng.next() * Math.PI * 2,
+        r = 70 + this.rng.next() * 60;
+      const x = clamp(boss.x + Math.cos(a) * r, 25, WORLD.w - 25);
+      const y = clamp(boss.y + Math.sin(a) * r, 30, WORLD.h - 20);
+      if (this.enemies.some((e) => e.hp > 0 && Math.hypot(e.x - x, e.y - y) < 30))
+        continue;
+      this.enemies.push({
+        id: ++this.id,
+        kind: "scarecrow",
+        x,
+        y,
+        hp: 20 * (1 + (this.wave - 1) * 0.13),
+        maxHp: 20 * (1 + (this.wave - 1) * 0.13),
+        speed: 40,
+        damage: 3,
+        exp: 3,
+        dir: 4,
+        windup: 0,
+        attackCD: 0,
+        hitAt: -1,
+        burnAt: 0,
+        elite: false,
+        born: this.clock,
+        level: this.wave,
+        defense: 2,
+        magicDefense: 1,
+      });
+      break;
+    }
+  }
+  private startBossJump(e: Enemy) {
+    e.bossJumpTarget = { x: this.player.x, y: this.player.y };
+    e.bossJumpUntil = this.clock + 1;
+    e.windup = 0.8;
+    this.effect("cast", e.x, e.y, 0, 0.8);
+  }
+  fireEliteProjectile(e: Enemy) {
+    const dx = this.player.x - e.x,
+      dy = this.player.y - e.y,
+      l = Math.max(1, Math.hypot(dx, dy));
+    this.projectiles.push({
+      id: ++this.id,
+      x: e.x,
+      y: e.y,
+      vx: (dx / l) * 260,
+      vy: (dy / l) * 260,
+      damage: Math.round(e.damage * 0.8),
+      life: 2.5,
+      dir: (((Math.round(Math.atan2(dy, dx) / (Math.PI / 8)) + 4) % 16) + 16) % 16,
+      skill: undefined,
+      targetId: -1,
+      homing: false,
+      hitChance: 75,
+    });
+    this.effect("cast", e.x, e.y, 0, 0.5);
   }
   private magicDamage(base: number, s: Skill) {
     const mc = this.rollStat("mc") + (this.stats.mc_flat ?? 0);
