@@ -80,6 +80,7 @@ function run(seed: number, classId: ClassId = "wizard") {
     result: g.result,
   };
 }
+// These probes simulate two full runs. Their wall-clock allowance is not a game performance target.
 it("completes a deterministic seeded run without softlocks or economy errors", () => {
   const a = run(176),
     b = run(176);
@@ -101,7 +102,7 @@ it("completes a deterministic seeded run without softlocks or economy errors", (
       upgrades: a.upgrades,
     }),
   );
-});
+}, 20_000);
 it("keeps a seeded warrior run deterministic across melee upgrades and shops", () => {
   const a = run(176, "warrior"),
     b = run(176, "warrior");
@@ -124,4 +125,4 @@ it("keeps a seeded warrior run deterministic across melee upgrades and shops", (
       upgrades: a.upgrades,
     }),
   );
-});
+}, 20_000);
