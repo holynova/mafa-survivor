@@ -22,3 +22,7 @@ Pages 计划地址：https://holynova.github.io/mafa-survivor/
 - 本地默认仍使用原版素材；灰盒构建不改变本地原始文件和默认画风。
 
 当前公开资产方案等待用户确认。源码及部署配置的准备和发布可以独立继续。
+
+## 首次发布核验记录
+
+2026-10-27：完整源码已推送，保留原远端 GDD 提交历史；源码提交 `f04a5f15d24de1160dccc0947503ae15571fb149` 的 [Source checks](https://github.com/holynova/mafa-survivor/actions/runs/40439650523) 已成功。GitHub Pages API 返回 build_type=workflow，配置已启用；尚无正式部署，尚未推送 v0.1.0-alpha.1 标签或创建该 Release。公开素材方案确认后才设置部署变量并发布首个阶段测试版本。
