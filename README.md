@@ -57,7 +57,7 @@ npm run build
 - `tests/long-run.test.ts`：固定种子的机器人战斗回归；用于查卡局与数据错误，不能代替人工平衡测试。
 - `docs/QA.md`：浏览器操作和截图验证记录。
 
-`npm run build` 是本地验证构建，不代表素材获准发布。`npm run build:release` 会执行素材授权门禁；当前应返回 `BLOCKED_BY_ASSET_RIGHTS`。
+`npm run build:release` 校验资源来源与项目所有人的授权记录。Pages 使用 `PAGES_ASSET_MODE=original npm run build:pages`，核验图片、地图和音效记录并生成带版本号的子路径产物。
 
 ## 美术与需求来源
 
@@ -67,7 +67,7 @@ npm run build
 - [设计数据 V0.9](docs/design-data-V0.9.json)：原聊天数据草案，保留原始内容；运行时由 `src/content.ts` 选取当前已实现子集并校验。
 - 原始图片来自 [etorth/mir2x_res](https://github.com/etorth/mir2x_res)，固定提交 `9e21ea6631317d06e064fbfa7e1ea43af6a2d3e6`。参考客户端为 mir2x 的 1.45 语境，不能标为已核准的 1.76 全量素材。
 - [资产登记表](docs/asset-manifest.json) 记录每帧源路径、哈希、偏移及动画；资产导入仅做无损图集整理，不使用 AI 生成的传奇风替代图。
-- [素材来源与授权状态](docs/ASSETS.md)。原始图片及缓存不纳入 Git；目前没有已核实的第三方原作分发授权。
+- [素材来源与授权状态](docs/ASSETS.md)。2026-10-27 项目所有人已明确确认拥有原版授权并要求公开发布，依据记录在 [授权确认](docs/asset-authorization.json)。原始图片及缓存由 CI 导入，不纳入源码 Git。
 
 ## 工程边界
 
@@ -79,6 +79,6 @@ npm run build
 
 [源码仓库](https://github.com/holynova/mafa-survivor) · [阶段版本记录](https://github.com/holynova/mafa-survivor/releases)
 
-GitHub Pages 已配置为 Actions 发布，计划测试地址为 [holynova.github.io/mafa-survivor](https://holynova.github.io/mafa-survivor/)。**游戏部署还在等待公开素材方案确认**；本地原版画面与音效保持不变。
+GitHub Pages 使用 Actions 发布，在线测试地址为 [holynova.github.io/mafa-survivor](https://holynova.github.io/mafa-survivor/)。公开展示版使用原版图片、地图和 WAV 音效；当前阶段版本为 **v0.1.0-alpha.1**。
 
 每个阶段通过测试与截图验收后，更新 CHANGELOG、推送递增的 `v0.1.0-alpha.N` 标签；工作流部署成功后自动创建预发布版本。页面显示版本和提交号，可通过反馈入口报告问题。配置与门禁见 [阶段发布说明](docs/RELEASES.md)。

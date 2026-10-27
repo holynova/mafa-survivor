@@ -1,10 +1,11 @@
 """Import a pinned, attributed subset of mir2x_res without altering original pixels.
-Run with a Python environment containing Pillow. Assets are local evaluation only.
+Run with Pillow and zstandard. Public use follows the recorded owner confirmation.
 """
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 import json, urllib.request, hashlib, time, io, math
 from PIL import Image
+from asset_authorization import authorize
 ROOT=Path(__file__).resolve().parents[1]
 CACHE=ROOT/'.cache'; CACHE.mkdir(exist_ok=True)
 OUT=ROOT/'public/assets/mir'; OUT.mkdir(parents=True,exist_ok=True)
@@ -146,6 +147,7 @@ for key,im,info in sorted(loaded,key=lambda x:(-x[1].height,x[0])):
  meta[key]={**info,'texture':f'mir-{page}','originX':24-info['dx'],'originY':16-info['dy']};x+=im.width+2;rowH=max(rowH,im.height)
 flush()
 manifest={'schemaVersion':2,'repository':REPO,'ref':REF,'referenceVersion':'mir2x 1.45 reference; gameplay 1.76 candidate','rightsStatus':'UNVERIFIED_THIRD_PARTY_ART','distribution':'LOCAL_EVALUATION_ONLY','releaseStatus':'BLOCKED_BY_ASSET_RIGHTS','world':world_layout,'pages':pages,'animations':animations,'frames':meta}
+authorize(manifest, ['images', 'map'])
 (OUT/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2))
 public_ledger={**manifest,'world':{k:v for k,v in manifest['world'].items() if k in ['sourcePath','sourceSha256','sourceRegion','width','height']}}
 (ROOT/'docs/asset-manifest.json').write_text(json.dumps(public_ledger,ensure_ascii=False,indent=2))

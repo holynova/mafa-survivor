@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { checkReleaseAuthorization } from "./asset-authorization.mjs";
 const root = new URL("../public/assets/mir/", import.meta.url);
 const manifest = JSON.parse(
   fs.readFileSync(new URL("manifest.json", root), "utf8"),
@@ -99,12 +100,4 @@ console.log(
   ),
 );
 if (failures.length) process.exitCode = 1;
-if (
-  process.argv.includes("--release") &&
-  manifest.releaseStatus !== "CLEARED_FOR_DISTRIBUTION"
-) {
-  console.error(
-    "BLOCKED_BY_ASSET_RIGHTS: original artwork redistribution rights are unverified.",
-  );
-  process.exitCode = 1;
-}
+if (process.argv.includes("--release")) checkReleaseAuthorization();

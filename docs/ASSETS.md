@@ -42,15 +42,15 @@
 
 ## 权利状态
 
-当前统一标记 `UNVERIFIED_THIRD_PARTY_ART` / `LOCAL_EVALUATION_ONLY`，发布状态 `BLOCKED_BY_ASSET_RIGHTS`。
+2026-10-27，项目所有人在本开发会话明确确认：“确认拥有原版授权，直接发布公开版本”。[机器可读确认](asset-authorization.json) 覆盖固定资源提交的图片、地图与音效，以及公开 Pages 和阶段发布。当前标记 `AUTHORIZED_BY_PROJECT_OWNER` / `PUBLIC_PROJECT_DISTRIBUTION`。
 
-候选仓库可下载、附带的开源许可证和解析器代码许可证，不等于传奇原作美术的分发授权。尚未取得可核实的原作权利依据；原始图片、图集、缓存不上传仓库或托管服务。
+公开发布依据为项目所有人的明确确认，不是对原作权利的独立法律核验，也不把源代码许可证冒作素材许可证。原始图片、图集和缓存继续忽略于源码 Git；发布时由 CI 从固定提交导入并部署。
 
-`npm run build` 只生成本地验证目录；`npm run build:release` 在缺少权利确认时退出失败。后续发布必须逐项核实使用范围；若无法取得许可，按 GDD 向产品负责人列明缺口，不能擅自改画风。
+`npm run build:release` 和原版 Pages 构建均校验图片、地图与音效的来源、固定提交及授权范围。仅修改构建变量不能覆盖记录不匹配；后续同范围阶段发布无需重复确认。
 
 逐帧机器清单另提供 `docs/asset_manifest.csv` 和 `data/assets.json`。源包 LICENSE 原文保存在 `docs/licenses/mir2x_res-LICENSE.txt`，随本地图集保留 `SOURCE_LICENSE.txt`；这不代替第三方原作权利核验。
 
-新增运行帧：抗拒火环 0x5A、诱惑之光 0xA、地狱火 0x76C、瞬息移动 0x6E、爆裂火焰 0x3B6、地狱雷光 0x010003D4、圣言术 0x8C、冰咆哮 0x30C、疾光电影 0x0100049C（八方向）、大火球 0x668（十六方向），均依据已检查的 mir2x magicrecord.inc 映射；权利状态继续为 permission_pending。
+新增运行帧：抗拒火环 0x5A、诱惑之光 0xA、地狱火 0x76C、瞬息移动 0x6E、爆裂火焰 0x3B6、地狱雷光 0x010003D4、圣言术 0x8C、冰咆哮 0x30C、疾光电影 0x0100049C（八方向）、大火球 0x668（十六方向），均依据已检查的 mir2x magicrecord.inc 映射；公开使用按上述项目所有人确认记录执行。
 
 战士新增原始运行帧：攻杀剑术 0x546、刺杀剑术 0x140、半月弯刀 0xE6、烈火剑法 0x5BE；各 8 方向、每方向 6 帧、方向步长 10。依据 magicrecord.inc 的 gfxID/frameCount/gfxIDCount/gfxDirType；野蛮冲撞源记录没有独立 magic gfx，当前使用原人物动作与位置变化，不冒用法师火焰。新增战士装备和六种技能书图标来自相同 itemrecord 字典。武器/头发叠层与装备外观变化仍未完成。
 
@@ -60,5 +60,5 @@
 
 - 人物图不是单层完整图片。源 hero.cpp 同时绘制 bodyLayer0 与 bodyLayer1；导入阶段按同一偏移无损合成，816 个有人物衣服叠层的动作帧均逐像素对照原始两层通过。`layers` 字段与 CSV `source_layers` 保存每层原路径和哈希。
 - 原地图物件是 48 px 宽的竖条，不能孤立当成完整树木。现在解析固定资源提交中的 `map/0.bin`（zstd+cereal），采用源区域 x552/y432、46×48 格，保留瓦片、物件竖条与通行数据。552 块地面、源布局的 631 条物件条带按原坐标组装；具体实时计数以 manifest.world 为准。地面先绘入一张 Canvas 纹理，消除独立图集瓦片的采样接缝。人物被树冠遮挡时降低遮挡条带透明度。
-- 音效来自相同固定资源提交的 `sound/seff`，WAV 原文件未改编码。`docs/audio-manifest.json` 记录 28 个 WAV 的 SHA-1/SHA-256 与 29 个映射；magicrecord 的 seffBase/引用关系按源格式解析。人物脚步、挥砍、受击来自 hero.cpp 的明确索引。所有音效仍是本地验证，权利状态未变。
+- 音效来自相同固定资源提交的 `sound/seff`，WAV 原文件未改编码。`docs/audio-manifest.json` 记录 28 个 WAV 的 SHA-1/SHA-256 与 29 个映射；magicrecord 的 seffBase/引用关系按源格式解析。人物脚步、挥砍、受击来自 hero.cpp 的明确索引。当前公开展示按上述项目所有人确认发布，保留全部来源哈希。
 - 版本是 mir2x 参考包语境；原地图区域的恢复不等于全部章节地图和 1.76 版本验收已完成。

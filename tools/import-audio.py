@@ -2,13 +2,12 @@
 from pathlib import Path
 import json,re,urllib.request,hashlib
 from concurrent.futures import ThreadPoolExecutor
+from asset_authorization import authorize
 root=Path(__file__).resolve().parents[1];cache=root/'.cache';out=root/'public/assets/mir/audio';out.mkdir(parents=True,exist_ok=True)
 ref='9e21ea6631317d06e064fbfa7e1ea43af6a2d3e6'
 def request(url):return urllib.request.urlopen(url,timeout=40).read()
-source_tree=cache/'mir2x-source-tree.json'
-if not source_tree.exists():source_tree.write_bytes(request('https://api.github.com/repos/etorth/mir2x/git/trees/main?recursive=1'))
-source_ref=json.loads(source_tree.read_text())['sha']
-srcfile=cache/'audio-magicrecord.inc'
+source_ref='bb6a22287abcd9f248d2aba755074c254c68787a'
+srcfile=cache/f'audio-magicrecord-{source_ref}.inc'
 if not srcfile.exists():srcfile.write_bytes(request(f'https://raw.githubusercontent.com/etorth/mir2x/{source_ref}/common/src/magicrecord.inc'))
 s=srcfile.read_text();blocks={}
 for block in re.split(r'\n(?=\{\s+\.name)',s):
@@ -41,5 +40,6 @@ def load(filename):
  return filename,{'sourcePath':'sound/seff/'+filename,'sha1':sha,'sha256':hashlib.sha256(b).hexdigest(),'bytes':len(b),'permissionStatus':'permission_pending'}
 files=dict(ThreadPoolExecutor(12).map(load,sorted(set(mapping.values()))))
 manifest={'ref':ref,'repository':'https://github.com/etorth/mir2x_res','rightsStatus':'UNVERIFIED_THIRD_PARTY_ART','releaseStatus':'BLOCKED_BY_ASSET_RIGHTS','mappingReference':{'ref':source_ref,'sourcePath':'common/src/magicrecord.inc','sha256':hashlib.sha256(srcfile.read_bytes()).hexdigest(),'soundFormula':'0x04000000 + seffBase * 16 + stage; references resolved; first existing stage retained'},'mapping':mapping,'files':files,'missing':[k for k in names if k not in mapping]}
+authorize(manifest, ['audio'])
 text=json.dumps(manifest,ensure_ascii=False,indent=2);(out/'manifest.json').write_text(text);(root/'docs/audio-manifest.json').write_text(text)
 print('Original audio:',len(files),'WAV files;',len(mapping),'mappings; missing:',manifest['missing'])

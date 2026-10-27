@@ -3,9 +3,9 @@
   "repository": "https://github.com/etorth/mir2x_res",
   "ref": "9e21ea6631317d06e064fbfa7e1ea43af6a2d3e6",
   "referenceVersion": "mir2x 1.45 reference; gameplay 1.76 candidate",
-  "rightsStatus": "UNVERIFIED_THIRD_PARTY_ART",
-  "distribution": "LOCAL_EVALUATION_ONLY",
-  "releaseStatus": "BLOCKED_BY_ASSET_RIGHTS",
+  "rightsStatus": "AUTHORIZED_BY_PROJECT_OWNER",
+  "distribution": "PUBLIC_PROJECT_DISTRIBUTION",
+  "releaseStatus": "AUTHORIZED_BY_PROJECT_OWNER",
   "world": {
     "sourcePath": "map/0.bin",
     "sourceSha256": "9fa3bac35403071a2786b406f2d20ee3235352adc53cb990cdf1e1048046e5b3",
@@ -72943,5 +72943,6 @@
       "originX": 24,
       "originY": 16
     }
-  }
+  },
+  "authorizationEvidence": "docs/asset-authorization.json"
 }
