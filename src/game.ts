@@ -864,6 +864,7 @@ export class Game {
             }
           : {}),
     });
+    return this.enemies.at(-1)!;
   }
   private summonBossMinion(boss: Enemy) {
     for (let i = 0; i < 3; i++) {
