@@ -181,3 +181,9 @@ alpha.2 已成功绕过超大地图目录，但多个技能书共用 `texture/it
 - 全部本地截图在`.artifacts/`且已经实际查看。本地开发菜单早期截图与冻结生产构建截图分开；仅生产构建截图作为本阶段发布证据。短时16.7ms不代表P95达标。原版神兽喷火音效仍无核验映射，没有替换合成音。
 - 本阶段尚未交付矿洞、寺庙与局外持久化，也没有完成道士全部多构筑通关、移动端内存/性能或全GDD退出条件。在线发布与浏览器验收结果在部署后另记。
 - 最终生产构建另测技能栏毒素按钮：点击「切换为红毒」后HUD显示「施毒术 · 红毒」，再切回绿毒，装备面板同为绿毒；截图`alpha5-poison-hud.jpg`。切换没有增加技能槽，暂停时HUD按钮禁用，装备面板仍可调整。
+
+### alpha.5 正式发布与公网文件核验
+
+- 发布提交`a4350ec7341ea5223f7fe8d6c9662b74281143fb`。手动预检[40493742042](https://github.com/holynova/mafa-survivor/actions/runs/40493742042)和标签工作流[40494059708](https://github.com/holynova/mafa-survivor/actions/runs/40494059708)均成功，后者build/deploy/release全部完成；Source checks [40493742292](https://github.com/holynova/mafa-survivor/actions/runs/40493742292)成功。[v0.1.0-alpha.5](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.5)为公开预发布。
+- 在线version.json返回alpha.5 / original / a4350ec，匹配阶段标签。在线16,509帧/35图集，三个新增模型均有8方向行走动画；35张PNG逐一HEAD200、Content-Type=image/png；实际原WAV下载哈希匹配。证据`.artifacts/alpha5-online-http.json`与三张本地生产截图上传至Release。
+- 独立后台内置浏览器公网导航返回后，读取AX状态30秒超时并重置工具连接。最终线上交互/截图仍未完成；没有改用前台Chrome或操作用户现有页面。本地生产构建验收和公网HTTP核验分别记录，不混称线上画面验收完成。

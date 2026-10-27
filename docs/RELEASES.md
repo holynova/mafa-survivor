@@ -35,3 +35,7 @@ Pages 测试地址：https://holynova.github.io/mafa-survivor/
 ## alpha.4 发布记录
 
 [v0.1.0-alpha.4](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.4) 的139项游戏测试、3项源缓存测试、资源/原图像素/音频检查、构建、部署和Release均成功，发布提交 `0450ff8`。在线version.json和33张原版PNG与原WAV核验通过。本地真实浏览器视觉验收已完成；最终公网交互截图因内置浏览器超时与前台Chrome控制需用户许可而待完成，详见QA.md。
+
+## 当前公开版本：alpha.5
+
+[v0.1.0-alpha.5](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.5)发布提交`a4350ec7341ea5223f7fe8d6c9662b74281143fb`；工作流40494059708的build/deploy/release成功。191项游戏测试与3项缓存测试、原图像素/WAV/构建检查通过；线上版本、35图集与原WAV核验通过。本地生产浏览器截图已验收并上传Release；公网内置浏览器AX超时，最终线上交互截图未完成，未操作用户前台Chrome。此版本开放道士与第一章七类敌人，矿洞/寺庙仍在开发。
