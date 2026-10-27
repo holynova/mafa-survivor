@@ -8,6 +8,7 @@ import {
   getItem,
   getSkill,
   type Slot,
+  MAPS, MONSTERS, PLAYABLE_MAP_IDS,
 } from "./content";
 import {
   assets,
@@ -28,7 +29,7 @@ import {
   repositoryUrl,
 } from "./release";
 import { TestTools } from "./TestTools";
-import { saveRun, history } from "./save";
+import { saveRun, history, loadProgress, unlockChapter } from "./save";
 const time = (seconds: number) =>
   `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 function Art({
@@ -132,7 +133,10 @@ export function App() {
   const [seed, setSeed] = useState("176");
   const [saveError, setSaveError] = useState("");
   const [saveStatus, setSaveStatus] = useState("");
+  const [progressBusy, setProgressBusy] = useState(true);
+  const [chapterError, setChapterError] = useState("");
   const inventoryResumes = useRef(false);
+  useEffect(() => { document.title = `玛法幸存者 · ${game.mapId === "mine" ? "矿洞与骷髅洞" : "比奇荒野"}`; }, [game.mapId]);
   useEffect(() => game.subscribe(refresh), []);
   useEffect(() => {
     const f = () => {
@@ -146,6 +150,9 @@ export function App() {
     history()
       .then(setRecords)
       .catch(() => setSaveError("无法读取本地记录，当前仍可正常试玩。"));
+    loadProgress().then((progress) => game.applyProgress(progress))
+      .catch((error: unknown) => setChapterError(error instanceof Error ? error.message : "无法读取局外进度，仍可试玩。"))
+      .finally(() => setProgressBusy(false));
     return () => {
       readyListeners.delete(f);
       document.removeEventListener("asset-error", fail);
@@ -154,8 +161,10 @@ export function App() {
   useEffect(() => {
     if (!game.result || game.mode === "test") return;
     setSaveStatus("正在保存…");
+    setProgressBusy(true);
     saveRun(game.result)
-      .then(() => {
+      .then((progress) => {
+        if (progress) game.applyProgress(progress);
         setSaveStatus("战绩已保存到本机");
         return history();
       })
@@ -163,7 +172,7 @@ export function App() {
       .catch(() => {
         setSaveStatus("保存未成功");
         setSaveError("浏览器存储不可用，本次战绩尚未保存。");
-      });
+      }).finally(() => setProgressBusy(false));
   }, [game.result]);
   const start = (mode: Mode) => {
     void sounds.unlock();
@@ -185,13 +194,16 @@ export function App() {
   };
   const active = !["lobby", "won", "dead"].includes(game.phase);
   const boss = game.boss;
+  const chapter = MAPS[game.mapId];
+  const bossName = MONSTERS.find((m) => m.id === chapter.boss)!.name;
+  const chapterUnlocked = game.unlockedMaps.has(game.mapId);
   return (
     <main>
       <div className="vignette" />
       <TestTools />
       {game.mode !== "test" && (appearanceStatus.loading || appearanceStatus.error) && (
         <div className="appearance-notice" role="status">
-          {appearanceStatus.error || "正在载入原版外观…"}
+          {appearanceStatus.error || "正在载入原版素材…"}
           {appearanceStatus.error && <button onClick={() => document.dispatchEvent(new Event("retry-appearance"))}>重试</button>}
         </div>
       )}
@@ -257,14 +269,46 @@ export function App() {
             )}
             {tab === "play" && (
               <div className="journey">
+                <div className="class-picker chapter-picker" role="group" aria-label="选择章节">
+                  {PLAYABLE_MAP_IDS.map((id) => <button key={id} disabled={!ready}
+                    aria-pressed={game.mapId === id} onClick={() => { game.selectMap(id); setChapterError(""); }}>
+                    {id === "biche" ? "比奇荒野" : "矿洞与骷髅洞"}
+                  </button>)}
+                </div>
                 <div className="chapter">
-                  <span>第一章</span>
-                  <h2>比奇荒野</h2>
+                  <span>{game.mapId === "biche" ? "第一章" : "第二章"} · 玛法结晶 {game.crystals}</span>
+                  <h2>{game.mapId === "biche" ? "比奇荒野" : chapter.name}</h2>
                   <p>
-                    稻草人游荡在旧路旁。带上熟悉的招式，
-                    <br />
-                    在怪潮中收集经验，找回熟悉的力量。
+                    {game.mapId === "biche" ? "稻草人游荡在旧路旁。在怪潮中收集经验，找回熟悉的力量。" : "沿旧矿道穿过坍塌岩壁，提防转角后的骷髅弓箭手，迎战召唤僵尸的尸王。"}
                   </p>
+                  {!chapterUnlocked && <>
+                    <button className="secondary" disabled={progressBusy || game.crystals < chapter.unlockCost}
+                      onClick={async () => {
+                        setProgressBusy(true); setChapterError("");
+                        try { game.applyProgress(await unlockChapter(game.mapId)); }
+                        catch (error) { setChapterError(error instanceof Error ? error.message : "解锁未保存，请重试。"); }
+                        finally { setProgressBusy(false); }
+                      }}>解锁正常远征 · {chapter.unlockCost} 玛法结晶</button>
+                    <p className="muted">正常通关比奇可获得3结晶。短局试玩与快速测试可直接进入本章。</p>
+                  </>}
+                  {chapterError && <p className="inline-error">{chapterError}</p>}
+                </div>
+                <div className="mode-buttons">
+                  <button
+                    className="primary"
+                    disabled={!ready || assetError || progressBusy || !chapterUnlocked}
+                    onClick={() => start("normal")}
+                  >
+                    {ready ? chapterUnlocked ? game.mapId === "mine" ? "进入矿洞" : "进入荒野" : "正常远征尚未解锁" : "正在载入原版素材…"}
+                    <span>12 波 · 每波 75 秒</span>
+                  </button>
+                  <button
+                    className="secondary"
+                    disabled={!ready || assetError}
+                    onClick={() => start("trial")}
+                  >
+                    短局试玩<span>3 波 · 每波 35 秒 · 不发放结晶</span>
+                  </button>
                 </div>
                 <div className="class-card">
                   <Art
@@ -279,23 +323,6 @@ export function App() {
                     </small>
                   </div>
                   <span className="class-mark">已选</span>
-                </div>
-                <div className="mode-buttons">
-                  <button
-                    className="primary"
-                    disabled={!ready || assetError}
-                    onClick={() => start("normal")}
-                  >
-                    {ready ? "进入荒野" : "正在载入原版素材…"}
-                    <span>12 波 · 每波 75 秒</span>
-                  </button>
-                  <button
-                    className="secondary"
-                    disabled={!ready || assetError}
-                    onClick={() => start("trial")}
-                  >
-                    短局试玩<span>3 波 · 每波 35 秒 · 不发放结晶</span>
-                  </button>
                 </div>
                 <button
                   className="test-entry"
@@ -377,7 +404,7 @@ export function App() {
                       <div>
                         <strong>
                           {r.won ? "生还" : "陨落"} ·{" "}
-                          {r.mode === "trial" ? "短局试玩" : "比奇荒野"}
+                          {r.mapId === "mine" ? MAPS.mine.name : "比奇荒野"}{r.mode === "trial" ? " · 短局试玩" : ""}
                         </strong>
                         <span>
                           {CLASSES[r.classId ?? "wizard"].name} · 第 {r.wave} 波
@@ -398,7 +425,7 @@ export function App() {
             {saveError && <p className="inline-error">{saveError}</p>}
           </section>
           <div className="world-caption">
-            <span>比奇省 · 荒野边境</span>
+            <span>{game.mapId === "mine" ? "比奇省 · 废矿深处" : "比奇省 · 荒野边境"}</span>
             <small>经典资源 / 幸存者玩法</small>
           </div>
           <footer className="lobby-footer">
@@ -447,7 +474,7 @@ export function App() {
             </div>
             <div className="wave-info">
               <span>
-                {game.mode === "trial" ? "短局试玩" : "比奇荒野"}{" "}
+                {game.mapId === "mine" ? chapter.name : "比奇荒野"}{game.mode === "trial" ? " · 试玩" : ""}{" "}
                 <b>
                   第 {game.wave} / {game.maxWaves} 波
                 </b>
@@ -478,7 +505,7 @@ export function App() {
           {boss && (
             <div className="boss-bar">
               <span>
-                骷髅精灵{" "}
+                {bossName}{" "}
                 <small>
                   {Math.ceil(boss.hp)} / {Math.ceil(boss.maxHp)}
                 </small>
@@ -489,7 +516,7 @@ export function App() {
             </div>
           )}
           <div className="battle-location">
-            <span>比奇荒野</span>
+            <span>{game.mapId === "mine" ? chapter.name : "比奇荒野"}</span>
             <small>
               {time(game.clock)} / {game.mode === "trial" ? "01:45" : "15:00"}
             </small>
@@ -919,14 +946,14 @@ export function App() {
               {game.mode === "trial" ? "短局试玩结束" : "本次征途已结束"}
             </div>
             <h2 id="result-title">
-              {game.phase === "won" ? "荒野生还" : "魂归玛法"}
+              {game.phase === "won" ? game.mapId === "mine" ? "矿洞生还" : "荒野生还" : "魂归玛法"}
             </h2>
             <p>
               {game.phase === "won"
-                ? "你穿过怪潮，迎来了荒野的晨光。"
+                ? game.mapId === "mine" ? "尸王倒下，旧矿道重新透进了微光。" : "你穿过怪潮，迎来了荒野的晨光。"
                 : game.player.hp === 0
                   ? "这次倒下，下一次再战。"
-                  : "时间已尽，骷髅精灵仍在荒野徘徊。"}
+                  : `本局结束，${bossName}仍未被击败。`}
             </p>
             <div className="result-stats">
               <div>
@@ -973,7 +1000,7 @@ export function App() {
             </p>
             {saveError && <p className="inline-error">{saveError}</p>}
             <div className="result-actions">
-              <button className="primary" onClick={() => start(game.mode)}>
+              <button className="primary" disabled={progressBusy} onClick={() => start(game.mode)}>
                 再战一次
               </button>
               <button className="secondary" onClick={() => game.lobby()}>

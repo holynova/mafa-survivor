@@ -24,6 +24,7 @@ orders=[int(n) for n in re.findall(r'\b[01]\b',(r/'.cache/weaponorder.inc').read
 catalog={'resourceRepository':'https://github.com/etorth/mir2x_res','resourceRef':'9e21ea6631317d06e064fbfa7e1ea43af6a2d3e6','itemReference':{'repository':'https://github.com/etorth/mir2x','ref':'bb6a22287abcd9f248d2aba755074c254c68787a','path':'common/src/itemrecord.inc','sha256':hashlib.sha256(s.encode()).hexdigest()},'weaponOrderReference':{'repository':'https://github.com/etorth/mir2x','ref':'bb6a22287abcd9f248d2aba755074c254c68787a','path':'client/src/weaponorder.inc','sha256':hashlib.sha256((r/'.cache/weaponorder.inc').read_bytes()).hexdigest()},'weapons':wm,'clothes':dm,'missing':[n for n in weapons if n not in wm]+[n for n in clothes if n not in dm],'motions':motions,'weaponOrder':orders,'weaponShapeBegin':1,'weaponEncoding':'male bit22 | ((item.shape - WEAPON_BEGIN) << 14) | gfxMotion << 8 | direction << 5 | frame; WEAPON_BEGIN=1'}
 (r/'tools/equipment-appearance.json').write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n')
 sources={}
+monster_looks=set(json.loads((r/'tools/monster-models.json').read_text())['models'].values())
 for kind in ['hero','monster','weapon']:
  entries=json.loads((r/f'.cache/{kind}.json').read_text())['tree'];chosen=[]
  for e in entries:
@@ -32,7 +33,7 @@ for kind in ['hero','monster','weapon']:
    gender=(code>>22)&1;shape=(code>>14)&255;motion=(code>>8)&63
    wanted=gender==1 and motion in motions.values() and (shape in set(wm.values()) and not(code&(1<<23)) if kind=='weapon' else shape in set(dm.values()))
   else:
-   wanted=bool(code&(1<<23)) and ((code>>12)&0x7ff) in [0x28,0x26,0x27,0x16,0x17,0x19,0x18,0x24,0x20,0x38,0x30,0x5A] and ((code>>8)&15) in [0,1,2,3,4]
+   wanted=bool(code&(1<<23)) and ((code>>12)&0x7ff) in monster_looks and ((code>>8)&15) in [0,1,2,3,4]
   if wanted:chosen.append({'path':e['path'],'sha':e['sha']})
  sources[kind]=chosen
 (r/'tools/appearance-sources.json').write_text(json.dumps({'repository':catalog['resourceRepository'],'ref':catalog['resourceRef'],'files':sources},indent=2)+'\n')

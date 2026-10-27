@@ -1,0 +1,28 @@
+{
+  "clientRef": "bb6a22287abcd9f248d2aba755074c254c68787a",
+  "clientPath": "common/src/monsterrecord.inc",
+  "models": {
+    "scarecrow": 40,
+    "cat": 38,
+    "rakecat": 39,
+    "orc": 22,
+    "orcWarrior": 23,
+    "spider": 25,
+    "orcBrave": 24,
+    "boss": 36,
+    "skeleton": 32,
+    "summonedSkeleton": 56,
+    "zombie": 48,
+    "beast": 90,
+    "skeletonWarrior": 34,
+    "skeletonArcher": 144,
+    "caveMaggot": 37,
+    "corpseKing": 53
+  },
+  "mineModels": [
+    "skeletonWarrior",
+    "skeletonArcher",
+    "caveMaggot",
+    "corpseKing"
+  ]
+}

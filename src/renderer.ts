@@ -2,13 +2,14 @@ import Phaser from "phaser";
 import { mapObjectAlpha, mapObjectDepth, coversActor, type Occluder } from "./map-render";
 import { assetUrl, isGraybox } from "./release";
 import { sounds } from "./sound";
-import { setWorldLayout, type WorldLayout } from "./world";
+import { setWorldLayouts, type WorldLayout } from "./world";
 import { MovementInput, inputDiagnostics } from "./input";
-import { SCENERY, ITEMS } from "./content";
+import { SCENERY, ITEMS, MAPS, isBossKind, type MapId } from "./content";
 import { resolveAppearance, weaponBehind } from "./appearance";
 import { game, WORLD, type Enemy } from "./game";
 export type Manifest = {
   world?: WorldLayout;
+  worlds?: Partial<Record<MapId, WorldLayout>>;
   pages: {
     key: string;
     image: string;
@@ -36,7 +37,7 @@ export type Manifest = {
 export let assets: Manifest;
 export function setAssetManifest(manifest: Manifest) {
   assets = manifest;
-  setWorldLayout(manifest.world ?? null);
+  setWorldLayouts(manifest.worlds ?? (manifest.world ? { biche: manifest.world } : {}));
 }
 let rendererReady = false;
 export const readyListeners = new Set<() => void>();
@@ -51,6 +52,7 @@ class BattleScene extends Phaser.Scene {
   private movementInput!: MovementInput;
   private accumulator = 0;
   private lastRun = "";
+  private testVisualEpoch = 0;
   private nextFootstep = 0;
   private seen = new Set<string>();
   private drag: { id: number; x: number; y: number } | null = null;
@@ -64,6 +66,8 @@ class BattleScene extends Phaser.Scene {
   private lastEnemies = new Map<number, Enemy>();
   private failed = false;
   private occluders: Occluder[] = [];
+  private worldObjects: Phaser.GameObjects.GameObject[] = [];
+  private paintedMap: MapId | null = null;
   private modelPages = new Map<string, Set<string>>();
   private queuedPages = new Set<string>();
   private failedPages = new Set<string>();
@@ -80,7 +84,7 @@ class BattleScene extends Phaser.Scene {
         document.dispatchEvent(new CustomEvent("asset-error"));
       } else {
         this.failedPages.add(file.key);
-        appearanceStatus.error = "换装素材加载失败，请重试";
+        appearanceStatus.error = "原版素材加载失败，请重试";
         game.emit();
       }
     });
@@ -95,6 +99,11 @@ class BattleScene extends Phaser.Scene {
       const pages = this.modelPages.get(model) ?? new Set<string>();
       for (const frame of sequence) if (assets.frames[frame]) pages.add(assets.frames[frame].texture);
       this.modelPages.set(model, pages);
+    }
+    for (const [id, world] of Object.entries(assets.worlds ?? { biche: assets.world })) {
+      if (!world) continue;
+      this.modelPages.set("world-" + id, new Set([...world.tiles, ...world.objects].map((part) =>
+        assets.frames["map/" + part.texture.toString(16).toUpperCase().padStart(8, "0")]?.texture).filter((v): v is string => !!v)));
     }
     this.load.on("complete", () => game.emit());
     document.addEventListener("retry-appearance", () => {
@@ -169,8 +178,14 @@ class BattleScene extends Phaser.Scene {
     this.movementInput?.clear();
   }
   private paintGround() {
+    for (const object of this.worldObjects) object.destroy();
+    this.worldObjects = [];
+    this.occluders = [];
+    this.paintedMap = game.mapId;
+    if (this.textures.exists("terrain")) this.textures.remove("terrain");
     if (isGraybox) {
       const g = this.add.graphics().setDepth(-100);
+      this.worldObjects.push(g);
       g.fillStyle(0x18221e, 1).fillRect(0, 0, WORLD.w, WORLD.h);
       g.lineStyle(1, 0x2c3d33, 0.45);
       for (let x = 0; x < WORLD.w; x += 96) g.lineBetween(x, 0, x, WORLD.h);
@@ -179,10 +194,12 @@ class BattleScene extends Phaser.Scene {
         g.fillStyle(0x63715c, 1).fillCircle(object.x, object.y, object.r + 8);
       return;
     }
-    const map = assets.world;
+    const map = game.layout;
     const texture = this.textures.createCanvas("terrain", WORLD.w, WORLD.h)!;
     const context = texture.context;
     context.imageSmoothingEnabled = false;
+    context.fillStyle = game.mapId === "mine" ? "#11100e" : "#252a1e";
+    context.fillRect(0, 0, WORLD.w, WORLD.h);
     const paint = (key: string, x: number, y: number, bottom = false) => {
       const meta = assets.frames[key];
       if (!meta) return;
@@ -220,7 +237,7 @@ class BattleScene extends Phaser.Scene {
         for (let x = 0; x < WORLD.w; x += f.width) paint("ground/3", x, y);
     }
     texture.refresh();
-    this.add.image(0, 0, "terrain").setOrigin(0).setDepth(-100);
+    this.worldObjects.push(this.add.image(0, 0, "terrain").setOrigin(0).setDepth(-100));
     const alphaMasks = new Map<string, Uint8Array>();
     if (map)
       for (const o of map.objects) {
@@ -234,6 +251,7 @@ class BattleScene extends Phaser.Scene {
           .setOrigin(0, 1)
           .setDepth(mapObjectDepth(o, map.cellHeight))
           .setAlpha(mapObjectAlpha(o, f.width, f.height, mapObjectDepth(o, map.cellHeight), null));
+        this.worldObjects.push(image);
         if (!alphaMasks.has(key)) {
           const frame = this.textures.getFrame(f.texture, key);
           const canvas = document.createElement("canvas");
@@ -250,16 +268,16 @@ class BattleScene extends Phaser.Scene {
         const key = "scenery/" + o.id,
           f = assets.frames[key];
         if (f)
-          this.add
+          this.worldObjects.push(this.add
             .image(o.x, o.y, f.texture, key)
             .setOrigin(0.5, 1)
-            .setDepth(o.y);
+            .setDepth(o.y));
       }
-    this.add
+    this.worldObjects.push(this.add
       .graphics()
       .lineStyle(2, 0xd8c894, 0.45)
       .strokeRect(24, 36, WORLD.w - 48, WORLD.h - 60)
-      .setDepth(-1);
+      .setDepth(-1));
   }
   private draw(
     key: string,
@@ -362,7 +380,7 @@ class BattleScene extends Phaser.Scene {
         : key.startsWith("pet")
           ? 0x8abfa1
           : 0xc4766a;
-      const radius = (name === "boss" ? 26 : 12) * scale;
+      const radius = (isBossKind(name) ? 26 : 12) * scale;
       this.bars
         .fillStyle(color, alpha)
         .fillCircle(x, y - 12, radius)
@@ -428,7 +446,20 @@ class BattleScene extends Phaser.Scene {
   }
   update(_time: number, delta: number) {
     if (!rendererReady) return;
+    if (!isGraybox) {
+      const kinds = [...new Set([...MAPS[game.mapId].monsterPool, MAPS[game.mapId].boss, ...game.enemies.map((e) => e.kind)])];
+      const models = ["world-" + game.mapId, ...kinds.flatMap((kind) => [kind, kind + "-shadow"])];
+      const missing = models.some((name) => [...(this.modelPages.get(name) ?? [])].some((key) => !this.textures.exists(key)));
+      if (missing && !this.requireModels(models)) { this.accumulator = 0; return; }
+    }
+    if (this.paintedMap !== game.mapId) {
+      this.paintGround(); this.corpses = []; this.lastEnemies.clear(); this.clearInput();
+    }
     frameMS = frameMS * 0.95 + delta * 0.05;
+    if (this.testVisualEpoch !== game.test.visualEpoch) {
+      this.testVisualEpoch = game.test.visualEpoch;
+      this.corpses = []; this.lastEnemies.clear();
+    }
     if (this.lastRun !== game.runId) {
       this.lastRun = game.runId;
       this.clearInput();
@@ -533,7 +564,7 @@ class BattleScene extends Phaser.Scene {
         );
       for (const e of game.enemies) {
         const motion =
-          e.windup > 0 || (e.chargeWindupUntil ?? 0) > game.clock ? "attack" : t - e.hitAt < 0.17 ? "hurt" : "walk";
+          e.windup > 0 || e.stompAt !== undefined || (e.chargeWindupUntil ?? 0) > game.clock ? "attack" : t - e.hitAt < 0.17 ? "hurt" : "walk";
         const scale = e.elite ? 1.15 : 1;
         this.actor(
           "enemy-" + e.id,
@@ -548,7 +579,7 @@ class BattleScene extends Phaser.Scene {
           scale,
         );
         if (e.elite || e.hp < e.maxHp) {
-          const w = e.kind === "boss" ? 64 : 32;
+          const w = isBossKind(e.kind) ? 64 : 32;
           this.bars
             .fillStyle(0x150c09, 0.85)
             .fillRect(e.x - w / 2, e.y - 58, w, 4);
@@ -567,14 +598,19 @@ class BattleScene extends Phaser.Scene {
             .strokeEllipse(
               e.x,
               e.y + 1,
-              e.kind === "boss" ? 145 : 52,
-              e.kind === "boss" ? 75 : 25,
+              isBossKind(e.kind) ? 145 : 52,
+              isBossKind(e.kind) ? 75 : 25,
             );
         }
         if (e.chargeTarget && (e.chargeWindupUntil ?? 0) > game.clock) {
           this.bars.lineStyle(3, 0xe6a754, 0.6)
             .lineBetween(e.x, e.y, e.chargeTarget.x, e.chargeTarget.y)
             .strokeEllipse(e.chargeTarget.x, e.chargeTarget.y, 50, 24);
+        }
+        if (e.stompAt !== undefined && e.stompOrigin) {
+          this.bars.lineStyle(3, 0xe39a6c, 0.85)
+            .strokeCircle(e.stompOrigin.x, e.stompOrigin.y, 130)
+            .fillStyle(0xb96b42, 0.14).fillCircle(e.stompOrigin.x, e.stompOrigin.y, 130 * Math.max(0, 1 - (e.stompAt - game.clock)));
         }
       }
       for (const p of game.pets) {
@@ -614,9 +650,9 @@ class BattleScene extends Phaser.Scene {
       for (const p of game.projectiles)
         this.fx(
           "p-" + p.id,
-          p.visual === "poison" ? "poison" : (p.skill ?? "fireball") + "/" + p.dir,
+          p.visual === "poison" ? "poison" : (p.visual === "arrow" ? "arrow" : p.skill ?? "fireball") + "/" + p.dir,
           p.x,
-          p.y,
+          p.y - (p.height ?? 0),
           t,
           2200,
           p.visual === "poison" ? 0.55 : 0.8,

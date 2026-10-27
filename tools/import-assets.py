@@ -58,7 +58,8 @@ for shape in sorted(set(appearance['clothes'].values())):
 for shape in sorted(set(appearance['weapons'].values())):
  actor('weapon',f'weapon-{shape}',(1<<8)|shape,hero_motions,source_entries['weapon'])
 monster_motions={'idle':0,'walk':1,'attack':2,'hurt':3,'death':4}
-for name,look in [('scarecrow',0x28),('cat',0x26),('rakecat',0x27),('orc',0x16),('orcWarrior',0x17),('spider',0x19),('orcBrave',0x18),('boss',0x24),('skeleton',0x20),('summonedSkeleton',0x38),('zombie',0x30),('beast',0x5A)]:
+monster_models=json.loads((ROOT/'tools/monster-models.json').read_text())
+for name,look in monster_models['models'].items():
  actor('monster',name,look,monster_motions)
  actor('monster',name+'-shadow',look|(1<<11),monster_motions,source_entries['monster'])
 magic={int(p['path'][:8],16):p for p in tree('magic')}
@@ -84,15 +85,19 @@ for direction in range(16):
  animations[f'talisman/{direction}']=[select('magic',magic[0x3D4+direction*10+i],f'talisman/{direction}/{i}') for i in range(3)]
 for direction in range(8):
  animations[f'beastflame/{direction}']=[select('magic',magic[0x030003D4+direction*10+i],f'beastflame/{direction}/{i}') for i in range(6)]
-from map_region import load_region
-world_layout=load_region(CACHE,request,REF)
+# Original bow arrow, used for the survivor-mode skeleton archer adaptation.
+for direction in range(16):
+ animations[f'arrow/{direction}']=[select('magic',magic[0x03000578+direction*10],f'arrow/{direction}/0')]
+from map_region import load_regions
+world_layouts=load_regions(CACHE,request,REF)
+world_layout=world_layouts['biche']
 # Use the reviewed, pinned subset catalogue: the upstream map directory is too
 # large for a reliable GitHub tree/contents response. Every download is still
 # verified against its recorded Git blob hash below.
 map_catalog=json.loads((ROOT/'tools/map-asset-catalog.json').read_text())
 assert map_catalog['repository']==REPO and map_catalog['ref']==REF
 map_entries=map_catalog['frames']
-map_ids={p['texture'] for p in world_layout['tiles']+world_layout['objects']}
+map_ids={p['texture'] for world in world_layouts.values() for p in world['tiles']+world['objects']}
 for code in sorted(map_ids):
  key=f'map/{code:08X}'
  if key not in map_entries:raise ValueError('Map source ID absent from pinned subset catalogue: '+key)
@@ -145,9 +150,12 @@ with ThreadPoolExecutor(max_workers=16) as ex:loaded=list(ex.map(load,selected))
 # Packing order is deterministic; source pixels and anchors are unchanged.
 meta={};pages=[]
 groups={}
+mine_only={f'map/{code:08X}' for code in {p['texture'] for p in world_layouts['mine']['tiles']+world_layouts['mine']['objects']}
+           -{p['texture'] for p in world_layouts['biche']['tiles']+world_layouts['biche']['objects']}}
 for record in loaded:
  name=record[0].split('/')[0]
  group=name.replace('-shadow','') if name.startswith(('dress-','weapon-')) and name not in ['dress-1','dress-1-shadow','weapon-8'] else 'core'
+ if name.removesuffix('-shadow') in monster_models['mineModels'] or name=='arrow' or record[0] in mine_only:group='chapter-mine'
  groups.setdefault(group,[]).append(record)
 page=0
 for group in sorted(groups, key=lambda g:(g!='core',g)):
@@ -166,7 +174,7 @@ for group in sorted(groups, key=lambda g:(g!='core',g)):
   atlas.paste(im,(x,y));frames[key]={'frame':{'x':x,'y':y,'w':im.width,'h':im.height},'rotated':False,'trimmed':False,'spriteSourceSize':{'x':0,'y':0,'w':im.width,'h':im.height},'sourceSize':{'w':im.width,'h':im.height}}
   meta[key]={**info,'texture':f'mir-{page}','originX':24-info['dx'],'originY':16-info['dy']};x+=im.width+2;rowH=max(rowH,im.height)
  flush();page+=1
-manifest={'schemaVersion':2,'repository':REPO,'ref':REF,'referenceVersion':'mir2x 1.45 reference; gameplay 1.76 candidate','rightsStatus':'UNVERIFIED_THIRD_PARTY_ART','distribution':'LOCAL_EVALUATION_ONLY','releaseStatus':'BLOCKED_BY_ASSET_RIGHTS','world':world_layout,'pages':pages,'animations':animations,'frames':meta}
+manifest={'schemaVersion':2,'repository':REPO,'ref':REF,'referenceVersion':'mir2x 1.45 reference; gameplay 1.76 candidate','rightsStatus':'UNVERIFIED_THIRD_PARTY_ART','distribution':'LOCAL_EVALUATION_ONLY','releaseStatus':'BLOCKED_BY_ASSET_RIGHTS','world':world_layout,'worlds':world_layouts,'pages':pages,'animations':animations,'frames':meta}
 authorize(manifest, ['images', 'map'])
 (OUT/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2))
 public_ledger={**manifest,'world':{k:v for k,v in manifest['world'].items() if k in ['sourcePath','sourceSha256','sourceRegion','width','height']}}

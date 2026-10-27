@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import appearance from "./equipment-appearance.json" with { type: "json" };
+import monsters from "./monster-models.json" with { type: "json" };
 import { checkReleaseAuthorization } from "./asset-authorization.mjs";
 const root = new URL("../public/assets/mir/", import.meta.url);
 const manifest = JSON.parse(
@@ -27,23 +28,7 @@ for (const [name, sequence] of Object.entries(manifest.animations)) {
     if (!frames[id] || !manifest.frames[id])
       failures.push(name + ": missing " + id);
 }
-for (const actor of [
-  "taoist",
-  "skeleton",
-  "summonedSkeleton",
-  "zombie",
-  "beast",
-  "wizard",
-  "warrior",
-  "scarecrow",
-  "cat",
-  "rakecat",
-  "orc",
-  "orcWarrior",
-  "spider",
-  "orcBrave",
-  "boss",
-])
+for (const actor of ["taoist", "wizard", "warrior", ...Object.keys(monsters.models)])
   for (const motion of ["wizard", "warrior", "taoist"].includes(actor)
     ? ["idle", "walk", "cast", "attack", "hurt", "death"]
     : ["idle", "walk", "attack", "hurt", "death"])
@@ -76,16 +61,21 @@ for (const spell of ["beam", "powerstrike", "thrust", "cleave", "firesword"])
 for (const [id, f] of Object.entries(manifest.frames))
   if (!f.sourcePath || !f.sha256 || !f.sha1 || !frames[id])
     failures.push(id + ": missing source or atlas entry");
-if (manifest.world) {
-  const m = manifest.world;
+for (const [mapId, m] of Object.entries(manifest.worlds ?? { biche: manifest.world }).filter(([, m]) => m)) {
   if (m.walk.length !== (m.width / m.cellWidth) * (m.height / m.cellHeight))
-    failures.push("map: invalid walk grid");
+    failures.push(mapId + ": invalid walk grid");
+  if (m.spawn && !m.walk[Math.floor(m.spawn.y / m.cellHeight) * (m.width / m.cellWidth) + Math.floor(m.spawn.x / m.cellWidth)])
+    failures.push(mapId + ": spawn is not walkable");
   for (const part of [...m.tiles, ...m.objects]) {
     const id =
       "map/" + part.texture.toString(16).toUpperCase().padStart(8, "0");
     if (!frames[id]) failures.push("map: missing " + id);
   }
 }
+const mineFixture = JSON.parse(fs.readFileSync(new URL("../tests/fixtures/mine-layout.json", import.meta.url), "utf8"));
+if (JSON.stringify(manifest.worlds?.mine.walk) !== JSON.stringify(mineFixture.walk) ||
+    manifest.worlds?.mine.sourceSha256 !== mineFixture.sourceSha256)
+  failures.push("mine: checked navigation fixture differs from imported pinned source map");
 // Equipment and shadows must share source animation indices, not merely exist.
 const requireActor = (name, motions) => {
   for (const motion of motions) for (let dir = 0; dir < 8; dir++)
@@ -106,12 +96,12 @@ for (const model of new Set(Object.values(appearance.weapons))) {
       failures.push(`weapon-${model}: missing matching body index ${frame}`);
   }
 }
-for (const name of ["scarecrow", "cat", "rakecat", "orc", "orcWarrior", "spider", "orcBrave", "boss", "skeleton", "summonedSkeleton", "zombie", "beast"])
+for (const name of Object.keys(monsters.models))
   requireActor(name + "-shadow", ["idle", "walk", "attack", "hurt", "death"]);
 // New forest species must use their own source lookID in all eight directions.
-for (const [name, look] of [["orcWarrior", 0x17], ["spider", 0x19], ["orcBrave", 0x18]])
+for (const [name, look] of Object.entries(monsters.models))
   for (const [id, frame] of Object.entries(manifest.frames)) {
-    if (id.startsWith(name + "/") || id.startsWith(name + "-shadow/")) {
+    if (frame.sourcePath.startsWith("texture/monster/") && (id.startsWith(name + "/") || id.startsWith(name + "-shadow/"))) {
       const code = parseInt(frame.sourcePath.split("/").at(-1).slice(0, 8), 16);
       if ((code >>> 12) !== (id.includes("-shadow/") ? look | (1 << 11) : look))
         failures.push(id + ": wrong original monster model");

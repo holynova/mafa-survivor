@@ -15,6 +15,8 @@ import {
   type Slot,
   type Item,
   type MapId,
+  isBossKind,
+  PLAYABLE_MAP_IDS,
 } from "./content";
 import type { SkillField } from "./spells";
 import {
@@ -29,7 +31,7 @@ import {
   buffDefense,
   clearTaoSkill,
 } from "./taoist";
-import { canStand, worldLayout } from "./world";
+import { canStand, getWorldLayout, WorldNavigation } from "./world";
 import { hasWorldAppearance } from "./appearance";
 import { newTestSettings } from "./test-mode";
 import { CLASSES, type ClassId } from "./classes";
@@ -100,6 +102,9 @@ export type Enemy = Entity & {
   chargeTarget?: { x: number; y: number };
   chargeWindupUntil?: number;
   chargeCD?: number;
+  stompAt?: number;
+  stompOrigin?: { x: number; y: number };
+  stompCD?: number;
 };
 export type Pet = Entity & {
   source?: "charm" | "skeleton" | "beast";
@@ -126,7 +131,9 @@ export type Projectile = Entity & {
   hitChance?: number;
   homing?: boolean;
   faction?: "enemy";
-  visual?: "poison";
+  visual?: "poison" | "arrow";
+  damageKind?: "physical" | "magic";
+  height?: number;
 };
 export type Drop = Entity & {
   exp: number;
@@ -147,6 +154,7 @@ export type Skill = {
   id: SkillId;
   rank: number;
   cd: number;
+  retryAt?: number;
   power: number;
   count: number;
   radius: number;
@@ -199,6 +207,13 @@ export type RunResult = {
   skills: string[];
 };
 export class Game {
+  private nav: WorldNavigation | null = null;
+  get layout() { return getWorldLayout(this.mapId); }
+  get navigation() {
+    if (this.layout !== this.nav?.layout) this.nav = this.layout ? new WorldNavigation(this.layout) : null;
+    return this.nav;
+  }
+  canStand(x: number, y: number, radius = 12) { return canStand(x, y, radius, this.layout); }
   classId: ClassId = "wizard";
   mapId: MapId = "biche";
   unlockedMaps: Set<MapId> = new Set(["biche"]);
@@ -309,7 +324,7 @@ export class Game {
     );
   }
   get obstacles(): typeof SCENERY {
-    return worldLayout ? [] : this.scenery;
+    return this.layout ? [] : this.scenery;
   }
   get classInfo() {
     return CLASSES[this.classId];
@@ -320,14 +335,15 @@ export class Game {
     this.recompute();
     this.emit();
   }
-  unlockMap(mapId: MapId): boolean {
-    if (this.unlockedMaps.has(mapId)) return false;
-    const cost = MAPS[mapId].unlockCost;
-    if (this.crystals < cost) return false;
-    this.crystals -= cost;
-    this.unlockedMaps.add(mapId);
+  selectMap(mapId: MapId) {
+    if (this.phase !== "lobby" || mapId === "zuma") return;
+    this.mapId = mapId;
     this.emit();
-    return true;
+  }
+  applyProgress(progress: { crystals: number; unlockedMaps: MapId[] }) {
+    this.crystals = progress.crystals;
+    this.unlockedMaps = new Set(["biche", ...progress.unlockedMaps]);
+    this.emit();
   }
   get duration() {
     return this.mode === "trial" ? 35 : 75;
@@ -336,7 +352,7 @@ export class Game {
     return this.mode === "trial" ? 3 : 12;
   }
   get boss() {
-    return this.enemies.find((e) => e.kind === "boss" && e.hp > 0);
+    return this.enemies.find((e) => isBossKind(e.kind) && e.hp > 0);
   }
   get cooldownCost() {
     return rerollPrice(this.rerolls);
@@ -369,8 +385,9 @@ export class Game {
       summonHP: 0,
     };
   }
-  start(mode: Mode, seed = 176, classId: ClassId = this.classId, warriorFourSlot = false, mapId: MapId = "biche") {
-    if (!this.unlockedMaps.has(mapId)) return;
+  start(mode: Mode, seed = 176, classId: ClassId = this.classId, warriorFourSlot = false, mapId: MapId = this.mapId) {
+    if (!PLAYABLE_MAP_IDS.includes(mapId)) return;
+    if (mode === "normal" && !this.unlockedMaps.has(mapId)) return;
     this.classId = classId;
     this.mapId = mapId;
     this.mode = mode;
@@ -391,9 +408,15 @@ export class Game {
     this.totalGold = 0;
     this.bossKilled = false;
     this.bossSpawned = false;
+    let spawn = this.layout?.spawn ?? { x: WORLD.w / 2, y: WORLD.h / 2 };
+    const safe = (p: { x: number; y: number }) => this.canStand(p.x, p.y) && this.obstacles.every((o) => Math.hypot(p.x - o.x, p.y - o.y) > o.r + 12);
+    if (!safe(spawn)) spawn = Array.from({length:32}, (_, i) => ({
+      x: WORLD.w / 2 + Math.cos(i * Math.PI / 8) * (80 + Math.floor(i / 16) * 80),
+      y: WORLD.h / 2 + Math.sin(i * Math.PI / 8) * (80 + Math.floor(i / 16) * 80),
+    })).find(safe) ?? spawn;
     this.player = {
-      x: WORLD.w / 2,
-      y: WORLD.h / 2,
+      x: spawn.x,
+      y: spawn.y,
       hp: this.classInfo.hp,
       dir: 4,
       moving: false,
@@ -491,14 +514,14 @@ export class Game {
         ),
         ny = clamp(this.player.y + dy * this.moveSpeed * dt, 55, WORLD.h - 35);
       if (
-        canStand(nx, this.player.y) &&
+        this.canStand(nx, this.player.y) &&
         this.obstacles.every(
           (o) => Math.hypot(nx - o.x, this.player.y - o.y) > o.r + 12,
         )
       )
         this.player.x = nx;
       if (
-        canStand(this.player.x, ny) &&
+        this.canStand(this.player.x, ny) &&
         this.obstacles.every(
           (o) => Math.hypot(this.player.x - o.x, ny - o.y) > o.r + 12,
         )
@@ -527,7 +550,7 @@ export class Game {
       !this.bossSpawned &&
       this.waveTime > Math.min(25, this.duration * 0.45)
     ) {
-      this.spawnEnemy("boss");
+      this.spawnEnemy(MAPS[this.mapId].boss);
       this.bossSpawned = true;
     }
     this.hash.rebuild(this.enemies.filter((e) => e.hp > 0));
@@ -544,13 +567,12 @@ export class Game {
         continue;
       }
       if (!victim.visible) e.windup = 0;
-      // --- Boss special behaviors (GDD §11 / P4) ---
+      if (isBossKind(e.kind) && e.hp <= e.maxHp * 0.5 && (e.bossPhase ?? 1) === 1) {
+        e.bossPhase = 2; e.speed *= 1.25; e.damage *= 1.25;
+      }
+      if (e.kind === "corpseKing" && this.updateCorpseKing(e, dt)) continue;
+      // --- Forest boss jump and summon ---
       if (e.kind === "boss") {
-        if (e.hp <= e.maxHp * 0.5 && (e.bossPhase ?? 1) === 1) {
-          e.bossPhase = 2;
-          e.speed *= 1.25;
-          e.damage *= 1.25;
-        }
         if ((e.bossSummonCD ?? 0) <= 0) {
           this.summonBossMinion(e);
           e.bossSummonCD = (e.bossPhase ?? 1) === 2 ? 10 : 15;
@@ -595,7 +617,7 @@ export class Game {
         victim.visible &&
         (e.rangedCD ?? 0) <= 0 &&
         e.windup === 0 &&
-        d < 420
+        d < 420 && (!this.navigation || this.navigation.lineClear(e, victim, 0))
       ) {
         this.fireEliteProjectile(e, victim);
         e.rangedCD = 2.5;
@@ -612,7 +634,7 @@ export class Game {
           const length = Math.hypot(cx, cy), step = Math.min(length, e.speed * 4 * dt);
           const nx = e.x + cx / Math.max(1, length) * step;
           const ny = e.y + cy / Math.max(1, length) * step;
-          if (canStand(nx, ny) && this.obstacles.every((o) => Math.hypot(nx - o.x, ny - o.y) > o.r + 12)) {
+          if (this.canStand(nx, ny) && this.obstacles.every((o) => Math.hypot(nx - o.x, ny - o.y) > o.r + 12)) {
             e.x = nx; e.y = ny;
           } else e.chargeUntil = 0;
           const hit = [this.player, ...this.pets.filter((p) => p.hp > 0)]
@@ -629,10 +651,10 @@ export class Game {
         e.attackCD = 0.8;
         continue;
       }
-      if (e.elite && !e.ranged && victim.visible && d > 90 && d < 300 && e.chargeCD === 0 && e.windup === 0) {
+      if ((e.elite || e.kind === "skeletonWarrior") && !e.ranged && victim.visible && d > 90 && d < (e.kind === "skeletonWarrior" ? 180 : 300) && e.chargeCD === 0 && e.windup === 0 && (!this.navigation || this.navigation.lineClear(e, victim))) {
         e.chargeTarget = { x: victim.x, y: victim.y };
-        e.chargeWindupUntil = this.clock + 0.7;
-        e.chargeUntil = this.clock + 1.6;
+        e.chargeWindupUntil = this.clock + (e.kind === "skeletonWarrior" ? 0.5 : 0.7);
+        e.chargeUntil = this.clock + (e.kind === "skeletonWarrior" ? 1.1 : 1.6);
         e.chargeCD = 6;
         continue;
       }
@@ -646,27 +668,27 @@ export class Game {
             locked &&
             canDetect(this, e, e.attackTarget ?? 0, locked) &&
             Math.hypot(locked.x - e.x, locked.y - e.y) <
-              (e.kind === "boss" ? 105 : 46)
+              (isBossKind(e.kind) ? 105 : 46)
           ) {
             if (locked === this.player) this.hurt(e.damage);
             else {
               this.hurtPet(locked as Pet, e.damage, "physical");
             }
           }
-          e.attackCD = e.kind === "boss" ? 1.5 : 1.1;
+          e.attackCD = isBossKind(e.kind) ? 1.5 : 1.1;
         }
         continue;
       }
       if (
         victim.visible &&
-        d < (e.kind === "boss" ? 72 : 29) &&
+        d < (isBossKind(e.kind) ? 72 : 29) &&
         e.attackCD === 0
       ) {
         e.attackTarget = victim.id;
-        e.windup = e.kind === "boss" ? 0.65 : 0.4;
+        e.windup = isBossKind(e.kind) ? 0.65 : 0.4;
         continue;
       }
-      if (d > (e.ranged ? 230 : 22)) {
+      if (d > (e.ranged ? 230 : 22) || (e.ranged && this.navigation && !this.navigation.lineClear(e, victim, 0))) {
         let sx = 0,
           sy = 0;
         for (const other of this.hash.nearby(e.x, e.y, 30)) {
@@ -679,15 +701,18 @@ export class Game {
             sy += (oy / l) * (30 - l) * 2;
           }
         }
+        const waypoint = this.mapId === "mine" ? this.navigation?.waypoint(e, victim) ?? victim : victim;
+        const mx = waypoint.x - e.x, my = waypoint.y - e.y, length = Math.max(1, Math.hypot(mx, my));
+        e.dir = this.direction(mx, my);
         const rush =
-          e.kind === "rakecat" && Math.sin(this.clock * 1.3 + e.id) > 0.8
+          ["rakecat", "caveMaggot"].includes(e.kind) && Math.sin(this.clock * 1.3 + e.id) > 0.8
             ? 1.8
             : 1;
         const sp = e.speed * rush;
-        const nx = clamp(e.x + ((dx / d) * sp + sx) * dt, 35, WORLD.w - 35),
-          ny = clamp(e.y + ((dy / d) * sp + sy) * dt, 55, WORLD.h - 35);
-        if (canStand(nx, e.y)) e.x = nx;
-        if (canStand(e.x, ny)) e.y = ny;
+        const nx = clamp(e.x + ((mx / length) * sp + sx) * dt, 35, WORLD.w - 35),
+          ny = clamp(e.y + ((my / length) * sp + sy) * dt, 55, WORLD.h - 35);
+        if (this.canStand(nx, e.y)) e.x = nx;
+        if (this.canStand(e.x, ny)) e.y = ny;
         for (const o of this.obstacles) {
           const ox = e.x - o.x,
             oy = e.y - o.y,
@@ -705,6 +730,7 @@ export class Game {
       s.cd = Math.max(0, s.cd - dt);
       if (
         s.cd === 0 &&
+        this.clock >= (s.retryAt ?? 0) &&
         (s.id !== "teleport" ||
           (this.automaticTeleport &&
             this.player.hp / this.maxHP < 0.3 &&
@@ -743,6 +769,7 @@ export class Game {
       p.x += p.vx * dt;
       p.y += p.vy * dt;
       p.life -= dt;
+      if (this.navigation && !this.navigation.lineClear(previous, p, 0)) { p.life = 0; continue; }
       if (p.faction === "enemy") {
         const dx = p.x - previous.x, dy = p.y - previous.y;
         const lengthSquared = dx * dx + dy * dy;
@@ -752,8 +779,8 @@ export class Game {
             return { actor, fraction, distance: Math.hypot(actor.x - previous.x - dx * fraction, actor.y - previous.y - dy * fraction) };
           }).filter((a) => a.distance < 18).sort((a, b) => a.fraction - b.fraction)[0];
         if (target && p.life > 0) {
-          if (target.actor === this.player) this.hurt(p.damage, "magic");
-          else this.hurtPet(target.actor as Pet, p.damage, "magic");
+          if (target.actor === this.player) this.hurt(p.damage, p.damageKind ?? "magic");
+          else this.hurtPet(target.actor as Pet, p.damage, p.damageKind ?? "magic");
           if (p.visual === "poison") this.effect("poison", target.actor.x, target.actor.y, 0, 0.5);
           p.life = 0;
         }
@@ -856,34 +883,40 @@ export class Game {
   direction(dx: number, dy: number) {
     return (((Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) + 2) % 8) + 8) % 8;
   }
-  spawnEnemy(kind?: string) {
+  spawnEnemy(kind?: string, summoned = false) {
     const scheduledElite = this.wave >= 4 && this.spawned === Math.floor(WAVE_BUDGET[this.wave - 1] / 2);
     if (!kind && this.mapId === "biche" && scheduledElite) kind = "orcBrave";
     let m;
     if (kind) m = MONSTERS.find((x) => x.id === kind)!;
     else {
       const map = MAPS[this.mapId];
-      const nonBoss = MONSTERS.filter(
-        (x) => x.id !== "boss" && x.id !== "orcBrave" && map.monsterPool.includes(x.id),
-      );
+      const nonBoss = map.monsterPool.filter((id) => !isBossKind(id) && id !== "orcBrave")
+        .map((id) => MONSTERS.find((m) => m.id === id)!);
       const pool = nonBoss.slice(
         0,
         // By wave five, the forest roster includes its armoured and ranged enemies.
-        Math.min(nonBoss.length, this.mapId === "biche" ? this.wave + 1 : 1 + Math.ceil(this.wave / 2)),
+        Math.min(nonBoss.length, this.wave + 1),
       );
       m = this.rng.pick(pool);
     }
     const a = this.rng.next() * Math.PI * 2,
       r = 440 + this.rng.next() * 140;
     const nativeElite = m.id === "orcBrave";
-    const elite = nativeElite || (m.id !== "boss" && scheduledElite);
+    const elite = nativeElite || (!summoned && !isBossKind(m.id) && scheduledElite);
     const mult = 1 + (this.wave - 1) * 0.13;
     const hp = m.hp * (elite && !nativeElite ? 4 : 1) * mult;
+    const candidates = this.navigation?.reachablePoints(this.player, 300, 620) ?? [];
+    const point = candidates.length ? this.rng.pick(candidates) : {
+      x: clamp(this.player.x + Math.cos(a) * r, 25, WORLD.w - 25),
+      y: clamp(this.player.y + Math.sin(a) * r, 50, WORLD.h - 25),
+    };
+    if (this.navigation && !this.canStand(point.x, point.y)) Object.assign(point,
+      this.rng.pick(this.navigation.reachablePoints(this.player, 80)) ?? this.layout!.spawn ?? this.player);
     this.enemies.push({
       id: ++this.id,
       kind: m.id,
-      x: clamp(this.player.x + Math.cos(a) * r, 25, WORLD.w - 25),
-      y: clamp(this.player.y + Math.sin(a) * r, 50, WORLD.h - 25),
+      x: point.x,
+      y: point.y,
       hp,
       maxHp: hp,
       speed: m.speed * (1 + this.wave * 0.025),
@@ -897,11 +930,11 @@ export class Game {
       elite,
       born: this.clock,
       level: this.wave,
-      defense: m.id === "boss" ? 12 : ["orc", "orcWarrior", "orcBrave"].includes(m.id) ? 4 : 2,
-      magicDefense: m.id === "boss" ? 8 : m.id === "orc" ? 2 : 1,
-      ...(m.id === "boss"
+      defense: isBossKind(m.id) ? 12 : ["orc", "orcWarrior", "orcBrave"].includes(m.id) ? 4 : 2,
+      magicDefense: isBossKind(m.id) ? 8 : m.id === "orc" ? 2 : 1,
+      ...(isBossKind(m.id)
         ? { bossPhase: 1, bossJumpUntil: 0 }
-        : m.id === "spider" ? { ranged: true, rangedCD: 0 }
+        : ["spider", "skeletonArcher"].includes(m.id) ? { ranged: true, rangedCD: 0 }
         : elite
           ? {
               ranged: !nativeElite && this.rng.next() < 0.3,
@@ -951,11 +984,46 @@ export class Game {
     e.windup = 0.8;
     this.effect("cast", e.x, e.y, 0, 0.8);
   }
+  private updateCorpseKing(e: Enemy, dt: number) {
+    e.bossSummonCD = Math.max(0, (e.bossSummonCD ?? 4) - dt);
+    e.stompCD = Math.max(0, (e.stompCD ?? 5) - dt);
+    if (e.bossSummonCD === 0) {
+      for (let i = 0; i < 2 && this.enemies.length < 300; i++) {
+        const points = this.navigation?.reachablePoints(e, 70, 160)
+          .filter((p) => Math.hypot(p.x - this.player.x, p.y - this.player.y) > 70);
+        if (this.navigation && !points?.length) continue;
+        const point = points?.length ? this.rng.pick(points) : { x: e.x + (i ? -60 : 60), y: e.y + 50 };
+        if (!this.canStand(point.x, point.y)) continue;
+        const minion = this.spawnEnemy("zombie", true);
+        minion.x = point.x; minion.y = point.y;
+      }
+      e.bossSummonCD = e.bossPhase === 2 ? 8 : 12;
+    }
+    if (e.stompAt !== undefined) {
+      if (this.clock >= e.stompAt) {
+        const origin = e.stompOrigin!;
+        if (Math.hypot(this.player.x - origin.x, this.player.y - origin.y) < 130)
+          this.hurt(e.damage * 1.4, "physical");
+        for (const pet of this.pets) if (pet.hp > 0 && Math.hypot(pet.x - origin.x, pet.y - origin.y) < 130)
+          this.hurtPet(pet, e.damage * 1.4, "physical");
+        e.stompAt = undefined; e.stompOrigin = undefined; e.attackCD = 1;
+      }
+      return true;
+    }
+    if (e.stompCD === 0 && [this.player, ...this.pets].some((p) => p.hp > 0 && Math.hypot(p.x - e.x, p.y - e.y) < 190)) {
+      e.stompAt = this.clock + 1;
+      e.stompOrigin = { x: e.x, y: e.y };
+      e.stompCD = e.bossPhase === 2 ? 6 : 9;
+      e.windup = 0;
+      return true;
+    }
+    return false;
+  }
   fireEliteProjectile(e: Enemy, target: { x: number; y: number } = this.player) {
     const dx = target.x - e.x,
       dy = target.y - e.y,
       l = Math.max(1, Math.hypot(dx, dy));
-    const speed = e.kind === "spider" ? 160 : 260;
+    const speed = e.kind === "spider" ? 160 : e.kind === "skeletonArcher" ? 300 : 260;
     this.projectiles.push({
       id: ++this.id,
       x: e.x,
@@ -967,7 +1035,8 @@ export class Game {
       dir: (((Math.round(Math.atan2(dy, dx) / (Math.PI / 8)) + 4) % 16) + 16) % 16,
       skill: undefined,
       faction: "enemy",
-      visual: e.kind === "spider" ? "poison" : undefined,
+      visual: e.kind === "spider" ? "poison" : e.kind === "skeletonArcher" ? "arrow" : undefined,
+      damageKind: e.kind === "skeletonArcher" ? "physical" : "magic",
       homing: false,
       hitChance: 75,
     });
@@ -1059,8 +1128,8 @@ export class Game {
     );
     targets.sort(
       (a, b) =>
-        (fire && a.kind === "boss" ? -1000 : 0) -
-        (fire && b.kind === "boss" ? -1000 : 0) +
+        (fire && isBossKind(a.kind) ? -1000 : 0) -
+        (fire && isBossKind(b.kind) ? -1000 : 0) +
         Math.hypot(a.x - this.player.x, a.y - this.player.y) -
         Math.hypot(b.x - this.player.x, b.y - this.player.y),
     );
@@ -1155,7 +1224,7 @@ export class Game {
           if (
             targets.some(
               (e) =>
-                e.kind === "boss" &&
+                isBossKind(e.kind) &&
                 (Math.hypot(e.x - x, e.y - y) < 120 ||
                   this.distanceToSegment(e, this.player, { x, y }) <
                     Math.min(
@@ -1205,19 +1274,14 @@ export class Game {
       }
       for (const e of targets) {
         if (
-          e.kind === "boss" ||
+          isBossKind(e.kind) ||
           e.elite ||
           (e.level ?? 1) > this.level + 2 ||
           this.distanceToSegment(e, from, this.player) >
             30 * (1 + s.radius / 100)
         )
           continue;
-        const x = e.x + aim.x * 100,
-          y = e.y + aim.y * 100;
-        if (this.freePoint(x, y, 0)) {
-          e.x = x;
-          e.y = y;
-        }
+        this.pushEnemy(e, aim.x, aim.y, 100);
         e.windup = 0;
       }
       this.player.dir = this.direction(aim.x, aim.y);
@@ -1313,12 +1377,13 @@ export class Game {
       .filter(
         (e) =>
           e.hp > 0 &&
-          Math.hypot(e.x - this.player.x, e.y - this.player.y) < 620,
+          Math.hypot(e.x - this.player.x, e.y - this.player.y) < 620 &&
+          (!["fireball", "bigfireball", "talisman"].includes(s.id) || !this.navigation || this.navigation.lineClear(this.player, e, 0)),
       )
       .sort((a, b) => {
         const priority = (e: Enemy) =>
           (weighted
-            ? e.kind === "boss"
+            ? isBossKind(e.kind)
               ? -1000
               : e.elite
                 ? -500
@@ -1349,24 +1414,35 @@ export class Game {
     });
     return this.effects.at(-1)!;
   }
+  private pushEnemy(e: Enemy, dx: number, dy: number, distance: number) {
+    const origin = { x: e.x, y: e.y };
+    for (let travel = 8; travel <= distance + 7; travel += 8) {
+      const step = Math.min(travel, distance);
+      const x = clamp(origin.x + dx * step, 35, WORLD.w - 35), y = clamp(origin.y + dy * step, 55, WORLD.h - 35);
+      if (!this.canStand(x, y) || this.obstacles.some((o) => Math.hypot(x-o.x,y-o.y) <= o.r+12)) break;
+      e.x=x; e.y=y;
+      if (step === distance) break;
+    }
+  }
   private isUndead(e: Enemy) {
-    return ["scarecrow", "zombie", "skeleton", "boss"].includes(e.kind);
+    return ["scarecrow", "zombie", "skeleton", "skeletonWarrior", "skeletonArcher", "boss", "corpseKing"].includes(e.kind);
   }
   private canTame(e: Enemy) {
     return (
       !e.elite &&
-      e.kind !== "boss" &&
-      ["cat", "rakecat", "orc"].includes(e.kind)
+      !isBossKind(e.kind) &&
+      ["cat", "rakecat", "orc", "orcWarrior", "spider", "caveMaggot"].includes(e.kind)
     );
   }
-  freePoint(x: number, y: number, enemyClearance = 50) {
+  freePoint(x: number, y: number, enemyClearance = 50, radius = 16) {
     return (
-      canStand(x, y, 16) &&
+      this.canStand(x, y, radius) &&
+      (!this.navigation || this.navigation.connected(this.player, { x, y })) &&
       x >= 35 &&
       x <= WORLD.w - 35 &&
       y >= 55 &&
       y <= WORLD.h - 35 &&
-      this.obstacles.every((o) => Math.hypot(x - o.x, y - o.y) > o.r + 16) &&
+      this.obstacles.every((o) => Math.hypot(x - o.x, y - o.y) > o.r + radius) &&
       this.enemies.every(
         (e) => e.hp <= 0 || Math.hypot(x - e.x, y - e.y) > enemyClearance,
       )
@@ -1482,18 +1558,21 @@ export class Game {
         p.cd = source === "beast" ? 1.6 : 1.1;
         p.attackUntil = this.clock + 0.4;
       } else if (d > (target ? range * 0.75 : 80)) {
+        const waypoint = this.mapId === "mine" ? this.navigation?.waypoint(p, destination) ?? destination : destination;
+        const mx = waypoint.x - p.x, my = waypoint.y - p.y, length = Math.max(1, Math.hypot(mx, my));
+        p.dir = this.direction(mx, my);
         const nx = clamp(
-            p.x + (dx / Math.max(1, d)) * p.speed * dt,
+            p.x + (mx / length) * p.speed * dt,
             35,
             WORLD.w - 35,
           ),
           ny = clamp(
-            p.y + (dy / Math.max(1, d)) * p.speed * dt,
+            p.y + (my / length) * p.speed * dt,
             55,
             WORLD.h - 35,
           );
-        if (this.freePoint(nx, p.y, 0)) p.x = nx;
-        if (this.freePoint(p.x, ny, 0)) p.y = ny;
+        if (this.freePoint(nx, p.y, 0, 12)) p.x = nx;
+        if (this.freePoint(p.x, ny, 0, 12)) p.y = ny;
         p.moving = true;
         revealActor(this, p.id);
       }
@@ -1505,6 +1584,10 @@ export class Game {
     const targets = this.targetList(s),
       rad = (n: number) =>
         n * (1 + s.radius / 100) * (1 + (this.stats.skill_radius ?? 0) / 100);
+    if (["fireball", "bigfireball", "talisman"].includes(s.id) && !targets.length) {
+      s.retryAt = this.clock + 0.15;
+      return;
+    }
     if (
       getSkill(s.id).classId !== "taoist" &&
       !["teleport", "dash"].includes(s.id) &&
@@ -1533,7 +1616,8 @@ export class Game {
         this.projectiles.push({
           id: ++this.id,
           x: this.player.x,
-          y: this.player.y - 22,
+          y: this.player.y,
+          height: 22,
           vx: (dx / l) * speed,
           vy: (dy / l) * speed,
           damage: this.magicDamage(s.id === "fireball" ? 7 : 22, s),
@@ -1570,14 +1654,13 @@ export class Game {
       );
       if (!nearby.length) return;
       for (const e of nearby) {
-        if (e.kind === "boss" || e.elite || (e.level ?? 1) > this.level + 2)
+        if (isBossKind(e.kind) || e.elite || (e.level ?? 1) > this.level + 2)
           continue;
         const dx = e.x - this.player.x,
           dy = e.y - this.player.y,
           d = Math.max(1, Math.hypot(dx, dy)),
           push = 110 * (1 + s.knockback / 100);
-        e.x = clamp(e.x + (dx / d) * push, 25, WORLD.w - 25);
-        e.y = clamp(e.y + (dy / d) * push, 50, WORLD.h - 25);
+        this.pushEnemy(e, dx / d, dy / d, push);
         e.windup = 0;
       }
       this.effect("repulse", this.player.x, this.player.y, rad(120));
@@ -1616,7 +1699,7 @@ export class Game {
       const undead = targets.filter((e) => this.isUndead(e));
       if (!undead.length) return;
       for (const e of undead.slice(0, Math.min(3, 1 + s.count))) {
-        if (e.elite || e.kind === "boss")
+        if (e.elite || isBossKind(e.kind))
           this.hit(e, Math.min(e.maxHp * 0.15, this.magicDamage(30, s)), s.id);
         else if (
           this.rng.next() <
@@ -1744,7 +1827,7 @@ export class Game {
     if (e.hp <= 0) {
       this.kills++;
       this.waveKills++;
-      if (e.kind === "boss") this.bossKilled = true;
+      if (isBossKind(e.kind)) this.bossKilled = true;
       const gold =
         Math.round(
           (this.rng.next() < 0.65 ? 4 : 0) *
@@ -1762,7 +1845,7 @@ export class Game {
             it.tier <= (this.wave >= 7 ? 4 : this.wave >= 3 ? 3 : 2),
         );
         if (candidates.length) itemId = this.rng.pick(candidates).id;
-      } else if (e.kind === "boss") {
+      } else if (isBossKind(e.kind)) {
         // Boss: one high-quality equipment draw (GDD §10.4).
         const candidates = ITEMS.filter(
           (it) =>

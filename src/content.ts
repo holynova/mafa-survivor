@@ -294,8 +294,13 @@ export const MONSTERS = [
   { id: "orcBrave", name: "半兽勇士", hp: 280, damage: 14, speed: 55, exp: 20 },
   { id: "zombie", name: "僵尸", hp: 110, damage: 10, speed: 26, exp: 5 },
   { id: "skeleton", name: "骷髅", hp: 50, damage: 6, speed: 44, exp: 3 },
+  { id: "skeletonWarrior", name: "骷髅战士", hp: 70, damage: 8, speed: 44, exp: 5 },
+  { id: "skeletonArcher", name: "骷髅弓箭手", hp: 60, damage: 7, speed: 30, exp: 5 },
+  { id: "caveMaggot", name: "洞蛆", hp: 26, damage: 3, speed: 65, exp: 3 },
+  { id: "corpseKing", name: "尸王", hp: 1250, damage: 22, speed: 45, exp: 80 },
   { id: "boss", name: "骷髅精灵", hp: 950, damage: 18, speed: 58, exp: 60 },
 ];
+export const isBossKind = (kind: string) => kind === "boss" || kind === "corpseKing";
 export const getItem = (id: string) => {
   const item = ITEMS.find((x) => x.id === id);
   if (!item) throw new Error("Unknown item: " + id);
@@ -324,6 +329,7 @@ export const SCENERY = [
 export type MapId = "biche" | "mine" | "zuma";
 
 export const MAP_IDS: MapId[] = ["biche", "mine", "zuma"];
+export const PLAYABLE_MAP_IDS: MapId[] = ["biche", "mine"];
 
 export const MAP_SCENERY: Record<MapId, typeof SCENERY> = {
   biche: SCENERY,
@@ -366,9 +372,9 @@ export const MAPS: Record<MapId, { id: MapId; name: string; theme: string; monst
     id: "mine",
     name: "矿洞与骷髅洞",
     theme: "狭窄走廊、坍塌岩石、转角；远程压制与圣言克制",
-    monsterPool: ["skeleton", "zombie", "orc"],
-    boss: "boss",
-    unlockCost: 50,
+    monsterPool: ["skeleton", "caveMaggot", "zombie", "skeletonWarrior", "skeletonArcher"],
+    boss: "corpseKing",
+    unlockCost: 3,
   },
   zuma: {
     id: "zuma",

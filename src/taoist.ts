@@ -1,5 +1,6 @@
 import type { Enemy, Game, Pet, Skill } from "./game";
 import type { SkillId } from "./spells";
+import { isBossKind } from "./content";
 import { clamp } from "./rules";
 
 export type ActorBuffs = {
@@ -53,7 +54,7 @@ export function canDetect(
   actor: { x: number; y: number },
 ) {
   return (
-    e.kind === "boss" ||
+    isBossKind(e.kind) ||
     e.elite ||
     !invisible(g, id) ||
     distance(e, actor) <= actorBuffs(g, id).detectionRadius
@@ -295,7 +296,8 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
       g.projectiles.push({
         id: g.nextEntityId(),
         x: g.player.x,
-        y: g.player.y - 22,
+        y: g.player.y,
+        height: 22,
         vx: (dx / d) * speed,
         vy: (dy / d) * speed,
         damage: taoDamage(g, 10, s),
@@ -344,7 +346,7 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
   }
   if (s.id === "reveal") {
     const chosen = targets
-      .filter((e) => e.elite || e.kind === "boss")
+      .filter((e) => e.elite || isBossKind(e.kind))
       .slice(0, Math.min(3, 1 + s.count));
     if (!chosen.length) return false;
     for (const e of chosen) {
@@ -356,7 +358,7 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
   if (s.id === "trap") {
     const eligible = targets.filter(
       (e) =>
-        e.kind !== "boss" &&
+        !isBossKind(e.kind) &&
         !e.elite &&
         (e.level ?? 1) <= g.level + 2 &&
         distance(e, g.player) < 220 &&

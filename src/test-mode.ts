@@ -9,6 +9,7 @@ export const newTestSettings = () => ({
   speed: 1,
   pose: "live",
   direction: 4,
+  visualEpoch: 0,
 });
 export function testSpawn(g: Game, kind: string, count: number) {
   if (g.mode !== "test" || !["battle", "paused"].includes(g.phase)) return;
@@ -21,8 +22,12 @@ export function testSpawn(g: Game, kind: string, count: number) {
     const e = g.enemies.at(-1)!;
     const a = (i * Math.PI * 2) / Math.max(1, count),
       r = 180 + (i % 3) * 45;
-    e.x = Math.max(35, Math.min(2173, g.player.x + Math.cos(a) * r));
-    e.y = Math.max(55, Math.min(1501, g.player.y + Math.sin(a) * r));
+    const desired = { x: Math.max(35, Math.min(2173, g.player.x + Math.cos(a) * r)),
+      y: Math.max(55, Math.min(1501, g.player.y + Math.sin(a) * r)) };
+    const points = g.navigation?.reachablePoints(g.player, 150, 350);
+    const point = points?.length ? points.reduce((best, p) =>
+      Math.hypot(p.x - desired.x, p.y - desired.y) < Math.hypot(best.x - desired.x, best.y - desired.y) ? p : best) : desired;
+    e.x = point.x; e.y = point.y;
   }
   g.emit();
 }
@@ -50,12 +55,21 @@ export function testEquip(g: Game, id: SkillId, slot: number) {
 }
 export function testClear(g: Game) {
   if (g.mode !== "test") return;
+  g.test.visualEpoch++;
   g.enemies = [];
   g.projectiles = [];
   g.effects = [];
   g.drops = [];
   g.floating = [];
   g.emit();
+}
+/** Prepare the real Boss AI transition without skipping time or awarding loot. */
+export function testBossPhase(g: Game) {
+  if (g.mode !== "test" || !["battle", "paused"].includes(g.phase) || !g.boss) return false;
+  const boss = g.boss;
+  boss.hp = Math.min(boss.hp, boss.maxHp * 0.49);
+  boss.stompCD = 0; boss.bossJumpCD = 0; boss.bossSummonCD = 0;
+  g.emit(); return true;
 }
 
 /** Equip real inventory items in the isolated test run, using the regular slots. */

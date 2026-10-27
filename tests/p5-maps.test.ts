@@ -1,90 +1,70 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { Game } from "../src/game";
-import { MAPS, MAP_IDS, type MapId } from "../src/content";
+import { MAPS, MONSTERS, PLAYABLE_MAP_IDS, isBossKind } from "../src/content";
+import { setWorldLayouts, type WorldLayout } from "../src/world";
 
-function setup() {
-  const g = new Game();
-  g.start("normal", 176, "wizard");
-  return g;
+function mineGrid(): WorldLayout {
+  const walk = Array.from({length: 46 * 48}, () => 1);
+  for (let y=0;y<48;y++) walk[y*46+23] = y===10 ? 1 : 0;
+  return {width:2208,height:1536,cellWidth:48,cellHeight:32,walk,tiles:[],objects:[],spawn:{x:504,y:656}};
 }
-
-describe("map chapters & crystal progression (GDD §11 / P5)", () => {
-  it("only biche is unlocked by default", () => {
-    const g = setup();
-    expect(g.unlockedMaps.has("biche")).toBe(true);
-    expect(g.unlockedMaps.has("mine")).toBe(false);
-    expect(g.unlockedMaps.has("zuma")).toBe(false);
-    expect(g.crystals).toBe(0);
+afterEach(() => setWorldLayouts({}));
+describe("playable chapter runtime", () => {
+  it("keeps unimplemented temples out of selectable and startable chapters", () => {
+    expect(PLAYABLE_MAP_IDS).toEqual(["biche","mine"]);
+    const g=new Game(); g.applyProgress({crystals:150,unlockedMaps:["biche","zuma"]});
+    g.start("test",176,"wizard",false,"zuma");
+    expect(g.phase).toBe("lobby");
   });
-
-  it("unlockMap consumes crystals and persists", () => {
-    const g = setup();
-    g.crystals = 50;
-    expect(g.unlockMap("mine")).toBe(true);
-    expect(g.unlockedMaps.has("mine")).toBe(true);
-    expect(g.crystals).toBe(0);
-
-    g.crystals = 150;
-    expect(g.unlockMap("zuma")).toBe(true);
-    expect(g.unlockedMaps.has("zuma")).toBe(true);
-    expect(g.crystals).toBe(0);
-  });
-
-  it("unlockMap rejects insufficient crystals or already unlocked", () => {
-    const g = setup();
-    g.crystals = 10;
-    expect(g.unlockMap("mine")).toBe(false); // cost 50
-    expect(g.unlockedMaps.has("mine")).toBe(false);
-    expect(g.crystals).toBe(10);
-
-    expect(g.unlockMap("biche")).toBe(false); // already unlocked
-  });
-
-  it("cannot start a run on a locked map", () => {
-    const g = new Game();
-    const before = { phase: g.phase, classId: g.classId, mapId: g.mapId };
-    g.start("normal", 176, "wizard", false, "mine");
-    expect(g.phase).toBe(before.phase);
-    expect(g.classId).toBe(before.classId);
-    expect(g.mapId).toBe(before.mapId);
-  });
-
-  it("can start a run on an unlocked map", () => {
-    const g = new Game();
-    g.crystals = 50;
-    g.unlockMap("mine");
-    g.start("normal", 176, "wizard", false, "mine");
-    expect(g.phase).toBe("battle");
-    expect(g.mapId).toBe("mine");
-  });
-
-  it("crystals awarded on won normal run", () => {
-    const g = setup();
-    g.finish(true);
-    expect(g.crystals).toBe(3);
-  });
-
-  it("no crystals on dead or trial run", () => {
-    const g = setup();
-    g.finish(false);
-    expect(g.crystals).toBe(0);
-    const g2 = setup();
-    g2.mode = "trial";
-    g2.finish(true);
-    expect(g2.crystals).toBe(0);
-  });
-
-  it("all map chapters have defined data", () => {
-    for (const id of MAP_IDS) {
-      const m = MAPS[id];
-      expect(m.name).toBeTruthy();
-      expect(m.theme).toBeTruthy();
-      expect(m.monsterPool.length).toBeGreaterThan(0);
-      expect(m.boss).toBe("boss");
-      expect(m.unlockCost).toBeGreaterThanOrEqual(0);
+  it("normal mine requires an unlock; trial and test are free chapter previews", () => {
+    const g=new Game(); g.selectMap("mine"); g.start("normal");
+    expect(g.phase).toBe("lobby");
+    for (const mode of ["trial","test"] as const) {
+      g.start(mode); expect(g.mapId).toBe("mine"); expect(g.phase).toBe("battle");
+      g.finish(true); expect(g.result?.crystals).toBe(0); g.lobby();
     }
-    expect(MAPS.biche.unlockCost).toBe(0);
-    expect(MAPS.mine.unlockCost).toBe(50);
-    expect(MAPS.zuma.unlockCost).toBe(150);
+    g.applyProgress({crystals:0,unlockedMaps:["biche","mine"]}); g.start("normal");
+    expect(g.mapId).toBe("mine"); expect(g.phase).toBe("battle");
+  });
+  it("uses each chapter's own layout and starts on its safe original-map point", () => {
+    const mine=mineGrid(); setWorldLayouts({mine});
+    const a=new Game(); a.start("test",176,"wizard",false,"mine");
+    const b=new Game(); b.start("test");
+    expect(a.player.x).toBe(mine.spawn!.x); expect(a.layout).toBe(mine);
+    expect(b.layout).toBeNull(); // Another Game cannot silently switch a's map.
+    expect(a.canStand(23.5*48,20.5*32)).toBe(false);
+    expect(b.canStand(23.5*48,20.5*32)).toBe(true);
+  });
+  it("spawns all enemies on reachable floor, never inside a wall or separated pocket", () => {
+    const mine=mineGrid(); setWorldLayouts({mine});
+    const g=new Game(); g.start("test",176,"wizard",false,"mine");
+    for(let i=0;i<100;i++) {
+      const e=g.spawnEnemy();
+      expect(g.canStand(e.x,e.y)).toBe(true);
+      expect(g.navigation!.connected(g.player,e)).toBe(true);
+      expect(Math.hypot(e.x-g.player.x,e.y-g.player.y)).toBeGreaterThanOrEqual(300);
+    }
+  });
+  it("the mine has five distinct ordinary species and its own undead Boss", () => {
+    expect(MAPS.mine.monsterPool).toEqual(["skeleton","caveMaggot","zombie","skeletonWarrior","skeletonArcher"]);
+    expect(MAPS.mine.boss).toBe("corpseKing");
+    expect(MAPS.mine.unlockCost).toBe(3);
+    for (const id of MAPS.mine.monsterPool) expect(MONSTERS.find((m)=>m.id===id)).toBeDefined();
+    expect(isBossKind(MAPS.mine.boss)).toBe(true);
+  });
+  it("spawns the corpse king in the final mine wave and settles its kill once", () => {
+    const g=new Game(); g.start("trial",176,"taoist",false,"mine");
+    g.wave=g.maxWaves; g.waveTime=16; g.step(1/60);
+    const boss=g.boss!; expect(boss.kind).toBe("corpseKing");
+    g.hit(boss,1e9,"test"); expect(g.bossKilled).toBe(true);
+    const kills=g.kills; g.hit(boss,1e9,"test"); expect(g.kills).toBe(kills);
+    g.waveTime=g.duration; g.endWave();
+    for(let i=0;i<20 && !g.result;i++) {
+      if(g.phase==="upgrade") g.choose(g.choices[0].id);
+      else if(g.phase==="replace") g.replaceSkill(null);
+      else g.step(1/60);
+    }
+    expect(g.phase).toBe("won");
+    expect(g.result?.mapId).toBe("mine"); expect(g.result?.crystals).toBe(0);
   });
 });

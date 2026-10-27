@@ -3,12 +3,12 @@ import { useState } from "react";
 import { sounds } from "./sound";
 import { game } from "./game";
 import { CLASS_IDS, CLASSES, type ClassId } from "./classes";
-import { SKILLS, MONSTERS, getSkill, type SkillId } from "./content";
+import { SKILLS, MONSTERS, MAPS, PLAYABLE_MAP_IDS, getSkill, type SkillId, type MapId } from "./content";
 import { inputDiagnostics } from "./input";
 import { hasWorldAppearance } from "./appearance";
 import { appearanceStatus } from "./renderer";
 import { ITEMS, getItem } from "./content";
-import { testWear, testSpawn, testEquip, testClear } from "./test-mode";
+import { testWear, testSpawn, testEquip, testClear, testBossPhase } from "./test-mode";
 export function TestTools() {
   const [open, setOpen] = useState(true),
     [kind, setKind] = useState("orc"),
@@ -85,6 +85,13 @@ export function TestTools() {
             </button>
           </div>
           <label>
+            地图{" "}
+            <select aria-label="测试地图" value={game.mapId}
+              onChange={(e) => game.start("test", game.seed, game.classId, false, e.target.value as MapId)}>
+              {PLAYABLE_MAP_IDS.map((id) => <option key={id} value={id}>{MAPS[id].name}</option>)}
+            </select>
+          </label>
+          <label>
             职业{" "}
             <select
               aria-label="测试职业"
@@ -116,8 +123,8 @@ export function TestTools() {
             </label>
           ))}
           <p>当前穿戴：{game.equipment.weapon ? getItem(game.equipment.weapon.itemId).name : "空手"} · {game.equipment.armor ? getItem(game.equipment.armor.itemId).name : "基础布衣"}</p>
-          {appearanceStatus.loading && <p role="status">正在载入原版外观…</p>}
-          {appearanceStatus.error && <p role="alert">{appearanceStatus.error} <button onClick={() => document.dispatchEvent(new Event("retry-appearance"))}>重试外观</button></p>}
+          {appearanceStatus.loading && <p role="status">正在载入原版素材…</p>}
+          {appearanceStatus.error && <p role="alert">{appearanceStatus.error} <button onClick={() => document.dispatchEvent(new Event("retry-appearance"))}>重试素材</button></p>}
           <label>
             人物动作{" "}
             <select
@@ -209,13 +216,16 @@ export function TestTools() {
             />
           </label>
           <div className="test-row">
-            <button onClick={() => testSpawn(game, kind, count)}>
+            <button disabled={!["battle", "paused"].includes(game.phase)} onClick={() => testSpawn(game, kind, count)}>
               生成怪物
             </button>
-            <button onClick={() => testSpawn(game, "boss", 1)}>
+            <button disabled={!["battle", "paused"].includes(game.phase)} onClick={() => testSpawn(game, MAPS[game.mapId].boss, 1)}>
               生成 Boss
             </button>
             <button onClick={() => testClear(game)}>清场</button>
+            <button aria-label="测试Boss狂暴与预警" disabled={!game.boss || !["battle", "paused"].includes(game.phase)} onClick={() => testBossPhase(game)}>
+              Boss半血 / 技能就绪
+            </button>
           </div>
           <label>
             技能{" "}

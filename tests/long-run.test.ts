@@ -1,13 +1,18 @@
 import { it, expect } from "vitest";
-import { Game, WORLD } from "../src/game";
-import { getItem } from "../src/content";
+import { Game, WORLD, type Mode } from "../src/game";
+import { getItem, type MapId } from "../src/content";
+import { setWorldLayouts } from "../src/world";
+import mineLayout from "./fixtures/mine-layout.json";
 import type { ClassId } from "../src/classes";
-function run(seed: number, classId: ClassId = "wizard") {
+function run(seed: number, classId: ClassId = "wizard", mapId: MapId = "biche", mode: Mode = "normal") {
+  setWorldLayouts(mapId === "mine" ? {mine:mineLayout} : {});
   const g = new Game();
-  g.start("normal", seed, classId);
+  g.applyProgress({crystals:0,unlockedMaps:["biche","mine"]});
+  g.start(mode, seed, classId, false, mapId);
   let last = -1,
     shops = 0,
     upgrades = 0;
+  let dodgeGoal: {x:number;y:number} | undefined;
   // Test bot intentionally observes all simulated entities to collect loot and kite.
   for (let step = 0; step < 60 * 940; step++) {
     if (g.phase === "upgrade") {
@@ -49,12 +54,27 @@ function run(seed: number, classId: ClassId = "wizard") {
                 Math.hypot(b.x - g.player.x, b.y - g.player.y),
             )[0]
         : undefined;
-    const destination = target ?? meleeTarget;
+    let destination: {x:number;y:number} | undefined = target ?? meleeTarget;
+    // Mine probes use a legal kiting input policy. It chooses clear floor in
+    // reaction to visible close threats, without changing HP, skills or clocks.
+    if (mapId === "mine" && classId !== "warrior" && g.navigation) {
+      const threats = g.enemies.filter((e) => e.hp > 0 && Math.hypot(e.x-g.player.x,e.y-g.player.y)<180);
+      if (threats.length) {
+        if (!dodgeGoal || step % 12 === 0) {
+          const points = g.navigation.reachablePoints(g.player,100,180)
+            .filter((p)=>g.navigation!.lineClear(g.player,p,12));
+          const safety = (p:{x:number;y:number}) => Math.min(...threats.map((e)=>Math.hypot(p.x-e.x,p.y-e.y)));
+          dodgeGoal = points.sort((a,b)=>safety(b)-safety(a))[0];
+        }
+        destination = dodgeGoal ?? destination;
+      } else dodgeGoal = undefined;
+    }
+    const waypoint = destination && g.navigation ? g.navigation.waypoint(g.player,destination) : destination;
     const dx =
-        (destination?.x ?? WORLD.w / 2 + Math.cos(g.clock * 0.1) * 300) -
+        (waypoint?.x ?? WORLD.w / 2 + Math.cos(g.clock * 0.1) * 300) -
         g.player.x,
       dy =
-        (destination?.y ?? WORLD.h / 2 + Math.sin(g.clock * 0.1) * 300) -
+        (waypoint?.y ?? WORLD.h / 2 + Math.sin(g.clock * 0.1) * 300) -
         g.player.y;
     g.input = {
       x: dx / Math.max(25, Math.hypot(dx, dy)),
@@ -103,6 +123,15 @@ it("completes a deterministic seeded run without softlocks or economy errors", (
     }),
   );
 }, 20_000);
+
+it("runs a seeded mine trial using the real source walk grid through shops and a terminal result", () => {
+  const a=run(176,"wizard","mine","trial"), b=run(176,"wizard","mine","trial");
+  console.log("mine-trial-176 probe",JSON.stringify({phase:a.phase,wave:a.wave,kills:a.kills,shops:a.shops,clock:Math.round(a.clock),level:a.level}));
+  expect({...a,result:{...a.result,runId:""}}).toEqual({...b,result:{...b.result,runId:""}});
+  expect(["won","dead"]).toContain(a.phase);
+  expect(a.shops).toBeGreaterThan(0); expect(a.kills).toBeGreaterThan(0);
+  expect(a.result?.mapId).toBe("mine"); expect(a.result?.crystals).toBe(0);
+},20_000);
 it("keeps a seeded warrior run deterministic across melee upgrades and shops", () => {
   const a = run(176, "warrior"),
     b = run(176, "warrior");
