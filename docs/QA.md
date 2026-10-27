@@ -222,3 +222,10 @@ alpha.2 已成功绕过超大地图目录，但多个技能书共用 `texture/it
 - 使用真实测试UI触发Boss半血与CD就绪，继续实际AI，得到沃玛873/1800HP电光／第二段锁线／2援军截图alpha7-woma-warning.jpg，祖玛1225/2500HP初段警告／3援军截图alpha7-zuma-warning.jpg。连续段数及伤害／躲避另由模拟断言验证。8火焰沃玛环形混合视线场景实际出现源火焰弹，截图alpha7-flame-projectile.jpg；6祖玛弓箭手实际出现散射箭，截图alpha7-zuma-arrows.jpg。未把强制降血当正常通关。
 - 生产浏览器warn/error日志为空。全部截图保存在.artifacts并实际查看。Vite报告主JS约1.68MB的体积警告，构建成功；未据短时16.7ms宣称P95、低端设备或移动内存达标。
 - 未完成项：三职业多构筑的矿洞／寺庙正常通关、完整难度曲线、全部墙体／拥挤边界、旧Boss召唤频率与GDD20秒约束统一、高级外观、局外天赋、备份／恢复和局中续玩。线上发布与最终公网交互另记。
+
+### alpha.7 正式发布与公网核验
+
+- 固定提交`7ef5accff5c190d88ff9d242e66557a2a0179e48`；[标签工作流40543810174](https://github.com/holynova/mafa-survivor/actions/runs/40543810174)build/deploy/release全部成功，Source checks 40543751805成功。
+- 公网version.json为alpha.7/original/7ef5acc；22,709帧／42图集。42张PNG逐一HEAD200/image/png、28原WAV实际下载SHA256全部匹配。沃玛／祖玛源路径和SHA、8新怪八方向行走、雕像8方向潜伏／6帧苏醒序列核对通过。记录alpha7-online-http.json。
+- 独立后台IAB真实导航公开Pages的?stage=v0.1.0-alpha.7，直接截图成功：alpha7-online-menu.jpg显示版本alpha.7／7ef5acc与比奇、矿洞、沃玛、祖玛入口。随后尝试按钮操作30秒超时、连接重置，未完成线上战斗交互；不把菜单截图当成公网实战。用户前台Chrome和现有页面未操作。
+- Release附六张本地生产战斗／雕像／树冠截图、一张真实公网菜单和HTTP证据；所有照片来源已明确标注。完整职业通关、平衡、性能和GDD退出条件继续开发。

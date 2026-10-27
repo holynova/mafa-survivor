@@ -40,6 +40,10 @@ Pages 测试地址：https://holynova.github.io/mafa-survivor/
 
 [v0.1.0-alpha.5](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.5)发布提交`a4350ec7341ea5223f7fe8d6c9662b74281143fb`；工作流40494059708的build/deploy/release成功。191项游戏测试与3项缓存测试、原图像素/WAV/构建检查通过；线上版本、35图集与原WAV核验通过。本地生产浏览器截图已验收并上传Release；公网内置浏览器AX超时，最终线上交互截图未完成，未操作用户前台Chrome。此版本开放道士与第一章七类敌人，矿洞/寺庙仍在开发。
 
-## 当前公开版本：alpha.6
+## alpha.6 历史发布
 
 [v0.1.0-alpha.6](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.6)发布提交`81f2fcf5cfe71a3eca2391293daa1daeaf09077a`；[工作流40504313748](https://github.com/holynova/mafa-survivor/actions/runs/40504313748)的build/deploy/release全部成功，Source checks 40504305353成功。211项游戏测试、6项Python资源测试、原图像素、原WAV与构建检查通过。公网version.json与标签一致，37张PNG和28个原WAV逐一核验通过；本地生产截图与HTTP证据已附在Release。公网浏览器重载/重连超时，最终alpha.6线上交互截图待补；用户现有测试页保持原样。
+
+## 当前公开版本：alpha.7
+
+[v0.1.0-alpha.7](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.7)发布提交`7ef5accff5c190d88ff9d242e66557a2a0179e48`；[工作流40543810174](https://github.com/holynova/mafa-survivor/actions/runs/40543810174)build/deploy/release全部成功，Source checks 40543751805成功。231项游戏测试、6项Python资源测试、原图像素／WAV／构建通过。公网版本一致、42图集和28原WAV逐项通过；两张寺庙源地图和雕像特殊动作完整。真实公网菜单截图alpha7-online-menu.jpg与本地战斗截图／HTTP核验已附Release；公网按钮操作超时，最终线上战斗交互仍待补。三章内容可进入不等于完整平衡或全GDD退出条件已完成。
