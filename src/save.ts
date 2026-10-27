@@ -5,7 +5,7 @@ import { MAPS, PLAYABLE_MAP_IDS, type MapId } from "./content";
 
 const progressSchema = z.object({
   schemaVersion: z.literal(1), crystals: z.number().int().nonnegative(),
-  unlockedMaps: z.array(z.enum(["biche", "mine", "zuma"])),
+  unlockedMaps: z.array(z.enum(["biche", "mine", "woma", "zuma"])),
 });
 export type Progress = z.infer<typeof progressSchema>;
 interface GameDB extends DBSchema {

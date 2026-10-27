@@ -1962,3 +1962,5 @@ body:has(.lobby) .vignette {
 
 .appearance-notice { position: fixed; z-index: 40; bottom: 118px; left: 50%; transform: translateX(-50%); padding: 8px 14px; background: #172119ee; color: #e5d8a9; border: 1px solid #7e734a; font-size: 13px; white-space: nowrap; }
 .appearance-notice button { margin-left: 12px; padding: 3px 8px; }
+
+.chapter-picker { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }

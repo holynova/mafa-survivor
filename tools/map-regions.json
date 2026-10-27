@@ -16,6 +16,22 @@
       "width": 46,
       "height": 48,
       "sha256": "486c407e5cb89ebfb4b8a419cfbf40038231adb8add8bf088ae4df0ddc9fa6dd"
+    },
+    "woma": {
+      "file": "D024.bin",
+      "x": 28,
+      "y": 28,
+      "width": 46,
+      "height": 48,
+      "sha256": "82b12dee64bd3475733b12e5e5895cfbdb5a03f0f575ddd386c1bf3fff3d4563"
+    },
+    "zuma": {
+      "file": "D501.bin",
+      "x": 196,
+      "y": 176,
+      "width": 46,
+      "height": 48,
+      "sha256": "670fd302c3e62e54405cc17ff577b0f5004c38c44679142e79a7aa627c54e2c2"
     }
   }
 }

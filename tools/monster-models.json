@@ -17,12 +17,30 @@
     "skeletonWarrior": 34,
     "skeletonArcher": 144,
     "caveMaggot": 37,
-    "corpseKing": 53
+    "corpseKing": 53,
+    "womaWarrior": 41,
+    "womaBrave": 42,
+    "flameWoma": 43,
+    "womaLord": 45,
+    "zumaGuard": 84,
+    "zumaArcher": 82,
+    "zumaStatue": 83,
+    "zumaLord": 85
   },
   "mineModels": [
     "skeletonWarrior",
     "skeletonArcher",
     "caveMaggot",
     "corpseKing"
+  ],
+  "templeModels": [
+    "womaWarrior",
+    "womaBrave",
+    "flameWoma",
+    "womaLord",
+    "zumaGuard",
+    "zumaArcher",
+    "zumaStatue",
+    "zumaLord"
   ]
 }

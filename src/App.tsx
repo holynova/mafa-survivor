@@ -136,7 +136,7 @@ export function App() {
   const [progressBusy, setProgressBusy] = useState(true);
   const [chapterError, setChapterError] = useState("");
   const inventoryResumes = useRef(false);
-  useEffect(() => { document.title = `玛法幸存者 · ${game.mapId === "mine" ? "矿洞与骷髅洞" : "比奇荒野"}`; }, [game.mapId]);
+  useEffect(() => { document.title = `玛法幸存者 · ${game.mapId === "biche" ? "比奇荒野" : MAPS[game.mapId].name}`; }, [game.mapId]);
   useEffect(() => game.subscribe(refresh), []);
   useEffect(() => {
     const f = () => {
@@ -272,14 +272,14 @@ export function App() {
                 <div className="class-picker chapter-picker" role="group" aria-label="选择章节">
                   {PLAYABLE_MAP_IDS.map((id) => <button key={id} disabled={!ready}
                     aria-pressed={game.mapId === id} onClick={() => { game.selectMap(id); setChapterError(""); }}>
-                    {id === "biche" ? "比奇荒野" : "矿洞与骷髅洞"}
+                    {id === "biche" ? "比奇荒野" : MAPS[id].name}
                   </button>)}
                 </div>
                 <div className="chapter">
-                  <span>{game.mapId === "biche" ? "第一章" : "第二章"} · 玛法结晶 {game.crystals}</span>
+                  <span>{game.mapId === "biche" ? "第一章" : game.mapId === "mine" ? "第二章" : "第三章"} · 玛法结晶 {game.crystals}</span>
                   <h2>{game.mapId === "biche" ? "比奇荒野" : chapter.name}</h2>
                   <p>
-                    {game.mapId === "biche" ? "稻草人游荡在旧路旁。在怪潮中收集经验，找回熟悉的力量。" : "沿旧矿道穿过坍塌岩壁，提防转角后的骷髅弓箭手，迎战召唤僵尸的尸王。"}
+                    {game.mapId === "biche" ? "稻草人游荡在旧路旁。在怪潮中收集经验，找回熟悉的力量。" : game.mapId === "mine" ? "沿旧矿道穿过坍塌岩壁，提防转角后的骷髅弓箭手，迎战召唤僵尸的尸王。" : chapter.theme}
                   </p>
                   {!chapterUnlocked && <>
                     <button className="secondary" disabled={progressBusy || game.crystals < chapter.unlockCost}
@@ -299,7 +299,7 @@ export function App() {
                     disabled={!ready || assetError || progressBusy || !chapterUnlocked}
                     onClick={() => start("normal")}
                   >
-                    {ready ? chapterUnlocked ? game.mapId === "mine" ? "进入矿洞" : "进入荒野" : "正常远征尚未解锁" : "正在载入原版素材…"}
+                    {ready ? chapterUnlocked ? game.mapId === "biche" ? "进入荒野" : game.mapId === "mine" ? "进入矿洞" : "进入神殿" : "正常远征尚未解锁" : "正在载入原版素材…"}
                     <span>12 波 · 每波 75 秒</span>
                   </button>
                   <button
@@ -404,7 +404,7 @@ export function App() {
                       <div>
                         <strong>
                           {r.won ? "生还" : "陨落"} ·{" "}
-                          {r.mapId === "mine" ? MAPS.mine.name : "比奇荒野"}{r.mode === "trial" ? " · 短局试玩" : ""}
+                          {!r.mapId || r.mapId === "biche" ? "比奇荒野" : MAPS[r.mapId].name}{r.mode === "trial" ? " · 短局试玩" : ""}
                         </strong>
                         <span>
                           {CLASSES[r.classId ?? "wizard"].name} · 第 {r.wave} 波
@@ -425,7 +425,7 @@ export function App() {
             {saveError && <p className="inline-error">{saveError}</p>}
           </section>
           <div className="world-caption">
-            <span>{game.mapId === "mine" ? "比奇省 · 废矿深处" : "比奇省 · 荒野边境"}</span>
+            <span>{game.mapId === "biche" ? "比奇省 · 荒野边境" : game.mapId === "mine" ? "比奇省 · 废矿深处" : chapter.name + " · 祭坛深处"}</span>
             <small>经典资源 / 幸存者玩法</small>
           </div>
           <footer className="lobby-footer">
@@ -474,7 +474,7 @@ export function App() {
             </div>
             <div className="wave-info">
               <span>
-                {game.mapId === "mine" ? chapter.name : "比奇荒野"}{game.mode === "trial" ? " · 试玩" : ""}{" "}
+                {game.mapId === "biche" ? "比奇荒野" : chapter.name}{game.mode === "trial" ? " · 试玩" : ""}{" "}
                 <b>
                   第 {game.wave} / {game.maxWaves} 波
                 </b>
@@ -516,7 +516,7 @@ export function App() {
             </div>
           )}
           <div className="battle-location">
-            <span>{game.mapId === "mine" ? chapter.name : "比奇荒野"}</span>
+            <span>{game.mapId === "biche" ? "比奇荒野" : chapter.name}</span>
             <small>
               {time(game.clock)} / {game.mode === "trial" ? "01:45" : "15:00"}
             </small>
@@ -946,11 +946,11 @@ export function App() {
               {game.mode === "trial" ? "短局试玩结束" : "本次征途已结束"}
             </div>
             <h2 id="result-title">
-              {game.phase === "won" ? game.mapId === "mine" ? "矿洞生还" : "荒野生还" : "魂归玛法"}
+              {game.phase === "won" ? game.mapId === "biche" ? "荒野生还" : game.mapId === "mine" ? "矿洞生还" : "神殿生还" : "魂归玛法"}
             </h2>
             <p>
               {game.phase === "won"
-                ? game.mapId === "mine" ? "尸王倒下，旧矿道重新透进了微光。" : "你穿过怪潮，迎来了荒野的晨光。"
+                ? game.mapId === "biche" ? "你穿过怪潮，迎来了荒野的晨光。" : game.mapId === "mine" ? "尸王倒下，旧矿道重新透进了微光。" : `${bossName}倒下，祭坛重新归于沉寂。`
                 : game.player.hp === 0
                   ? "这次倒下，下一次再战。"
                   : `本局结束，${bossName}仍未被击败。`}

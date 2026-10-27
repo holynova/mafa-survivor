@@ -18,6 +18,7 @@ import {
   isBossKind,
   PLAYABLE_MAP_IDS,
 } from "./content";
+import { TEMPLE_RANGED, updateTempleEnemy } from "./temple";
 import type { SkillField } from "./spells";
 import {
   createTaoState,
@@ -105,6 +106,14 @@ export type Enemy = Entity & {
   stompAt?: number;
   stompOrigin?: { x: number; y: number };
   stompCD?: number;
+  staggerUntil?: number;
+  dormant?: boolean;
+  awakenAt?: number;
+  rangedTarget?: { x: number; y: number };
+  rangedFireAt?: number;
+  shockCD?: number;
+  shock?: { origin: {x:number;y:number}; target: {x:number;y:number}; at:number; remaining:number };
+  summoned?: boolean;
 };
 export type Pet = Entity & {
   source?: "charm" | "skeleton" | "beast";
@@ -131,7 +140,7 @@ export type Projectile = Entity & {
   hitChance?: number;
   homing?: boolean;
   faction?: "enemy";
-  visual?: "poison" | "arrow";
+  visual?: "poison" | "arrow" | "womaFlame";
   damageKind?: "physical" | "magic";
   height?: number;
 };
@@ -142,7 +151,7 @@ export type Drop = Entity & {
   itemId?: string;
 };
 export type Fx = Entity & {
-  kind: SkillId | "hit" | "cast" | "beastflame" | "talismanHit";
+  kind: SkillId | "hit" | "cast" | "beastflame" | "talismanHit" | "womaShock";
   dir?: number;
   life: number;
   total: number;
@@ -336,7 +345,7 @@ export class Game {
     this.emit();
   }
   selectMap(mapId: MapId) {
-    if (this.phase !== "lobby" || mapId === "zuma") return;
+    if (this.phase !== "lobby" || !PLAYABLE_MAP_IDS.includes(mapId)) return;
     this.mapId = mapId;
     this.emit();
   }
@@ -570,6 +579,7 @@ export class Game {
       if (isBossKind(e.kind) && e.hp <= e.maxHp * 0.5 && (e.bossPhase ?? 1) === 1) {
         e.bossPhase = 2; e.speed *= 1.25; e.damage *= 1.25;
       }
+      if (updateTempleEnemy(this,e,dt,victim)) continue;
       if (e.kind === "corpseKing" && this.updateCorpseKing(e, dt)) continue;
       // --- Forest boss jump and summon ---
       if (e.kind === "boss") {
@@ -613,7 +623,7 @@ export class Game {
       e.dir = this.direction(dx, dy);
       // --- Elite special behaviors (GDD §11 / P4) ---
       if (
-        e.ranged &&
+        e.ranged && !TEMPLE_RANGED.includes(e.kind) &&
         victim.visible &&
         (e.rangedCD ?? 0) <= 0 &&
         e.windup === 0 &&
@@ -621,7 +631,7 @@ export class Game {
       ) {
         this.fireEliteProjectile(e, victim);
         e.rangedCD = 2.5;
-      } else if (e.ranged) {
+      } else if (e.ranged && !TEMPLE_RANGED.includes(e.kind)) {
         e.rangedCD = Math.max(0, (e.rangedCD ?? 0) - dt);
       }
       e.chargeCD = Math.max(0, (e.chargeCD ?? 0) - dt);
@@ -648,7 +658,8 @@ export class Game {
           if ((e.chargeUntil ?? 0) > this.clock) continue;
         }
         e.chargeTarget = undefined;
-        e.attackCD = 0.8;
+        e.attackCD = e.kind === "womaBrave" ? 1.8 : 0.8;
+        if(e.kind === "womaBrave")e.staggerUntil=this.clock+1.8;
         continue;
       }
       if ((e.elite || e.kind === "skeletonWarrior") && !e.ranged && victim.visible && d > 90 && d < (e.kind === "skeletonWarrior" ? 180 : 300) && e.chargeCD === 0 && e.windup === 0 && (!this.navigation || this.navigation.lineClear(e, victim))) {
@@ -701,7 +712,7 @@ export class Game {
             sy += (oy / l) * (30 - l) * 2;
           }
         }
-        const waypoint = this.mapId === "mine" ? this.navigation?.waypoint(e, victim) ?? victim : victim;
+        const waypoint = this.mapId !== "biche" ? this.navigation?.waypoint(e, victim) ?? victim : victim;
         const mx = waypoint.x - e.x, my = waypoint.y - e.y, length = Math.max(1, Math.hypot(mx, my));
         e.dir = this.direction(mx, my);
         const rush =
@@ -901,7 +912,7 @@ export class Game {
     }
     const a = this.rng.next() * Math.PI * 2,
       r = 440 + this.rng.next() * 140;
-    const nativeElite = m.id === "orcBrave";
+    const nativeElite = ["orcBrave", "womaBrave"].includes(m.id);
     const elite = nativeElite || (!summoned && !isBossKind(m.id) && scheduledElite);
     const mult = 1 + (this.wave - 1) * 0.13;
     const hp = m.hp * (elite && !nativeElite ? 4 : 1) * mult;
@@ -929,12 +940,14 @@ export class Game {
       burnAt: 0,
       elite,
       born: this.clock,
+      summoned,
+      ...(m.id === "zumaStatue" ? {dormant:true} : {}),
       level: this.wave,
-      defense: isBossKind(m.id) ? 12 : ["orc", "orcWarrior", "orcBrave"].includes(m.id) ? 4 : 2,
+      defense: m.id === "zumaGuard" ? 18 : isBossKind(m.id) ? 12 : ["orc", "orcWarrior", "orcBrave"].includes(m.id) ? 4 : 2,
       magicDefense: isBossKind(m.id) ? 8 : m.id === "orc" ? 2 : 1,
       ...(isBossKind(m.id)
         ? { bossPhase: 1, bossJumpUntil: 0 }
-        : ["spider", "skeletonArcher"].includes(m.id) ? { ranged: true, rangedCD: 0 }
+        : ["spider", "skeletonArcher", ...TEMPLE_RANGED].includes(m.id) ? { ranged: true, rangedCD: 0 }
         : elite
           ? {
               ranged: !nativeElite && this.rng.next() < 0.3,
@@ -1020,30 +1033,23 @@ export class Game {
     return false;
   }
   fireEliteProjectile(e: Enemy, target: { x: number; y: number } = this.player) {
-    const dx = target.x - e.x,
-      dy = target.y - e.y,
-      l = Math.max(1, Math.hypot(dx, dy));
-    const speed = e.kind === "spider" ? 160 : e.kind === "skeletonArcher" ? 300 : 260;
-    this.projectiles.push({
-      id: ++this.id,
-      x: e.x,
-      y: e.y,
-      vx: (dx / l) * speed,
-      vy: (dy / l) * speed,
-      damage: e.kind === "spider" ? e.damage : Math.round(e.damage * 0.8),
-      life: 3,
-      dir: (((Math.round(Math.atan2(dy, dx) / (Math.PI / 8)) + 4) % 16) + 16) % 16,
-      skill: undefined,
-      faction: "enemy",
-      visual: e.kind === "spider" ? "poison" : e.kind === "skeletonArcher" ? "arrow" : undefined,
-      damageKind: e.kind === "skeletonArcher" ? "physical" : "magic",
-      homing: false,
-      hitChance: 75,
-    });
+    const angle = Math.atan2(target.y-e.y,target.x-e.x);
+    const arrow=["skeletonArcher","zumaArcher"].includes(e.kind);
+    const speed=e.kind === "spider" ? 160 : TEMPLE_RANGED.includes(e.kind) ? 180 : arrow ? 300 : 260;
+    for (const offset of e.kind === "zumaArcher" ? [-0.22,0,0.22] : [0]) {
+      const a=angle+offset;
+      this.projectiles.push({
+        id:++this.id,x:e.x,y:e.y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,
+        damage:["spider",...TEMPLE_RANGED].includes(e.kind) ? e.damage : Math.round(e.damage*0.8),
+        life:3,dir:(((Math.round(a/(Math.PI/8))+4)%16)+16)%16,
+        faction:"enemy",visual:e.kind === "spider" ? "poison" : arrow ? "arrow" : e.kind==="flameWoma" ? "womaFlame" : undefined,
+        damageKind:arrow ? "physical" : "magic",homing:false,hitChance:75,
+      });
+    }
     this.effect("cast", e.x, e.y, 0, 0.5);
     e.windup = 0.35;
   }
-  private hurtPet(pet: Pet, raw: number, kind: "physical" | "magic") {
+  hurtPet(pet: Pet, raw: number, kind: "physical" | "magic") {
     const base = pet.source === "skeleton" ? 4 : pet.source === "beast" ? 8 : 0;
     pet.hp = Math.max(0, pet.hp - incomingDamage(raw, base + buffDefense(this, pet.id, kind), 0));
   }
@@ -1425,7 +1431,7 @@ export class Game {
     }
   }
   private isUndead(e: Enemy) {
-    return ["scarecrow", "zombie", "skeleton", "skeletonWarrior", "skeletonArcher", "boss", "corpseKing"].includes(e.kind);
+    return ["scarecrow", "zombie", "skeleton", "skeletonWarrior", "skeletonArcher", "boss", "corpseKing", "womaWarrior", "womaBrave", "flameWoma", "womaLord", "zumaGuard", "zumaStatue", "zumaLord"].includes(e.kind);
   }
   private canTame(e: Enemy) {
     return (
@@ -1558,7 +1564,7 @@ export class Game {
         p.cd = source === "beast" ? 1.6 : 1.1;
         p.attackUntil = this.clock + 0.4;
       } else if (d > (target ? range * 0.75 : 80)) {
-        const waypoint = this.mapId === "mine" ? this.navigation?.waypoint(p, destination) ?? destination : destination;
+        const waypoint = this.mapId !== "biche" ? this.navigation?.waypoint(p, destination) ?? destination : destination;
         const mx = waypoint.x - p.x, my = waypoint.y - p.y, length = Math.max(1, Math.hypot(mx, my));
         p.dir = this.direction(mx, my);
         const nx = clamp(
@@ -1828,6 +1834,8 @@ export class Game {
       this.kills++;
       this.waveKills++;
       if (isBossKind(e.kind)) this.bossKilled = true;
+      // Summoned reinforcements cannot become an infinite reward source.
+      if (e.summoned) return;
       const gold =
         Math.round(
           (this.rng.next() < 0.65 ? 4 : 0) *

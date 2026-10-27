@@ -10,11 +10,13 @@ function mineGrid(): WorldLayout {
 }
 afterEach(() => setWorldLayouts({}));
 describe("playable chapter runtime", () => {
-  it("keeps unimplemented temples out of selectable and startable chapters", () => {
-    expect(PLAYABLE_MAP_IDS).toEqual(["biche","mine"]);
-    const g=new Game(); g.applyProgress({crystals:150,unlockedMaps:["biche","zuma"]});
-    g.start("test",176,"wizard",false,"zuma");
-    expect(g.phase).toBe("lobby");
+  it("offers both original temple chapters as free trials while gating normal mode", () => {
+    expect(PLAYABLE_MAP_IDS).toEqual(["biche","mine","woma","zuma"]);
+    for(const id of ["woma","zuma"] as const) {
+      const g=new Game();g.selectMap(id);g.start("normal");expect(g.phase).toBe("lobby");
+      g.start("trial");expect(g.mapId).toBe(id);expect(g.phase).toBe("battle");
+      g.finish(true);expect(g.result?.crystals).toBe(0);
+    }
   });
   it("normal mine requires an unlock; trial and test are free chapter previews", () => {
     const g=new Game(); g.selectMap("mine"); g.start("normal");

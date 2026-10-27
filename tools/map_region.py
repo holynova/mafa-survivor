@@ -46,4 +46,4 @@ def load_region(cache,request,ref,region='biche'):
    'width':cw*48,'height':ch*32,'cellWidth':48,'cellHeight':32,'walk':walk,'tiles':tiles,'objects':objects}
 
 def load_regions(cache,request,ref):
- return {name:load_region(cache,request,ref,name) for name in ['biche','mine']}
+ return {name:load_region(cache,request,ref,name) for name in json.loads((Path(__file__).parent/'map-regions.json').read_text())['regions']}

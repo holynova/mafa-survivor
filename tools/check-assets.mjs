@@ -72,10 +72,15 @@ for (const [mapId, m] of Object.entries(manifest.worlds ?? { biche: manifest.wor
     if (!frames[id]) failures.push("map: missing " + id);
   }
 }
-const mineFixture = JSON.parse(fs.readFileSync(new URL("../tests/fixtures/mine-layout.json", import.meta.url), "utf8"));
-if (JSON.stringify(manifest.worlds?.mine.walk) !== JSON.stringify(mineFixture.walk) ||
-    manifest.worlds?.mine.sourceSha256 !== mineFixture.sourceSha256)
-  failures.push("mine: checked navigation fixture differs from imported pinned source map");
+for (const chapter of ["mine","woma","zuma"]) {
+  const fixture = JSON.parse(fs.readFileSync(new URL(`../tests/fixtures/${chapter}-layout.json`, import.meta.url), "utf8"));
+  if (JSON.stringify(manifest.worlds?.[chapter]?.walk) !== JSON.stringify(fixture.walk) || manifest.worlds?.[chapter]?.sourceSha256 !== fixture.sourceSha256)
+    failures.push(`${chapter}: checked navigation fixture differs from imported pinned source map`);
+}
+for (const name of ["womaFlame","womaShock"]) for(let d=0;d<8;d++)
+  if(!manifest.animations[`${name}/${d}`]?.length)failures.push(`${name}/${d}: missing original temple effect`);
+for (const model of ["zumaStatue","zumaStatue-shadow"]) for(const motion of ["stone","awaken"]) for(let d=0;d<8;d++)
+  if(!manifest.animations[`${model}/${motion}/${d}`]?.length)failures.push(`${model}/${motion}/${d}: missing original transformation`);
 // Equipment and shadows must share source animation indices, not merely exist.
 const requireActor = (name, motions) => {
   for (const motion of motions) for (let dir = 0; dir < 8; dir++)

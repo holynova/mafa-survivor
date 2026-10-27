@@ -299,8 +299,16 @@ export const MONSTERS = [
   { id: "caveMaggot", name: "洞蛆", hp: 26, damage: 3, speed: 65, exp: 3 },
   { id: "corpseKing", name: "尸王", hp: 1250, damage: 22, speed: 45, exp: 80 },
   { id: "boss", name: "骷髅精灵", hp: 950, damage: 18, speed: 58, exp: 60 },
+  { id: "womaWarrior", name: "沃玛战士", hp: 95, damage: 9, speed: 46, exp: 6 },
+  { id: "womaBrave", name: "沃玛勇士", hp: 140, damage: 13, speed: 48, exp: 12 },
+  { id: "flameWoma", name: "火焰沃玛", hp: 90, damage: 12, speed: 35, exp: 7 },
+  { id: "womaLord", name: "沃玛教主", hp: 1800, damage: 25, speed: 50, exp: 100 },
+  { id: "zumaGuard", name: "祖玛卫士", hp: 165, damage: 14, speed: 42, exp: 8 },
+  { id: "zumaArcher", name: "祖玛弓箭手", hp: 85, damage: 10, speed: 30, exp: 7 },
+  { id: "zumaStatue", name: "祖玛雕像", hp: 120, damage: 10, speed: 45, exp: 8 },
+  { id: "zumaLord", name: "祖玛教主", hp: 2500, damage: 30, speed: 52, exp: 130 },
 ];
-export const isBossKind = (kind: string) => kind === "boss" || kind === "corpseKing";
+export const isBossKind = (kind: string) => ["boss", "corpseKing", "womaLord", "zumaLord"].includes(kind);
 export const getItem = (id: string) => {
   const item = ITEMS.find((x) => x.id === id);
   if (!item) throw new Error("Unknown item: " + id);
@@ -326,10 +334,10 @@ export const SCENERY = [
 // Chapter map data (GDD §11). Each chapter has its own scenery obstacle set
 // and monster pool; chapters are unlocked out-of-run with Mafa Crystals.
 // ---------------------------------------------------------------------------
-export type MapId = "biche" | "mine" | "zuma";
+export type MapId = "biche" | "mine" | "woma" | "zuma";
 
-export const MAP_IDS: MapId[] = ["biche", "mine", "zuma"];
-export const PLAYABLE_MAP_IDS: MapId[] = ["biche", "mine"];
+export const MAP_IDS: MapId[] = ["biche", "mine", "woma", "zuma"];
+export const PLAYABLE_MAP_IDS: MapId[] = [...MAP_IDS];
 
 export const MAP_SCENERY: Record<MapId, typeof SCENERY> = {
   biche: SCENERY,
@@ -357,6 +365,10 @@ export const MAP_SCENERY: Record<MapId, typeof SCENERY> = {
     { id: "pillar", x: 300, y: 1036, r: 18 },
     { id: "pillar", x: 1908, y: 1036, r: 18 },
   ],
+  woma: [
+    { id: "pillar", x: 700, y: 500, r: 20 },
+    { id: "pillar", x: 1500, y: 1000, r: 20 },
+  ],
 };
 
 export const MAPS: Record<MapId, { id: MapId; name: string; theme: string; monsterPool: string[]; boss: string; unlockCost: number }> = {
@@ -376,12 +388,20 @@ export const MAPS: Record<MapId, { id: MapId; name: string; theme: string; monst
     boss: "corpseKing",
     unlockCost: 3,
   },
+  woma: {
+    id: "woma",
+    name: "沃玛神殿",
+    theme: "神殿石柱与祭坛；火焰弹、冲锋与教主连续冲击",
+    monsterPool: ["womaWarrior", "flameWoma", "womaBrave"],
+    boss: "womaLord",
+    unlockCost: 6,
+  },
   zuma: {
     id: "zuma",
-    name: "沃玛/祖玛进阶",
+    name: "祖玛神殿",
     theme: "祭坛墙体、断桥、房间边缘；混合远近，高压Boss",
-    monsterPool: ["zombie", "skeleton", "orc"],
-    boss: "boss",
-    unlockCost: 150,
+    monsterPool: ["zumaGuard", "zumaArcher", "zumaStatue"],
+    boss: "zumaLord",
+    unlockCost: 9,
   },
 } as const;

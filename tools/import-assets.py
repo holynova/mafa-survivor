@@ -60,8 +60,12 @@ for shape in sorted(set(appearance['weapons'].values())):
 monster_motions={'idle':0,'walk':1,'attack':2,'hurt':3,'death':4}
 monster_models=json.loads((ROOT/'tools/monster-models.json').read_text())
 for name,look in monster_models['models'].items():
- actor('monster',name,look,monster_motions)
- actor('monster',name+'-shadow',look|(1<<11),monster_motions,source_entries['monster'])
+ motions={**monster_motions,**({'awaken':8} if name=='zumaStatue' else {})}
+ actor('monster',name,look,motions)
+ actor('monster',name+'-shadow',look|(1<<11),motions,source_entries['monster'])
+ if name=='zumaStatue':
+  for model in [name,name+'-shadow']:
+   for direction in range(8):animations[f'{model}/stone/{direction}']=animations[f'{model}/awaken/{direction}'][:1]
 magic={int(p['path'][:8],16):p for p in tree('magic')}
 for name,start,count in [('lightning',0x5AA,5),('firewall',0x398,5),('shield',0x352,3)]:
  animations[name]=[select('magic',magic[start+i],f'{name}/{i}') for i in range(count)]
@@ -88,6 +92,9 @@ for direction in range(8):
 # Original bow arrow, used for the survivor-mode skeleton archer adaptation.
 for direction in range(16):
  animations[f'arrow/{direction}']=[select('magic',magic[0x03000578+direction*10],f'arrow/{direction}/0')]
+for name,start,count in [('womaFlame',0x03000208,7),('womaShock',0x030001B8,6)]:
+ for direction in range(8):
+  animations[f'{name}/{direction}']=[select('magic',magic[start+direction*10+i],f'{name}/{direction}/{i}') for i in range(count)]
 from map_region import load_regions
 world_layouts=load_regions(CACHE,request,REF)
 world_layout=world_layouts['biche']
@@ -152,10 +159,13 @@ meta={};pages=[]
 groups={}
 mine_only={f'map/{code:08X}' for code in {p['texture'] for p in world_layouts['mine']['tiles']+world_layouts['mine']['objects']}
            -{p['texture'] for p in world_layouts['biche']['tiles']+world_layouts['biche']['objects']}}
+temple_only={f'map/{code:08X}' for id in ['woma','zuma'] for code in {p['texture'] for p in world_layouts[id]['tiles']+world_layouts[id]['objects']}
+             -{p['texture'] for id in ['biche','mine'] for p in world_layouts[id]['tiles']+world_layouts[id]['objects']}}
 for record in loaded:
  name=record[0].split('/')[0]
  group=name.replace('-shadow','') if name.startswith(('dress-','weapon-')) and name not in ['dress-1','dress-1-shadow','weapon-8'] else 'core'
  if name.removesuffix('-shadow') in monster_models['mineModels'] or name=='arrow' or record[0] in mine_only:group='chapter-mine'
+ if name.removesuffix('-shadow') in monster_models['templeModels'] or name in ['womaFlame','womaShock'] or record[0] in temple_only:group='chapter-temple'
  groups.setdefault(group,[]).append(record)
 page=0
 for group in sorted(groups, key=lambda g:(g!='core',g)):

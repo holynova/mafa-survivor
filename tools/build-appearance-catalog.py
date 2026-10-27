@@ -33,7 +33,7 @@ for kind in ['hero','monster','weapon']:
    gender=(code>>22)&1;shape=(code>>14)&255;motion=(code>>8)&63
    wanted=gender==1 and motion in motions.values() and (shape in set(wm.values()) and not(code&(1<<23)) if kind=='weapon' else shape in set(dm.values()))
   else:
-   wanted=bool(code&(1<<23)) and ((code>>12)&0x7ff) in monster_looks and ((code>>8)&15) in [0,1,2,3,4]
+   wanted=bool(code&(1<<23)) and ((code>>12)&0x7ff) in monster_looks and (((code>>8)&15) in [0,1,2,3,4] or ((code>>12)&0x7ff)==0x53 and ((code>>8)&15)==8)
   if wanted:chosen.append({'path':e['path'],'sha':e['sha']})
  sources[kind]=chosen
 (r/'tools/appearance-sources.json').write_text(json.dumps({'repository':catalog['resourceRepository'],'ref':catalog['resourceRef'],'files':sources},indent=2)+'\n')

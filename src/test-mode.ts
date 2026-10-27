@@ -68,7 +68,7 @@ export function testBossPhase(g: Game) {
   if (g.mode !== "test" || !["battle", "paused"].includes(g.phase) || !g.boss) return false;
   const boss = g.boss;
   boss.hp = Math.min(boss.hp, boss.maxHp * 0.49);
-  boss.stompCD = 0; boss.bossJumpCD = 0; boss.bossSummonCD = 0;
+  boss.stompCD = 0; boss.bossJumpCD = 0; boss.bossSummonCD = 0; boss.shockCD = 0;
   g.emit(); return true;
 }
 

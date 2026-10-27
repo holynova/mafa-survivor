@@ -198,7 +198,7 @@ class BattleScene extends Phaser.Scene {
     const texture = this.textures.createCanvas("terrain", WORLD.w, WORLD.h)!;
     const context = texture.context;
     context.imageSmoothingEnabled = false;
-    context.fillStyle = game.mapId === "mine" ? "#11100e" : "#252a1e";
+    context.fillStyle = game.mapId === "biche" ? "#252a1e" : "#11100e";
     context.fillRect(0, 0, WORLD.w, WORLD.h);
     const paint = (key: string, x: number, y: number, bottom = false) => {
       const meta = assets.frames[key];
@@ -448,7 +448,7 @@ class BattleScene extends Phaser.Scene {
     if (!rendererReady) return;
     if (!isGraybox) {
       const kinds = [...new Set([...MAPS[game.mapId].monsterPool, MAPS[game.mapId].boss, ...game.enemies.map((e) => e.kind)])];
-      const models = ["world-" + game.mapId, ...kinds.flatMap((kind) => [kind, kind + "-shadow"])];
+      const models = ["world-" + game.mapId, ...(game.mapId === "woma" || game.mapId === "zuma" ? ["womaFlame", "womaShock", "arrow"] : []), ...kinds.flatMap((kind) => [kind, kind + "-shadow"])];
       const missing = models.some((name) => [...(this.modelPages.get(name) ?? [])].some((key) => !this.textures.exists(key)));
       if (missing && !this.requireModels(models)) { this.accumulator = 0; return; }
     }
@@ -564,7 +564,7 @@ class BattleScene extends Phaser.Scene {
         );
       for (const e of game.enemies) {
         const motion =
-          e.windup > 0 || e.stompAt !== undefined || (e.chargeWindupUntil ?? 0) > game.clock ? "attack" : t - e.hitAt < 0.17 ? "hurt" : "walk";
+          e.dormant ? "stone" : (e.awakenAt ?? 0)>game.clock ? "awaken" : e.windup > 0 || e.shock || e.rangedFireAt !== undefined || e.stompAt !== undefined || (e.chargeWindupUntil ?? 0) > game.clock ? "attack" : t - e.hitAt < 0.17 ? "hurt" : "walk";
         const scale = e.elite ? 1.15 : 1;
         this.actor(
           "enemy-" + e.id,
@@ -573,7 +573,7 @@ class BattleScene extends Phaser.Scene {
           e.dir,
           e.x,
           e.y,
-          t - e.born,
+          motion === "awaken" ? Math.min(5,Math.floor((game.clock-((e.awakenAt ?? 0)-0.8))/0.8*6))/9 : t - e.born,
           e.y,
           1,
           scale,
@@ -612,6 +612,16 @@ class BattleScene extends Phaser.Scene {
             .strokeCircle(e.stompOrigin.x, e.stompOrigin.y, 130)
             .fillStyle(0xb96b42, 0.14).fillCircle(e.stompOrigin.x, e.stompOrigin.y, 130 * Math.max(0, 1 - (e.stompAt - game.clock)));
         }
+        if (e.rangedTarget && e.rangedFireAt !== undefined) {
+          const spread=e.kind === "zumaArcher" ? [-0.22,0,0.22] : [0];
+          const angle=Math.atan2(e.rangedTarget.y-e.y,e.rangedTarget.x-e.x);
+          for (const offset of spread) this.bars.lineStyle(2,0xeab46b,0.7)
+            .lineBetween(e.x,e.y,e.x+Math.cos(angle+offset)*420,e.y+Math.sin(angle+offset)*420);
+        }
+        if(e.shock) this.bars.lineStyle(76,0xd18a4c,0.17)
+          .lineBetween(e.shock.origin.x,e.shock.origin.y,e.shock.target.x,e.shock.target.y)
+          .lineStyle(2,0xffcf81,0.85).lineBetween(e.shock.origin.x,e.shock.origin.y,e.shock.target.x,e.shock.target.y);
+        if((e.awakenAt ?? 0)>game.clock) this.bars.lineStyle(3,0xffcc84,0.9).strokeCircle(e.x,e.y,42);
       }
       for (const p of game.pets) {
         this.actor(
@@ -650,7 +660,7 @@ class BattleScene extends Phaser.Scene {
       for (const p of game.projectiles)
         this.fx(
           "p-" + p.id,
-          p.visual === "poison" ? "poison" : (p.visual === "arrow" ? "arrow" : p.skill ?? "fireball") + "/" + p.dir,
+          p.visual === "poison" ? "poison" : p.visual === "womaFlame" ? "womaFlame/"+Math.floor(p.dir/2) : (p.visual === "arrow" ? "arrow" : p.skill ?? "fireball") + "/" + p.dir,
           p.x,
           p.y - (p.height ?? 0),
           t,
@@ -684,6 +694,7 @@ class BattleScene extends Phaser.Scene {
             "thrust",
             "cleave",
             "firesword",
+            "womaShock",
           ].includes(f.kind)
             ? f.kind + "/" + (f.dir ?? 4)
             : f.kind;

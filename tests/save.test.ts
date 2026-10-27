@@ -49,9 +49,24 @@ describe("IndexedDB settlement", () => {
     expect((await loadProgress()).crystals).toBe(0);
     expect(await history()).toHaveLength(1);
   });
-  it("rejects insufficient balance and unavailable chapters without spending", async () => {
+  it("persists both temple unlocks and their spent balance across game instances", async () => {
+    for(let seed=1;seed<=5;seed++){
+      const g=new Game();g.start("normal",seed);g.finish(true);await saveRun(g.result!);
+    }
+    expect((await loadProgress()).crystals).toBe(15);
+    await Promise.all([unlockChapter("woma"),unlockChapter("zuma")]);
+    const progress=await loadProgress();expect(progress.crystals).toBe(0);
+    expect(progress.unlockedMaps).toEqual(["biche","woma","zuma"]);
+    for(const chapter of ["woma","zuma"] as const){
+      const g=new Game();g.applyProgress(progress);g.selectMap(chapter);g.start("normal");
+      expect(g.mapId).toBe(chapter);expect(g.phase).toBe("battle");
+    }
+    await unlockChapter("woma");expect((await loadProgress()).crystals).toBe(0);
+  });
+  it("rejects insufficient balances without spending", async () => {
     await expect(unlockChapter("mine")).rejects.toThrow("需要 3");
-    await expect(unlockChapter("zuma")).rejects.toThrow("开发中");
+    await expect(unlockChapter("woma")).rejects.toThrow("需要 6");
+    await expect(unlockChapter("zuma")).rejects.toThrow("需要 9");
     expect(await loadProgress()).toMatchObject({crystals:0,unlockedMaps:["biche"]});
   });
   it("test and trial cannot grant crystals or unlock normal chapters", async () => {
