@@ -24,6 +24,14 @@ function setupElite() {
 }
 
 describe("Boss phases & special behaviors (GDD §11 / P4)", () => {
+  it("boss summons respect the shared 300-enemy cap", () => {
+    const { g, b } = setupBoss();
+    while (g.enemies.length < 300) g.spawnEnemy("scarecrow");
+    b.bossSummonCD = 0;
+    g.skills = []; g.basicCD = Infinity;
+    g.step(1 / 60);
+    expect(g.enemies).toHaveLength(300);
+  });
   it("boss enters phase 2 at 50% HP with speed and damage buff", () => {
     const { g, b } = setupBoss();
     b.hp = Math.floor(b.maxHp * 0.5) - 1;

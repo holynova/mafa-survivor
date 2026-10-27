@@ -1785,6 +1785,8 @@ body:has(.lobby) .vignette {
   margin: 12px 0;
 }
 .class-picker button {
+  flex: 1;
+  min-width: 0;
   padding: 7px 20px;
   border: 1px solid #5b5140;
   background: #191a17;
@@ -1798,6 +1800,27 @@ body:has(.lobby) .vignette {
 .class-picker button:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 3px;
+}
+.taoist-status {
+  margin: 18px 0;
+  padding: 12px 16px;
+  border: 1px solid #5b5140;
+  background: #191a17;
+}
+.taoist-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0;
+  font-size: 13px;
+}
+.taoist-status-row select {
+  max-width: 65%;
+  padding: 6px 8px;
+  color: var(--gold);
+  background: #24251f;
+  border: 1px solid #5b5140;
 }
 .test-entry {
   width: 100%;

@@ -22,6 +22,25 @@ function fire(g: Game) {
   g.cast(g.skills[0]);
 }
 describe("taoist skill pool", () => {
+  it.each(["normal", "trial"] as const)("starts a selected taoist in %s mode and resets run-only state on restart", (mode) => {
+    const g = new Game();
+    g.selectClass("taoist");
+    g.start(mode);
+    expect(g.classId).toBe("taoist");
+    expect(g.player.hp).toBe(135);
+    expect(g.skills.map((s) => s.id)).toEqual(["talisman"]);
+    expect(g.maxSkills).toBe(6);
+    g.setPoisonMode("red"); g.setHealPriority("pet");
+    const summon = g.newSkill("skeleton"); summon.cd = 0;
+    g.cast(summon);
+    expect(g.pets.length).toBeGreaterThan(0);
+    g.finish(false); g.lobby(); g.start(mode);
+    expect(g.classId).toBe("taoist");
+    expect(g.pets).toHaveLength(0);
+    expect(g.tao.poisonMode).toBe("green");
+    expect(g.tao.healPriority).toBe("self");
+    expect(g.result).toBeNull();
+  });
   it("has exactly thirteen named classic skills", () => {
     expect(SKILLS).toHaveLength(13);
     expect(new Set(SKILLS.map((s) => s.id)).size).toBe(13);

@@ -58,7 +58,7 @@ for shape in sorted(set(appearance['clothes'].values())):
 for shape in sorted(set(appearance['weapons'].values())):
  actor('weapon',f'weapon-{shape}',(1<<8)|shape,hero_motions,source_entries['weapon'])
 monster_motions={'idle':0,'walk':1,'attack':2,'hurt':3,'death':4}
-for name,look in [('scarecrow',0x28),('cat',0x26),('rakecat',0x27),('orc',0x16),('boss',0x24),('skeleton',0x20),('summonedSkeleton',0x38),('zombie',0x30),('beast',0x5A)]:
+for name,look in [('scarecrow',0x28),('cat',0x26),('rakecat',0x27),('orc',0x16),('orcWarrior',0x17),('spider',0x19),('orcBrave',0x18),('boss',0x24),('skeleton',0x20),('summonedSkeleton',0x38),('zombie',0x30),('beast',0x5A)]:
  actor('monster',name,look,monster_motions)
  actor('monster',name+'-shadow',look|(1<<11),monster_motions,source_entries['monster'])
 magic={int(p['path'][:8],16):p for p in tree('magic')}

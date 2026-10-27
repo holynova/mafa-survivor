@@ -8,7 +8,7 @@ Pages 测试地址：https://holynova.github.io/mafa-survivor/
 
 ## 发布入口
 
-1. 更新 CHANGELOG.md 与 package.json 的阶段版本；当前公开阶段号为 v0.1.0-alpha.3。
+1. 更新 CHANGELOG.md 与 package.json 的阶段版本；阶段号按 package.json 与最新已成功部署的标签核对，不重用旧标签。
 2. 运行自动测试、本地原版资源检查、人物合成检查、音频检查和构建；通过浏览器实际操作并查看截图。
 3. 仓库变量 `PAGES_ASSET_MODE=original`；Actions 导入固定提交资源并校验项目所有人的授权确认记录，检查图片、合成帧和音频。
 4. 提交并推送 main，打递增阶段标签并推送，例如 v0.1.0-alpha.2。
@@ -27,7 +27,7 @@ Pages 测试地址：https://holynova.github.io/mafa-survivor/
 
 2026-10-27：完整源码已推送，保留原远端 GDD 提交历史；源码提交 `f04a5f15d24de1160dccc0947503ae15571fb149` 的 [Source checks](https://github.com/holynova/mafa-survivor/actions/runs/40439650523) 已成功。GitHub Pages API 返回 build_type=workflow，配置已启用；这是授权确认前的源码准备记录。随后用户确认原版授权，alpha.1 首次部署受上游超大目录超时阻断；alpha.2 修复目录问题后暴露了共享源贴图并发缓存冲突，未部署；alpha.3 修复并加入回归测试后重新发布。线上核验以 QA.md 的实测记录及 Actions 成功状态为准。
 
-## 当前公开版本
+## alpha.3 历史发布
 
 [v0.1.0-alpha.3](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.3) 已于2026-10-27完成 build/deploy/release，标签提交 `8c8bd3d`。真实 Chrome 线上试玩、D 键、音效、测试工具和截图验收记录见 QA.md。后续每阶段沿用递增 alpha 标签流程，不重写历史标签。
 

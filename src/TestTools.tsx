@@ -98,7 +98,6 @@ export function TestTools() {
               {CLASS_IDS.map((id) => (
                 <option key={id} value={id}>
                   {CLASSES[id].name}
-                  {id === "taoist" ? "（开发验证中）" : ""}
                 </option>
               ))}
             </select>

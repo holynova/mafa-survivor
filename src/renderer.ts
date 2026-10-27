@@ -533,7 +533,7 @@ class BattleScene extends Phaser.Scene {
         );
       for (const e of game.enemies) {
         const motion =
-          e.windup > 0 ? "attack" : t - e.hitAt < 0.17 ? "hurt" : "walk";
+          e.windup > 0 || (e.chargeWindupUntil ?? 0) > game.clock ? "attack" : t - e.hitAt < 0.17 ? "hurt" : "walk";
         const scale = e.elite ? 1.15 : 1;
         this.actor(
           "enemy-" + e.id,
@@ -570,6 +570,11 @@ class BattleScene extends Phaser.Scene {
               e.kind === "boss" ? 145 : 52,
               e.kind === "boss" ? 75 : 25,
             );
+        }
+        if (e.chargeTarget && (e.chargeWindupUntil ?? 0) > game.clock) {
+          this.bars.lineStyle(3, 0xe6a754, 0.6)
+            .lineBetween(e.x, e.y, e.chargeTarget.x, e.chargeTarget.y)
+            .strokeEllipse(e.chargeTarget.x, e.chargeTarget.y, 50, 24);
         }
       }
       for (const p of game.pets) {
@@ -609,12 +614,12 @@ class BattleScene extends Phaser.Scene {
       for (const p of game.projectiles)
         this.fx(
           "p-" + p.id,
-          (p.skill ?? "fireball") + "/" + p.dir,
+          p.visual === "poison" ? "poison" : (p.skill ?? "fireball") + "/" + p.dir,
           p.x,
           p.y,
           t,
           2200,
-          0.8,
+          p.visual === "poison" ? 0.55 : 0.8,
         );
       for (const f of game.effects) {
         if (f.kind === "firewall") {

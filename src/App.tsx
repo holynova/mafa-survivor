@@ -221,7 +221,7 @@ export function App() {
       {game.phase === "lobby" && (
         <>
           <div className="edition">
-            开发预览 <span>02 / 法师与战士</span>
+            开发预览 <span>03 / 法师 · 战士 · 道士</span>
           </div>
           <section className="lobby">
             <div className="eyebrow">
@@ -244,7 +244,7 @@ export function App() {
             </nav>
             {(tab === "play" || tab === "skills") && (
               <div className="class-picker" role="group" aria-label="选择职业">
-                {CLASS_IDS.filter((id) => id !== "taoist").map((id) => (
+                {CLASS_IDS.map((id) => (
                   <button
                     key={id}
                     aria-pressed={game.classId === id}
@@ -334,9 +334,9 @@ export function App() {
                   <kbd>Esc</kbd> / <kbd>P</kbd> 暂停。切出窗口会自动暂停。
                 </p>
                 <p className="muted">
-                  法师 14 项、战士 6 项技能已开放，单局最多装备 6
-                  项。普通攻击独立于技能槽；空格可触发瞬移、冲撞或手动技能。道士
-                  13 项技能已开放。
+                  法师 14 项、战士 6 项、道士 13 项技能可选，单局最多装备 6
+                  项。普通攻击独立于技能槽；空格可触发瞬移、冲撞或手动技能。
+                  道士可在行囊中切换红绿毒和治疗优先目标。
                 </p>
               </div>
             )}
@@ -515,11 +515,18 @@ export function App() {
                         >
                           <Icon frame={def.asset} />
                         </button>
+                      ) : s.id === "poison" ? (
+                        <button className="manual-skill"
+                          aria-label={`切换为${game.tao.poisonMode === "green" ? "红" : "绿"}毒`}
+                          disabled={game.phase !== "battle"}
+                          onClick={() => game.setPoisonMode(game.tao.poisonMode === "green" ? "red" : "green")}>
+                          <Icon frame={def.asset} />
+                        </button>
                       ) : (
                         <Icon frame={def.asset} />
                       )}
                       <div>
-                        <strong>{def.name}</strong>
+                        <strong>{def.name}{s.id === "poison" ? ` · ${game.tao.poisonMode === "green" ? "绿毒" : "红毒"}` : ""}</strong>
                         <span>
                           Lv.{s.rank}{" "}
                           <em>
@@ -830,11 +837,12 @@ export function App() {
                 ["冷却缩减", (game.stats.cooldown_reduction ?? 0) + "%"],
                 ["拾取半径", Math.round(game.pickupRadius) + " px"],
                 [
-                  game.classId === "warrior" ? "物理伤害" : "魔法伤害",
+                  game.classId === "warrior" ? "物理伤害" : game.classId === "taoist" ? "道术伤害" : "魔法伤害",
                   "+" +
                     (game.stats[
                       game.classId === "warrior"
                         ? "dc_bonus_pct"
+                        : game.classId === "taoist" ? "sc_bonus_pct"
                         : "mc_bonus_pct"
                     ] ?? 0) +
                     "%",
@@ -850,18 +858,22 @@ export function App() {
             {game.classId === "taoist" && (
               <div className="taoist-status">
                 <h3>道士修为</h3>
-                <div className="taoist-status-row">
+                <label className="taoist-status-row">
                   <span>毒素模式</span>
-                  <b>
-                    {game.tao.poisonMode === "green" ? "绿毒·持续伤害" : "红毒·减防"}
-                  </b>
-                </div>
-                <div className="taoist-status-row">
+                  <select aria-label="毒素模式" value={game.tao.poisonMode}
+                    onChange={(e) => game.setPoisonMode(e.target.value as "green" | "red")}>
+                    <option value="green">绿毒 · 持续伤害</option>
+                    <option value="red">红毒 · 减防</option>
+                  </select>
+                </label>
+                <label className="taoist-status-row">
                   <span>治疗优先级</span>
-                  <b>
-                    {game.tao.healPriority === "self" ? "优先自身" : "优先宝宝"}
-                  </b>
-                </div>
+                  <select aria-label="治疗优先级" value={game.tao.healPriority}
+                    onChange={(e) => game.setHealPriority(e.target.value as "self" | "pet")}>
+                    <option value="self">优先自身</option>
+                    <option value="pet">优先宝宝</option>
+                  </select>
+                </label>
                 <div className="taoist-status-row">
                   <span>召唤宝宝</span>
                   <b>
@@ -871,6 +883,7 @@ export function App() {
                     神兽
                   </b>
                 </div>
+                <p className="muted fine-print">习得施毒术或治愈术后生效。切换设置不消耗技能槽。</p>
               </div>
             )}
             <h3>

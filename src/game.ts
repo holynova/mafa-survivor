@@ -98,6 +98,8 @@ export type Enemy = Entity & {
   /** 精英冲锋 */
   chargeUntil?: number;
   chargeTarget?: { x: number; y: number };
+  chargeWindupUntil?: number;
+  chargeCD?: number;
 };
 export type Pet = Entity & {
   source?: "charm" | "skeleton" | "beast";
@@ -123,6 +125,8 @@ export type Projectile = Entity & {
   targetId?: number;
   hitChance?: number;
   homing?: boolean;
+  faction?: "enemy";
+  visual?: "poison";
 };
 export type Drop = Entity & {
   exp: number;
@@ -587,16 +591,50 @@ export class Game {
       e.dir = this.direction(dx, dy);
       // --- Elite special behaviors (GDD §11 / P4) ---
       if (
-        e.elite &&
         e.ranged &&
+        victim.visible &&
         (e.rangedCD ?? 0) <= 0 &&
         e.windup === 0 &&
         d < 420
       ) {
-        this.fireEliteProjectile(e);
+        this.fireEliteProjectile(e, victim);
         e.rangedCD = 2.5;
-      } else if (e.elite && e.ranged) {
+      } else if (e.ranged) {
         e.rangedCD = Math.max(0, (e.rangedCD ?? 0) - dt);
+      }
+      e.chargeCD = Math.max(0, (e.chargeCD ?? 0) - dt);
+      if (e.chargeTarget) {
+        e.dir = this.direction(e.chargeTarget.x - e.x, e.chargeTarget.y - e.y);
+        // The warning locks a position. It never tracks a sidestepping target.
+        if (this.clock < (e.chargeWindupUntil ?? 0)) continue;
+        if (this.clock < (e.chargeUntil ?? 0)) {
+          const cx = e.chargeTarget.x - e.x, cy = e.chargeTarget.y - e.y;
+          const length = Math.hypot(cx, cy), step = Math.min(length, e.speed * 4 * dt);
+          const nx = e.x + cx / Math.max(1, length) * step;
+          const ny = e.y + cy / Math.max(1, length) * step;
+          if (canStand(nx, ny) && this.obstacles.every((o) => Math.hypot(nx - o.x, ny - o.y) > o.r + 12)) {
+            e.x = nx; e.y = ny;
+          } else e.chargeUntil = 0;
+          const hit = [this.player, ...this.pets.filter((p) => p.hp > 0)]
+            .find((a) => Math.hypot(a.x - e.x, a.y - e.y) < 32);
+          if (hit) {
+            if (hit === this.player) this.hurt(e.damage * 1.3);
+            else this.hurtPet(hit as Pet, e.damage * 1.3, "physical");
+            e.chargeUntil = 0;
+          }
+          if (length <= step) e.chargeUntil = 0;
+          if ((e.chargeUntil ?? 0) > this.clock) continue;
+        }
+        e.chargeTarget = undefined;
+        e.attackCD = 0.8;
+        continue;
+      }
+      if (e.elite && !e.ranged && victim.visible && d > 90 && d < 300 && e.chargeCD === 0 && e.windup === 0) {
+        e.chargeTarget = { x: victim.x, y: victim.y };
+        e.chargeWindupUntil = this.clock + 0.7;
+        e.chargeUntil = this.clock + 1.6;
+        e.chargeCD = 6;
+        continue;
       }
       if (e.windup > 0) {
         e.windup -= dt;
@@ -612,18 +650,7 @@ export class Game {
           ) {
             if (locked === this.player) this.hurt(e.damage);
             else {
-              const pet = locked as Pet;
-              const base =
-                pet.source === "skeleton" ? 4 : pet.source === "beast" ? 8 : 0;
-              pet.hp = Math.max(
-                0,
-                pet.hp -
-                  incomingDamage(
-                    e.damage,
-                    base + buffDefense(this, pet.id, "physical"),
-                    0,
-                  ),
-              );
+              this.hurtPet(locked as Pet, e.damage, "physical");
             }
           }
           e.attackCD = e.kind === "boss" ? 1.5 : 1.1;
@@ -639,7 +666,7 @@ export class Game {
         e.windup = e.kind === "boss" ? 0.65 : 0.4;
         continue;
       }
-      if (d > 22) {
+      if (d > (e.ranged ? 230 : 22)) {
         let sx = 0,
           sy = 0;
         for (const other of this.hash.nearby(e.x, e.y, 30)) {
@@ -712,9 +739,26 @@ export class Game {
           (((Math.round(Math.atan2(dy, dx) / (Math.PI / 8)) + 4) % 16) + 16) %
           16;
       }
+      const previous = { x: p.x, y: p.y };
       p.x += p.vx * dt;
       p.y += p.vy * dt;
       p.life -= dt;
+      if (p.faction === "enemy") {
+        const dx = p.x - previous.x, dy = p.y - previous.y;
+        const lengthSquared = dx * dx + dy * dy;
+        const target = [this.player, ...this.pets.filter((pet) => pet.hp > 0)]
+          .map((actor) => {
+            const fraction = clamp(((actor.x - previous.x) * dx + (actor.y - previous.y) * dy) / Math.max(1, lengthSquared), 0, 1);
+            return { actor, fraction, distance: Math.hypot(actor.x - previous.x - dx * fraction, actor.y - previous.y - dy * fraction) };
+          }).filter((a) => a.distance < 18).sort((a, b) => a.fraction - b.fraction)[0];
+        if (target && p.life > 0) {
+          if (target.actor === this.player) this.hurt(p.damage, "magic");
+          else this.hurtPet(target.actor as Pet, p.damage, "magic");
+          if (p.visual === "poison") this.effect("poison", target.actor.x, target.actor.y, 0, 0.5);
+          p.life = 0;
+        }
+        continue;
+      }
       const e = this.hash
         .nearby(p.x, p.y, 24)
         .find((e) => e.hp > 0 && (!p.targetId || p.targetId === e.id));
@@ -813,27 +857,28 @@ export class Game {
     return (((Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) + 2) % 8) + 8) % 8;
   }
   spawnEnemy(kind?: string) {
+    const scheduledElite = this.wave >= 4 && this.spawned === Math.floor(WAVE_BUDGET[this.wave - 1] / 2);
+    if (!kind && this.mapId === "biche" && scheduledElite) kind = "orcBrave";
     let m;
     if (kind) m = MONSTERS.find((x) => x.id === kind)!;
     else {
       const map = MAPS[this.mapId];
       const nonBoss = MONSTERS.filter(
-        (x) => x.id !== "boss" && map.monsterPool.includes(x.id),
+        (x) => x.id !== "boss" && x.id !== "orcBrave" && map.monsterPool.includes(x.id),
       );
       const pool = nonBoss.slice(
         0,
-        Math.min(nonBoss.length, 1 + Math.ceil(this.wave / 2)),
+        // By wave five, the forest roster includes its armoured and ranged enemies.
+        Math.min(nonBoss.length, this.mapId === "biche" ? this.wave + 1 : 1 + Math.ceil(this.wave / 2)),
       );
       m = this.rng.pick(pool);
     }
     const a = this.rng.next() * Math.PI * 2,
       r = 440 + this.rng.next() * 140;
-    const elite =
-      m.id !== "boss" &&
-      this.wave >= 4 &&
-      this.spawned === Math.floor(WAVE_BUDGET[this.wave - 1] / 2);
+    const nativeElite = m.id === "orcBrave";
+    const elite = nativeElite || (m.id !== "boss" && scheduledElite);
     const mult = 1 + (this.wave - 1) * 0.13;
-    const hp = m.hp * (elite ? 4 : 1) * mult;
+    const hp = m.hp * (elite && !nativeElite ? 4 : 1) * mult;
     this.enemies.push({
       id: ++this.id,
       kind: m.id,
@@ -843,7 +888,7 @@ export class Game {
       maxHp: hp,
       speed: m.speed * (1 + this.wave * 0.025),
       damage: m.damage * (1 + (this.wave - 1) * 0.13),
-      exp: m.exp * (elite ? 5 : 1),
+      exp: m.exp * (elite && !nativeElite ? 5 : 1),
       dir: 4,
       windup: 0,
       attackCD: 0,
@@ -852,13 +897,14 @@ export class Game {
       elite,
       born: this.clock,
       level: this.wave,
-      defense: m.id === "boss" ? 12 : m.id === "orc" ? 4 : 2,
+      defense: m.id === "boss" ? 12 : ["orc", "orcWarrior", "orcBrave"].includes(m.id) ? 4 : 2,
       magicDefense: m.id === "boss" ? 8 : m.id === "orc" ? 2 : 1,
       ...(m.id === "boss"
         ? { bossPhase: 1, bossJumpUntil: 0 }
+        : m.id === "spider" ? { ranged: true, rangedCD: 0 }
         : elite
           ? {
-              ranged: this.rng.next() < 0.3,
+              ranged: !nativeElite && this.rng.next() < 0.3,
               rangedCD: 0,
               chargeUntil: 0,
             }
@@ -867,6 +913,7 @@ export class Game {
     return this.enemies.at(-1)!;
   }
   private summonBossMinion(boss: Enemy) {
+    if (this.enemies.length >= 300) return;
     for (let i = 0; i < 3; i++) {
       const a = this.rng.next() * Math.PI * 2,
         r = 70 + this.rng.next() * 60;
@@ -904,25 +951,32 @@ export class Game {
     e.windup = 0.8;
     this.effect("cast", e.x, e.y, 0, 0.8);
   }
-  fireEliteProjectile(e: Enemy) {
-    const dx = this.player.x - e.x,
-      dy = this.player.y - e.y,
+  fireEliteProjectile(e: Enemy, target: { x: number; y: number } = this.player) {
+    const dx = target.x - e.x,
+      dy = target.y - e.y,
       l = Math.max(1, Math.hypot(dx, dy));
+    const speed = e.kind === "spider" ? 160 : 260;
     this.projectiles.push({
       id: ++this.id,
       x: e.x,
       y: e.y,
-      vx: (dx / l) * 260,
-      vy: (dy / l) * 260,
-      damage: Math.round(e.damage * 0.8),
-      life: 2.5,
+      vx: (dx / l) * speed,
+      vy: (dy / l) * speed,
+      damage: e.kind === "spider" ? e.damage : Math.round(e.damage * 0.8),
+      life: 3,
       dir: (((Math.round(Math.atan2(dy, dx) / (Math.PI / 8)) + 4) % 16) + 16) % 16,
       skill: undefined,
-      targetId: -1,
+      faction: "enemy",
+      visual: e.kind === "spider" ? "poison" : undefined,
       homing: false,
       hitChance: 75,
     });
     this.effect("cast", e.x, e.y, 0, 0.5);
+    e.windup = 0.35;
+  }
+  private hurtPet(pet: Pet, raw: number, kind: "physical" | "magic") {
+    const base = pet.source === "skeleton" ? 4 : pet.source === "beast" ? 8 : 0;
+    pet.hp = Math.max(0, pet.hp - incomingDamage(raw, base + buffDefense(this, pet.id, kind), 0));
   }
   private magicDamage(base: number, s: Skill) {
     const mc = this.rollStat("mc") + (this.stats.mc_flat ?? 0);

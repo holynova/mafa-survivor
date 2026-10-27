@@ -126,3 +126,21 @@ it("keeps a seeded warrior run deterministic across melee upgrades and shops", (
     }),
   );
 }, 20_000);
+
+it("plays a normal taoist run through upgrades, shops and a terminal result deterministically", () => {
+  const a = run(176, "taoist"), b = run(176, "taoist");
+  expect({ ...a, result: { ...a.result, runId: "" } }).toEqual({
+    ...b, result: { ...b.result, runId: "" },
+  });
+  expect(["won", "dead"]).toContain(a.phase);
+  expect(a.shops).toBeGreaterThan(0);
+  expect(a.upgrades).toBeGreaterThan(0);
+  expect(a.kills).toBeGreaterThan(0);
+  expect(a.result?.classId).toBe("taoist");
+  expect(a.result?.skills).toContain("灵魂火符 Lv.1");
+  expect(a.result?.skillDamage.talisman).toBeGreaterThan(0);
+  console.log("taoist-176 balance probe", JSON.stringify({
+    phase: a.phase, wave: a.wave, kills: a.kills, clock: Math.round(a.clock),
+    shops: a.shops, upgrades: a.upgrades, skills: a.result?.skills,
+  }));
+}, 20_000);

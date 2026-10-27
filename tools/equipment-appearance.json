@@ -2,10 +2,10 @@
   "resourceRepository": "https://github.com/etorth/mir2x_res",
   "resourceRef": "9e21ea6631317d06e064fbfa7e1ea43af6a2d3e6",
   "itemReference": {
-    "path": "common/src/itemrecord.inc",
-    "sha256": "53e4934df73397696a481f4743a3fb493726fb9e755c4a3908dae740d75dffaa",
     "repository": "https://github.com/etorth/mir2x",
-    "ref": "bb6a22287abcd9f248d2aba755074c254c68787a"
+    "ref": "bb6a22287abcd9f248d2aba755074c254c68787a",
+    "path": "common/src/itemrecord.inc",
+    "sha256": "53e4934df73397696a481f4743a3fb493726fb9e755c4a3908dae740d75dffaa"
   },
   "weaponOrderReference": {
     "repository": "https://github.com/etorth/mir2x",

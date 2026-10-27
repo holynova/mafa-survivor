@@ -39,6 +39,9 @@ for (const actor of [
   "cat",
   "rakecat",
   "orc",
+  "orcWarrior",
+  "spider",
+  "orcBrave",
   "boss",
 ])
   for (const motion of ["wizard", "warrior", "taoist"].includes(actor)
@@ -103,8 +106,17 @@ for (const model of new Set(Object.values(appearance.weapons))) {
       failures.push(`weapon-${model}: missing matching body index ${frame}`);
   }
 }
-for (const name of ["scarecrow", "cat", "rakecat", "orc", "boss", "skeleton", "summonedSkeleton", "zombie", "beast"])
+for (const name of ["scarecrow", "cat", "rakecat", "orc", "orcWarrior", "spider", "orcBrave", "boss", "skeleton", "summonedSkeleton", "zombie", "beast"])
   requireActor(name + "-shadow", ["idle", "walk", "attack", "hurt", "death"]);
+// New forest species must use their own source lookID in all eight directions.
+for (const [name, look] of [["orcWarrior", 0x17], ["spider", 0x19], ["orcBrave", 0x18]])
+  for (const [id, frame] of Object.entries(manifest.frames)) {
+    if (id.startsWith(name + "/") || id.startsWith(name + "-shadow/")) {
+      const code = parseInt(frame.sourcePath.split("/").at(-1).slice(0, 8), 16);
+      if ((code >>> 12) !== (id.includes("-shadow/") ? look | (1 << 11) : look))
+        failures.push(id + ": wrong original monster model");
+    }
+  }
 for (const name of ["dress-1", "dress-1-shadow", "weapon-8"])
   for (const motion of Object.keys(appearance.motions)) for (let dir = 0; dir < 8; dir++)
     for (const key of manifest.animations[`${name}/${motion}/${dir}`] ?? [])
