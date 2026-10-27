@@ -7,6 +7,7 @@ const db = () =>
     },
   });
 export async function saveRun(result: RunResult) {
+  if (result.mode === "test") return;
   const database = await db();
   const tx = database.transaction("runs", "readwrite");
   if (!(await tx.store.get(result.runId)))

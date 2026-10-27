@@ -14,6 +14,10 @@ npm run dev
 
 默认地址：[http://127.0.0.1:5178/](http://127.0.0.1:5178/)。开发界面有正常局（12×75 秒）和短局试玩（3×35 秒）；商店与升级暂停计时。
 
+首页新增「快速测试模式」：默认无敌，可刷怪/Boss、装配六槽技能、清冷却、增加金币、跳到商店/下一波、1/2/4 倍速、切换人物动作与八方向。面板显示坐标和实际按键事件，可直接检查 D 键。测试局不写入战绩、不发放结晶；「动作检查」会冻结战斗模拟，切回「实战」恢复。
+
+原始资源导入现包括人物双层合成、原地图地面/完整物件布局和原版 WAV 音效。首次安装仍需运行导入脚本；音效在点击出征后解锁，可在战场左下角关闭。
+
 素材导入脚本需要 Python 3 与 Pillow。推荐隔离环境：
 
 ```sh
@@ -42,6 +46,8 @@ python3 -m venv .venv
 ```sh
 npm test
 npm run assets:check
+npm run assets:visual-check
+npm run assets:audio-check
 npm run build
 ```
 
@@ -68,3 +74,11 @@ npm run build
 `src/game.ts` 与 `src/rules.ts` 管理可序列化规则；`src/renderer.ts` 将状态映射到 Phaser 图像；`src/App.tsx` 管理 DOM 菜单和面板；`src/save.ts` 使用 IndexedDB 事务保存战绩。React 不逐帧驱动战斗；UI 约每 100 ms 更新。
 
 开发版 `window.__MAFA__` 是浏览器 QA 的模拟句柄，生产构建不暴露它。不要将此调试入口当作正式游戏 API。
+
+## GitHub 与阶段测试版本
+
+[源码仓库](https://github.com/holynova/mafa-survivor) · [阶段版本记录](https://github.com/holynova/mafa-survivor/releases)
+
+GitHub Pages 已配置为 Actions 发布，计划测试地址为 [holynova.github.io/mafa-survivor](https://holynova.github.io/mafa-survivor/)。**游戏部署还在等待公开素材方案确认**；本地原版画面与音效保持不变。
+
+每个阶段通过测试与截图验收后，更新 CHANGELOG、推送递增的 `v0.1.0-alpha.N` 标签；工作流部署成功后自动创建预发布版本。页面显示版本和提交号，可通过反馈入口报告问题。配置与门禁见 [阶段发布说明](docs/RELEASES.md)。

@@ -1,7 +1,12 @@
 import Phaser from "phaser";
+import { assetUrl, isGraybox } from "./release";
+import { sounds } from "./sound";
+import { setWorldLayout, type WorldLayout } from "./world";
+import { MovementInput, inputDiagnostics } from "./input";
 import { SCENERY } from "./content";
 import { game, WORLD, type Enemy } from "./game";
 export type Manifest = {
+  world?: WorldLayout;
   pages: {
     key: string;
     image: string;
@@ -27,6 +32,7 @@ export type Manifest = {
 export let assets: Manifest;
 export function setAssetManifest(manifest: Manifest) {
   assets = manifest;
+  setWorldLayout(manifest.world ?? null);
 }
 let rendererReady = false;
 export const readyListeners = new Set<() => void>();
@@ -37,10 +43,11 @@ class BattleScene extends Phaser.Scene {
   private pool: Phaser.GameObjects.Image[] = [];
   private labels = new Map<number, Phaser.GameObjects.Text>();
   private bars!: Phaser.GameObjects.Graphics;
-  private keys!: Phaser.Types.Input.Keyboard.CursorKeys;
-  private wasd!: Record<string, Phaser.Input.Keyboard.Key>;
+  private movementInput!: MovementInput;
   private accumulator = 0;
   private lastRun = "";
+  private nextFootstep = 0;
+  private mapObjects: { image: Phaser.GameObjects.Image; alpha: number }[] = [];
   private seen = new Set<string>();
   private drag: { id: number; x: number; y: number } | null = null;
   private corpses: {
@@ -57,11 +64,7 @@ class BattleScene extends Phaser.Scene {
   }
   preload() {
     for (const page of assets.pages)
-      this.load.atlas(
-        page.key,
-        "/assets/mir/" + page.image,
-        "/assets/mir/" + page.data,
-      );
+      this.load.atlas(page.key, assetUrl(page.image), assetUrl(page.data));
     this.load.on("loaderror", () => {
       this.failed = true;
       document.dispatchEvent(new CustomEvent("asset-error"));
@@ -73,11 +76,15 @@ class BattleScene extends Phaser.Scene {
     this.cameras.main.setZoom(this.zoom());
     this.paintGround();
     this.bars = this.add.graphics().setDepth(5000);
-    this.keys = this.input.keyboard!.createCursorKeys();
-    this.wasd = this.input.keyboard!.addKeys("W,A,S,D") as Record<
-      string,
-      Phaser.Input.Keyboard.Key
-    >;
+    this.movementInput = new MovementInput(
+      window,
+      () => game.phase === "battle",
+    );
+    this.game.canvas.tabIndex = 0;
+    this.game.canvas.setAttribute("aria-label", "游戏战场");
+    this.game.events.once(Phaser.Core.Events.DESTROY, () =>
+      this.movementInput.destroy(),
+    );
     this.input.keyboard!.addCapture([
       "W",
       "A",
@@ -132,35 +139,85 @@ class BattleScene extends Phaser.Scene {
     this.drag = null;
     game.input = { x: 0, y: 0 };
     this.input.keyboard?.resetKeys();
+    this.movementInput?.clear();
   }
   private paintGround() {
-    const grass = ["ground/3"].filter((x) => assets.frames[x]);
-    const fallback = "ground/3";
-    // Original ground blocks, tiled without repainting their pixels.
-    const tile = assets.frames[grass[0] ?? fallback];
-    const w = tile.width,
-      h = tile.height;
-    for (let y = 0; y < WORLD.h; y += h)
-      for (let x = 0; x < WORLD.w; x += w) {
-        const key =
-          grass[
-            (Math.floor(x / w) * 13 + Math.floor(y / h) * 7) % grass.length
-          ] ?? fallback;
-        this.add
-          .image(x, y, assets.frames[key].texture, key)
-          .setOrigin(0)
-          .setDepth(-100);
-      }
-    for (const object of SCENERY) {
-      const frame = "scenery/" + object.id;
-      const f = assets.frames[frame];
-      if (f)
-        this.add
-          .image(object.x, object.y, f.texture, frame)
-          .setOrigin(0.5, 1)
-          .setDepth(object.y);
+    if (isGraybox) {
+      const g = this.add.graphics().setDepth(-100);
+      g.fillStyle(0x18221e, 1).fillRect(0, 0, WORLD.w, WORLD.h);
+      g.lineStyle(1, 0x2c3d33, 0.45);
+      for (let x = 0; x < WORLD.w; x += 96) g.lineBetween(x, 0, x, WORLD.h);
+      for (let y = 0; y < WORLD.h; y += 96) g.lineBetween(0, y, WORLD.w, y);
+      for (const object of SCENERY)
+        g.fillStyle(0x63715c, 1).fillCircle(object.x, object.y, object.r + 8);
+      return;
     }
-    // Boundary is a gameplay overlay; it makes the playable limits explicit.
+    const map = assets.world;
+    const texture = this.textures.createCanvas("terrain", WORLD.w, WORLD.h)!;
+    const context = texture.context;
+    context.imageSmoothingEnabled = false;
+    const paint = (key: string, x: number, y: number, bottom = false) => {
+      const meta = assets.frames[key];
+      if (!meta) return;
+      const f = this.textures.getFrame(meta.texture, key);
+      context.drawImage(
+        f.source.image as HTMLImageElement,
+        f.cutX,
+        f.cutY,
+        f.cutWidth,
+        f.cutHeight,
+        x,
+        bottom ? y - f.cutHeight : y,
+        f.cutWidth,
+        f.cutHeight,
+      );
+    };
+    if (map) {
+      for (const tile of map.tiles)
+        paint(
+          "map/" + tile.texture.toString(16).toUpperCase().padStart(8, "0"),
+          tile.x,
+          tile.y,
+        );
+      for (const o of map.objects)
+        if (o.depth === 0)
+          paint(
+            "map/" + o.texture.toString(16).toUpperCase().padStart(8, "0"),
+            o.x,
+            o.y,
+            true,
+          );
+    } else {
+      const f = assets.frames["ground/3"];
+      for (let y = 0; y < WORLD.h; y += f.height)
+        for (let x = 0; x < WORLD.w; x += f.width) paint("ground/3", x, y);
+    }
+    texture.refresh();
+    this.add.image(0, 0, "terrain").setOrigin(0).setDepth(-100);
+    if (map)
+      for (const o of map.objects) {
+        if (o.depth === 0) continue;
+        const key =
+            "map/" + o.texture.toString(16).toUpperCase().padStart(8, "0"),
+          f = assets.frames[key];
+        if (!f) continue;
+        const image = this.add
+          .image(o.x, o.y, f.texture, key)
+          .setOrigin(0, 1)
+          .setDepth(o.depth === 3 ? 2000 : o.y + (o.depth === 1 ? -1 : 0))
+          .setAlpha(o.alpha ? 0.38 : 1);
+        this.mapObjects.push({ image, alpha: o.alpha ? 0.38 : 1 });
+      }
+    else
+      for (const o of SCENERY) {
+        const key = "scenery/" + o.id,
+          f = assets.frames[key];
+        if (f)
+          this.add
+            .image(o.x, o.y, f.texture, key)
+            .setOrigin(0.5, 1)
+            .setDepth(o.y);
+      }
     this.add
       .graphics()
       .lineStyle(2, 0xd8c894, 0.45)
@@ -177,6 +234,10 @@ class BattleScene extends Phaser.Scene {
     scale = 1,
     offset = true,
   ) {
+    if (isGraybox) {
+      this.bars.fillStyle(0xcbb368, alpha).fillRect(x - 4, y - 4, 8, 8);
+      return;
+    }
     if (!assets.frames[frame]) return;
     this.seen.add(key);
     let image = this.bodies.get(key);
@@ -212,6 +273,29 @@ class BattleScene extends Phaser.Scene {
     alpha = 1,
     scale = 1,
   ) {
+    if (isGraybox) {
+      const color = key.startsWith("hero")
+        ? 0xdec78b
+        : key.startsWith("pet")
+          ? 0x8abfa1
+          : 0xc4766a;
+      const radius = (name === "boss" ? 26 : 12) * scale;
+      this.bars
+        .fillStyle(color, alpha)
+        .fillCircle(x, y - 12, radius)
+        .lineStyle(2, 0x102016, 1)
+        .strokeCircle(x, y - 12, radius);
+      const angle = ((dir - 2) * Math.PI) / 4;
+      this.bars
+        .lineStyle(3, 0xe8e1c4, alpha)
+        .lineBetween(
+          x,
+          y - 12,
+          x + Math.cos(angle) * (radius + 8),
+          y - 12 + Math.sin(angle) * (radius + 8),
+        );
+      return;
+    }
     const frames =
       assets.animations[`${name}/${motion}/${dir}`] ??
       assets.animations[`${name}/idle/${dir}`];
@@ -235,6 +319,12 @@ class BattleScene extends Phaser.Scene {
     depth: number,
     scale = 1,
   ) {
+    if (isGraybox) {
+      this.bars
+        .lineStyle(2, name.includes("fire") ? 0xd89f64 : 0x83b3c1, 0.65)
+        .strokeCircle(x, y - 10, (name.includes("beam") ? 30 : 15) * scale);
+      return;
+    }
     const frames = assets.animations[name];
     if (frames?.length)
       this.draw(
@@ -258,19 +348,24 @@ class BattleScene extends Phaser.Scene {
       this.accumulator = 0;
     }
     if (game.phase === "battle") {
-      let x =
-          (this.wasd.D.isDown || this.keys.right.isDown ? 1 : 0) -
-          (this.wasd.A.isDown || this.keys.left.isDown ? 1 : 0),
-        y =
-          (this.wasd.S.isDown || this.keys.down.isDown ? 1 : 0) -
-          (this.wasd.W.isDown || this.keys.up.isDown ? 1 : 0);
+      const axes = this.movementInput.axes;
+      let x = axes.x,
+        y = axes.y;
+      inputDiagnostics.last = this.movementInput.lastEvent;
+      inputDiagnostics.held = [...this.movementInput.held].join(" ") || "无";
+      inputDiagnostics.x = x;
+      inputDiagnostics.y = y;
       const p = this.input.activePointer;
-      if (this.drag && p.isDown) {
+      if (this.drag && p.isDown && x === 0 && y === 0) {
         x = Phaser.Math.Clamp((p.x - this.drag.x) / 45, -1, 1);
         y = Phaser.Math.Clamp((p.y - this.drag.y) / 45, -1, 1);
       }
       game.input = { x, y };
-      this.accumulator += Math.min(delta / 1000, 0.1);
+      this.accumulator +=
+        game.mode === "test" && game.test.pose !== "live"
+          ? 0
+          : Math.min(delta / 1000, 0.1) *
+            (game.mode === "test" ? game.test.speed : 1);
       while (this.accumulator >= 1 / 60) {
         game.step(1 / 60);
         this.accumulator -= 1 / 60;
@@ -279,9 +374,27 @@ class BattleScene extends Phaser.Scene {
       this.accumulator = 0;
       this.drag = null;
     }
+    if (game.phase === "battle") {
+      for (const key of game.audioEvents.splice(0)) sounds.play(key);
+      if (game.player.moving && game.clock >= this.nextFootstep) {
+        sounds.play("step");
+        this.nextFootstep = game.clock + 0.34;
+      }
+    } else game.audioEvents = [];
     this.seen.clear();
     this.bars.clear();
     const t = game.clock;
+    for (const object of this.mapObjects) {
+      const i = object.image;
+      const occludes =
+        game.phase !== "lobby" &&
+        i.depth > game.player.y &&
+        i.x < game.player.x + 50 &&
+        i.x + i.width > game.player.x - 50 &&
+        i.y - i.height < game.player.y + 20 &&
+        i.y > game.player.y - 85;
+      i.setAlpha(occludes ? 0.12 : object.alpha);
+    }
     if (game.phase === "lobby") {
       this.cameras.main.centerOn(WORLD.w / 2 + 70, WORLD.h / 2);
       this.actor(
@@ -470,19 +583,23 @@ class BattleScene extends Phaser.Scene {
       this.actor(
         "hero",
         game.classId,
-        game.phase === "dead"
-          ? "death"
-          : t < game.player.attackUntil
-            ? "attack"
-            : game.player.moving
-              ? "walk"
-              : t < game.player.castUntil
-                ? "cast"
-                : "idle",
-        game.player.dir,
+        game.mode === "test" && game.test.pose !== "live"
+          ? game.test.pose
+          : game.phase === "dead"
+            ? "death"
+            : t < game.player.attackUntil
+              ? "attack"
+              : game.player.moving
+                ? "walk"
+                : t < game.player.castUntil
+                  ? "cast"
+                  : "idle",
+        game.mode === "test" && game.test.pose !== "live"
+          ? game.test.direction
+          : game.player.dir,
         game.player.x,
         game.player.y,
-        t,
+        game.mode === "test" && game.test.pose !== "live" ? _time / 1000 : t,
         game.player.y + 0.5,
         t < game.player.hitUntil ? 0.65 : 1,
       );

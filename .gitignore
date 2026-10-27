@@ -8,3 +8,8 @@ public/assets/mir/
 .cache/
 
 __pycache__/
+
+.env
+.env.*
+!.env.example
+*.local

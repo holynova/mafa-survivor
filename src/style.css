@@ -1799,3 +1799,140 @@ body:has(.lobby) .vignette {
   outline: 2px solid var(--gold);
   outline-offset: 3px;
 }
+.test-entry {
+  width: 100%;
+  margin-top: 12px;
+  color: #d2dabb;
+  border: 1px dashed #8b9267;
+}
+.test-entry small {
+  margin-left: 12px;
+  color: var(--muted);
+}
+.test-tools {
+  position: fixed;
+  right: 18px;
+  top: 135px;
+  z-index: 7000;
+  width: 310px;
+  pointer-events: auto;
+  font-size: 12px;
+}
+.test-toggle {
+  float: right;
+  background: #243221;
+}
+.test-tools section {
+  clear: both;
+  margin-top: 42px;
+  padding: 16px;
+  max-height: calc(100vh - 220px);
+  overflow: auto;
+  background: #111a13f5;
+  border: 1px solid #889767;
+  box-shadow: 0 10px 35px #0008;
+}
+.test-tools h2 {
+  font-size: 17px;
+  margin: 0 0 12px;
+}
+.test-tools h2 small {
+  display: block;
+  margin-top: 6px;
+  font-size: 10px;
+  color: #c3cba9;
+}
+.test-tools output {
+  display: block;
+  padding: 8px;
+  background: #080e08;
+  color: #d4dda9;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.test-tools label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 9px 0;
+}
+.test-tools select,
+.test-tools input[type="number"] {
+  max-width: 175px;
+  width: 150px;
+  background: #263020;
+  border: 1px solid #6f7955;
+  color: #eee5c5;
+  padding: 6px;
+  font-size: 12px;
+}
+.test-tools input[type="checkbox"] {
+  width: auto;
+}
+.test-row {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+.test-row label {
+  margin: 0;
+}
+.test-row select {
+  width: 48px;
+}
+.test-tools button {
+  font-size: 11px;
+  padding: 7px 10px;
+}
+.test-tools p {
+  color: #dcba7d;
+  font-size: 11px;
+  line-height: 1.6;
+}
+@media (max-width: 700px) {
+  .test-tools {
+    width: 290px;
+    max-width: calc(100vw - 20px);
+    right: 10px;
+    top: 140px;
+  }
+  .test-tools section {
+    max-height: calc(100dvh - 230px);
+  }
+  .test-entry small {
+    display: block;
+    margin: 6px 0 0;
+  }
+}
+.release-badge {
+  position: fixed;
+  bottom: 23px;
+  left: 18px;
+  z-index: 6000;
+  display: flex;
+  gap: 12px;
+  color: #c1c8ad;
+  background: #111a13d9;
+  padding: 4px 7px;
+  font-size: 10px;
+  pointer-events: auto;
+}
+.release-badge a {
+  color: #ddc98b;
+  text-decoration: underline;
+}
+@media (max-width: 700px) {
+  .release-badge {
+    top: 128px;
+    bottom: auto;
+    left: 8px;
+    font-size: 9px;
+    gap: 8px;
+  }
+  body:has(.lobby) .release-badge {
+    top: auto;
+    bottom: 14px;
+  }
+}

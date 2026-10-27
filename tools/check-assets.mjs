@@ -26,6 +26,11 @@ for (const [name, sequence] of Object.entries(manifest.animations)) {
       failures.push(name + ": missing " + id);
 }
 for (const actor of [
+  "taoist",
+  "skeleton",
+  "summonedSkeleton",
+  "zombie",
+  "beast",
   "wizard",
   "warrior",
   "scarecrow",
@@ -34,7 +39,7 @@ for (const actor of [
   "orc",
   "boss",
 ])
-  for (const motion of ["wizard", "warrior"].includes(actor)
+  for (const motion of ["wizard", "warrior", "taoist"].includes(actor)
     ? ["idle", "walk", "cast", "attack", "hurt", "death"]
     : ["idle", "walk", "attack", "hurt", "death"])
     for (let dir = 0; dir < 8; dir++)
@@ -66,6 +71,16 @@ for (const spell of ["beam", "powerstrike", "thrust", "cleave", "firesword"])
 for (const [id, f] of Object.entries(manifest.frames))
   if (!f.sourcePath || !f.sha256 || !f.sha1 || !frames[id])
     failures.push(id + ": missing source or atlas entry");
+if (manifest.world) {
+  const m = manifest.world;
+  if (m.walk.length !== (m.width / m.cellWidth) * (m.height / m.cellHeight))
+    failures.push("map: invalid walk grid");
+  for (const part of [...m.tiles, ...m.objects]) {
+    const id =
+      "map/" + part.texture.toString(16).toUpperCase().padStart(8, "0");
+    if (!frames[id]) failures.push("map: missing " + id);
+  }
+}
 console.log(
   JSON.stringify(
     {

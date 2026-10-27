@@ -18,6 +18,15 @@ import {
 } from "./renderer";
 import { CLASSES, CLASS_IDS } from "./classes";
 import { expNeeded, sellPrice } from "./rules";
+import { sounds } from "./sound";
+import {
+  assetUrl,
+  isGraybox,
+  releaseVersion,
+  releaseCommit,
+  repositoryUrl,
+} from "./release";
+import { TestTools } from "./TestTools";
 import { saveRun, history } from "./save";
 const time = (seconds: number) =>
   `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
@@ -42,7 +51,7 @@ function Art({
       style={{
         width: f.width,
         height: f.height,
-        backgroundImage: `url(/assets/mir/${assets.pages.find((p) => p.key === f.texture)!.image})`,
+        backgroundImage: `url(${assetUrl(assets.pages.find((p) => p.key === f.texture)!.image)})`,
         backgroundPosition: `-${atlasPosition(frame!).x}px -${atlasPosition(frame!).y}px`,
       }}
     />
@@ -50,14 +59,24 @@ function Art({
 }
 let framePositions: Record<string, { x: number; y: number }> = {};
 export async function loadArtPositions() {
-  const r = await fetch("/assets/mir/manifest.json");
+  if (isGraybox) {
+    setAssetManifest({
+      pages: [],
+      animations: {},
+      frames: {},
+      rightsStatus: "NO_THIRD_PARTY_ASSETS",
+    });
+    framePositions = {};
+    return;
+  }
+  const r = await fetch(assetUrl("manifest.json"));
   if (!r.ok) throw new Error("无法读取素材清单");
   const manifest = await r.json();
   setAssetManifest(manifest);
   framePositions = {};
   await Promise.all(
     manifest.pages.map(async (page: { data: string }) => {
-      const response = await fetch("/assets/mir/" + page.data);
+      const response = await fetch(assetUrl(page.data));
       if (!response.ok) throw new Error("无法读取素材图集");
       const atlas = await response.json();
       for (const [key, value] of Object.entries(atlas.frames))
@@ -90,7 +109,7 @@ function Icon({ frame }: { frame?: string }) {
             <image
               width={page.width}
               height={page.height}
-              href={"/assets/mir/" + page.image}
+              href={assetUrl(page.image)}
             />
           </svg>
         </svg>
@@ -119,6 +138,8 @@ export function App() {
       setReady(true);
     };
     readyListeners.add(f);
+    // An asset-free build may finish Phaser initialization before React effects subscribe.
+    if (isReady()) f();
     const fail = () => setAssetError(true);
     document.addEventListener("asset-error", fail);
     history()
@@ -130,7 +151,7 @@ export function App() {
     };
   }, []);
   useEffect(() => {
-    if (!game.result) return;
+    if (!game.result || game.mode === "test") return;
     setSaveStatus("正在保存…");
     saveRun(game.result)
       .then(() => {
@@ -144,10 +165,12 @@ export function App() {
       });
   }, [game.result]);
   const start = (mode: Mode) => {
+    void sounds.unlock();
     setInventory(false);
     setSaveError("");
     setSaveStatus("");
     game.start(mode, Number(seed) >>> 0);
+    requestAnimationFrame(() => document.querySelector("canvas")?.focus());
   };
   const toggleInventory = () => {
     inventoryResumes.current = !inventory && game.phase === "battle";
@@ -164,6 +187,23 @@ export function App() {
   return (
     <main>
       <div className="vignette" />
+      <TestTools />
+      <div className="release-badge">
+        <span>
+          {releaseVersion} · {releaseCommit}
+          {isGraybox ? " · 灰盒测试版" : ""}
+        </span>
+        <a href={repositoryUrl + "/releases"} target="_blank" rel="noreferrer">
+          版本记录
+        </a>
+        <a
+          href={repositoryUrl + "/issues/new?template=bug_report.yml"}
+          target="_blank"
+          rel="noreferrer"
+        >
+          反馈问题
+        </a>
+      </div>
       {assetError && (
         <div className="asset-error" role="alert">
           <h2>原版素材未加载</h2>
@@ -197,7 +237,7 @@ export function App() {
             </nav>
             {(tab === "play" || tab === "skills") && (
               <div className="class-picker" role="group" aria-label="选择职业">
-                {CLASS_IDS.map((id) => (
+                {CLASS_IDS.filter((id) => id !== "taoist").map((id) => (
                   <button
                     key={id}
                     aria-pressed={game.classId === id}
@@ -250,6 +290,13 @@ export function App() {
                     短局试玩<span>3 波 · 每波 35 秒 · 不发放结晶</span>
                   </button>
                 </div>
+                <button
+                  className="test-entry"
+                  disabled={!ready || assetError}
+                  onClick={() => start("test")}
+                >
+                  快速测试模式 <small>无敌 · 刷怪 · 换技能 · 动作检查</small>
+                </button>
                 <div className="seed">
                   <label htmlFor="seed">世界种子</label>
                   <input
@@ -281,7 +328,8 @@ export function App() {
                 </p>
                 <p className="muted">
                   法师 14 项、战士 6 项技能已开放，单局最多装备 6
-                  项。普通攻击独立于技能槽；空格可触发瞬移、冲撞或手动技能。道士 13 项技能已开放。
+                  项。普通攻击独立于技能槽；空格可触发瞬移、冲撞或手动技能。道士
+                  13 项技能已开放。
                 </p>
               </div>
             )}
@@ -347,8 +395,16 @@ export function App() {
             <small>经典资源 / 幸存者玩法</small>
           </div>
           <footer className="lobby-footer">
-            <span>原版素材来自 mir2x_res · 来源与版本已登记</span>
-            <span>本地研究预览 · 素材分发授权待核验</span>
+            <span>
+              {isGraybox
+                ? "灰盒测试：原版图片、地图与音效未公开"
+                : "原版素材来自 mir2x_res · 来源与版本已登记"}
+            </span>
+            <span>
+              {isGraybox
+                ? "先验证玩法与操作，视觉以本地原版资源版本为准"
+                : "本地研究预览 · 素材分发授权待核验"}
+            </span>
           </footer>
         </>
       )}
@@ -487,7 +543,31 @@ export function App() {
             })}
           </div>
           <div className="controls-hint">
-            <span>WASD 移动 · 自动施法</span>
+            <span>
+              WASD 移动 · 自动施法{" "}
+              <button
+                className="audio-toggle"
+                disabled={isGraybox}
+                aria-label={
+                  isGraybox
+                    ? "此版未包含原版音效"
+                    : sounds.muted
+                      ? "开启原版音效"
+                      : "关闭原版音效"
+                }
+                onClick={() => {
+                  void sounds.unlock();
+                  sounds.setMuted(!sounds.muted);
+                  game.emit();
+                }}
+              >
+                {isGraybox
+                  ? "原版音效未公开"
+                  : sounds.muted
+                    ? "音效关"
+                    : "音效开"}
+              </button>
+            </span>
             <span>
               {game.enemies.length} 怪物 · {frameMS.toFixed(1)} ms
             </span>
@@ -680,7 +760,7 @@ export function App() {
           </section>
         </div>
       )}
-      {game.phase === "paused" && !inventory && (
+      {game.phase === "paused" && !inventory && game.mode !== "test" && (
         <div className="modal-backdrop">
           <section
             className="pause modal"

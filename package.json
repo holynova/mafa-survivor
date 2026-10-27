@@ -1,6 +1,6 @@
 {
   "name": "mafa-survivor",
-  "version": "0.1.0",
+  "version": "0.1.0-alpha.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,10 @@
     "test": "vitest run",
     "assets:fetch": "python3 tools/import-assets.py",
     "assets:check": "node tools/check-assets.mjs",
-    "build:release": "node tools/check-assets.mjs --release && npm run build"
+    "build:release": "node tools/check-assets.mjs --release && npm run build",
+    "assets:visual-check": ".venv/bin/python tools/check-visual-assets.py",
+    "assets:audio-check": "python3 tools/check-audio.py",
+    "build:pages": "node tools/build-pages.mjs"
   },
   "dependencies": {
     "idb": "^8.0.0",
@@ -19,11 +22,12 @@
     "zod": "^4.0.0"
   },
   "devDependencies": {
+    "@types/node": "^22.20.5",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "fake-indexeddb": "^6.2.6",
     "typescript": "^5.9.0",
     "vite": "^7.0.0",
-    "vitest": "^3.2.0"
+    "vitest": "^5.0.5"
   }
 }

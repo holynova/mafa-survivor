@@ -26,6 +26,8 @@ import {
   buffDefense,
   clearTaoSkill,
 } from "./taoist";
+import { canStand, worldLayout } from "./world";
+import { newTestSettings } from "./test-mode";
 import { CLASSES, type ClassId } from "./classes";
 import {
   Rng,
@@ -50,7 +52,7 @@ export type Phase =
   | "paused"
   | "won"
   | "dead";
-export type Mode = "normal" | "trial";
+export type Mode = "normal" | "trial" | "test";
 export type Entity = { id: number; x: number; y: number };
 export type Enemy = Entity & {
   kind: string;
@@ -103,7 +105,12 @@ export type Projectile = Entity & {
   hitChance?: number;
   homing?: boolean;
 };
-export type Drop = Entity & { exp: number; gold: number; born: number; itemId?: string };
+export type Drop = Entity & {
+  exp: number;
+  gold: number;
+  born: number;
+  itemId?: string;
+};
 export type Fx = Entity & {
   kind: SkillId | "hit" | "cast" | "beastflame" | "talismanHit";
   dir?: number;
@@ -170,6 +177,8 @@ export type RunResult = {
 export class Game {
   classId: ClassId = "wizard";
   tao = createTaoState();
+  test = newTestSettings();
+  audioEvents: string[] = [];
   phase: Phase = "lobby";
   mode: Mode = "normal";
   seed = 176;
@@ -243,6 +252,9 @@ export class Game {
   get maxHP() {
     return this.classInfo.hp + (this.stats.hp_max ?? 0);
   }
+  sound(key: string) {
+    if (this.audioEvents.length < 24) this.audioEvents.push(key);
+  }
   nextEntityId() {
     return ++this.id;
   }
@@ -261,6 +273,9 @@ export class Game {
       (1 -
         ((e.redPoison?.until ?? 0) > this.clock ? e.redPoison!.reduction : 0))
     );
+  }
+  get obstacles() {
+    return worldLayout ? [] : SCENERY;
   }
   get classInfo() {
     return CLASSES[this.classId];
@@ -314,6 +329,8 @@ export class Game {
   start(mode: Mode, seed = 176, classId: ClassId = this.classId) {
     this.classId = classId;
     this.mode = mode;
+    this.test = newTestSettings();
+    this.audioEvents = [];
     this.seed = seed;
     this.runId = crypto.randomUUID();
     this.rng = new Rng(seed);
@@ -370,6 +387,7 @@ export class Game {
   }
   lobby() {
     this.tao = createTaoState();
+    this.audioEvents = [];
     this.floating = [];
     this.effects = [];
     this.enemies = [];
@@ -427,13 +445,15 @@ export class Game {
         ),
         ny = clamp(this.player.y + dy * this.moveSpeed * dt, 55, WORLD.h - 35);
       if (
-        SCENERY.every(
+        canStand(nx, this.player.y) &&
+        this.obstacles.every(
           (o) => Math.hypot(nx - o.x, this.player.y - o.y) > o.r + 12,
         )
       )
         this.player.x = nx;
       if (
-        SCENERY.every(
+        canStand(this.player.x, ny) &&
+        this.obstacles.every(
           (o) => Math.hypot(this.player.x - o.x, ny - o.y) > o.r + 12,
         )
       )
@@ -541,9 +561,11 @@ export class Game {
             ? 1.8
             : 1;
         const sp = e.speed * rush;
-        e.x = clamp(e.x + ((dx / d) * sp + sx) * dt, 20, WORLD.w - 20);
-        e.y = clamp(e.y + ((dy / d) * sp + sy) * dt, 30, WORLD.h - 20);
-        for (const o of SCENERY) {
+        const nx = clamp(e.x + ((dx / d) * sp + sx) * dt, 35, WORLD.w - 35),
+          ny = clamp(e.y + ((dy / d) * sp + sy) * dt, 55, WORLD.h - 35);
+        if (canStand(nx, e.y)) e.x = nx;
+        if (canStand(e.x, ny)) e.y = ny;
+        for (const o of this.obstacles) {
           const ox = e.x - o.x,
             oy = e.y - o.y,
             l = Math.hypot(ox, oy);
@@ -699,7 +721,10 @@ export class Game {
     if (kind) m = MONSTERS.find((x) => x.id === kind)!;
     else {
       const nonBoss = MONSTERS.filter((x) => x.id !== "boss");
-      const pool = nonBoss.slice(0, Math.min(nonBoss.length, 1 + Math.ceil(this.wave / 2)));
+      const pool = nonBoss.slice(
+        0,
+        Math.min(nonBoss.length, 1 + Math.ceil(this.wave / 2)),
+      );
       m = this.rng.pick(pool);
     }
     const a = this.rng.next() * Math.PI * 2,
@@ -822,6 +847,7 @@ export class Game {
     if (!target) return false;
     this.meleeAim(targets);
     this.basicCD = this.classInfo.interval;
+    this.sound(this.equipment.weapon ? "attack" : "unarmed");
     this.player.attackUntil = this.clock + 0.35;
     const landed = this.physicalHit(target, power?.accuracy ?? 0);
     // Each charge modifies this one swing, including a missed swing. Never create
@@ -1114,11 +1140,12 @@ export class Game {
   }
   freePoint(x: number, y: number, enemyClearance = 50) {
     return (
+      canStand(x, y, 16) &&
       x >= 35 &&
       x <= WORLD.w - 35 &&
       y >= 55 &&
       y <= WORLD.h - 35 &&
-      SCENERY.every((o) => Math.hypot(x - o.x, y - o.y) > o.r + 16) &&
+      this.obstacles.every((o) => Math.hypot(x - o.x, y - o.y) > o.r + 16) &&
       this.enemies.every(
         (e) => e.hp <= 0 || Math.hypot(x - e.x, y - e.y) > enemyClearance,
       )
@@ -1228,6 +1255,7 @@ export class Game {
             )
               this.hit(e, damage, source, "magic");
           }
+          this.sound("beastflame");
           this.effect("beastflame", p.x, p.y, range, 0.6, p.dir);
         } else this.hit(target, damage, source, "physical");
         p.cd = source === "beast" ? 1.6 : 1.1;
@@ -1430,6 +1458,7 @@ export class Game {
       this.effect(s.id, center.x, center.y, radius);
     }
     if (!didCast) return;
+    this.sound(s.id);
     s.cd = Math.max(
       s.id === "shield"
         ? 8
@@ -1510,8 +1539,7 @@ export class Game {
             (!it.classId || it.classId === this.classId) &&
             it.tier <= (this.wave >= 7 ? 4 : this.wave >= 3 ? 3 : 2),
         );
-        if (candidates.length)
-          itemId = this.rng.pick(candidates).id;
+        if (candidates.length) itemId = this.rng.pick(candidates).id;
       }
       if (this.drops.length >= 300) {
         this.drops[0].exp += exp;
@@ -1529,6 +1557,7 @@ export class Game {
     }
   }
   hurt(raw: number, kind: "physical" | "magic" = "physical", force = false) {
+    if (this.mode === "test" && this.test.god) return;
     if (
       this.phase !== "battle" ||
       (!force && this.clock < this.player.hitUntil)
@@ -1566,6 +1595,7 @@ export class Game {
     );
     this.player.hp = Math.max(0, this.player.hp - damage);
     this.player.hitUntil = this.clock + 0.45;
+    this.sound("hurt");
     this.floating.push({
       id: ++this.id,
       x: this.player.x,

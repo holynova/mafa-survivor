@@ -166,7 +166,7 @@ function summon(g: Game, s: Skill) {
   g.pets.push({
     id: g.nextEntityId(),
     ...point,
-    kind: source,
+    kind: source === "skeleton" ? "summonedSkeleton" : "beast",
     source,
     hp,
     maxHp: hp,

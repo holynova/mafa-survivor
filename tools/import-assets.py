@@ -24,6 +24,7 @@ def tree(kind):
   p.write_bytes(request('https://api.github.com/repos/etorth/mir2x_res/git/trees/'+sha))
  d=json.loads(p.read_text());assert not d.get('truncated');return d['tree']
 selected=[];animations={};origins={}
+hero_entries={int(p["path"][:8],16):p for p in tree("hero")}
 def select(kind,entry,key):selected.append((kind,entry,key));return key
 def actor(kind,name,look,motions):
  entries=tree(kind)
@@ -42,7 +43,7 @@ actor('hero','wizard',(1<<8)|4,{'idle':0,'walk':21,'cast':3,'attack':9,'hurt':15
 actor('hero','taoist',(1<<8)|5,{'idle':0,'walk':21,'cast':3,'attack':9,'hurt':15,'death':19})
 actor('hero','warrior',(1<<8)|3,{'idle':0,'walk':21,'cast':3,'attack':9,'hurt':15,'death':19})
 # IDs are verified against mir2x/common/src/monsterrecord.inc.
-for name,look in [('scarecrow',0x28),('cat',0x26),('rakecat',0x27),('orc',0x16),('boss',0x24),('skeleton',0x38),('beast',0x5A)]:
+for name,look in [('scarecrow',0x28),('cat',0x26),('rakecat',0x27),('orc',0x16),('boss',0x24),('skeleton',0x20),('summonedSkeleton',0x38),('zombie',0x30),('beast',0x5A)]:
  actor('monster',name,look,{'idle':0,'walk':1,'attack':2,'hurt':3,'death':4})
 magic={int(p['path'][:8],16):p for p in tree('magic')}
 for name,start,count in [('lightning',0x5AA,5),('firewall',0x398,5),('shield',0x352,3)]:
@@ -67,9 +68,23 @@ for direction in range(16):
  animations[f'talisman/{direction}']=[select('magic',magic[0x3D4+direction*10+i],f'talisman/{direction}/{i}') for i in range(3)]
 for direction in range(8):
  animations[f'beastflame/{direction}']=[select('magic',magic[0x030003D4+direction*10+i],f'beastflame/{direction}/{i}') for i in range(6)]
+from map_region import load_region
+world_layout=load_region(CACHE,request,REF)
+# The catalogue API truncates this very large directory; only explicitly used
+# source IDs are consumed, each with a verified blob hash. No completeness claim.
+map_cache=CACHE/'map.json'
+if not map_cache.exists():
+ texture_root=json.loads(request(f'https://api.github.com/repos/etorth/mir2x_res/contents/texture?ref={REF}'))
+ map_sha=next(e['sha'] for e in texture_root if e['name']=='map')
+ map_cache.write_bytes(request('https://api.github.com/repos/etorth/mir2x_res/git/trees/'+map_sha))
+map_entries={int(e['path'][:8],16):e for e in json.loads(map_cache.read_text())['tree']}
+map_ids={p['texture'] for p in world_layout['tiles']+world_layout['objects']}
+for code in sorted(map_ids):
+ if code not in map_entries:raise ValueError('Map source ID outside downloaded catalogue: '+hex(code))
+ select('map',map_entries[code],f'map/{code:08X}')
 # Ground PNGs selected from the original map texture catalogue, not recreated.
 mp=json.loads((CACHE/'map-list.json').read_text()) if (CACHE/'map-list.json').exists() else json.loads(request(f'https://api.github.com/repos/etorth/mir2x_res/contents/texture/map?ref={REF}'))
-for i in [3,10,17,24,31,38,45,52,59,66,100,150,200,250,300,400,500,600,700,800,900]:
+for i in sorted(set(list(range(16))+[17,24,31,38,45,52,59,66,100,150,200,250,300,400,500,600,700,800,900])):
  p=mp[i];select('map',{'path':p['name'],'sha':p['sha']},'ground/'+str(i))
 # Item IDs verified against the source itemrecord, never guessed from sprite appearance.
 itemmap=json.loads((ROOT/'tools/item-icon-map.json').read_text())['mapping']
@@ -102,7 +117,17 @@ def load(t):
  im=Image.open(io.BytesIO(b)).convert('RGBA');fn=p['path'];dx=dy=0
  if len(fn.split('.')[0])==18:
   dx=int(fn[10:14],16)*(1 if fn[8]!='0' else -1);dy=int(fn[14:18],16)*(1 if fn[9]!='0' else -1)
- return key,im,{'sourcePath':f'texture/{kind}/{fn}','sha1':actual,'sha256':hashlib.sha256(b).hexdigest(),'dx':dx,'dy':dy,'width':im.width,'height':im.height}
+ info={'sourcePath':f'texture/{kind}/{fn}','sha1':actual,'sha256':hashlib.sha256(b).hexdigest(),'dx':dx,'dy':dy,'width':im.width,'height':im.height}
+ if kind=='hero' and not int(fn[:8],16)&(1<<24):
+  overlay=hero_entries.get(int(fn[:8],16)|(1<<24))
+  if overlay:
+   _,layer,layer_info=load(('hero',overlay,key+'/source-overlay'))
+   if layer.size!=im.size or (layer_info['dx'],layer_info['dy'])!=(dx,dy):raise ValueError('Hero source layer alignment differs: '+key)
+   info['layers']=[dict(info),layer_info]
+   im=Image.alpha_composite(im,layer)
+   info['assembly']='Original layer0 + layer1, unmodified source pixels, same source offsets'
+   info['assembledPixelSha256']=hashlib.sha256(im.tobytes()).hexdigest()
+ return key,im,info
 with ThreadPoolExecutor(max_workers=16) as ex:loaded=list(ex.map(load,selected))
 # Multiple 2048×4096 pages keep each texture within modest GPU limits.
 frames={};meta={};pages=[];x=y=rowH=0;page=0;atlas=Image.new('RGBA',(2048,4096))
@@ -120,9 +145,10 @@ for key,im,info in sorted(loaded,key=lambda x:(-x[1].height,x[0])):
  atlas.paste(im,(x,y));frames[key]={'frame':{'x':x,'y':y,'w':im.width,'h':im.height},'rotated':False,'trimmed':False,'spriteSourceSize':{'x':0,'y':0,'w':im.width,'h':im.height},'sourceSize':{'w':im.width,'h':im.height}}
  meta[key]={**info,'texture':f'mir-{page}','originX':24-info['dx'],'originY':16-info['dy']};x+=im.width+2;rowH=max(rowH,im.height)
 flush()
-manifest={'schemaVersion':2,'repository':REPO,'ref':REF,'referenceVersion':'mir2x 1.45 reference; gameplay 1.76 candidate','rightsStatus':'UNVERIFIED_THIRD_PARTY_ART','distribution':'LOCAL_EVALUATION_ONLY','releaseStatus':'BLOCKED_BY_ASSET_RIGHTS','pages':pages,'animations':animations,'frames':meta}
+manifest={'schemaVersion':2,'repository':REPO,'ref':REF,'referenceVersion':'mir2x 1.45 reference; gameplay 1.76 candidate','rightsStatus':'UNVERIFIED_THIRD_PARTY_ART','distribution':'LOCAL_EVALUATION_ONLY','releaseStatus':'BLOCKED_BY_ASSET_RIGHTS','world':world_layout,'pages':pages,'animations':animations,'frames':meta}
 (OUT/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2))
-(ROOT/'docs/asset-manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2))
+public_ledger={**manifest,'world':{k:v for k,v in manifest['world'].items() if k in ['sourcePath','sourceSha256','sourceRegion','width','height']}}
+(ROOT/'docs/asset-manifest.json').write_text(json.dumps(public_ledger,ensure_ascii=False,indent=2))
 for path in OUT.glob('atlas*'):
  if path.suffix in ['.png','.json'] and path.name not in {n for p in pages for n in [p['image'],p['data']]}:path.unlink()
 print('Packed',len(meta),'frames on',len(pages),'pages',flush=True)
@@ -130,3 +156,5 @@ print('Packed',len(meta),'frames on',len(pages),'pages',flush=True)
 import runpy
 runpy.run_path(str(ROOT/"tools/write-asset-ledger.py"))
 (OUT/'SOURCE_LICENSE.txt').write_bytes(request(f'https://raw.githubusercontent.com/etorth/mir2x_res/{REF}/LICENSE'))
+
+runpy.run_path(str(ROOT/"tools/import-audio.py"))
