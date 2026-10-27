@@ -44,6 +44,11 @@ Pages 测试地址：https://holynova.github.io/mafa-survivor/
 
 [v0.1.0-alpha.6](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.6)发布提交`81f2fcf5cfe71a3eca2391293daa1daeaf09077a`；[工作流40504313748](https://github.com/holynova/mafa-survivor/actions/runs/40504313748)的build/deploy/release全部成功，Source checks 40504305353成功。211项游戏测试、6项Python资源测试、原图像素、原WAV与构建检查通过。公网version.json与标签一致，37张PNG和28个原WAV逐一核验通过；本地生产截图与HTTP证据已附在Release。公网浏览器重载/重连超时，最终alpha.6线上交互截图待补；用户现有测试页保持原样。
 
-## 当前公开版本：alpha.7
+## alpha.7 历史发布
 
 [v0.1.0-alpha.7](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.7)发布提交`7ef5accff5c190d88ff9d242e66557a2a0179e48`；[工作流40543810174](https://github.com/holynova/mafa-survivor/actions/runs/40543810174)build/deploy/release全部成功，Source checks 40543751805成功。231项游戏测试、6项Python资源测试、原图像素／WAV／构建通过。公网版本一致、42图集和28原WAV逐项通过；两张寺庙源地图和雕像特殊动作完整。真实公网菜单截图alpha7-online-menu.jpg与本地战斗截图／HTTP核验已附Release；公网按钮操作超时，最终线上战斗交互仍待补。三章内容可进入不等于完整平衡或全GDD退出条件已完成。
+
+
+## 当前公开版本：alpha.8
+
+[v0.1.0-alpha.8](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.8)发布提交`6ba8a893c905be2f89663ae14ec7dad618908d6a`；[工作流40556922133](https://github.com/holynova/mafa-survivor/actions/runs/40556922133)build／deploy／release成功，Source checks 40556899413成功。250项游戏测试、6项Python资源测试、原图像素／WAV／生产构建通过。干净提交36局真实模拟与冻结前逐项一致，0不变量异常、仅2局通关，完整平衡仍未通过。公网版本、四源地图及walk、42图集、28原WAV核验通过；真实公网菜单与本地生产战斗截图、完整模拟报告和HTTP证据已附Release。公网试玩按钮操作仍超时，最终线上战斗交互待补；用户现有测试页未操作。

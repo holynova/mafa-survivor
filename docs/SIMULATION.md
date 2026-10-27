@@ -45,3 +45,5 @@ npm run simulate -- --seeds=176,17,991 --maps=biche,mine,woma,zuma --classes=wiz
 7. 正常精英按4／7／10／12波、试玩按第2波中段投放。沃玛勇士与半兽勇士属于原生精英，退出普通随机群。战士首次升级提供半月，道士提供骷髅，之后提供刺杀／施毒；用户仍可选其他强化。
 
 还需：更多独立种子和构筑、合理的新手／熟练输入模型、战士输出与Boss接敌、矿洞／祖玛通关、后期经济曲线、真实长局和300敌人P95。当前固定种子模拟可用于查故障与比较规则，不能替代这些验收。
+
+冻结复测提交`6ba8a893c905be2f89663ae14ec7dad618908d6a`、sourceDirty=false；alpha8-frozen-matrix.json的36局结果与冻结前after-matrix逐项完全一致，控制器哈希不变。汇总在alpha8-frozen-summary.json，作为本阶段发布附件。

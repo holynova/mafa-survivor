@@ -35,12 +35,13 @@ python3 -m venv .venv
 - 战士完整 6 技能池、半月与刺杀方向判定、攻杀/烈火蓄力、手动冲撞和撞墙反伤。
 - 三攻/防御/魔御区间、准确与幸运规则、职业装备过滤；普通攻击不占技能槽。
 - 法师完整 14 技能池，技能升级与通用属性三选一、6 槽替换、手动瞬息移动和诱惑宝宝。
-- 稻草人、多钩猫、钉耙猫、半兽人、骷髅精灵；近战追逐、攻击预警、伤害、经验与金币。
+- 道士13技能池，火符／红绿毒、治疗、骷髅与神兽、隐身／增益与困魔；装备面板可切毒及治疗优先级。
+- 比奇、矿洞、沃玛、祖玛四个原版场景，22类敌人／四Boss；远程预警、冲锋、雕像苏醒、连段攻击与无奖励援军。正常章节使用结晶解锁，试玩和测试可直接进入。
 - 12 波计时、波间商店、刷新、锁定、购买、自动穿戴与卖出；8 个装备槽与无格叠加道具。
 - 最终 Boss、胜负结算、每技能伤害统计、IndexedDB 本机战绩。
 - 固定 60 Hz 战斗步长、可复现种子、空间哈希、精灵复用、掉落数量限制。
 
-这是开发预览，尚未达到完整游戏验收。道士、完整地图、复杂 AI、缺失高级装备/头发/头盔外观、音频、平衡与发布工作见 [进度与缺口](docs/STATUS.md)。
+这是开发预览，尚未达到完整游戏验收。三职业多构筑通关、完整章节平衡、高级装备/头发/头盔外观、音频缺口、存档恢复和设备性能见 [进度与缺口](docs/STATUS.md)。
 
 ## 验证
 
@@ -80,7 +81,7 @@ npm run build
 
 [源码仓库](https://github.com/holynova/mafa-survivor) · [阶段版本记录](https://github.com/holynova/mafa-survivor/releases)
 
-GitHub Pages 使用 Actions 发布，在线测试地址为 [holynova.github.io/mafa-survivor](https://holynova.github.io/mafa-survivor/)。公开展示版使用原版图片、地图和 WAV 音效；当前公开版本为 **v0.1.0-alpha.7**；alpha.8正在验收。
+GitHub Pages 使用 Actions 发布，在线测试地址为 [holynova.github.io/mafa-survivor](https://holynova.github.io/mafa-survivor/)。公开展示版使用原版图片、地图和 WAV 音效；当前公开版本为 **v0.1.0-alpha.8**。
 
 每个阶段通过测试与截图验收后，更新 CHANGELOG、推送递增的 `v0.1.0-alpha.N` 标签；工作流部署成功后自动创建预发布版本。页面显示版本和提交号，可通过反馈入口报告问题。配置与门禁见 [阶段发布说明](docs/RELEASES.md)。
 

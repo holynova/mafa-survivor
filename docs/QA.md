@@ -243,3 +243,11 @@ alpha.2 已成功绕过超大地图目录，但多个技能书共用 `texture/it
 
 - 最终生产构建重新从种子176开启道士沃玛测试，关闭无敌、开启自动走位与4倍速；59秒自然达到Lv2／4击杀／33金币，未加血或跳波。首次选择含召唤骷髅，实际选择后宝宝进入战斗。截图alpha8-taoist-growth.jpg、alpha8-taoist-skeleton.jpg均已查看；火焰遮挡的早期召唤截图不作最终证据。
 - 浏览器复测发现展开的测试工具遮住第三张升级卡，现进入升级／替换／商店／终局时自动收起，仍可手动展开。重建后实测Lv2三选一全部完整可见；最终250项测试和生产构建再次通过。
+
+### alpha.8 正式发布与公网核验
+
+- 冻结提交`6ba8a893c905be2f89663ae14ec7dad618908d6a`；[标签工作流40556922133](https://github.com/holynova/mafa-survivor/actions/runs/40556922133)build／deploy／release全部成功，Source checks 40556899413成功。[v0.1.0-alpha.8](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.8)已公开预发布。
+- 从干净的该提交重跑三种子36局，sourceDirty=false、控制器SHA不变，与冻结前36局结果逐项完全相同。0不变量失败、2通关，alpha8-frozen-matrix.json与alpha8-frozen-summary.json作为Release附件；不把重复运行当作72个独立样本。
+- 公网version.json为alpha.8／original／6ba8a89；四场景源路径／SHA／完整walk夹具一致，42张PNG逐一HEAD200/image/png，28原WAV实际下载SHA256全部匹配。在线JS入口返回正确类型，22,709帧完整；证据alpha8-online-http.json。首次核验脚本假定旧mine夹具有sourcePath而KeyError，改为从已登记map-regions核对路径、夹具核对SHA与walk后重跑通过；不是产品地图故障。
+- 独立后台IAB导航公开Pages的?stage=v0.1.0-alpha.8并直接截图，alpha8-online-menu.jpg实际显示alpha.8／6ba8a89和四个场景入口。随后尝试可见试玩按钮，30秒超时并重置连接；没有完成公网战斗交互，没有操作用户现有页面或前台Chrome。
+- Release附五张真实本地生产截图、一张真实公网菜单、冻结模拟完整报告／汇总和公网HTTP证据，名称／标签区分本地与公网。250项测试通过不等于完整平衡；职业通关、10k种子、300怪P95、移动内存和完整存档等继续开发。
