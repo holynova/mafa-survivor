@@ -264,3 +264,15 @@ alpha.2 已成功绕过超大地图目录，但多个技能书共用 `texture/it
 - 回比奇复测发现真实焦点缺陷：选复选框后点Canvas，DOM activeElement仍为INPUT[type=checkbox]；D600ms后X1104／Y768不变，计时推进且KeyD有记录。浏览器脚本按“实战→切自然刷怪→点击游戏战场→D600ms→冻结”稳定复现，alpha9-focus-red.jpg已保存；Phaser阻止默认指针聚焦，MovementInput正确忽略表单键盘输入，需在战场pointerdown显式恢复Canvas焦点。
 
 - 焦点修复后的同一浏览器脚本：点击战场后activeElement=CANVAS／aria-label=游戏战场，D600ms从1104／768移动到1230.4／768，松键为空；alpha9-focus-green.jpg实际显示树后完整轮廓、完整树冠与换装。输入保护仍由MovementInput保留，只有用户实际点Canvas才恢复战场焦点。生产warn/error日志为空。最终258项测试及生产构建再次通过。
+
+- alpha.9固定提交56525d7cb8cf794fff396231537403de603e886e，从干净工作树执行三职业×四场景×三种子36局，V4哈希不变；全部正常终结、0不变量异常、2局比奇法师通关，12局战士与冻结前完全一致、0通关。完整冻结报告与同控制器对照分别保存，重复运行不算新增样本。
+
+
+### alpha.9 正式发布与公网核验
+
+- [标签工作流40596882903](https://github.com/holynova/mafa-survivor/actions/runs/40596882903)build／deploy／release全部成功，Source checks 40596866324成功；公开预发布[v0.1.0-alpha.9](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.9)固定56525d7cb8cf794fff396231537403de603e886e。
+- 公网version.json为alpha.9／original／56525d7；四地图源路径／SHA／完整walk夹具一致，22,709帧／42张PNG逐一HEAD200/image/png，28原WAV实际下载SHA256全部匹配，JS入口类型正确。alpha9-online-http.json已附Release。
+- 独立后台IAB实际导航公开Pages，alpha9-online-menu.jpg显示alpha.9／56525d7。此次成功点击短局试玩，实际法师普通试玩有自然刷怪、自动火球、D800ms输入和受伤；31秒／13击杀／20金币、94→93HP，无无敌／改血／跳波。alpha9-online-trial.jpg记录真实公网战斗、完整树冠及被遮挡人物轮廓；暂停后AX显示战斗已暂停、93HP／32秒。
+- 随后继续按钮／S键流程30秒超时、连接重置；查回同一独立页后绑定仍超时。升级、商店与新测试工具的公网交互尚未完成，不把31秒普通试玩冒作完整一局或正常通关。用户现有页面和前台Chrome全程未操作。
+- 最终源码构建重新复测隔墙／绕障碍，截图alpha9-mine-wall-probe.jpg和alpha9-mine-wall-detour.jpg覆盖为最终本地生产证据；alpha9-focus-green.jpg同为最终生产输入回归。Release附这三张本地截图、两张真实公网图片、冻结36局完整报告／汇总、V3/V4与新旧引擎战士对照及HTTP证据。
+- 完整职业平衡、10k独立种子、300怪P95、移动内存、完整存档／高级外观仍未完成，保持在STATUS／ACCEPTANCE中。

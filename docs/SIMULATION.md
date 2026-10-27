@@ -71,3 +71,5 @@ V4控制器SHA256为`54bbfa14f07727d3708325cb0cf43b6a1e5c7d0544b4628afe758132c8d
 | 991／zuma | 6／5 | 4／6 | 4／6 |
 
 对照原始报告为alpha9-before-melee.json、alpha9-after-melee.json与alpha9-comparison-summary.json。修复提升了特定接敌与隔墙行为的正确性，部分种子表现也回退；未改怪物基础数值／经济或宣称整体难度达标。
+
+alpha.9最终冻结复测：提交`56525d7cb8cf794fff396231537403de603e886e`、sourceDirty=false、V4哈希不变。三职业四场景三种子36局全部终结、0不变量异常、2局比奇法师通关；12局战士与冻结前逐项完全一致，0通关。报告alpha9-frozen-matrix.json与alpha9-frozen-summary.json附于本阶段Release；重复复测不增加独立种子数。
