@@ -203,3 +203,9 @@ alpha.2 已成功绕过超大地图目录，但多个技能书共用 `texture/it
 - 所有本地图片均保存并实际查看；短时16.7ms不等于300怪P95、移动内存或长时性能达标。沃玛/祖玛、完整平衡、高级外观及完整GDD退出条件未完成。正式在线版本和交互验收在部署后另记录。
 
 - 最终窄道回归发现宝宝用16px移动半径、导航用12px，导致单格通道内无法前进；统一实际移动半径为12px，保留出生/传送的16px安全检查。修复前红色复现、修复后通道移动断言通过，最终19个文件/211项游戏测试通过。
+
+### alpha.6 正式发布与公网文件核验
+
+- 冻结提交`81f2fcf5cfe71a3eca2391293daa1daeaf09077a`；[标签工作流40504313748](https://github.com/holynova/mafa-survivor/actions/runs/40504313748)build/deploy/release全部成功，Source checks 40504305353成功。Release附带三张明确标为本地生产的真实截图与HTTP核验JSON。
+- 公网version.json为alpha.6/original/81f2fcf；18,544帧/37图集，mine源D401.bin与SHA及出生点一致。37张PNG逐一HEAD200/image/png；28个原WAV实际下载SHA256全部匹配。证据`.artifacts/alpha6-online-http.json`。
+- 独立后台IAB直接截图曾成功显示部署前alpha.5菜单；alpha.6部署后重载超过30秒、重连超过60秒，工具连接重置，因此未取得alpha.6线上交互画面。旧版公网截图不作为新版验收。未操作用户前台Chrome或既有测试页；本地alpha.6生产交互与截图已完成，线上交互验收仍待补。
