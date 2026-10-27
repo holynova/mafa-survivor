@@ -71,22 +71,19 @@ for direction in range(8):
  animations[f'beastflame/{direction}']=[select('magic',magic[0x030003D4+direction*10+i],f'beastflame/{direction}/{i}') for i in range(6)]
 from map_region import load_region
 world_layout=load_region(CACHE,request,REF)
-# The catalogue API truncates this very large directory; only explicitly used
-# source IDs are consumed, each with a verified blob hash. No completeness claim.
-map_cache=CACHE/'map.json'
-if not map_cache.exists():
- texture_root=json.loads(request(f'https://api.github.com/repos/etorth/mir2x_res/contents/texture?ref={REF}'))
- map_sha=next(e['sha'] for e in texture_root if e['name']=='map')
- map_cache.write_bytes(request('https://api.github.com/repos/etorth/mir2x_res/git/trees/'+map_sha))
-map_entries={int(e['path'][:8],16):e for e in json.loads(map_cache.read_text())['tree']}
+# Use the reviewed, pinned subset catalogue: the upstream map directory is too
+# large for a reliable GitHub tree/contents response. Every download is still
+# verified against its recorded Git blob hash below.
+map_catalog=json.loads((ROOT/'tools/map-asset-catalog.json').read_text())
+assert map_catalog['repository']==REPO and map_catalog['ref']==REF
+map_entries=map_catalog['frames']
 map_ids={p['texture'] for p in world_layout['tiles']+world_layout['objects']}
 for code in sorted(map_ids):
- if code not in map_entries:raise ValueError('Map source ID outside downloaded catalogue: '+hex(code))
- select('map',map_entries[code],f'map/{code:08X}')
-# Ground PNGs selected from the original map texture catalogue, not recreated.
-mp=json.loads((CACHE/'map-list.json').read_text()) if (CACHE/'map-list.json').exists() else json.loads(request(f'https://api.github.com/repos/etorth/mir2x_res/contents/texture/map?ref={REF}'))
-for i in sorted(set(list(range(16))+[17,24,31,38,45,52,59,66,100,150,200,250,300,400,500,600,700,800,900])):
- p=mp[i];select('map',{'path':p['name'],'sha':p['sha']},'ground/'+str(i))
+ key=f'map/{code:08X}'
+ if key not in map_entries:raise ValueError('Map source ID absent from pinned subset catalogue: '+key)
+ select('map',map_entries[key],key)
+for key,entry in sorted(map_entries.items()):
+ if key.startswith('ground/'):select('map',entry,key)
 # Item IDs verified against the source itemrecord, never guessed from sprite appearance.
 itemmap=json.loads((ROOT/'tools/item-icon-map.json').read_text())['mapping']
 items={int(p['path'][:8],16):p for p in tree('item')}
