@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 import json, urllib.request, hashlib, time, io, math
 from PIL import Image
 from asset_authorization import authorize
+from source_cache import read_source, blob_sha
 ROOT=Path(__file__).resolve().parents[1]
 CACHE=ROOT/'.cache'; CACHE.mkdir(exist_ok=True)
 OUT=ROOT/'public/assets/mir'; OUT.mkdir(parents=True,exist_ok=True)
@@ -109,9 +110,8 @@ for key,filename in [('deadwood','000A000A.PNG'),('sign','000A00FA.PNG'),('shrub
 print('Downloading',len(selected),'original frames',flush=True)
 def load(t):
  kind,p,key=t;f=CACHE/'raw'/kind/p['path'];f.parent.mkdir(parents=True,exist_ok=True)
- if not f.exists():f.write_bytes(request(f'https://raw.githubusercontent.com/etorth/mir2x_res/{REF}/texture/{kind}/{p["path"]}'))
- b=f.read_bytes();actual=hashlib.sha1(f'blob {len(b)}\0'.encode()+b).hexdigest()
- if actual!=p['sha']:raise ValueError('Git blob hash mismatch: '+key)
+ b=read_source(f,f'https://raw.githubusercontent.com/etorth/mir2x_res/{REF}/texture/{kind}/{p["path"]}',p['sha'],request)
+ actual=blob_sha(b)
  im=Image.open(io.BytesIO(b)).convert('RGBA');fn=p['path'];dx=dy=0
  if len(fn.split('.')[0])==18:
   dx=int(fn[10:14],16)*(1 if fn[8]!='0' else -1);dy=int(fn[14:18],16)*(1 if fn[9]!='0' else -1)

@@ -1,11 +1,17 @@
 """Fetch source-backed Mir effects; no synthesized substitute sounds."""
 from pathlib import Path
-import json,re,urllib.request,hashlib
+import json,re,urllib.request,hashlib,time
 from concurrent.futures import ThreadPoolExecutor
 from asset_authorization import authorize
+from source_cache import read_source, blob_sha
 root=Path(__file__).resolve().parents[1];cache=root/'.cache';out=root/'public/assets/mir/audio';out.mkdir(parents=True,exist_ok=True)
 ref='9e21ea6631317d06e064fbfa7e1ea43af6a2d3e6'
-def request(url):return urllib.request.urlopen(url,timeout=40).read()
+def request(url):
+ for attempt in range(4):
+  try:return urllib.request.urlopen(url,timeout=40).read()
+  except Exception:
+   if attempt==3:raise
+   time.sleep(attempt+1)
 source_ref='bb6a22287abcd9f248d2aba755074c254c68787a'
 srcfile=cache/f'audio-magicrecord-{source_ref}.inc'
 if not srcfile.exists():srcfile.write_bytes(request(f'https://raw.githubusercontent.com/etorth/mir2x/{source_ref}/common/src/magicrecord.inc'))
@@ -33,9 +39,8 @@ mapping={k:v for k,n in names.items() if (v:=sound(n))}
 mapping.update(step='01000001.WAV',attack='01010034.WAV',unarmed='01010039.WAV',hurt='0103008A.WAV')
 def load(filename):
  entry=catalog[filename];path=out/filename
- if not path.exists():path.write_bytes(request(f'https://raw.githubusercontent.com/etorth/mir2x_res/{ref}/sound/seff/{filename}'))
- b=path.read_bytes();sha=hashlib.sha1(f'blob {len(b)}\0'.encode()+b).hexdigest()
- assert sha==entry['sha'],filename+' source hash mismatch'
+ b=read_source(path,f'https://raw.githubusercontent.com/etorth/mir2x_res/{ref}/sound/seff/{filename}',entry['sha'],request)
+ sha=blob_sha(b)
  assert b[:4]==b'RIFF' and b[8:12]==b'WAVE',filename+' not WAV'
  return filename,{'sourcePath':'sound/seff/'+filename,'sha1':sha,'sha256':hashlib.sha256(b).hexdigest(),'bytes':len(b),'permissionStatus':'permission_pending'}
 files=dict(ThreadPoolExecutor(12).map(load,sorted(set(mapping.values()))))

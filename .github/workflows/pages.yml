@@ -31,12 +31,13 @@ jobs:
           path: |
             .cache
             public/assets/mir
-          key: mir-9e21ea6631317d06-${{ hashFiles('tools/import-*.py', 'tools/map_region.py', 'tools/map-asset-catalog.json', 'tools/asset_authorization.py', 'docs/asset-authorization.json') }}
+          key: mir-9e21ea6631317d06-${{ hashFiles('tools/import-*.py', 'tools/source_cache.py', 'tools/map_region.py', 'tools/map-asset-catalog.json', 'tools/asset_authorization.py', 'docs/asset-authorization.json') }}
           restore-keys: mir-9e21ea6631317d06-
       - name: Import and verify pinned original media
         if: vars.PAGES_ASSET_MODE == 'original'
         run: |
           python -m pip install -r tools/requirements.txt
+          python -m unittest discover -s tools -p 'test_*.py'
           python tools/import-assets.py
           node tools/check-assets.mjs --release
           python tools/check-visual-assets.py
