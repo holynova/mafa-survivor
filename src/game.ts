@@ -27,6 +27,7 @@ import {
   clearTaoSkill,
 } from "./taoist";
 import { canStand, worldLayout } from "./world";
+import { hasWorldAppearance } from "./appearance";
 import { newTestSettings } from "./test-mode";
 import { CLASSES, type ClassId } from "./classes";
 import {
@@ -211,6 +212,7 @@ export class Game {
   pendingSkill: SkillId | null = null;
   automaticTeleport = false;
   automaticDash = true;
+  warriorFourSlot = false;
   charges: Partial<Record<"powerstrike" | "firesword", boolean>> = {};
   basicCD = 0;
   enemies: Enemy[] = [];
@@ -251,6 +253,9 @@ export class Game {
   }
   get maxHP() {
     return this.classInfo.hp + (this.stats.hp_max ?? 0);
+  }
+  get maxSkills() {
+    return this.classId === "warrior" && this.warriorFourSlot ? 4 : 6;
   }
   sound(key: string) {
     if (this.audioEvents.length < 24) this.audioEvents.push(key);
@@ -326,9 +331,10 @@ export class Game {
       summonHP: 0,
     };
   }
-  start(mode: Mode, seed = 176, classId: ClassId = this.classId) {
+  start(mode: Mode, seed = 176, classId: ClassId = this.classId, warriorFourSlot = false) {
     this.classId = classId;
     this.mode = mode;
+    this.warriorFourSlot = warriorFourSlot;
     this.test = newTestSettings();
     this.audioEvents = [];
     this.seed = seed;
@@ -367,7 +373,7 @@ export class Game {
     this.drops = [];
     this.effects = [];
     this.floating = [];
-    this.equipment = {};
+    this.equipment = { weapon: { itemId: ITEMS.find((i) => i.name === "木剑")!.id, paid: 0 } };
     this.passives = {};
     this.upgrades = {};
     this.offers = [];
@@ -1536,6 +1542,7 @@ export class Game {
         const candidates = ITEMS.filter(
           (it) =>
             it.kind === "equipment" &&
+            hasWorldAppearance(it) &&
             (!it.classId || it.classId === this.classId) &&
             it.tier <= (this.wave >= 7 ? 4 : this.wave >= 3 ? 3 : 2),
         );
@@ -1736,7 +1743,7 @@ export class Game {
     if (c.kind === "skill") {
       let s = this.skills.find((s) => s.id === c.skill);
       if (!s) {
-        if (this.skills.length >= 6) {
+        if (this.skills.length >= this.maxSkills) {
           this.pendingSkill = c.skill!;
           this.phase = "replace";
           this.emit();
@@ -1816,6 +1823,7 @@ export class Game {
     this.emit();
   }
   validItem(item: Item) {
+    if (!hasWorldAppearance(item)) return false;
     if (item.classId && item.classId !== this.classId) return false;
     if (
       this.classId === "warrior" &&

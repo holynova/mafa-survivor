@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import appearance from "./equipment-appearance.json" with { type: "json" };
 import { checkReleaseAuthorization } from "./asset-authorization.mjs";
 const root = new URL("../public/assets/mir/", import.meta.url);
 const manifest = JSON.parse(
@@ -82,6 +83,35 @@ if (manifest.world) {
     if (!frames[id]) failures.push("map: missing " + id);
   }
 }
+// Equipment and shadows must share source animation indices, not merely exist.
+const requireActor = (name, motions) => {
+  for (const motion of motions) for (let dir = 0; dir < 8; dir++)
+    if (!manifest.animations[`${name}/${motion}/${dir}`]?.length)
+      failures.push(`${name}/${motion}/${dir}: missing appearance pose`);
+};
+for (const model of new Set(Object.values(appearance.clothes))) {
+  requireActor(`dress-${model}`, Object.keys(appearance.motions));
+  requireActor(`dress-${model}-shadow`, Object.keys(appearance.motions));
+}
+for (const model of new Set(Object.values(appearance.weapons))) {
+  requireActor(`weapon-${model}`, Object.keys(appearance.motions));
+  for (const motion of Object.keys(appearance.motions)) for (let dir = 0; dir < 8; dir++) {
+    const body = manifest.animations[`dress-1/${motion}/${dir}`] ?? [];
+    const weapon = manifest.animations[`weapon-${model}/${motion}/${dir}`] ?? [];
+    const frames = new Set(weapon.map((k) => k.split("/").at(-1)));
+    for (const frame of body) if (!frames.has(frame.split("/").at(-1)))
+      failures.push(`weapon-${model}: missing matching body index ${frame}`);
+  }
+}
+for (const name of ["scarecrow", "cat", "rakecat", "orc", "boss", "skeleton", "summonedSkeleton", "zombie", "beast"])
+  requireActor(name + "-shadow", ["idle", "walk", "attack", "hurt", "death"]);
+for (const name of ["dress-1", "dress-1-shadow", "weapon-8"])
+  for (const motion of Object.keys(appearance.motions)) for (let dir = 0; dir < 8; dir++)
+    for (const key of manifest.animations[`${name}/${motion}/${dir}`] ?? [])
+      if (manifest.pages.find((p) => p.key === manifest.frames[key].texture)?.lazy)
+        failures.push(key + ": starter outfit must be preloaded");
+for (const page of manifest.pages)
+  if (page.group === "core" && page.lazy) failures.push(page.key + ": core atlas cannot be lazy");
 console.log(
   JSON.stringify(
     {

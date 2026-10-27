@@ -1,9 +1,11 @@
 import Phaser from "phaser";
+import { mapObjectAlpha, mapObjectDepth, coversActor, type Occluder } from "./map-render";
 import { assetUrl, isGraybox } from "./release";
 import { sounds } from "./sound";
 import { setWorldLayout, type WorldLayout } from "./world";
 import { MovementInput, inputDiagnostics } from "./input";
-import { SCENERY } from "./content";
+import { SCENERY, ITEMS } from "./content";
+import { resolveAppearance, weaponBehind } from "./appearance";
 import { game, WORLD, type Enemy } from "./game";
 export type Manifest = {
   world?: WorldLayout;
@@ -13,6 +15,8 @@ export type Manifest = {
     data: string;
     width: number;
     height: number;
+    lazy?: boolean;
+    group?: string;
   }[];
   animations: Record<string, string[]>;
   frames: Record<
@@ -38,6 +42,7 @@ let rendererReady = false;
 export const readyListeners = new Set<() => void>();
 export const isReady = () => rendererReady;
 export let frameMS = 0;
+export const appearanceStatus = { loading: false, error: "" };
 class BattleScene extends Phaser.Scene {
   private bodies = new Map<string, Phaser.GameObjects.Image>();
   private pool: Phaser.GameObjects.Image[] = [];
@@ -47,7 +52,6 @@ class BattleScene extends Phaser.Scene {
   private accumulator = 0;
   private lastRun = "";
   private nextFootstep = 0;
-  private mapObjects: { image: Phaser.GameObjects.Image; alpha: number }[] = [];
   private seen = new Set<string>();
   private drag: { id: number; x: number; y: number } | null = null;
   private corpses: {
@@ -59,15 +63,26 @@ class BattleScene extends Phaser.Scene {
   }[] = [];
   private lastEnemies = new Map<number, Enemy>();
   private failed = false;
+  private occluders: Occluder[] = [];
+  private modelPages = new Map<string, Set<string>>();
+  private queuedPages = new Set<string>();
+  private failedPages = new Set<string>();
+  private heroLook: { body: string; weapon: string | null } = { body: "dress-1", weapon: "weapon-8" };
   constructor() {
     super("battle");
   }
   preload() {
-    for (const page of assets.pages)
+    for (const page of assets.pages.filter((p) => !p.lazy))
       this.load.atlas(page.key, assetUrl(page.image), assetUrl(page.data));
-    this.load.on("loaderror", () => {
-      this.failed = true;
-      document.dispatchEvent(new CustomEvent("asset-error"));
+    this.load.on("loaderror", (file: Phaser.Loader.File) => {
+      if (!rendererReady) {
+        this.failed = true;
+        document.dispatchEvent(new CustomEvent("asset-error"));
+      } else {
+        this.failedPages.add(file.key);
+        appearanceStatus.error = "换装素材加载失败，请重试";
+        game.emit();
+      }
     });
   }
   create() {
@@ -75,6 +90,18 @@ class BattleScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, WORLD.w, WORLD.h);
     this.cameras.main.setZoom(this.zoom());
     this.paintGround();
+    for (const [name, sequence] of Object.entries(assets.animations)) {
+      const model = name.split("/")[0];
+      const pages = this.modelPages.get(model) ?? new Set<string>();
+      for (const frame of sequence) if (assets.frames[frame]) pages.add(assets.frames[frame].texture);
+      this.modelPages.set(model, pages);
+    }
+    this.load.on("complete", () => game.emit());
+    document.addEventListener("retry-appearance", () => {
+      this.failedPages.clear();
+      this.queuedPages.clear();
+      appearanceStatus.error = "";
+    });
     this.bars = this.add.graphics().setDepth(5000);
     this.movementInput = new MovementInput(
       window,
@@ -194,6 +221,7 @@ class BattleScene extends Phaser.Scene {
     }
     texture.refresh();
     this.add.image(0, 0, "terrain").setOrigin(0).setDepth(-100);
+    const alphaMasks = new Map<string, Uint8Array>();
     if (map)
       for (const o of map.objects) {
         if (o.depth === 0) continue;
@@ -204,9 +232,18 @@ class BattleScene extends Phaser.Scene {
         const image = this.add
           .image(o.x, o.y, f.texture, key)
           .setOrigin(0, 1)
-          .setDepth(o.depth === 3 ? 2000 : o.y + (o.depth === 1 ? -1 : 0))
-          .setAlpha(o.alpha ? 0.38 : 1);
-        this.mapObjects.push({ image, alpha: o.alpha ? 0.38 : 1 });
+          .setDepth(mapObjectDepth(o, map.cellHeight))
+          .setAlpha(mapObjectAlpha(o, f.width, f.height, mapObjectDepth(o, map.cellHeight), null));
+        if (!alphaMasks.has(key)) {
+          const frame = this.textures.getFrame(f.texture, key);
+          const canvas = document.createElement("canvas");
+          canvas.width = f.width; canvas.height = f.height;
+          const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
+          ctx.drawImage(frame.source.image as HTMLImageElement, frame.cutX, frame.cutY, f.width, f.height, 0, 0, f.width, f.height);
+          const pixels = ctx.getImageData(0, 0, f.width, f.height).data;
+          alphaMasks.set(key, Uint8Array.from({ length: f.width * f.height }, (_, i) => pixels[i * 4 + 3]));
+        }
+        this.occluders.push({ x: o.x, y: o.y, width: f.width, height: f.height, depth: image.depth, mask: alphaMasks.get(key)! });
       }
     else
       for (const o of SCENERY) {
@@ -261,6 +298,52 @@ class BattleScene extends Phaser.Scene {
       .setScale(scale)
       .clearTint();
   }
+  private requireModels(names: string[]) {
+    const needed = new Set<string>();
+    for (const name of names)
+      for (const texture of this.modelPages.get(name) ?? []) needed.add(texture);
+    let complete = true;
+    for (const page of assets.pages.filter((p) => needed.has(p.key))) {
+      if (this.textures.exists(page.key)) continue;
+      complete = false;
+      if (this.queuedPages.has(page.key) || this.failedPages.has(page.key)) continue;
+      this.queuedPages.add(page.key);
+      this.load.atlas(page.key, assetUrl(page.image), assetUrl(page.data));
+    }
+    const loading = !complete && !appearanceStatus.error;
+    if (appearanceStatus.loading !== loading) {
+      appearanceStatus.loading = loading;
+      game.emit();
+    }
+    if (!this.load.isLoading() && this.load.list.size) this.load.start();
+    if (complete) appearanceStatus.error = "";
+    return complete;
+  }
+  private hero(motion: string, dir: number, x: number, y: number, time: number, depth: number, alpha: number) {
+    const desired = resolveAppearance(game.classId, game.phase === "lobby"
+      ? { weapon: { itemId: ITEMS.find((i) => i.name === "木剑")!.id } }
+      : game.equipment);
+    const needed = [desired.body, desired.body + "-shadow", ...(desired.weapon ? [desired.weapon] : [])];
+    if (this.requireModels(needed)) this.heroLook = desired;
+    const body = assets.animations[`${this.heroLook.body}/${motion}/${dir}`];
+    if (!body?.length) return;
+    const frame = body[Math.floor(time * 9) % body.length];
+    const index = Number(frame.split("/").at(-1));
+    const matching = (name: string) => assets.animations[`${name}/${motion}/${dir}`]?.find((f) => Number(f.split("/").at(-1)) === index);
+    const shadow = matching(this.heroLook.body + "-shadow");
+    if (shadow) this.draw("hero-shadow", shadow, x, y, -40, alpha * 0.46);
+    const weapon = this.heroLook.weapon && matching(this.heroLook.weapon);
+    if (weapon) this.draw("hero-weapon", weapon, x, y, depth + (weaponBehind(motion, dir, index) ? -0.1 : 0.1), alpha);
+    this.draw("hero", frame, x, y, depth, alpha);
+    if (game.phase !== "lobby" && this.occluders.some((part) => coversActor(part, { x, y }))) {
+      this.draw("hero-cover", frame, x, y, 4100, alpha * 0.32);
+      this.bodies.get("hero-cover")?.setTintFill(0xe4d5ab);
+      if (weapon) {
+        this.draw("weapon-cover", weapon, x, y, 4100 + (weaponBehind(motion, dir, index) ? -0.1 : 0.1), alpha * 0.32);
+        this.bodies.get("weapon-cover")?.setTintFill(0xe4d5ab);
+      }
+    }
+  }
   private actor(
     key: string,
     name: string,
@@ -296,6 +379,12 @@ class BattleScene extends Phaser.Scene {
         );
       return;
     }
+    if (key === "hero") {
+      this.hero(motion, dir, x, y, time, depth, alpha);
+      return;
+    }
+    const shadowFrames = assets.animations[`${name}-shadow/${motion}/${dir}`];
+    if (shadowFrames?.length) this.draw(key + "-shadow", shadowFrames[Math.floor(time * 9) % shadowFrames.length], x, y, -40, alpha * 0.46, scale);
     const frames =
       assets.animations[`${name}/${motion}/${dir}`] ??
       assets.animations[`${name}/idle/${dir}`];
@@ -346,6 +435,7 @@ class BattleScene extends Phaser.Scene {
       this.corpses = [];
       this.lastEnemies.clear();
       this.accumulator = 0;
+      this.heroLook = { body: "dress-1", weapon: "weapon-8" };
     }
     if (game.phase === "battle") {
       const axes = this.movementInput.axes;
@@ -384,17 +474,6 @@ class BattleScene extends Phaser.Scene {
     this.seen.clear();
     this.bars.clear();
     const t = game.clock;
-    for (const object of this.mapObjects) {
-      const i = object.image;
-      const occludes =
-        game.phase !== "lobby" &&
-        i.depth > game.player.y &&
-        i.x < game.player.x + 50 &&
-        i.x + i.width > game.player.x - 50 &&
-        i.y - i.height < game.player.y + 20 &&
-        i.y > game.player.y - 85;
-      i.setAlpha(occludes ? 0.12 : object.alpha);
-    }
     if (game.phase === "lobby") {
       this.cameras.main.centerOn(WORLD.w / 2 + 70, WORLD.h / 2);
       this.actor(

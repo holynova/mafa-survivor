@@ -495,7 +495,7 @@ export function App() {
             </small>
           </div>
           <div className="skill-dock">
-            {Array.from({ length: 6 }, (_, i) => {
+            {Array.from({ length: game.maxSkills }, (_, i) => {
               const s = game.skills[i];
               const def = s ? getSkill(s.id) : null;
               return (

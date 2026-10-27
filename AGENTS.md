@@ -14,3 +14,6 @@
 - 用户已授权把项目源码发布到 holynova/mafa-survivor，并在每个已验收阶段更新 GitHub Pages 与 GitHub 预发布版本；同一已确认发布范围不重复请求许可。
 - 阶段发布前更新 CHANGELOG、版本号并完成测试和真实浏览器截图验收；打递增的 v0.1.0-alpha.N 标签，通过 Actions 部署后检查在线 version.json、试玩与截图，再报告版本链接。具体流程见 docs/RELEASES.md。
 - Pages 公开素材方案已确认为 original；仓库变量 PAGES_ASSET_MODE=original。原版图片、地图和音效在 Actions 中按固定源提交导入并部署；.cache 与生成资源继续忽略于源码 Git。更换资源源仓库或提交时更新对应授权记录。
+
+- 人物外观使用真实装备映射，武器 shape 要减 WEAPON_BEGIN=1，前后层使用源 weaponorder 表；模型缺失装备不进入公开版本商店或精英掉落，不能冒用其他装备模型。
+- 地图物件是相邻竖条，不得独立按角色矩形范围修改条带 alpha；保持源前后层与完整树冠。人物/怪物阴影使用来源已登记的动作阴影。

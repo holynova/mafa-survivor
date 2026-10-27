@@ -22,6 +22,9 @@ function start() {
 }
 function shop() {
   const g = start();
+  // Economy fixtures start empty; starter equipment has dedicated coverage.
+  g.equipment = {};
+  g.recompute();
   g.waveTime = 75;
   g.endWave();
   return g;

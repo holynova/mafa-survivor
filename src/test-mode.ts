@@ -1,4 +1,6 @@
 import { getSkill } from "./spells";
+import { ITEMS } from "./content";
+import { hasWorldAppearance } from "./appearance";
 import { clearTaoSkill } from "./taoist";
 import type { Game } from "./game";
 import type { SkillId } from "./spells";
@@ -54,4 +56,16 @@ export function testClear(g: Game) {
   g.drops = [];
   g.floating = [];
   g.emit();
+}
+
+/** Equip real inventory items in the isolated test run, using the regular slots. */
+export function testWear(g: Game, itemId: string) {
+  const item = ITEMS.find((i) => i.id === itemId);
+  if (g.mode !== "test" || !item || !["weapon", "armor"].includes(item.slot ?? "") ||
+      (item.classId && item.classId !== g.classId) || !hasWorldAppearance(item)) return false;
+  const slot = item.slot as "weapon" | "armor";
+  g.equipment[slot] = { itemId: item.id, paid: 0 };
+  g.recompute();
+  g.emit();
+  return true;
 }

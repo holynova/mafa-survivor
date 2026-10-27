@@ -5,7 +5,10 @@ import { game } from "./game";
 import { CLASS_IDS, CLASSES, type ClassId } from "./classes";
 import { SKILLS, MONSTERS, getSkill, type SkillId } from "./content";
 import { inputDiagnostics } from "./input";
-import { testSpawn, testEquip, testClear } from "./test-mode";
+import { hasWorldAppearance } from "./appearance";
+import { appearanceStatus } from "./renderer";
+import { ITEMS, getItem } from "./content";
+import { testWear, testSpawn, testEquip, testClear } from "./test-mode";
 export function TestTools() {
   const [open, setOpen] = useState(true),
     [kind, setKind] = useState("orc"),
@@ -100,6 +103,22 @@ export function TestTools() {
               ))}
             </select>
           </label>
+          {(["weapon", "armor"] as const).map((kind) => (
+            <label key={kind}>
+              {kind === "weapon" ? "武器外观" : "衣服外观"}
+              <select aria-label={kind === "weapon" ? "测试武器" : "测试衣服"}
+                value={game.equipment[kind]?.itemId ?? ""}
+                onChange={(e) => { if (e.target.value) testWear(game, e.target.value); }}>
+                {!game.equipment[kind] && <option value="">基础布衣</option>}
+                {ITEMS.filter((i) => i.slot === kind && (!i.classId || i.classId === game.classId) && hasWorldAppearance(i)).map((i) => (
+                  <option key={i.id} value={i.id}>{i.name}</option>
+                ))}
+              </select>
+            </label>
+          ))}
+          <p>当前穿戴：{game.equipment.weapon ? getItem(game.equipment.weapon.itemId).name : "空手"} · {game.equipment.armor ? getItem(game.equipment.armor.itemId).name : "基础布衣"}</p>
+          {appearanceStatus.loading && <p role="status">正在载入原版外观…</p>}
+          {appearanceStatus.error && <p role="alert">{appearanceStatus.error} <button onClick={() => document.dispatchEvent(new Event("retry-appearance"))}>重试外观</button></p>}
           <label>
             人物动作{" "}
             <select

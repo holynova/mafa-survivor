@@ -6,6 +6,8 @@ import { Rng, rollRange, effective } from "../src/rules";
 function setup() {
   const g = new Game();
   g.start("normal", 176, "warrior");
+  // These mechanics probes explicitly measure the unarmed class baseline.
+  g.equipment = {};
   g.upgrades.accuracy = 100;
   g.recompute();
   return g;
@@ -124,6 +126,7 @@ describe("independent ordinary attacks and charged swings", () => {
   it("also gives wizards a weak melee attack separate from the six slots", () => {
     const g = new Game();
     g.start("normal");
+    g.equipment = {};
     g.skills = [];
     g.upgrades.accuracy = 100;
     g.recompute();
