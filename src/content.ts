@@ -284,6 +284,13 @@ export const ITEMS: Item[] = [
 export const WAVE_BUDGET = [
   35, 48, 69, 95, 125, 158, 194, 233, 273, 316, 361, 408,
 ];
+// Later chapters spend their threat budget on fewer, tougher enemies. Rewards
+// compensate for that lower count without changing the GDD monster HP/damage.
+export const CHAPTER_PRESSURE = { biche:1, mine:1.7, woma:2.8, zuma:3.8 };
+export const NATIVE_ELITES = ["orcBrave","womaBrave"];
+export function waveSpawnBudget(mapId:MapId,wave:number,trial=false) {
+  return Math.max(1,Math.ceil(WAVE_BUDGET[wave-1]/CHAPTER_PRESSURE[mapId]*(trial ? 0.7 : 1)));
+}
 export const MONSTERS = [
   { id: "scarecrow", name: "稻草人", hp: 18, damage: 1, speed: 32, exp: 2 },
   { id: "cat", name: "多钩猫", hp: 22, damage: 2, speed: 54, exp: 2 },

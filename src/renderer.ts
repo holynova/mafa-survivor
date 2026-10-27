@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import {simulationInput} from "./simulation";
 import { mapObjectAlpha, mapObjectDepth, coversActor, type Occluder } from "./map-render";
 import { assetUrl, isGraybox } from "./release";
 import { sounds } from "./sound";
@@ -45,6 +46,8 @@ export const isReady = () => rendererReady;
 export let frameMS = 0;
 export const appearanceStatus = { loading: false, error: "" };
 class BattleScene extends Phaser.Scene {
+  private autopilotClock=-1;
+  private autopilotAction={x:0,y:0};
   private bodies = new Map<string, Phaser.GameObjects.Image>();
   private pool: Phaser.GameObjects.Image[] = [];
   private labels = new Map<number, Phaser.GameObjects.Text>();
@@ -373,6 +376,7 @@ class BattleScene extends Phaser.Scene {
     depth: number,
     alpha = 1,
     scale = 1,
+    height = 0,
   ) {
     if (isGraybox) {
       const color = key.startsWith("hero")
@@ -411,7 +415,7 @@ class BattleScene extends Phaser.Scene {
         key,
         frames[Math.floor(time * 9) % frames.length],
         x,
-        y,
+        y - height,
         depth,
         alpha,
         scale,
@@ -466,28 +470,39 @@ class BattleScene extends Phaser.Scene {
       this.corpses = [];
       this.lastEnemies.clear();
       this.accumulator = 0;
+      this.autopilotClock=-1;this.autopilotAction={x:0,y:0};
       this.heroLook = { body: "dress-1", weapon: "weapon-8" };
     }
     if (game.phase === "battle") {
       const axes = this.movementInput.axes;
       let x = axes.x,
         y = axes.y;
+      const previousHeld=inputDiagnostics.held,previousEvent=inputDiagnostics.last;
       inputDiagnostics.last = this.movementInput.lastEvent;
       inputDiagnostics.held = [...this.movementInput.held].join(" ") || "无";
       inputDiagnostics.x = x;
       inputDiagnostics.y = y;
+      if(game.mode==="test" && (previousHeld!==inputDiagnostics.held || previousEvent!==inputDiagnostics.last))game.emit();
       const p = this.input.activePointer;
       if (this.drag && p.isDown && x === 0 && y === 0) {
         x = Phaser.Math.Clamp((p.x - this.drag.x) / 45, -1, 1);
         y = Phaser.Math.Clamp((p.y - this.drag.y) / 45, -1, 1);
       }
       game.input = { x, y };
+      const manual=this.movementInput.held.size>0 || !!(this.drag && p.isDown);
       this.accumulator +=
         game.mode === "test" && game.test.pose !== "live"
           ? 0
           : Math.min(delta / 1000, 0.1) *
             (game.mode === "test" ? game.test.speed : 1);
       while (this.accumulator >= 1 / 60) {
+        if(game.mode==="test" && game.test.autowalk && !manual) {
+          if(game.clock>=this.autopilotClock){
+            this.autopilotAction=simulationInput(game,this.autopilotAction);
+            this.autopilotClock=game.clock+1/6;
+          }
+          game.input=this.autopilotAction;
+        }
         game.step(1 / 60);
         this.accumulator -= 1 / 60;
       }
@@ -563,6 +578,8 @@ class BattleScene extends Phaser.Scene {
           ),
         );
       for (const e of game.enemies) {
+        const airborne=e.bossJumpTarget && game.clock>=(e.bossJumpWindupUntil ?? Infinity) && game.clock<(e.bossJumpUntil ?? 0);
+        const jumpHeight=airborne ? Math.sin(Math.PI*Math.max(0,Math.min(1,(game.clock-(e.bossJumpWindupUntil ?? 0))/0.6)))*75 : 0;
         const motion =
           e.dormant ? "stone" : (e.awakenAt ?? 0)>game.clock ? "awaken" : e.windup > 0 || e.shock || e.rangedFireAt !== undefined || e.stompAt !== undefined || (e.chargeWindupUntil ?? 0) > game.clock ? "attack" : t - e.hitAt < 0.17 ? "hurt" : "walk";
         const scale = e.elite ? 1.15 : 1;
@@ -577,6 +594,7 @@ class BattleScene extends Phaser.Scene {
           e.y,
           1,
           scale,
+          jumpHeight,
         );
         if (e.elite || e.hp < e.maxHp) {
           const w = isBossKind(e.kind) ? 64 : 32;
@@ -611,6 +629,11 @@ class BattleScene extends Phaser.Scene {
           this.bars.lineStyle(3, 0xe39a6c, 0.85)
             .strokeCircle(e.stompOrigin.x, e.stompOrigin.y, 130)
             .fillStyle(0xb96b42, 0.14).fillCircle(e.stompOrigin.x, e.stompOrigin.y, 130 * Math.max(0, 1 - (e.stompAt - game.clock)));
+        }
+        if(e.bossJumpTarget && game.clock<(e.bossJumpWindupUntil ?? 0)) {
+          this.bars.lineStyle(3,0xf1ba72,0.9).strokeCircle(e.bossJumpTarget.x,e.bossJumpTarget.y,110)
+            .fillStyle(0xd6904b,0.14).fillCircle(e.bossJumpTarget.x,e.bossJumpTarget.y,110)
+            .lineStyle(2,0xf1ba72,0.6).lineBetween(e.x,e.y,e.bossJumpTarget.x,e.bossJumpTarget.y);
         }
         if (e.rangedTarget && e.rangedFireAt !== undefined) {
           const spread=e.kind === "zumaArcher" ? [-0.22,0,0.22] : [0];

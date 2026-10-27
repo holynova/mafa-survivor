@@ -1,6 +1,6 @@
 {
   "name": "mafa-survivor",
-  "version": "0.1.0-alpha.7",
+  "version": "0.1.0-alpha.8",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,7 +12,8 @@
     "build:release": "node tools/check-assets.mjs --release && npm run build",
     "assets:visual-check": ".venv/bin/python tools/check-visual-assets.py",
     "assets:audio-check": "python3 tools/check-audio.py",
-    "build:pages": "node tools/build-pages.mjs"
+    "build:pages": "node tools/build-pages.mjs",
+    "simulate": "node tools/simulate.mjs"
   },
   "dependencies": {
     "idb": "^8.0.0",

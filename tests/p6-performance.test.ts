@@ -24,8 +24,8 @@ function runSeeds(seeds: number[], waves = 3) {
   return results;
 }
 
-describe("P6: batch seed simulation (P4-01, P4-02)", () => {
-  it("100 seeds: no crashes/softlocks, every run progresses", () => {
+describe("Legacy wave-transition smoke checks (not balance simulations)", () => {
+  it("100 seeded forced transitions preserve valid phases", () => {
     const seeds = Array.from({ length: 100 }, (_, i) => i * 13 + 7);
     const results = runSeeds(seeds, 3);
     for (const r of results) {
@@ -59,8 +59,8 @@ describe("P6: batch seed simulation (P4-01, P4-02)", () => {
   });
 });
 
-describe("P6: 300-enemy performance (P4-05)", () => {
-  it("step with 300 enemies stays within frame budget", () => {
+describe("Short simulation workload timings (not browser 300-enemy acceptance)", () => {
+  it("cleans up a one-HP enemy workload within the unit-test time budget", () => {
     const g = new Game();
     g.start("normal", 176, "warrior");
     for (let i = 0; i < 300; i++) {
@@ -75,7 +75,7 @@ describe("P6: 300-enemy performance (P4-05)", () => {
     expect(avgMs).toBeLessThan(16.7);
   });
 
-  it("300 enemies with 4 wizard skills + projectiles", () => {
+  it("cleans up a one-HP spell workload within the unit-test time budget", () => {
     const g = new Game();
     g.start("normal", 176, "wizard");
     for (const id of ["fireball", "lightning", "firewall", "ice"] as const) {

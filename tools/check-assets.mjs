@@ -72,7 +72,7 @@ for (const [mapId, m] of Object.entries(manifest.worlds ?? { biche: manifest.wor
     if (!frames[id]) failures.push("map: missing " + id);
   }
 }
-for (const chapter of ["mine","woma","zuma"]) {
+for (const chapter of ["biche","mine","woma","zuma"]) {
   const fixture = JSON.parse(fs.readFileSync(new URL(`../tests/fixtures/${chapter}-layout.json`, import.meta.url), "utf8"));
   if (JSON.stringify(manifest.worlds?.[chapter]?.walk) !== JSON.stringify(fixture.walk) || manifest.worlds?.[chapter]?.sourceSha256 !== fixture.sourceSha256)
     failures.push(`${chapter}: checked navigation fixture differs from imported pinned source map`);

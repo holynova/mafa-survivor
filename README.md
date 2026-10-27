@@ -1,6 +1,6 @@
 # 玛法幸存者
 
-网页优先的单机 2D 幸存者游戏，使用 Phaser 3、TypeScript、React、Vite。以完整 GDD V1.0 为需求基线，当前可选法师（14 技能）与战士（6 技能），共享独立普通攻击和六槽构筑。
+网页优先的单机 2D 幸存者游戏，使用 Phaser 3、TypeScript、React、Vite。以完整 GDD V1.0 为需求基线，当前可选法师（14 技能）、战士（6 技能）与道士（13 技能），共享独立普通攻击和六槽构筑。
 
 ## 本地试玩
 
@@ -14,7 +14,7 @@ npm run dev
 
 默认地址：[http://127.0.0.1:5178/](http://127.0.0.1:5178/)。开发界面有正常局（12×75 秒）和短局试玩（3×35 秒）；商店与升级暂停计时。
 
-首页新增「快速测试模式」：默认无敌，可刷怪/Boss、装配六槽技能、清冷却、增加金币、跳到商店/下一波、1/2/4 倍速、切换人物动作与八方向，并直接更换真实武器和衣服。面板显示坐标和实际按键事件，可直接检查 D 键。测试局不写入战绩、不发放结晶；「动作检查」会冻结战斗模拟，切回「实战」恢复。
+首页新增「快速测试模式」：默认无敌，可刷怪/Boss、装配六槽技能、清冷却、增加金币、跳到商店/下一波、1/2/4 倍速、切换人物动作与八方向，并直接更换真实武器和衣服。面板显示坐标和实际按键事件，可直接检查 D 键。可开启「自动走位」避敌和拾取，方向键与拖动优先接管；升级和商店仍手动选择。测试局不写入战绩、不发放结晶；「动作检查」会冻结战斗模拟，切回「实战」恢复。
 
 原始资源导入现包括人物双层合成、原地图地面/完整物件布局和原版 WAV 音效。首次安装仍需运行导入脚本；音效在点击出征后解锁，可在战场左下角关闭。
 
@@ -80,6 +80,14 @@ npm run build
 
 [源码仓库](https://github.com/holynova/mafa-survivor) · [阶段版本记录](https://github.com/holynova/mafa-survivor/releases)
 
-GitHub Pages 使用 Actions 发布，在线测试地址为 [holynova.github.io/mafa-survivor](https://holynova.github.io/mafa-survivor/)。公开展示版使用原版图片、地图和 WAV 音效；当前阶段版本为 **v0.1.0-alpha.4**。
+GitHub Pages 使用 Actions 发布，在线测试地址为 [holynova.github.io/mafa-survivor](https://holynova.github.io/mafa-survivor/)。公开展示版使用原版图片、地图和 WAV 音效；当前公开版本为 **v0.1.0-alpha.7**；alpha.8正在验收。
 
 每个阶段通过测试与截图验收后，更新 CHANGELOG、推送递增的 `v0.1.0-alpha.N` 标签；工作流部署成功后自动创建预发布版本。页面显示版本和提交号，可通过反馈入口报告问题。配置与门禁见 [阶段发布说明](docs/RELEASES.md)。
+
+## 真实战斗模拟
+
+```sh
+npm run simulate -- --seeds=176,17,991 --maps=biche,mine,woma,zuma --classes=wizard,warrior,taoist --mode=normal --out=.artifacts/simulation.json
+```
+
+使用原地图通行夹具、真实1/60秒步进及合法升级／交易，不修改生命、时钟或掉落。报告保存策略哈希、地图源SHA、逐波成长和失败原因；不是人类通关率。运行方式、对照数据和未达标项见[模拟记录](docs/SIMULATION.md)。

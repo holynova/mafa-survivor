@@ -6,6 +6,7 @@ import type { Game } from "./game";
 import type { SkillId } from "./spells";
 export const newTestSettings = () => ({
   god: true,
+  autowalk: false,
   speed: 1,
   pose: "live",
   direction: 4,

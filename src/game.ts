@@ -3,7 +3,7 @@ import {
   MONSTERS,
   SKILLS,
   SCENERY,
-  WAVE_BUDGET,
+  CHAPTER_PRESSURE, NATIVE_ELITES, waveSpawnBudget,
   SLOT_KEYS,
   getItem,
   getSkill,
@@ -18,6 +18,7 @@ import {
   isBossKind,
   PLAYABLE_MAP_IDS,
 } from "./content";
+import {updateRangedEnemy} from "./enemy-ai";
 import { TEMPLE_RANGED, updateTempleEnemy } from "./temple";
 import type { SkillField } from "./spells";
 import {
@@ -95,6 +96,8 @@ export type Enemy = Entity & {
   bossSummonCD?: number;
   /** Boss 跳跃冷却 */
   bossJumpCD?: number;
+  bossJumpWindupUntil?: number;
+  bossJumpOrigin?: {x:number;y:number};
   /** 精英远程攻击 */
   ranged?: boolean;
   rangedCD?: number;
@@ -161,6 +164,7 @@ export type Fx = Entity & {
 export type Floating = Entity & { text: string; color: string; life: number };
 export type Skill = {
   id: SkillId;
+  focusTarget?: number;
   rank: number;
   cd: number;
   retryAt?: number;
@@ -354,6 +358,7 @@ export class Game {
     this.unlockedMaps = new Set(["biche", ...progress.unlockedMaps]);
     this.emit();
   }
+  get spawnBudget() { return waveSpawnBudget(this.mapId,this.wave,this.mode==="trial"); }
   get duration() {
     return this.mode === "trial" ? 35 : 75;
   }
@@ -541,10 +546,7 @@ export class Game {
     if (this.player.moving) revealActor(this, 0);
     updateTaoist(this);
     this.spawnTimer -= dt;
-    const budget =
-      this.mode === "trial"
-        ? Math.floor(WAVE_BUDGET[this.wave - 1] * 0.7)
-        : WAVE_BUDGET[this.wave - 1];
+    const budget=this.spawnBudget;
     if (
       this.spawnTimer <= 0 &&
       this.spawned < budget &&
@@ -579,42 +581,30 @@ export class Game {
       if (isBossKind(e.kind) && e.hp <= e.maxHp * 0.5 && (e.bossPhase ?? 1) === 1) {
         e.bossPhase = 2; e.speed *= 1.25; e.damage *= 1.25;
       }
-      if (updateTempleEnemy(this,e,dt,victim)) continue;
+      if (updateRangedEnemy(this,e,dt,victim) || updateTempleEnemy(this,e,dt,victim)) continue;
       if (e.kind === "corpseKing" && this.updateCorpseKing(e, dt)) continue;
-      // --- Forest boss jump and summon ---
       if (e.kind === "boss") {
-        if ((e.bossSummonCD ?? 0) <= 0) {
-          this.summonBossMinion(e);
-          e.bossSummonCD = (e.bossPhase ?? 1) === 2 ? 10 : 15;
-        } else {
-          e.bossSummonCD = Math.max(0, (e.bossSummonCD ?? 0) - dt);
-        }
-        const airborne = (e.bossJumpUntil ?? 0) > this.clock;
-        if (airborne) {
-          const tj = e.bossJumpTarget!;
-          const dxj = tj.x - e.x,
-            dyj = tj.y - e.y,
-            dj = Math.max(1, Math.hypot(dxj, dyj));
-          e.x = clamp(e.x + (dxj / dj) * e.speed * 1.6 * dt, 25, WORLD.w - 25);
-          e.y = clamp(e.y + (dyj / dj) * e.speed * 1.6 * dt, 30, WORLD.h - 20);
-          e.windup = 0;
+        e.bossSummonCD=Math.max(0,(e.bossSummonCD ?? 6)-dt);
+        if(e.bossSummonCD===0){this.summonBossMinion(e);e.bossSummonCD=20;}
+        if(e.bossJumpTarget) {
+          if(this.clock<(e.bossJumpWindupUntil ?? 0)) {
+            e.windup=(e.bossJumpWindupUntil ?? 0)-this.clock;continue;
+          }
+          const origin=e.bossJumpOrigin!,target=e.bossJumpTarget;
+          if(this.clock<(e.bossJumpUntil ?? 0)) {
+            const t=clamp((this.clock-(e.bossJumpWindupUntil ?? 0))/0.6,0,1);
+            e.x=origin.x+(target.x-origin.x)*t;e.y=origin.y+(target.y-origin.y)*t;
+            e.windup=0;continue;
+          }
+          e.x=target.x;e.y=target.y;
+          if(Math.hypot(this.player.x-e.x,this.player.y-e.y)<110)this.hurt(e.damage*1.5,"magic");
+          for(const pet of this.pets)if(pet.hp>0 && Math.hypot(pet.x-e.x,pet.y-e.y)<110)this.hurtPet(pet,e.damage*1.5,"magic");
+          e.bossJumpTarget=undefined;e.bossJumpOrigin=undefined;e.windup=0;e.attackCD=1;e.staggerUntil=this.clock+0.6;
           continue;
         }
-        // Just landed: area damage on landing
-        if (e.bossJumpTarget) {
-          const radius = 110;
-          if (
-            Math.hypot(this.player.x - e.x, this.player.y - e.y) < radius
-          ) {
-            this.hurt(e.damage * 1.5, "magic", true);
-          }
-          e.bossJumpTarget = undefined;
-        }
-        if ((e.bossJumpCD ?? 0) <= 0) {
-          this.startBossJump(e);
-          e.bossJumpCD = 20;
-        } else {
-          e.bossJumpCD = Math.max(0, (e.bossJumpCD ?? 0) - dt);
+        e.bossJumpCD=Math.max(0,(e.bossJumpCD ?? 4)-dt);
+        if(e.bossJumpCD===0 && victim.visible && Math.hypot(victim.x-e.x,victim.y-e.y)<320 && this.startBossJump(e,victim)) {
+          e.bossJumpCD=20;continue;
         }
       }
       const dx = victim.x - e.x,
@@ -622,18 +612,6 @@ export class Game {
         d = Math.hypot(dx, dy);
       e.dir = this.direction(dx, dy);
       // --- Elite special behaviors (GDD §11 / P4) ---
-      if (
-        e.ranged && !TEMPLE_RANGED.includes(e.kind) &&
-        victim.visible &&
-        (e.rangedCD ?? 0) <= 0 &&
-        e.windup === 0 &&
-        d < 420 && (!this.navigation || this.navigation.lineClear(e, victim, 0))
-      ) {
-        this.fireEliteProjectile(e, victim);
-        e.rangedCD = 2.5;
-      } else if (e.ranged && !TEMPLE_RANGED.includes(e.kind)) {
-        e.rangedCD = Math.max(0, (e.rangedCD ?? 0) - dt);
-      }
       e.chargeCD = Math.max(0, (e.chargeCD ?? 0) - dt);
       if (e.chargeTarget) {
         e.dir = this.direction(e.chargeTarget.x - e.x, e.chargeTarget.y - e.y);
@@ -712,7 +690,7 @@ export class Game {
             sy += (oy / l) * (30 - l) * 2;
           }
         }
-        const waypoint = this.mapId !== "biche" ? this.navigation?.waypoint(e, victim) ?? victim : victim;
+        const waypoint = this.navigation?.waypoint(e,victim) ?? victim;
         const mx = waypoint.x - e.x, my = waypoint.y - e.y, length = Math.max(1, Math.hypot(mx, my));
         e.dir = this.direction(mx, my);
         const rush =
@@ -895,13 +873,17 @@ export class Game {
     return (((Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) + 2) % 8) + 8) % 8;
   }
   spawnEnemy(kind?: string, summoned = false) {
-    const scheduledElite = this.wave >= 4 && this.spawned === Math.floor(WAVE_BUDGET[this.wave - 1] / 2);
-    if (!kind && this.mapId === "biche" && scheduledElite) kind = "orcBrave";
+    const eliteWave=this.mode==="trial" ? this.wave===2 : [4,7,10,12].includes(this.wave);
+    const scheduledElite = eliteWave && this.spawned === Math.floor(this.spawnBudget/2);
+    if (!kind && scheduledElite) {
+      if(this.mapId==="biche")kind="orcBrave";
+      if(this.mapId==="woma")kind="womaBrave";
+    }
     let m;
     if (kind) m = MONSTERS.find((x) => x.id === kind)!;
     else {
       const map = MAPS[this.mapId];
-      const nonBoss = map.monsterPool.filter((id) => !isBossKind(id) && id !== "orcBrave")
+      const nonBoss = map.monsterPool.filter((id) => !isBossKind(id) && !NATIVE_ELITES.includes(id))
         .map((id) => MONSTERS.find((m) => m.id === id)!);
       const pool = nonBoss.slice(
         0,
@@ -912,7 +894,7 @@ export class Game {
     }
     const a = this.rng.next() * Math.PI * 2,
       r = 440 + this.rng.next() * 140;
-    const nativeElite = ["orcBrave", "womaBrave"].includes(m.id);
+    const nativeElite = NATIVE_ELITES.includes(m.id);
     const elite = nativeElite || (!summoned && !isBossKind(m.id) && scheduledElite);
     const mult = 1 + (this.wave - 1) * 0.13;
     const hp = m.hp * (elite && !nativeElite ? 4 : 1) * mult;
@@ -959,43 +941,28 @@ export class Game {
     return this.enemies.at(-1)!;
   }
   private summonBossMinion(boss: Enemy) {
-    if (this.enemies.length >= 300) return;
-    for (let i = 0; i < 3; i++) {
-      const a = this.rng.next() * Math.PI * 2,
-        r = 70 + this.rng.next() * 60;
-      const x = clamp(boss.x + Math.cos(a) * r, 25, WORLD.w - 25);
-      const y = clamp(boss.y + Math.sin(a) * r, 30, WORLD.h - 20);
-      if (this.enemies.some((e) => e.hp > 0 && Math.hypot(e.x - x, e.y - y) < 30))
-        continue;
-      this.enemies.push({
-        id: ++this.id,
-        kind: "scarecrow",
-        x,
-        y,
-        hp: 20 * (1 + (this.wave - 1) * 0.13),
-        maxHp: 20 * (1 + (this.wave - 1) * 0.13),
-        speed: 40,
-        damage: 3,
-        exp: 3,
-        dir: 4,
-        windup: 0,
-        attackCD: 0,
-        hitAt: -1,
-        burnAt: 0,
-        elite: false,
-        born: this.clock,
-        level: this.wave,
-        defense: 2,
-        magicDefense: 1,
-      });
-      break;
+    for(let i=0;i<2 && this.enemies.length<300;i++) {
+      const candidates=this.navigation?.reachablePoints(boss,70,140)
+        .filter(p=>this.enemies.every(e=>e.hp<=0 || Math.hypot(e.x-p.x,e.y-p.y)>30));
+      const angle=this.rng.next()*Math.PI*2+i*Math.PI;
+      const point=candidates?.length ? this.rng.pick(candidates) : this.navigation ? null :
+        {x:boss.x+Math.cos(angle)*100,y:boss.y+Math.sin(angle)*100};
+      if(!point || !this.canStand(point.x,point.y) || this.obstacles.some(o=>Math.hypot(point.x-o.x,point.y-o.y)<o.r+12))continue;
+      const add=this.spawnEnemy("scarecrow",true);add.x=point.x;add.y=point.y;
     }
   }
-  private startBossJump(e: Enemy) {
-    e.bossJumpTarget = { x: this.player.x, y: this.player.y };
-    e.bossJumpUntil = this.clock + 1;
-    e.windup = 0.8;
-    this.effect("cast", e.x, e.y, 0, 0.8);
+  private startBossJump(e: Enemy, victim: {x:number;y:number}) {
+    const dx=victim.x-e.x,dy=victim.y-e.y,d=Math.max(1,Math.hypot(dx,dy));
+    const intended={x:e.x+dx/d*Math.min(300,d),y:e.y+dy/d*Math.min(300,d)};
+    const safe=(p:{x:number;y:number})=>this.canStand(p.x,p.y) && this.obstacles.every(o=>Math.hypot(p.x-o.x,p.y-o.y)>o.r+12);
+    const candidates=this.navigation?.reachablePoints(e,0,320).filter(safe);
+    const target=safe(intended) && (!this.navigation || this.navigation.connected(e,intended)) ? intended :
+      candidates?.sort((a,b)=>Math.hypot(a.x-intended.x,a.y-intended.y)-Math.hypot(b.x-intended.x,b.y-intended.y))[0];
+    if(!target)return false;
+    e.bossJumpOrigin={x:e.x,y:e.y};e.bossJumpTarget={...target};
+    e.bossJumpWindupUntil=this.clock+0.8;e.bossJumpUntil=this.clock+1.4;
+    e.dir=this.direction(target.x-e.x,target.y-e.y);e.windup=0.8;
+    return true;
   }
   private updateCorpseKing(e: Enemy, dt: number) {
     e.bossSummonCD = Math.max(0, (e.bossSummonCD ?? 4) - dt);
@@ -1010,7 +977,7 @@ export class Game {
         const minion = this.spawnEnemy("zombie", true);
         minion.x = point.x; minion.y = point.y;
       }
-      e.bossSummonCD = e.bossPhase === 2 ? 8 : 12;
+      e.bossSummonCD = 20;
     }
     if (e.stompAt !== undefined) {
       if (this.clock >= e.stompAt) {
@@ -1035,7 +1002,7 @@ export class Game {
   fireEliteProjectile(e: Enemy, target: { x: number; y: number } = this.player) {
     const angle = Math.atan2(target.y-e.y,target.x-e.x);
     const arrow=["skeletonArcher","zumaArcher"].includes(e.kind);
-    const speed=e.kind === "spider" ? 160 : TEMPLE_RANGED.includes(e.kind) ? 180 : arrow ? 300 : 260;
+    const speed=e.kind === "spider" ? 160 : 180;
     for (const offset of e.kind === "zumaArcher" ? [-0.22,0,0.22] : [0]) {
       const a=angle+offset;
       this.projectiles.push({
@@ -1379,7 +1346,7 @@ export class Game {
       "poison",
       "reveal",
     ].includes(s.id);
-    return this.enemies
+    const targets=this.enemies
       .filter(
         (e) =>
           e.hp > 0 &&
@@ -1399,6 +1366,16 @@ export class Game {
             : 0) + Math.hypot(e.x - this.player.x, e.y - this.player.y);
         return priority(a) - priority(b);
       });
+    if(["fireball","bigfireball","talisman"].includes(s.id)) {
+      const focus=targets.find(e=>e.id===s.focusTarget),first=targets[0];
+      const threat=(e:Enemy)=>isBossKind(e.kind) ? 2 : e.elite ? 1 : 0;
+      if(focus && first && threat(focus)>=threat(first) &&
+        Math.hypot(focus.x-this.player.x,focus.y-this.player.y)<=Math.hypot(first.x-this.player.x,first.y-this.player.y)+150) {
+        targets.splice(targets.indexOf(focus),1);targets.unshift(focus);
+      }
+      s.focusTarget=targets[0]?.id;
+    }
+    return targets;
   }
   effect(
     kind: Fx["kind"],
@@ -1564,7 +1541,7 @@ export class Game {
         p.cd = source === "beast" ? 1.6 : 1.1;
         p.attackUntil = this.clock + 0.4;
       } else if (d > (target ? range * 0.75 : 80)) {
-        const waypoint = this.mapId !== "biche" ? this.navigation?.waypoint(p, destination) ?? destination : destination;
+        const waypoint = this.navigation?.waypoint(p,destination) ?? destination;
         const mx = waypoint.x - p.x, my = waypoint.y - p.y, length = Math.max(1, Math.hypot(mx, my));
         p.dir = this.direction(mx, my);
         const nx = clamp(
@@ -1838,7 +1815,7 @@ export class Game {
       if (e.summoned) return;
       const gold =
         Math.round(
-          (this.rng.next() < 0.65 ? 4 : 0) *
+          (this.rng.next() < 0.65 ? Math.round(4*CHAPTER_PRESSURE[this.mapId]) : 0) *
             (1 + (this.stats.gold_gain ?? 0) / 100),
         ) * (e.elite ? 4 : 1);
       const exp = Math.round(e.exp * (1 + (this.stats.exp_gain ?? 0) / 100));
@@ -1952,9 +1929,9 @@ export class Game {
       (s) =>
         s.classId === this.classId && !this.skills.some((a) => a.id === s.id),
     );
-    const guaranteed = unlearned.find((s) =>
-      ["lightning", "firewall", "shield"].includes(s.id),
-    );
+    const early = this.classId === "wizard" ? ["lightning","firewall","shield"] :
+      this.classId === "warrior" ? ["cleave","thrust"] : ["skeleton","poison"];
+    const guaranteed = early.map(id=>unlearned.find(s=>s.id===id)).find(Boolean);
     const newSkill =
       guaranteed ?? (unlearned.length ? this.rng.pick(unlearned) : undefined);
     const candidates: Upgrade[] = [];

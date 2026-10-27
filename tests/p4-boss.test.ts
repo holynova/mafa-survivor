@@ -8,6 +8,7 @@ function setupBoss() {
   const b = g.enemies.at(-1)!;
   b.x = g.player.x;
   b.y = g.player.y;
+  b.bossJumpCD=0;
   return { g, b };
 }
 
@@ -58,13 +59,13 @@ describe("Boss phases & special behaviors (GDD §11 / P4)", () => {
 
   it("boss jump sets airborne target, landing deals damage and clears target", () => {
     const { g, b } = setupBoss();
-    // First step: bossJumpCD is undefined(0) -> triggers a jump
+    // Explicit ready cooldown starts the full warning + flight sequence.
     g.step(1 / 60);
     expect(b.bossJumpTarget).toBeDefined();
     expect(b.bossJumpUntil).toBeGreaterThan(g.clock);
-    // Second step past jump duration: landing damage + target cleared
+    // Real fixed steps cover warning, flight, then landing damage.
     const hpBefore = g.player.hp;
-    g.step(1.1);
+    for(let i=0;i<90;i++)g.step(1/60);
     expect(b.bossJumpTarget).toBeUndefined();
     expect(g.player.hp).toBeLessThan(hpBefore);
   });

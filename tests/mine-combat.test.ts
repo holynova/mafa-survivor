@@ -20,7 +20,7 @@ describe("mine enemy behaviors", () => {
     g.mode="normal"; expect(testBossPhase(g)).toBe(false); expect(e.hp).toBe(hp);
     g.mode="test"; expect(testBossPhase(g)).toBe(true); g.step(1/60);
     expect(e.bossPhase).toBe(2); expect(e.stompAt).toBeGreaterThan(g.clock);
-    expect(e.bossSummonCD).toBe(8); expect(e.stompCD).toBe(6);
+    expect(e.bossSummonCD).toBe(20); expect(e.stompCD).toBe(6);
     expect(g.kills).toBe(0); expect(g.crystals).toBe(0);
   });
   function wall() {
@@ -92,9 +92,9 @@ describe("mine enemy behaviors", () => {
   });
   it("shoots a physical original-arrow projectile that can hit the player", () => {
     const {g,e}=arena("skeletonArcher",200); const hp=g.player.hp;
-    g.step(1/60);
+    advance(g,0.8);
     expect(g.projectiles[0]).toMatchObject({visual:"arrow",faction:"enemy",damageKind:"physical"});
-    advance(g,0.8); expect(g.player.hp).toBeLessThan(hp);
+    advance(g,1.2); expect(g.player.hp).toBeLessThan(hp);
   });
   it("the undead ordinary archer can be affected by holy, while the corpse king cannot be one-shot", () => {
     for(const kind of ["skeletonArcher","corpseKing"]) {

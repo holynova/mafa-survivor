@@ -1,5 +1,5 @@
 import { isGraybox } from "./release";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { sounds } from "./sound";
 import { game } from "./game";
 import { CLASS_IDS, CLASSES, type ClassId } from "./classes";
@@ -17,6 +17,11 @@ export function TestTools() {
       game.classInfo.startingSkill,
     ),
     [slot, setSlot] = useState(0);
+  useEffect(() => {
+    if (["upgrade", "replace", "shop", "won", "dead"].includes(game.phase)) {
+      setOpen(false);
+    }
+  }, [game.phase]);
   if (game.mode !== "test" || game.phase === "lobby") return null;
   return (
     <aside className="test-tools">
@@ -61,6 +66,11 @@ export function TestTools() {
               无敌
             </label>
             <label>
+              <input type="checkbox" checked={game.test.autowalk}
+                onChange={(e)=>{game.test.autowalk=e.target.checked;game.emit();}} />
+              自动走位
+            </label>
+            <label>
               速度{" "}
               <select
                 aria-label="测试速度"
@@ -84,6 +94,7 @@ export function TestTools() {
               {game.phase === "paused" ? "继续" : "暂停"}
             </button>
           </div>
+          {game.test.autowalk && <p>自动避敌和拾取；按方向键或拖动可接管。升级和商店仍由你选择。</p>}
           <label>
             地图{" "}
             <select aria-label="测试地图" value={game.mapId}

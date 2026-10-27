@@ -23,7 +23,7 @@ describe("hostile projectiles", () => {
     const { g, e } = arena();
     const hp = g.player.hp;
     g.fireEliteProjectile(e);
-    advance(g, 1);
+    advance(g, 1.3);
     expect(g.player.hp).toBeLessThan(hp);
     expect(g.projectiles).toHaveLength(0);
   });
@@ -71,7 +71,8 @@ describe("first chapter roster", () => {
     const friend = g.spawnEnemy("scarecrow");
     friend.x = e.x - 80; friend.y = e.y; friend.speed = 0;
     const hp = g.player.hp, monsterHP = friend.hp;
-    g.step(1 / 60);
+    advance(g,0.5);expect(g.projectiles).toHaveLength(0);expect(e.rangedTarget).toBeDefined();
+    advance(g,0.3);
     expect(g.projectiles[0]?.visual).toBe("poison");
     expect(Math.hypot(g.projectiles[0]!.vx, g.projectiles[0]!.vy)).toBeLessThan(200);
     advance(g, 1.6);
