@@ -157,3 +157,10 @@ alpha.2 已成功绕过超大地图目录，但多个技能书共用 `texture/it
 ### alpha.4 素材缓存隔离
 
 发布前增加提交号查询参数，统一覆盖素材清单、图集PNG/JSON、原音频清单/WAV和CSS图标。回归测试先在旧实现失败（不同提交仍得到同一个 manifest.json URL），修复后通过。发布使用隔离工作树固定在已验收源码，避免混入其他阶段正在进行的改动。
+
+### alpha.4 正式发布与公网文件核验
+
+- [标签发布工作流 40473943929](https://github.com/holynova/mafa-survivor/actions/runs/40473943929) build/deploy/release 全部成功；[v0.1.0-alpha.4](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.4) 已于2026-10-27发布。最终冻结发布提交 `0450ff8b34c5643bc69d81b5b32f49f050889ef9`，工作流确认139项游戏测试通过，另3项缓存测试通过；前文123项为本地早期检查时的计数。
+- 在线 version.json 返回 alpha.4 / original / 0450ff8，匹配标签；在线原版清单15,165帧、33图集。33张PNG逐一HEAD返回200且Content-Type=image/png；实际下载原版WAV的SHA-256匹配清单。记录保存在 `.artifacts/alpha4-online-http.json`。
+- 提交版本查询参数统一附在素材URL上，防止浏览器缓存旧图集配新坐标。对应修正已合并回远端main，保留后续阶段。
+- 后台内置浏览器在导航公网时持续超时，最终公网浏览器交互/截图尚未完成；已暂停前台Chrome操作并请求用户许可。不能把本地截图冒称公网截图。本次Release附带的视觉证据明确保留本地文件名。

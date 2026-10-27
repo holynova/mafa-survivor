@@ -30,3 +30,8 @@ Pages 测试地址：https://holynova.github.io/mafa-survivor/
 ## 当前公开版本
 
 [v0.1.0-alpha.3](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.3) 已于2026-10-27完成 build/deploy/release，标签提交 `8c8bd3d`。真实 Chrome 线上试玩、D 键、音效、测试工具和截图验收记录见 QA.md。后续每阶段沿用递增 alpha 标签流程，不重写历史标签。
+
+
+## alpha.4 发布记录
+
+[v0.1.0-alpha.4](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.4) 的139项游戏测试、3项源缓存测试、资源/原图像素/音频检查、构建、部署和Release均成功，发布提交 `0450ff8`。在线version.json和33张原版PNG与原WAV核验通过。本地真实浏览器视觉验收已完成；最终公网交互截图因内置浏览器超时与前台Chrome控制需用户许可而待完成，详见QA.md。
