@@ -78,8 +78,15 @@ Pages 测试地址：https://holynova.github.io/mafa-survivor/
 公网alpha.12／original／6b28d9d、四源地图与walk、42图集、28原WAV哈希和JS入口通过。后台IAB导航25秒超时，最终公网交互／截图仍未完成；Release六张图均标本地来源，另附冻结报告／汇总及公网HTTP。用户现有测试页和前台Chrome未操作，本次独立本地测试页完成后已清理。
 
 
-## 当前公开版本：alpha.13
+## alpha.13 历史发布
 
 [v0.1.0-alpha.13](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.13)固定提交`98434ee9ae4021b4d99894a8e47381276c54ab61`；[工作流40653990168](https://github.com/holynova/mafa-survivor/actions/runs/40653990168)build／deploy／release及Source checks 40653711452成功。313项游戏测试、6项Python、原图／WAV／生产构建、本地真实回复／交易／模型／输入截图通过。干净冻结36局与冻结前逐项相同，0不变量异常／2法师通关；同V5旧引擎亦2通关，新版4局法师实际回复，战士样本未购买新道具，整体平衡未过。
 
 公网alpha.13／original／98434ee、四源地图与walk、42图集、28原WAV哈希和JS入口核验通过；后台IAB导航25秒超时，最终公网实操／截图仍未完成。Release六张图均标本地来源，另附完整冻结／摘要／旧引擎／比较／HTTP五份JSON；用户现有测试页与前台Chrome未操作，本次独立本地页验收后已清理。
+
+
+## 当前公开版本：alpha.14
+
+[v0.1.0-alpha.14](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.14)固定提交`98db73e965449e44728648928fc40ccd58479e64`；[工作流40666265185](https://github.com/holynova/mafa-survivor/actions/runs/40666265185)build／deploy／release及Source checks 40666010504成功。338项游戏测试、6项Python、原图／WAV／生产构建、本地真实文件下载／导入／恢复撤回与模型／输入截图通过。存档整体替换、预览过期保护和同事务回滚已验；不含局中续玩，不作为新平衡证据。
+
+公网alpha.14／original／98db73e、四源地图与walk、42图集、28原WAV哈希和JS入口通过；后台IAB导航30秒超时，最终公网UI／截图仍未完成。Release附三张明确本地截图与存档QA摘要／公网HTTP两份JSON，不公开实际存档文件。用户现有页／前台Chrome未操作。

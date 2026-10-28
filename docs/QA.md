@@ -368,3 +368,11 @@ alpha.2 已成功绕过超大地图目录，但多个技能书共用 `texture/it
 - 预览最初确认按钮在滚动下方；修正为有效预览收起JSON并滚入确认区，最终alpha14-restore-preview.jpg已查看，表格、提示、确认勾选和确认／取消按钮完整可见。保留最近一次恢复点，异常原始数据下载仅供排查；没有把原始异常文件当成有效恢复文件。
 - 最终真实表单换井中月／重盔甲后点战场，D600ms从1104／768→1230.4／768，松键为空、KeyD/d；alpha14-input-forest.jpg已查看，原树冠完整、遮挡轮廓可见，无之前的相邻条带细线。向左进入开阔地后工具生成5半兽人再冻结；alpha14-models-shadows.jpg已查看，仅宣称图中可见人物／怪物完整及原动作阴影落地。warn/error为空。测试模式不写战绩、不发结晶；用户当前页面／前台Chrome未操作。
 - 此阶段没有战斗／经济／策略改动，不额外重复36局；alpha.13的2／36通关、0不变量异常仍是最近一次平衡证据，完整平衡未通过。局中续玩、天赋、高级外观及设备性能继续保留缺口。云端／公网结果另记。
+
+
+### alpha.14 发布与公网核验
+
+- 固定提交`98db73e965449e44728648928fc40ccd58479e64`，[工作流40666265185](https://github.com/holynova/mafa-survivor/actions/runs/40666265185)build／deploy／release成功，Source checks [40666010504](https://github.com/holynova/mafa-survivor/actions/runs/40666010504)成功；[v0.1.0-alpha.14](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.14)为公开预发布。
+- 公网version.json为alpha.14／original／98db73e，四源地图路径／SHA／walk夹具一致，22,709帧／42张PNG逐一HEAD200/image/png，28原WAV实际下载SHA256一致，JS入口200且类型正确；alpha14-online-http.json已附Release。
+- 独立后台IAB打开?stage=v0.1.0-alpha.14在30秒超时，没有取得新版公网UI／截图，不重复已知失败流程或借用旧图。两个本地测试页已清理，用户现有页／前台Chrome没有操作。
+- Release附三张本地生产图（最终恢复预览、D键与树冠、完整人物怪物／原动作阴影）及两份摘要JSON（本地存档QA、公网HTTP）；实际导出存档／夹具不公开上传。局中续玩、天赋、完整平衡／性能／高级外观与GDD退出条件继续开发。
