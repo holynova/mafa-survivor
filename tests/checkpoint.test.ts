@@ -152,6 +152,7 @@ describe("wave-boundary checkpoints", () => {
     expect(sanitizeCheckpoint({ ...cp, version: 99 })).toBeNull();
     expect(sanitizeCheckpoint({ ...cp, wave: 13 })).toBeNull();
     expect(sanitizeCheckpoint({ ...cp, skills: [{ ...cp.skills[0], id: "made-up" }] })).toBeNull();
+    expect(sanitizeCheckpoint({ ...cp, phase: "upgrade", choices: [] })).toBeNull();
     expect(g.resumeCheckpoint({ ...cp, phase: "shop", offers: [{ itemId: "made-up" }] })).toBe(false);
     expect(g.phase).toBe("battle");
   });

@@ -193,6 +193,7 @@ export function sanitizeCheckpoint(value: unknown): RunCheckpoint | null {
         ? Boolean(c.stat && c.stat in STAT_NAMES)
         : Boolean(c.skill && c.skill in skillIdsFor(cp.classId)))
     : [];
+  if (cp.phase === "upgrade" && cp.choices.length === 0) return null;
   if (cp.phase === "replace") {
     if (!cp.pendingSkill || !(cp.pendingSkill in skillIdsFor(cp.classId))) return null;
   } else {
