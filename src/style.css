@@ -398,6 +398,22 @@ kbd {
   justify-content: space-between;
   font-size: 13px;
 }
+.save-manager { border-bottom: 1px solid var(--line); padding-bottom: 22px; margin-bottom: 12px; font-size: 12px; }
+.save-manager h2 { font-size: 18px; margin: 12px 0; }
+.save-manager p { line-height: 1.8; color: var(--muted); margin: 10px 0; }
+.save-actions { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px; margin: 12px 0; }
+.save-manager button, .save-file { border: 1px solid var(--line); padding: 9px 12px; background: #182219; color: var(--gold); border-radius: 3px; font: inherit; }
+.save-file { display: grid; gap: 8px; max-width: 100%; }
+.save-file input { max-width: 100%; width: 220px; font-size: 11px; }
+.save-json summary { cursor: pointer; padding: 10px 0; color: var(--gold); }
+.save-json textarea { display: block; width: 100%; box-sizing: border-box; height: 115px; resize: vertical; padding: 8px; margin: 8px 0; background: #101810; color: #eee0b9; border: 1px solid var(--line); font: 11px monospace; }
+.save-preview { padding: 12px; border: 1px solid var(--gold); margin-top: 12px; }
+.save-preview h3 { font-size: 15px; margin: 0; }
+.save-preview table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.save-preview th, .save-preview td { text-align: left; vertical-align: top; padding: 8px 5px; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.save-preview th:first-child { white-space: nowrap; }
+.save-confirm { display: flex; gap: 8px; align-items: center; line-height: 1.8; }
+.save-confirm input { width: 16px; height: 16px; margin: 0; flex: none; accent-color: var(--gold); }
 .records article div {
   display: flex;
   flex-direction: column;

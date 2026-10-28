@@ -1,16 +1,13 @@
 import { openDB, type DBSchema, type IDBPTransaction } from "idb";
-import { z } from "zod";
 import type { RunResult } from "./game";
 import { MAPS, PLAYABLE_MAP_IDS, type MapId } from "./content";
-
-const progressSchema = z.object({
-  schemaVersion: z.literal(1), crystals: z.number().int().nonnegative(),
-  unlockedMaps: z.array(z.enum(["biche", "mine", "woma", "zuma"])),
-});
-export type Progress = z.infer<typeof progressSchema>;
+import { progressSchema, parseBackup, type SaveBackup, type Progress } from "./save-format";
+export type { Progress } from "./save-format";
+type RawSnapshot = { progress: unknown; runs: (RunResult & { savedAt: number })[] };
+type RestorePoint = RawSnapshot & { kind: "restore-point"; createdAt: number };
 interface GameDB extends DBSchema {
   runs: { key: string; value: RunResult & { savedAt: number } };
-  meta: { key: string; value: Progress };
+  meta: { key: string; value: Progress | RestorePoint };
 }
 const db = () => openDB<GameDB>("mafa-survivor", 2, {
   upgrade(database) {
@@ -79,4 +76,64 @@ export async function history(): Promise<RunResult[]> {
     const rows = await database.getAll("runs");
     return rows.sort((a, b) => b.savedAt - a.savedAt).slice(0, 10);
   } finally { database.close(); }
+}
+
+async function snapshot(tx: ProgressTransaction): Promise<RawSnapshot> {
+  const runs = await tx.objectStore("runs").getAll();
+  runs.sort((a, b) => String(a.runId).localeCompare(String(b.runId)));
+  return { progress: await tx.objectStore("meta").get("progress"), runs };
+}
+const envelope = (data: RawSnapshot, exportedAt = Date.now()) => ({ format: "mafa-survivor-save", version: 1, exportedAt, ...data });
+export async function exportSave(): Promise<string> {
+  return withProgressTransaction(async tx => {
+    await readProgress(tx); // Migrate a valid legacy save before exporting.
+    const text = JSON.stringify(envelope(await snapshot(tx)), null, 2);
+    parseBackup(text);
+    return text;
+  });
+}
+// Preserve malformed data as well; a raw rescue file is not necessarily importable.
+export async function exportRawSave(previous = false): Promise<string> {
+  return withProgressTransaction(async tx => {
+    const data = previous ? await tx.objectStore("meta").get("before-restore") : await snapshot(tx);
+    if (!data) throw new Error("还没有恢复前备份。");
+    return JSON.stringify({ format: "mafa-survivor-raw", version: 1, exportedAt: Date.now(), data }, null, 2);
+  });
+}
+export type RestorePreview = {
+  backup: SaveBackup; revision: string;
+  before: { progress: Progress | null; runs: number };
+};
+export async function prepareRestore(text?: string): Promise<RestorePreview> {
+  const supplied = text === undefined ? undefined : parseBackup(text);
+  return withProgressTransaction(async tx => {
+    const current = await snapshot(tx);
+    let backup = supplied;
+    if (!backup) {
+      const previous = await tx.objectStore("meta").get("before-restore");
+      if (!previous || !("kind" in previous)) throw new Error("还没有恢复前备份。");
+      const progress = previous.progress ?? { schemaVersion: 1, crystals: previous.runs.reduce((total, run) =>
+        total + (run.mode === "normal" && run.won && Number.isSafeInteger(run.crystals) && run.crystals > 0 ? run.crystals : 0), 0), unlockedMaps: ["biche"] };
+      try { backup = parseBackup(JSON.stringify(envelope({ progress, runs: previous.runs }, previous.createdAt))); }
+      catch { throw new Error("恢复前的数据含异常，无法直接恢复；可下载原始数据保留排查。当前存档未修改。"); }
+    }
+    const parsed = progressSchema.safeParse(current.progress);
+    return { backup, revision: JSON.stringify(current), before: { progress: parsed.success ? parsed.data : null, runs: current.runs.length } };
+  });
+}
+export async function restoreSave(preview: RestorePreview): Promise<Progress> {
+  const backup = parseBackup(JSON.stringify(preview.backup));
+  return withProgressTransaction(async tx => {
+    const current = await snapshot(tx);
+    if (JSON.stringify(current) !== preview.revision) throw new Error("预览后本机存档已变化，请重新选择备份并预览。");
+    const meta = tx.objectStore("meta"), runs = tx.objectStore("runs");
+    await meta.put({ kind: "restore-point", createdAt: Date.now(), ...current }, "before-restore");
+    await runs.clear();
+    for (const run of backup.runs) await runs.add(run);
+    await meta.put(backup.progress, "progress");
+    return backup.progress;
+  });
+}
+export async function hasRestorePoint(): Promise<boolean> {
+  return withProgressTransaction(async tx => !!(await tx.objectStore("meta").get("before-restore")));
 }

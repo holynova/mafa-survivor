@@ -31,6 +31,7 @@ import {
 } from "./release";
 import { TestTools } from "./TestTools";
 import { saveRun, history, loadProgress, unlockChapter } from "./save";
+import { SaveManager } from "./SaveManager";
 const time = (seconds: number) =>
   `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 function Art({
@@ -399,6 +400,10 @@ export function App() {
             )}
             {tab === "records" && (
               <div className="records">
+                <SaveManager onBusyChange={setProgressBusy} onRestored={async progress => {
+                  game.applyProgress(progress); setRecords(await history());
+                  setSaveError(""); setChapterError("");
+                }} />
                 {records.length ? (
                   records.map((r) => (
                     <article key={r.runId}>
