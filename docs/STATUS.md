@@ -111,5 +111,5 @@
 ## 版本与证据
 
 - [公开游戏](https://holynova.github.io/mafa-survivor/)，当前alpha.16标签提交`adb2d99`；390项游戏测试与云端部署成功。本地生产页结算DPS／购买／属性与公网试玩结算／战绩展开、四源地图／42图集／28原WAV已验。完整平衡、装备使用率与300怪性能仍未完成；用户现有页面保留。
-- 原始产品基线：GDD.md；逐项未完成审计：ACCEPTANCE.md；素材及授权范围：ASSETS.md、asset-authorization.json；阶段证据：QA.md。
+- 原始产品基线：GDD.md；逐项未完成审计：ACCEPTANCE.md；路线、待办与验收门禁：ROADMAP.md（GitHub Issues #1–#6）；素材及授权范围：ASSETS.md、asset-authorization.json；阶段证据：QA.md。
 - 原版公开分发依据是项目所有人的明确确认；保留固定源提交、逐帧哈希与来源，不冒称独立法律核验。
