@@ -109,3 +109,8 @@ Pages 测试地址：https://holynova.github.io/mafa-survivor/
 ## alpha.17 已发布
 
 [v0.1.0-alpha.17](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.17)固定提交`0b21870dfc4947185b4164b70277e5d6c8d83472`；[Actions 40701022514](https://github.com/holynova/mafa-survivor/actions/runs/40701022514)构建／部署／Release及Source checks 40701022378成功。403测试、6Python、原图／WAV／生产构建通过；干净6283837的36局0异常／4法师通关，整体平衡仍未过。公网version original与标签一致，后台真实喷火与红蓝毒定格已操作并截图，证据附Release。
+
+
+## alpha.19 血瓶与原版掉落、伤亡反馈
+
+[v0.1.0-alpha.19](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.19)发布提交`c25475c906978d016c2099c622a11c076fa6b0e3`；[Pages与Release](https://github.com/holynova/mafa-survivor/actions/runs/40749747882)和[Source checks](https://github.com/holynova/mafa-survivor/actions/runs/40749741925)成功。429项游戏测试／7项Python／原图像素／29个WAV／生产构建通过，干净13ae123固定V5控制器72局0异常、4法师通关，整体平衡仍未通过。公网版本original／alpha.19／c25475c匹配；真实后台浏览器验证五档金币、原版掉落、血瓶实际回复7、受击和阵亡音效计数各1、测试结算0结晶。截图、诊断和矩阵附Release，未操作用户现有页面。

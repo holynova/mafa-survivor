@@ -455,3 +455,5 @@ alpha.18最终干净72局：`f08897690e283269d150a067470927ec8e99e307`、sourceD
 alpha.19最终干净72局：`13ae123a4fc978930b8ee0d634c17d4427c6f181`，sourceDirty=false，固定V5策略SHA `f49f1e08039bc1c25d096410461eb68c0907d3f69a5bc207e90755a88d83d694`，八章×三职业×三种子全部终结／0异常，4局法师通关（比奇176／17／991，矿洞176）。alpha.18也是4局，但矿洞通关种子不同；新增血瓶随机判定与实战回复改变了战斗轨迹，不声称逐项相同或整体平衡已通过。
 
 390×844真实iframe视口中实际点击「验证血瓶拾取」，HP100/100、实际回血7；面板可滚动到新增四个测试按钮与音效／血瓶统计。alpha19-mobile.jpg和alpha19-mobile-diagnostics.jpg已保存查看，按钮与诊断未超出窄屏横向边界。测试HTML仅在忽略的dist，不属于发布产物。
+
+alpha.19已公开发布：标签`c25475c906978d016c2099c622a11c076fa6b0e3`，Stage release and Pages **40749747882**的build／deploy／release全部成功，Source checks **40749741925**成功。公网version.json核对为original／v0.1.0-alpha.19／c25475c，后台独立IAB24实际进入测试并点击原版掉落展陈、真实回血、受伤与死亡：已保存查看alpha19-online-loot.jpg、alpha19-online-healing.jpg、alpha19-online-death-action.jpg、alpha19-online-sound-result.jpg；分别可见五档金币／装备落地图、实际回血7与余药、结算前的死亡动作起帧、受击1／阵亡1与0结晶。公共页面warn／error日志为空。截图、诊断文本、在线版本与干净72局JSON附在Release。用户现有5182页面与前台Chrome未操作。
