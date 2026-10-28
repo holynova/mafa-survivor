@@ -153,6 +153,8 @@ describe("wave-boundary checkpoints", () => {
     expect(sanitizeCheckpoint({ ...cp, wave: 13 })).toBeNull();
     expect(sanitizeCheckpoint({ ...cp, skills: [{ ...cp.skills[0], id: "made-up" }] })).toBeNull();
     expect(sanitizeCheckpoint({ ...cp, phase: "upgrade", choices: [] })).toBeNull();
+    const polluted = sanitizeCheckpoint({ ...cp, upgrades: JSON.parse('{"__proto__":5}') });
+    expect(polluted && Object.hasOwn(polluted.upgrades, "__proto__")).toBe(false);
     expect(g.resumeCheckpoint({ ...cp, phase: "shop", offers: [{ itemId: "made-up" }] })).toBe(false);
     expect(g.phase).toBe("battle");
   });

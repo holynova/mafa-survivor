@@ -184,18 +184,18 @@ export function sanitizeCheckpoint(value: unknown): RunCheckpoint | null {
     }),
   );
   cp.upgrades = Object.fromEntries(
-    Object.entries(cp.upgrades).filter(([key]) => key in STAT_NAMES),
+    Object.entries(cp.upgrades).filter(([key]) => Object.hasOwn(STAT_NAMES, key)),
   ) as RunCheckpoint["upgrades"];
   cp.offers = cp.offers.filter((o) => itemIds.has(o.itemId));
   if (cp.phase !== "shop") cp.offers = [];
   cp.choices = cp.phase === "upgrade"
     ? cp.choices.filter((c) => c.kind === "stat"
-        ? Boolean(c.stat && c.stat in STAT_NAMES)
-        : Boolean(c.skill && c.skill in skillIdsFor(cp.classId)))
+        ? Boolean(c.stat && Object.hasOwn(STAT_NAMES, c.stat))
+        : Boolean(c.skill && skillIdsFor(cp.classId).has(c.skill)))
     : [];
   if (cp.phase === "upgrade" && cp.choices.length === 0) return null;
   if (cp.phase === "replace") {
-    if (!cp.pendingSkill || !(cp.pendingSkill in skillIdsFor(cp.classId))) return null;
+    if (!cp.pendingSkill || !skillIdsFor(cp.classId).has(cp.pendingSkill)) return null;
   } else {
     cp.pendingSkill = null;
   }
@@ -203,6 +203,6 @@ export function sanitizeCheckpoint(value: unknown): RunCheckpoint | null {
 }
 
 const skillIdsFor = (classId: ClassId) =>
-  Object.fromEntries(SKILLS.filter((s) => s.classId === classId).map((s) => [s.id, true]));
+  new Set<string>(SKILLS.filter((s) => s.classId === classId).map((s) => s.id));
 
 export const itemById = (id: string): Item | undefined => ITEMS.find((i) => i.id === id);
