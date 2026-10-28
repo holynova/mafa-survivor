@@ -226,7 +226,7 @@ describe("combat and state transitions", () => {
   it("shield duration cannot cover the minimum cooldown even at maximum bonuses", () => {
     const g = start();
     g.spawnEnemy("orc");
-    g.enemies[0].x = g.player.x + 100;
+    Object.assign(g.enemies[0], {x:g.player.x+100,y:g.player.y});
     g.upgrades = { cooldown_reduction: 1000, duration: 1000 };
     g.recompute();
     const s = g.newSkill("shield");

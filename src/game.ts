@@ -19,6 +19,7 @@ import {
   PLAYABLE_MAP_IDS,
 } from "./content";
 import {updateRangedEnemy} from "./enemy-ai";
+import {ATTACK_CADENCE,cooldownScale,outputScale} from "./cadence";
 import {newCombatRecovery,recoverHit,type DamageOrigin,type CombatHealing} from "./combat-recovery";
 import {newDamageTaken,recordDamageTaken,type DamageTaken} from "./damage-taken";
 import { TEMPLE_RANGED, updateTempleEnemy } from "./temple";
@@ -405,6 +406,7 @@ export class Game {
   get pickupRadius() {
     return 70 * (1 + (this.stats.pickup_radius ?? 0) / 100);
   }
+  get detectionRange() { return 300*(1+(this.stats.detection_range??0)/100); }
   newSkill(id: SkillId): Skill {
     return {
       id,
@@ -1201,7 +1203,7 @@ export class Game {
       (1 + (this.stats.all_damage_pct ?? 0) / 100);
     if (this.rng.next() < (this.stats.crit_chance ?? 0) / 100)
       damage *= 1.5 + (this.stats.crit_mult ?? 0);
-    return Math.round(damage);
+    return Math.round(damage*outputScale(s.id));
   }
   rollStat(prefix: "dc" | "mc" | "sc" | "def" | "mdef", lucky = true) {
     return rollRange(
@@ -1252,7 +1254,7 @@ export class Game {
       (1 + (this.stats.all_damage_pct ?? 0) / 100);
     if (this.rng.next() < (this.stats.crit_chance ?? 0) / 100)
       damage *= 1.5 + (this.stats.crit_mult ?? 0);
-    return damage;
+    return damage*ATTACK_CADENCE;
   }
   basicAttack() {
     if (
@@ -1288,7 +1290,7 @@ export class Game {
     const target = targets[0];
     if (!target) return false;
     this.meleeAim(targets);
-    this.basicCD = this.classInfo.interval;
+    this.basicCD = this.classInfo.interval*ATTACK_CADENCE;
     this.sound(this.equipment.weapon ? "attack" : "unarmed");
     this.player.attackUntil = this.clock + 0.35;
     this.player.attackDir = this.player.dir;
@@ -1323,6 +1325,7 @@ export class Game {
         : 1;
     const raw =
       total *
+      ATTACK_CADENCE *
       crit *
       (1 + (this.stats.dc_bonus_pct ?? 0) / 100) *
       (1 + (this.stats.all_damage_pct ?? 0) / 100);
@@ -1532,7 +1535,7 @@ export class Game {
       .filter(
         (e) =>
           e.hp > 0 &&
-          Math.hypot(e.x - this.player.x, e.y - this.player.y) < 620 &&
+          Math.hypot(e.x - this.player.x, e.y - this.player.y) <= this.detectionRange &&
           (!["fireball", "bigfireball", "talisman"].includes(s.id) || !this.navigation || this.navigation.lineClear(this.player, e, 0)),
       )
       .sort((a, b) => {
@@ -1698,6 +1701,7 @@ export class Game {
         const sc = source === "charm" ? 0 : this.rollStat("sc") * 0.8;
         const damage = Math.round(
           (p.damage + sc) *
+            outputScale(source) *
             (1 + (skill?.summonPower ?? 0) / 100) *
             (1 + (this.stats.summon_damage ?? 0) / 100) *
             (1 + (this.stats.all_damage_pct ?? 0) / 100) *
@@ -1720,7 +1724,7 @@ export class Game {
           this.sound("beastflame");
           this.effect("beastflame", p.x, p.y, range, 0.6, p.dir);
         } else this.hit(target, damage, source, "physical", "summon");
-        p.cd = source === "beast" ? 1.6 : 1.1;
+        p.cd = (source === "beast" ? 1.6 : 1.1)*ATTACK_CADENCE;
         p.attackUntil = this.clock + 0.4;
       } else if (d > (target ? range * 0.75 : 80)) {
         const waypoint = this.navigation?.waypoint(p,destination) ?? destination;
@@ -1908,7 +1912,7 @@ export class Game {
         p.x,
         p.y,
         length,
-        0.55,
+        s.id==="hellfire" ? 1 : 0.55,
         this.direction(aim.x - p.x, aim.y - p.y),
       );
     } else if (s.id === "nova") {
@@ -1937,7 +1941,7 @@ export class Game {
             ? 12
             : s.id === "groupInvisible"
               ? 15
-              : 0.4,
+              : 0.4*cooldownScale(s.id),
       getSkill(s.id).cooldown *
         (1 - (this.stats.cooldown_reduction ?? 0) / 100) *
         (1 - Math.min(60, s.localCDR) / 100),
@@ -2214,6 +2218,11 @@ export class Game {
           description: "冷却缩减 +3%，最高有效加成 40%。",
           stat: "cooldown_reduction",
           value: 3,
+        },
+        {
+          id:"stat-detection",kind:"stat",name:"洞察强化",
+          description:"法术侦测距离 +20%，基础300px，最高450px；不扩大技能伤害范围。",
+          stat:"detection_range",value:20,
         },
       ] satisfies Upgrade[]
     ).filter(

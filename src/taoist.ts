@@ -2,6 +2,7 @@ import type { Enemy, Game, Pet, Skill } from "./game";
 import type { SkillId } from "./spells";
 import { isBossKind } from "./content";
 import { clamp } from "./rules";
+import {outputScale} from "./cadence";
 
 export type ActorBuffs = {
   invisibleUntil: number;
@@ -107,7 +108,7 @@ function heal(g: Game, id: number, amount: number, source: SkillId) {
   if (!friend) return 0;
   const net = Math.min(
     friend.maxHp - friend.actor.hp,
-    amount * (1 + (g.stats.healing_received ?? 0) / 100),
+    amount * outputScale(source) * (1 + (g.stats.healing_received ?? 0) / 100),
   );
   if (net <= 0) return 0;
   friend.actor.hp += net;
@@ -393,7 +394,7 @@ export function taoDamage(g: Game, base: number, s: Skill) {
       (1 + s.power / 100) *
       (1 + (g.stats.sc_bonus_pct ?? 0) / 100) *
       (1 + (g.stats.all_damage_pct ?? 0) / 100) *
-      crit,
+      crit*outputScale(s.id),
   );
 }
 export function updateTaoist(g: Game) {

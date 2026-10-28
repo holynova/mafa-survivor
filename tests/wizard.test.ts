@@ -26,25 +26,25 @@ function fire(g: Game) {
   g.cast(g.skills[0]);
 }
 describe("complete classic wizard skill pool", () => {
-  it("has exactly the fourteen named classic skills with GDD cooldowns", () => {
+  it("has exactly the fourteen named classic skills with faster balanced attack cooldowns", () => {
     expect(SKILLS).toHaveLength(14);
     expect(new Set(SKILLS.map((s) => s.id)).size).toBe(14);
     expect(Object.fromEntries(SKILLS.map((s) => [s.name, s.cooldown]))).toEqual(
       {
-        火球术: 1.1,
+        火球术: 0.88,
         抗拒火环: 11,
         诱惑之光: 7,
-        地狱火: 2.2,
-        雷电术: 1.35,
-        大火球: 1.65,
+        地狱火: 1.76,
+        雷电术: 1.08,
+        大火球: 1.32,
         瞬息移动: 24,
-        爆裂火焰: 2.6,
-        火墙: 6.5,
-        疾光电影: 3.2,
-        地狱雷光: 4.5,
+        爆裂火焰: 2.08,
+        火墙: 5.2,
+        疾光电影: 2.56,
+        地狱雷光: 3.6,
         魔法盾: 15,
         圣言术: 7.5,
-        冰咆哮: 4,
+        冰咆哮: 3.2,
       },
     );
   });
@@ -121,7 +121,7 @@ describe("complete classic wizard skill pool", () => {
     enemy(g, "cat", 40, 30);
     fire(g);
     expect(g.enemies.every((e) => e.hp < 1000)).toBe(true);
-    expect(g.skills[0].cd).toBe(4.5);
+    expect(g.skills[0].cd).toBe(3.6);
   });
   it("holy ignores living enemies and never instantly kills an undead boss or elite", () => {
     const g = setup("holy"),

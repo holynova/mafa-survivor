@@ -41,7 +41,7 @@ function skill(
 }
 
 describe("warrior class and equipment", () => {
-  it("offers the six exact warrior skills with GDD cooldowns", () => {
+  it("offers the six exact warrior skills with faster balanced attack cooldowns", () => {
     expect(
       Object.fromEntries(
         SKILLS.filter((s) => s.classId === "warrior").map((s) => [
@@ -51,11 +51,11 @@ describe("warrior class and equipment", () => {
       ),
     ).toEqual({
       基本剑术: 0,
-      攻杀剑术: 2,
-      刺杀剑术: 2.7,
-      半月弯刀: 3,
+      攻杀剑术: 1.6,
+      刺杀剑术: 2.16,
+      半月弯刀: 2.4,
       野蛮冲撞: 12,
-      烈火剑法: 6.5,
+      烈火剑法: 5.2,
     });
   });
   it("starts with warrior health, defense and one skill; changing class is lobby-only", () => {
@@ -147,7 +147,7 @@ describe("independent ordinary attacks and charged swings", () => {
     expect(e.hp).toBe(10000);
     g.basicAttack();
     const first = 10000 - e.hp;
-    expect(first).toBeGreaterThan(40);
+    expect(first).toBeGreaterThan(32);
     expect(g.charges).toEqual({});
     expect(g.projectiles).toHaveLength(0);
     expect(Object.values(g.damageDealt).reduce((a, b) => a + b, 0)).toBeCloseTo(
@@ -170,7 +170,7 @@ describe("independent ordinary attacks and charged swings", () => {
     expect(g.charges).toEqual({});
     g.enemies[0].x = g.player.x + 40;
     g.cast(s);
-    expect(s.cd).toBe(2);
+    expect(s.cd).toBe(1.6);
     s.cd = 0;
     g.cast(s);
     expect(s.cd).toBe(0);
@@ -205,7 +205,7 @@ describe("directional melee and collision-safe dash", () => {
     expect(a.hp).toBeLessThan(10000);
     expect(b.hp).toBeLessThan(10000);
     for (const e of [side, rear, far]) expect(e.hp).toBe(10000);
-    expect(s.cd).toBe(2.7);
+    expect(s.cd).toBe(2.16);
     const single = setup();
     single.skills = [];
     const t = skill(single, "thrust");

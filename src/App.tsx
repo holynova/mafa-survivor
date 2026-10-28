@@ -1019,6 +1019,7 @@ export function App() {
                 ["幸运", game.stats.luck ?? 0],
                 ["冷却缩减", (game.stats.cooldown_reduction ?? 0) + "%"],
                 ["拾取半径", Math.round(game.pickupRadius) + " px"],
+                ["侦测距离", Math.round(game.detectionRange) + " px"],
                 [
                   game.classId === "warrior" ? "物理伤害" : game.classId === "taoist" ? "道术伤害" : "魔法伤害",
                   "+" +

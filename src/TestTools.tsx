@@ -9,7 +9,7 @@ import { inputDiagnostics } from "./input";
 import { hasWorldAppearance } from "./appearance";
 import { appearanceStatus } from "./renderer";
 import { ITEMS, getItem } from "./content";
-import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall } from "./test-mode";
+import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual } from "./test-mode";
 import {damageSourceName} from "./damage-taken";
 export function TestTools() {
   const [open, setOpen] = useState(true),
@@ -61,6 +61,12 @@ export function TestTools() {
             {Object.entries(game.damageTaken.sources).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([source,value])=>
               <span key={source}>{damageSourceName(source)} {value.toFixed(2)}<br /></span>)}
           </output>
+          <label><input type="checkbox" checked={game.test.showDetection} onChange={e=>{game.test.showDetection=e.target.checked;game.emit();}} />显示侦测圈 · {Math.round(game.detectionRange)}px</label>
+          <div className="test-row">
+            <button onClick={()=>testSpellVisual(game,"hellfire")}>地狱火定格样例</button>
+            <button onClick={()=>testSpellVisual(game,"beast")}>神兽喷火定格样例</button>
+            <button onClick={()=>testSpellVisual(game,"poison")}>红蓝中毒定格样例</button>
+          </div>
           {game.mapId==="mine" && <>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testIncomingWall(game)}>重置并载入敌伤隔墙样例</button>
             {game.test.incomingWallSample && <>

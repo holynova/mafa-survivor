@@ -15,6 +15,7 @@ export const newTestSettings = () => ({
   visualEpoch: 0,
   recoverySample:false,
   incomingWallSample:false,
+  showDetection:false,
 });
 export function testSpawn(g: Game, kind: string, count: number) {
   if (g.mode !== "test" || !["battle", "paused"].includes(g.phase)) return;
@@ -67,6 +68,33 @@ export function testClear(g: Game) {
   g.drops = [];
   g.floating = [];
   g.emit();
+}
+/** Freeze actual casts for visual inspection; ordinary runs cannot load it. */
+export function testSpellVisual(g: Game, sample: "hellfire" | "beast" | "poison") {
+  if (g.mode !== "test") return false;
+  g.start("test", 176, sample === "hellfire" ? "wizard" : "taoist", false, "biche");
+  g.test.spawning = false;
+  g.basicCD = Infinity;
+  const point = g.navigation?.reachablePoints(g.player, 130, 210).sort((a,b)=>
+    Math.hypot(a.x-g.player.x+170,a.y-g.player.y)-Math.hypot(b.x-g.player.x+170,b.y-g.player.y)).find(p =>
+    g.attackLineClear(g.player, p)) ?? {x:g.player.x+170,y:g.player.y};
+  const enemy = g.spawnEnemy("orcWarrior");
+  Object.assign(enemy, point, {hp:10000,maxHp:10000,speed:0,attackCD:Infinity});
+  const skill = g.newSkill(sample);
+  skill.cd=0;g.skills=[skill];g.cast(skill);
+  if (sample === "poison") {
+    // The first enemy has green poison; give the second a higher target weight.
+    const other=g.spawnEnemy("orcWarrior");
+    Object.assign(other,{x:point.x,y:point.y+60,hp:11000,maxHp:11000,speed:0,attackCD:Infinity});
+    g.setPoisonMode("red");skill.cd=0;g.cast(skill);
+  }
+  for (let i=0;i<360;i++) {
+    g.step(1/60);
+    if (sample!=="beast" || g.effects.some(f=>f.kind==="beastflame")) break;
+  }
+  for(let i=0;i<12;i++)g.step(1/60);
+  g.pause();g.emit();
+  return sample!=="beast" || g.effects.some(f=>f.kind==="beastflame");
 }
 /** Isolated, source-map wall probe. No ordinary run can load this scenario. */
 export function testMeleeWall(g: Game) {

@@ -41,7 +41,9 @@ export type StatKey =
   | "crit_chance"
   | "crit_mult"
   | "dodge"
-  | "projectile_speed";
+  | "projectile_speed"
+  | "detection_range";
+// Acquisition range is separate from projectile travel and area radius.
 export type Bonuses = Partial<Record<StatKey, number>>;
 export const STAT_NAMES: Record<StatKey, string> = {
   dc_min: "攻击下限",
@@ -82,6 +84,7 @@ export const STAT_NAMES: Record<StatKey, string> = {
   crit_mult: "暴击倍率",
   dodge: "闪避",
   projectile_speed: "弹速",
+  detection_range: "侦测距离",
 };
 export const itemSchema = z.object({
   id: z.string(),
@@ -259,6 +262,7 @@ const passiveDrafts = [
   ),
   // Append to preserve the IDs already stored in historical runs.
   ...draft.passiveItemProposals.filter(x=>["hp_on_kill","lifesteal"].includes(String(x[1]))),
+  ["洞察强化","detection_range",20,125,3,"普通"],
 ];
 const passives: Item[] = passiveDrafts.map(
   (x, i) =>

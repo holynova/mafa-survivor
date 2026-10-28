@@ -56,6 +56,8 @@ export function effective(key: StatKey, raw: number) {
       return Math.min(30, raw);
     case "projectile_speed":
       return Math.min(100, raw);
+    case "detection_range":
+      return Math.min(50, Math.max(0,raw));
     default:
       return raw;
   }

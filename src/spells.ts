@@ -1,4 +1,5 @@
 import { z } from "zod";
+import {cooldownScale} from "./cadence";
 import { CLASS_IDS } from "./classes";
 export const SKILL_IDS = [
   "fireball",
@@ -478,6 +479,7 @@ const definitions = [
 ] as const;
 export const SKILLS = definitions.map((x) => ({
   ...skillSchema.parse(x),
+  cooldown:Math.round(x.cooldown*cooldownScale(x.id)*1000)/1000,
   branches: [...x.branches] as Branch[],
 }));
 export const getSkill = (id: SkillId) => {

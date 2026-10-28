@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import {alignCameraScroll} from "./camera-grid";
 import {heroPose} from "./hero-pose";
+import {effectSprites,poisonTint} from "./effect-visual";
 import {simulationInput} from "./simulation";
 import { mapObjectAlpha, mapObjectDepth, coversActor, type Occluder } from "./map-render";
 import { assetUrl, isGraybox } from "./release";
@@ -442,6 +443,7 @@ class BattleScene extends Phaser.Scene {
     time: number,
     depth: number,
     scale = 1,
+    frameRate = 10,
   ) {
     if (isGraybox) {
       this.bars
@@ -453,7 +455,7 @@ class BattleScene extends Phaser.Scene {
     if (frames?.length)
       this.draw(
         key,
-        frames[Math.floor(time * 10) % frames.length],
+        frames[Math.floor(time * frameRate) % frames.length],
         x,
         y,
         depth,
@@ -609,6 +611,8 @@ class BattleScene extends Phaser.Scene {
           scale,
           jumpHeight,
         );
+        const tint=poisonTint(e,game.clock);
+        if(tint!==undefined)this.bodies.get("enemy-"+e.id)?.setTint(tint);
         if (e.elite || e.hp < e.maxHp) {
           const w = isBossKind(e.kind) ? 64 : 32;
           this.bars
@@ -724,30 +728,22 @@ class BattleScene extends Phaser.Scene {
             ),
           );
         } else {
-          const animation = [
-            "beam",
-            "powerstrike",
-            "thrust",
-            "cleave",
-            "firesword",
-            "womaShock",
-          ].includes(f.kind)
-            ? f.kind + "/" + (f.dir ?? 4)
-            : f.kind;
-          this.fx(
-            "fx-" + f.id,
-            animation,
-            f.x,
-            f.y,
-            f.total - f.life,
-            2100,
+          effectSprites(f).forEach((sprite,index)=>this.fx(
+            "fx-" + f.id+"-"+index,
+            sprite.animation,
+            sprite.x,
+            sprite.y,
+            sprite.time,
+            sprite.depth,
             ["explosion", "ice", "nova", "repulse"].includes(f.kind)
               ? Math.max(0.8, f.radius / 120)
               : 1,
-          );
+            sprite.frameRate,
+          ));
         }
       }
       const hero=heroPose(game,_time/1000);
+      if(game.mode==="test" && game.test.showDetection)this.bars.lineStyle(2,0x71c9e8,.55).strokeCircle(game.player.x,game.player.y,game.detectionRange);
       this.actor(
         "hero",
         game.classId,
