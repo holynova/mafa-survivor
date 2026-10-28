@@ -35,6 +35,7 @@ import {
 } from "./taoist";
 import { canStand, getWorldLayout, WorldNavigation } from "./world";
 import { hasWorldAppearance } from "./appearance";
+import {isPrimaryWeaponUpgrade} from "./equipment";
 import { newTestSettings } from "./test-mode";
 import { CLASSES, type ClassId } from "./classes";
 import {
@@ -484,17 +485,25 @@ export class Game {
     this.input = { x: 0, y: 0 };
     this.emit();
   }
-  recompute() {
-    const sources = [
+  private statSources(equipment:Partial<Record<Slot,Equipped>>=this.equipment) {
+    return [
       this.classInfo.base,
       this.upgrades,
-      ...Object.values(this.equipment).map((e) => getItem(e.itemId).stats),
+      ...Object.values(equipment).map((e) => getItem(e.itemId).stats),
       ...Object.entries(this.passives).map(([id, n]) =>
         Object.fromEntries(
           Object.entries(getItem(id).stats).map(([k, v]) => [k, (v ?? 0) * n]),
         ),
       ),
     ];
+  }
+  previewEquipment(item:Item) {
+    if(item.kind!=="equipment" || !this.validItem(item))return null;
+    const equipment={...this.equipment,[this.equipmentSlot(item)]:{itemId:item.id,paid:0}};
+    return combine(this.statSources(equipment));
+  }
+  recompute() {
+    const sources=this.statSources();
     this.rawStats = sumBonuses(sources);
     this.stats = combine(sources);
     this.player.hp = Math.min(this.player.hp, this.maxHP);
@@ -2178,6 +2187,9 @@ export class Game {
     const retained = keep ? this.offers.filter((o) => o.locked && !o.sold) : [];
     const tier = this.wave >= 7 ? 4 : this.wave >= 3 ? 3 : 1;
     const pool = ITEMS.filter((x) => x.tier <= tier && this.validItem(x));
+    const weaponRestock=this.mode==="trial" ? this.wave===2 : [3,6,9].includes(this.wave);
+    const currentWeapon=this.equipment.weapon ? getItem(this.equipment.weapon.itemId) : undefined;
+    const upgrade=(item:Item)=>this.validItem(item) && isPrimaryWeaponUpgrade(this.classId,currentWeapon,item);
     this.offers = retained;
     for (let i = retained.length; i < 4; i++) {
       const available = pool.filter(
@@ -2186,7 +2198,11 @@ export class Game {
       );
       const needsPassive=!this.offers.some(o=>!o.sold && getItem(o.itemId).kind==="passive" && this.validItem(getItem(o.itemId)));
       const passives=available.filter(x=>x.kind==="passive");
-      const choices=needsPassive && passives.length ? passives : available;
+      const upgrades=available.filter(upgrade);
+      const needsWeapon=weaponRestock && !this.offers.some(o=>!o.sold && upgrade(getItem(o.itemId)));
+      const entryTier=Math.min(...upgrades.map(x=>x.tier));
+      const choices=needsPassive && passives.length ? passives :
+        needsWeapon && upgrades.length ? upgrades.filter(x=>x.tier===entryTier) : available;
       const item = this.rng.pick(choices.length ? choices : pool);
       this.offers.push({
         id: ++this.id,

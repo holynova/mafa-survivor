@@ -19,6 +19,7 @@ import {
   setAssetManifest,
 } from "./renderer";
 import { CLASSES, CLASS_IDS } from "./classes";
+import {primaryRange} from "./equipment";
 import { expNeeded, sellPrice } from "./rules";
 import { sounds } from "./sound";
 import {
@@ -709,7 +710,7 @@ export function App() {
               </div>
             </header>
             <div className="shop-toolbar">
-              <p>已锁定 {2-game.shopLocksRemaining}/2 件 · 可跨刷新与波次保留；购买装备会自动穿戴。</p>
+              <p>已锁定 {2-game.shopLocksRemaining}/2 件 · 可保留到下波攒钱购买；装备会自动穿戴。</p>
               <button
                 disabled={game.gold < game.cooldownCost}
                 onClick={() => game.reroll()}
@@ -724,6 +725,9 @@ export function App() {
                   item.kind === "equipment"
                     ? game.equipment[game.equipmentSlot(item)]
                     : null;
+                const preview=item.slot==="weapon" ? game.previewEquipment(item) : null;
+                const beforeRange=primaryRange(game.classId,game.stats);
+                const afterRange=preview ? primaryRange(game.classId,preview) : null;
                 return (
                   <article
                     key={o.id}
@@ -751,6 +755,9 @@ export function App() {
                     <Icon frame={item.icon} />
                     <h3>{item.name}</h3>
                     <p>{item.description}</p>
+                    {afterRange && <small className="replace-hint">
+                      {beforeRange.label}区间 {beforeRange.min}–{beforeRange.max} → {afterRange.min}–{afterRange.max}
+                    </small>}
                     {replacing && (
                       <small className="replace-hint">
                         替换 {getItem(replacing.itemId).name}，回收{" "}

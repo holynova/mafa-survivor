@@ -1,9 +1,13 @@
-import { Game, WORLD, type Mode, type Upgrade } from "./game";
+import { Game, WORLD, type Mode, type Upgrade, type Offer } from "./game";
 import { getItem, type Bonuses, type MapId, type SkillId } from "./content";
 import type { ClassId } from "./classes";
 import { inShockLane } from "./temple";
+import {isPrimaryWeaponUpgrade,primaryRange} from "./equipment";
 
-export type SimulationOptions = { seed:number; classId:ClassId; mapId:MapId; mode:Exclude<Mode,"test">; warriorFourSlot?:boolean };
+export type SimulationOptions = { seed:number; classId:ClassId; mapId:MapId; mode:Exclude<Mode,"test">; warriorFourSlot?:boolean; traceShops?:boolean };
+export type ShopTrace = {wave:number;round:number;gold:number;weapon:string|null;
+  offers:{id:number;itemId:string;name:string;price:number;locked:boolean;sold:boolean}[];
+  actions:{kind:"buy"|"lock"|"unlock"|"reroll";itemId?:string;price?:number;gold:number}[]};
 const priorities: Record<ClassId,SkillId[]> = {
   wizard:["firewall","lightning","ice","shield","bigfireball","fireball"],
   warrior:["cleave","thrust","firesword","powerstrike","dash","swordsmanship"],
@@ -39,6 +43,55 @@ function offerScore(g:Game,itemId:string) {
     if(current)value-=statScore(g,getItem(current.itemId).stats);
   }
   return value;
+}
+
+export function simulateShop(g:Game,trace?:ShopTrace[]) {
+  let purchases=0;
+  for(let round=0;round<3;round++) {
+    const record:ShopTrace|undefined=trace ? {wave:g.wave,round,gold:g.gold,weapon:g.equipment.weapon?.itemId ?? null,
+      offers:g.offers.map(o=>({...o,name:getItem(o.itemId).name})),actions:[]} : undefined;
+    if(record)trace!.push(record);
+    const equipped=g.equipment.weapon ? getItem(g.equipment.weapon.itemId) : undefined;
+    for(const offer of g.offers)if(offer.locked && getItem(offer.itemId).slot==="weapon" &&
+      !isPrimaryWeaponUpgrade(g.classId,equipped,getItem(offer.itemId))) {
+      g.lock(offer.id);record?.actions.push({kind:"unlock",itemId:offer.itemId,gold:g.gold});
+    }
+    const buy=(offer:Offer)=>{
+      if(!g.buy(offer.id))return false;
+      purchases++;record?.actions.push({kind:"buy",itemId:offer.itemId,price:offer.price,gold:g.gold});return true;
+    };
+    const heal=g.offers.find(o=>!o.sold && getItem(o.itemId).kind==="heal");
+    if(heal && g.player.hp/g.maxHP<0.4 && g.gold>=heal.price)buy(heal);
+    // Reserve an actual visible offer; no projected income or free equipment.
+    for(let attempt=0;attempt<4;attempt++) {
+      const current=g.equipment.weapon ? getItem(g.equipment.weapon.itemId) : undefined;
+      const target=g.offers.filter(o=>!o.sold && g.validItem(getItem(o.itemId)) &&
+        isPrimaryWeaponUpgrade(g.classId,current,getItem(o.itemId))).sort((a,b)=>a.price-b.price)[0];
+      if(!target)break;
+      if(g.gold<target.price) {
+        if(!target.locked && g.shopLocksRemaining>0) {
+          g.lock(target.id);record?.actions.push({kind:"lock",itemId:target.itemId,gold:g.gold});
+        }
+        return purchases;
+      }
+      if(!buy(target))break;
+    }
+    for(const offer of [...g.offers].sort((a,b)=>offerScore(g,b.itemId)-offerScore(g,a.itemId))) {
+      if(offer.sold)continue;
+      const item=getItem(offer.itemId);
+      if(item.kind==="heal" && g.player.hp/g.maxHP>0.75)continue;
+      if(item.slot==="weapon") {
+        const current=g.equipment.weapon ? getItem(g.equipment.weapon.itemId) : undefined;
+        const before=primaryRange(g.classId,current?.stats ?? {}),after=primaryRange(g.classId,item.stats);
+        if(after.min+after.max<before.min+before.max)continue;
+      }
+      if(offerScore(g,offer.itemId)>0)buy(offer);
+    }
+    if(round===2 || g.gold<g.cooldownCost+70)break;
+    const price=g.cooldownCost;if(!g.reroll())break;
+    record?.actions.push({kind:"reroll",price,gold:g.gold});
+  }
+  return purchases;
 }
 
 /** Observes the same combat state the view consumes; only returns legal input. */
@@ -101,6 +154,7 @@ export function runSimulation(options:SimulationOptions) {
   g.start(options.mode,options.seed,options.classId,options.warriorFourSlot ?? false,options.mapId);
   let ticks=0,interactions=0,shops=0,upgrades=0,purchases=0,hpLost=0,stationary=0,longestStationary=0;
   const waves:{wave:number;seconds:number;hp:number;level:number;kills:number;gold:number}[]=[];
+  const shopTrace:ShopTrace[]|undefined=options.traceShops ? [] : undefined;
   let failure:string|null=null;
   let lastBoss:{kind:string;hp:number;maxHp:number}|null=null;
   const check=()=>{
@@ -124,11 +178,7 @@ export function runSimulation(options:SimulationOptions) {
     }
     if(g.phase==="shop") {
       shops++;waves.push({wave:g.wave,seconds:g.clock,hp:g.player.hp,level:g.level,kills:g.kills,gold:g.lastWaveGold});
-      for(let round=0;round<3;round++) {
-        for(const offer of [...g.offers].sort((a,b)=>offerScore(g,b.itemId)-offerScore(g,a.itemId)))
-          if(!offer.sold && offerScore(g,offer.itemId)>0 && g.buy(offer.id))purchases++;
-        if(round===2 || g.gold<g.cooldownCost+70 || !g.reroll())break;
-      }
+      purchases+=simulateShop(g,shopTrace);
       g.nextWave();interactions++;continue;
     }
     if(g.phase!=="battle"){failure=`unhandled phase ${g.phase}`;break;}
@@ -147,6 +197,6 @@ export function runSimulation(options:SimulationOptions) {
     level:g.level,shops,upgrades,purchases,hpLost,longestStationary,bossKilled:g.bossKilled,
     bossHP:lastBoss ? {...lastBoss,hp:g.bossKilled ? 0 : lastBoss.hp} : null,
     goldEarned:g.totalGold,goldRemaining:g.gold,equipment:{...g.equipment},passives:{...g.passives},
-    skills:g.result?.skills ?? g.skills.map(s=>`${s.id}:${s.rank}`),damage:{...g.damageDealt},waves};
+    skills:g.result?.skills ?? g.skills.map(s=>`${s.id}:${s.rank}`),damage:{...g.damageDealt},waves,shopTrace};
   return report;
 }
