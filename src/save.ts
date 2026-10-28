@@ -3,12 +3,13 @@ import type { RunResult } from "./game";
 import { MAPS, PLAYABLE_MAP_IDS, type MapId } from "./content";
 import { progressSchema, parseBackup, type SaveBackup, type Progress } from "./save-format";
 import { TALENTS, talentCost, talentLevel, type TalentId } from "./talents";
+import { sanitizeCheckpoint, type RunCheckpoint } from "./checkpoint";
 export type { Progress } from "./save-format";
 type RawSnapshot = { progress: unknown; runs: (RunResult & { savedAt: number })[] };
 type RestorePoint = RawSnapshot & { kind: "restore-point"; createdAt: number };
 interface GameDB extends DBSchema {
   runs: { key: string; value: RunResult & { savedAt: number } };
-  meta: { key: string; value: Progress | RestorePoint };
+  meta: { key: string; value: Progress | RestorePoint | RunCheckpoint };
 }
 const db = () => openDB<GameDB>("mafa-survivor", 2, {
   upgrade(database) {
@@ -54,6 +55,7 @@ export async function saveRun(result: RunResult): Promise<Progress | null> {
         progress.crystals += result.crystals;
       await tx.objectStore("meta").put(progress, "progress");
     }
+    await tx.objectStore("meta").delete("run-checkpoint");
     return progress;
   });
 }
@@ -85,6 +87,35 @@ export async function buyTalent(id: TalentId): Promise<Progress> {
     await tx.objectStore("meta").put(progress, "progress");
     return progress;
   });
+}
+export async function readCheckpoint(): Promise<RunCheckpoint | null> {
+  return withProgressTransaction(async (tx) => {
+    const meta = tx.objectStore("meta"), raw = await meta.get("run-checkpoint");
+    if (raw === undefined) return null;
+    const checkpoint = sanitizeCheckpoint(raw);
+    if (!checkpoint) await meta.delete("run-checkpoint");
+    return checkpoint;
+  });
+}
+// Serialize checkpoint writes so a slower earlier save cannot overwrite a newer one.
+let checkpointQueue: Promise<unknown> = Promise.resolve();
+const enqueueCheckpoint = <T>(work: () => Promise<T>): Promise<T> => {
+  const next = checkpointQueue.then(work, work);
+  checkpointQueue = next.then(() => undefined, () => undefined);
+  return next;
+};
+export async function writeCheckpoint(value: unknown): Promise<boolean> {
+  const checkpoint = sanitizeCheckpoint(value);
+  if (!checkpoint) return false;
+  return enqueueCheckpoint(() => withProgressTransaction(async (tx) => {
+    await tx.objectStore("meta").put(checkpoint, "run-checkpoint");
+    return true;
+  }));
+}
+export async function clearCheckpoint(): Promise<void> {
+  await enqueueCheckpoint(() => withProgressTransaction(async (tx) => {
+    await tx.objectStore("meta").delete("run-checkpoint");
+  }));
 }
 export async function history(): Promise<RunResult[]> {
   const database = await db();
@@ -147,6 +178,7 @@ export async function restoreSave(preview: RestorePreview): Promise<Progress> {
     await runs.clear();
     for (const run of backup.runs) await runs.add(run);
     await meta.put(backup.progress, "progress");
+    await meta.delete("run-checkpoint");
     return backup.progress;
   });
 }

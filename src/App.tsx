@@ -30,10 +30,11 @@ import {
   repositoryUrl,
 } from "./release";
 import { TestTools } from "./TestTools";
-import { saveRun, history, loadProgress, unlockChapter, buyTalent } from "./save";
+import { saveRun, history, loadProgress, unlockChapter, buyTalent, readCheckpoint, writeCheckpoint, clearCheckpoint } from "./save";
 import { SaveManager } from "./SaveManager";
 import {damageSourceName} from "./damage-taken";
 import {TALENTS, talentCost, talentLevel} from "./talents";
+import type {RunCheckpoint} from "./checkpoint";
 const time = (seconds: number) =>
   `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 function Art({
@@ -139,9 +140,23 @@ export function App() {
   const [saveStatus, setSaveStatus] = useState("");
   const [progressBusy, setProgressBusy] = useState(true);
   const [chapterError, setChapterError] = useState("");
+  const [savedRun, setSavedRun] = useState<RunCheckpoint | null>(null);
   const inventoryResumes = useRef(false);
+  const checkpointKey = useRef("");
   useEffect(() => { document.title = `玛法幸存者 · ${game.mapId === "biche" ? "比奇荒野" : MAPS[game.mapId].name}`; }, [game.mapId]);
   useEffect(() => game.subscribe(refresh), []);
+  // Autosave only at stable wave boundaries; a mid-wave refresh replays this wave.
+  useEffect(() => game.subscribe(() => {
+    if (game.mode === "test") return;
+    const checkpoint = game.snapshotCheckpoint();
+    if (!checkpoint) return;
+    const key = JSON.stringify({ ...checkpoint, savedAt: 0 });
+    if (key === checkpointKey.current) return;
+    checkpointKey.current = key;
+    void writeCheckpoint(checkpoint)
+      .then((ok) => { if (ok) setSavedRun(checkpoint); })
+      .catch(() => {});
+  }), []);
   useEffect(() => {
     const f = () => {
       setReady(true);
@@ -154,7 +169,15 @@ export function App() {
     history()
       .then(setRecords)
       .catch(() => setSaveError("无法读取本地记录，当前仍可正常试玩。"));
-    loadProgress().then((progress) => game.applyProgress(progress))
+    loadProgress().then(async (progress) => {
+      game.applyProgress(progress);
+      const checkpoint = await readCheckpoint();
+      if (checkpoint && checkpoint.mode === "normal" && !game.unlockedMaps.has(checkpoint.mapId)) {
+        await clearCheckpoint();
+        return;
+      }
+      setSavedRun(checkpoint);
+    })
       .catch((error: unknown) => setChapterError(error instanceof Error ? error.message : "无法读取局外进度，仍可试玩。"))
       .finally(() => setProgressBusy(false));
     return () => {
@@ -167,15 +190,21 @@ export function App() {
     setSaveStatus("正在保存…");
     setProgressBusy(true);
     saveRun(game.result)
-      .then((progress) => {
+      .then(async (progress) => {
         if (progress) game.applyProgress(progress);
         setSaveStatus("战绩已保存到本机");
+        checkpointKey.current = "";
+        setSavedRun(null);
+        await clearCheckpoint().catch(() => {});
         return history();
       })
       .then(setRecords)
       .catch(() => {
         setSaveStatus("保存未成功");
         setSaveError("浏览器存储不可用，本次战绩尚未保存。");
+        checkpointKey.current = "";
+        setSavedRun(null);
+        void clearCheckpoint().catch(() => {});
       }).finally(() => setProgressBusy(false));
   }, [game.result]);
   const start = (mode: Mode) => {
@@ -183,8 +212,32 @@ export function App() {
     setInventory(false);
     setSaveError("");
     setSaveStatus("");
+    checkpointKey.current = "";
     game.start(mode, Number(seed) >>> 0);
     requestAnimationFrame(() => document.querySelector("canvas")?.focus());
+  };
+  const resumeRun = async () => {
+    if (!savedRun) return;
+    setProgressBusy(true);
+    setChapterError("");
+    try {
+      game.applyProgress(await loadProgress());
+      if (!game.resumeCheckpoint(savedRun)) throw new Error("上次战斗存档无法恢复，已保留本机进度。");
+      checkpointKey.current = "";
+      setInventory(false);
+      setSaveStatus("已从本波起点继续");
+      setTab("play");
+      requestAnimationFrame(() => document.querySelector("canvas")?.focus());
+    } catch (error) {
+      setChapterError(error instanceof Error ? error.message : "无法继续上次战斗。");
+    } finally {
+      setProgressBusy(false);
+    }
+  };
+  const discardRun = async () => {
+    setSavedRun(null);
+    checkpointKey.current = "";
+    await clearCheckpoint().catch(() => {});
   };
   const toggleInventory = () => {
     inventoryResumes.current = !inventory && game.phase === "battle";
@@ -297,6 +350,28 @@ export function App() {
                   </>}
                   {chapterError && <p className="inline-error">{chapterError}</p>}
                 </div>
+                {savedRun && (
+                  <div className="resume-run">
+                    <div>
+                      <strong>继续上次战斗</strong>
+                      <span>
+                        {CLASSES[savedRun.classId]?.name ?? savedRun.classId} ·{" "}
+                        {savedRun.mapId === "biche" ? "比奇荒野" : MAPS[savedRun.mapId].name} ·
+                        第 {savedRun.wave} 波 ·{" "}
+                        {{battle:"本波开头",shop:"波间商店",upgrade:"升级选择",replace:"替换技能"}[savedRun.phase]}
+                      </span>
+                      <small>刷新只回到本波起点；已保存金币、装备、技能与升级。</small>
+                    </div>
+                    <div>
+                      <button className="primary" disabled={progressBusy} onClick={resumeRun}>
+                        继续
+                      </button>
+                      <button className="secondary" disabled={progressBusy} onClick={discardRun}>
+                        放弃
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <div className="mode-buttons">
                   <button
                     className="primary"
@@ -450,6 +525,7 @@ export function App() {
                 <SaveManager onBusyChange={setProgressBusy} onRestored={async progress => {
                   game.applyProgress(progress); setRecords(await history());
                   setSaveError(""); setChapterError("");
+                  setSavedRun(null); checkpointKey.current = "";
                 }} />
                 {records.length ? (
                   records.map((r) => (

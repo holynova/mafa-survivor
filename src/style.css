@@ -255,6 +255,46 @@ h1 > span {
   padding: 3px 7px;
   font-size: 10px !important;
 }
+.resume-run {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid rgba(217, 193, 139, 0.45);
+  background: rgba(217, 193, 139, 0.08);
+  padding: 12px 14px;
+  margin-bottom: 2px;
+}
+.resume-run > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.resume-run strong {
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--gold);
+}
+.resume-run span {
+  font-size: 10px;
+  line-height: 1.6;
+}
+.resume-run small {
+  font-size: 9px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.resume-run > div:last-child {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.resume-run button {
+  font-size: 10px;
+  padding: 7px 10px;
+  letter-spacing: 1px;
+}
 .mode-buttons {
   display: flex;
   flex-direction: column;

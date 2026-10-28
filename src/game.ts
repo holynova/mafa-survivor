@@ -42,6 +42,11 @@ import { newTestSettings } from "./test-mode";
 import { CLASSES, type ClassId } from "./classes";
 import { talentBonuses, sanitizeTalents, type TalentId } from "./talents";
 import {
+  RUN_CHECKPOINT_VERSION,
+  sanitizeCheckpoint,
+  type RunCheckpoint,
+} from "./checkpoint";
+import {
   Rng,
   clamp,
   combine,
@@ -528,6 +533,129 @@ export class Game {
     this.stats = combine(sources);
     this.player.hp = Math.min(this.player.hp, this.maxHP);
     refreshSummons(this);
+  }
+  /** Stable wave-boundary state for refresh recovery; live combat is never saved. */
+  snapshotCheckpoint(): RunCheckpoint | null {
+    if (this.mode === "test") return null;
+    if (!["battle", "shop", "upgrade", "replace"].includes(this.phase)) return null;
+    if (this.phase === "battle" && (this.waveTime > 0.05 || this.spawned > 0)) return null;
+    return {
+      version: RUN_CHECKPOINT_VERSION,
+      savedAt: Date.now(),
+      mode: this.mode,
+      classId: this.classId,
+      mapId: this.mapId,
+      warriorFourSlot: this.warriorFourSlot,
+      seed: this.seed,
+      rngState: this.rng.seed,
+      runId: this.runId,
+      phase: this.phase as RunCheckpoint["phase"],
+      wave: this.wave,
+      clock: this.clock,
+      kills: this.kills,
+      gold: this.gold,
+      totalGold: this.totalGold,
+      level: this.level,
+      exp: this.exp,
+      rerolls: this.rerolls,
+      bossKilled: this.bossKilled,
+      bossSpawned: this.bossSpawned,
+      lastWaveGold: this.lastWaveGold,
+      lastWaveKills: this.lastWaveKills,
+      damageDealt: { ...this.damageDealt },
+      combatRecovery: {
+        healing: { ...this.combatRecovery.healing },
+        killReadyAt: this.combatRecovery.killReadyAt,
+        killEvents: this.combatRecovery.killEvents.map((e) => ({ ...e })),
+      },
+      damageTaken: {
+        physical: this.damageTaken.physical,
+        magic: this.damageTaken.magic,
+        sources: { ...this.damageTaken.sources },
+      },
+      player: { ...this.player },
+      skills: this.skills.map((s) => ({ ...s })),
+      pets: this.pets.map((p) => ({ ...p })),
+      equipment: Object.fromEntries(
+        Object.entries(this.equipment).map(([slot, e]) => [slot, { ...e! }]),
+      ),
+      passives: { ...this.passives },
+      upgrades: { ...this.upgrades },
+      offers: this.offers.map((o) => ({ ...o })),
+      choices: this.choices.map((c) => ({ ...c })),
+      pendingSkill: this.pendingSkill,
+      nextEntityId: this.id + 1,
+      tao: {
+        poisonMode: this.tao.poisonMode,
+        healPriority: this.tao.healPriority,
+        healing: { ...this.tao.healing },
+      },
+      charges: { ...this.charges },
+    };
+  }
+  /** Restore a validated checkpoint, replaying the current wave from its start. */
+  resumeCheckpoint(value: unknown): boolean {
+    const cp = sanitizeCheckpoint(value);
+    if (!cp) return false;
+    this.start(cp.mode, cp.seed, cp.classId, cp.warriorFourSlot, cp.mapId);
+    if (this.mapId !== cp.mapId || this.phase !== "battle") return false;
+    this.runId = cp.runId;
+    this.rng = new Rng(cp.rngState);
+    this.clock = cp.clock;
+    this.wave = cp.wave;
+    this.waveTime = 0;
+    this.kills = cp.kills;
+    this.gold = cp.gold;
+    this.totalGold = cp.totalGold;
+    this.level = cp.level;
+    this.exp = cp.exp;
+    this.rerolls = cp.rerolls;
+    this.bossKilled = cp.bossKilled;
+    this.bossSpawned = cp.bossSpawned;
+    this.lastWaveGold = cp.lastWaveGold;
+    this.lastWaveKills = cp.lastWaveKills;
+    this.damageDealt = { ...cp.damageDealt };
+    this.combatRecovery = {
+      healing: { ...cp.combatRecovery.healing },
+      killReadyAt: cp.combatRecovery.killReadyAt,
+      killEvents: cp.combatRecovery.killEvents.map((e) => ({ ...e })),
+    };
+    this.damageTaken = {
+      physical: cp.damageTaken.physical,
+      magic: cp.damageTaken.magic,
+      sources: { ...cp.damageTaken.sources },
+    };
+    this.id = cp.nextEntityId - 1;
+    this.player = { ...cp.player };
+    this.skills = cp.skills as Skill[];
+    this.pets = cp.pets as Pet[];
+    this.equipment = cp.equipment as Partial<Record<Slot, Equipped>>;
+    this.passives = { ...cp.passives };
+    this.upgrades = cp.upgrades;
+    this.offers = cp.offers as Offer[];
+    this.choices = cp.choices as Upgrade[];
+    this.pendingSkill = cp.pendingSkill as SkillId | null;
+    this.charges = cp.charges as Partial<Record<"powerstrike" | "firesword", boolean>>;
+    this.tao.poisonMode = cp.tao.poisonMode;
+    this.tao.healPriority = cp.tao.healPriority;
+    this.tao.healing = { ...cp.tao.healing };
+    this.tao.buffs = {};
+    this.enemies = [];
+    this.projectiles = [];
+    this.drops = [];
+    this.effects = [];
+    this.floating = [];
+    this.spawned = 0;
+    this.spawnTimer = 0.25;
+    this.waveKills = 0;
+    this.waveGold = 0;
+    this.result = null;
+    this.recompute();
+    this.player.hp = Math.min(cp.player.hp, this.maxHP);
+    this.phase = cp.phase;
+    this.input = { x: 0, y: 0 };
+    this.emit();
+    return true;
   }
   pause() {
     if (this.phase === "battle") {
