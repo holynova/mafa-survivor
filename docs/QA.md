@@ -349,3 +349,13 @@ alpha.2 已成功绕过超大地图目录，但多个技能书共用 `texture/it
 - 用可见测试工具加金币／跳到第3波，seed176真实刷新6次，3000→2380，出现击杀回复164报价；真实购买后2216、属性0.2/次。alpha13-recovery-shop.jpg已查看，四商品／说明／购买与迎战按钮在1280×720完整可见。种子6分别允许0／1只初始自然怪的离线库存复盘都出现生命偷取；实际界面同样第3波出现245报价，买后1000→755、属性1%。最终alpha13-lifesteal-shop.jpg明确宝宝与处决不吸血，已查看。
 - 最终版本重置后，D600ms从1104／768→1230.4／768、松键为空、KeyD/d；滚动测试面板到顶部截图alpha13-input-forest.jpg保留坐标与原树冠／遮挡轮廓。实际井中月／重盔甲，向左到开阔地后工具生成5半兽人；alpha13-models-shadows.jpg已查看，图中可见模型／阴影完整，没有上阶段已修的条带细线。warn/error日志为空。用户现有测试页与前台Chrome未操作。
 - 新报告器注入旧引擎的36局与alpha.12冻结核心结果完全一致，两边V5组合SHA相同。新版36局全部终结、0不变量异常、2法师通关，4局法师产生回复；战士未购买新道具，不作战士收益改善声明。详见SIMULATION.md和完整JSON；冻结与公网结果另记。
+
+- 干净提交98434ee9ae4021b4d99894a8e47381276c54ab61重新跑36局，sourceDirty=false，策略组合SHA与两边对照一致，包含combatHealing／shopTrace的全部results与冻结前深比较完全一致；0不变量异常、2比奇法师通关，4局法师有实际回复。Source checks [40653711452](https://github.com/holynova/mafa-survivor/actions/runs/40653711452)成功。本次独立本地测试页在完成截图后清理，用户现有页面保持原样。
+
+
+### alpha.13 发布与公网核验
+
+- 固定提交`98434ee9ae4021b4d99894a8e47381276c54ab61`，[工作流40653990168](https://github.com/holynova/mafa-survivor/actions/runs/40653990168)build／deploy／release成功，[v0.1.0-alpha.13](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.13)为公开预发布。
+- 公网version.json为alpha.13／original／98434ee；四源地图路径／SHA／walk夹具一致，22,709帧／42张PNG逐一HEAD200/image/png，28原WAV实际下载SHA256一致，JS入口200且类型正确；alpha13-online-http.json已附Release。
+- 后台IAB打开?stage=v0.1.0-alpha.13在25秒超时，未取得新版公网菜单、实操或截图，不继续重复已知失败流程。本地截图和旧公网图片均不替代新版公网验收；用户现有测试页与前台Chrome未操作。
+- Release附六张本地生产图（续航样例／实际属性、两种商品卡片、森林输入／模型阴影）及五份JSON（冻结完整36局、冻结摘要、旧引擎＋新报告器、同策略对照、公网HTTP）。完整职业／经济／多构筑／性能／存档／高级外观与GDD退出条件继续开发。
