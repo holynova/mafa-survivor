@@ -226,6 +226,8 @@ export type RunResult = {
   gold: number;
   crystals: number;
   skillDamage: Record<string, number>;
+  purchases?: Record<string, number>;
+  rerolls?: number;
   healing?: Record<string, number>;
   combatHealing?: CombatHealing;
   damageTaken?: DamageTaken;
@@ -262,6 +264,8 @@ export class Game {
   bossSpawned = false;
   bossKilled = false;
   damageDealt: Record<string, number> = {};
+  /** Shop purchases this run, keyed by item id. */
+  purchases: Record<string, number> = {};
   combatRecovery=newCombatRecovery();
   damageTaken=newDamageTaken();
   player = {
@@ -483,6 +487,7 @@ export class Game {
     this.rerolls = 0;
     this.result = null;
     this.damageDealt = {};
+    this.purchases = {};
     this.combatRecovery=newCombatRecovery();
     this.damageTaken=newDamageTaken();
     this.spawned = 0;
@@ -563,6 +568,7 @@ export class Game {
       lastWaveGold: this.lastWaveGold,
       lastWaveKills: this.lastWaveKills,
       damageDealt: { ...this.damageDealt },
+      purchases: { ...this.purchases },
       combatRecovery: {
         healing: { ...this.combatRecovery.healing },
         killReadyAt: this.combatRecovery.killReadyAt,
@@ -615,6 +621,7 @@ export class Game {
     this.lastWaveGold = cp.lastWaveGold;
     this.lastWaveKills = cp.lastWaveKills;
     this.damageDealt = { ...cp.damageDealt };
+    this.purchases = { ...cp.purchases };
     this.combatRecovery = {
       healing: { ...cp.combatRecovery.healing },
       killReadyAt: cp.combatRecovery.killReadyAt,
@@ -2404,6 +2411,7 @@ export class Game {
     } else if (item.kind === "passive")
       this.passives[item.id] = (this.passives[item.id] ?? 0) + 1;
     else this.player.hp = Math.min(this.maxHP, this.player.hp + 35);
+    this.purchases[item.id] = (this.purchases[item.id] ?? 0) + 1;
     this.recompute();
     this.emit();
     return true;
@@ -2465,6 +2473,8 @@ export class Game {
       gold: this.totalGold,
       crystals: runCrystals,
       skillDamage: { ...this.damageDealt },
+      purchases: { ...this.purchases },
+      rerolls: this.rerolls,
       healing: { ...this.tao.healing },
       combatHealing:{...this.combatRecovery.healing},
       damageTaken:{...this.damageTaken,sources:{...this.damageTaken.sources}},

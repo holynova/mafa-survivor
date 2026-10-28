@@ -39,7 +39,7 @@ export function SaveManager({ onRestored, onBusyChange }: {
   };
   return <section className="save-manager" aria-label="存档备份与恢复" aria-busy={busy}>
     <h2>存档备份</h2>
-    <p>保存全部战绩、玛法结晶和章节解锁。刷新会结束当前战斗；备份不含局中进度。</p>
+    <p>保存全部战绩、玛法结晶、章节解锁与玛法天赋。备份不含续玩检查点；刷新后会回到本波起点，可从主菜单继续。</p>
     <div className="save-actions">
       <button disabled={busy} onClick={() => void work(async () => {
         const value = await exportSave(); setText(value); download(value, "backup");

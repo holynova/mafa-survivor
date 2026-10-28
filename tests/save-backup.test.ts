@@ -63,6 +63,7 @@ describe("portable progress backups", () => {
   it("round-trips legacy records without class/map/healing fields and migrates their balance once", async () => {
     const game = new Game(); game.start("normal"); game.finish(true);
     const run = { ...game.result!, savedAt: 1 }; delete run.classId; delete run.mapId; delete run.combatHealing;
+    delete run.purchases; delete run.rerolls;
     const database = await openDB("mafa-survivor", 1, { upgrade(db) { db.createObjectStore("runs", { keyPath: "runId" }); } });
     await database.add("runs", run); database.close();
     const text = await exportSave(); expect(parseBackup(text).progress.crystals).toBe(3);
@@ -103,6 +104,9 @@ describe("portable progress backups", () => {
     ["unknown class", (b: any) => { b.runs[0].classId = "unknown"; }],
     ["missing score", (b: any) => { delete b.runs[0].skillDamage; }],
     ["non-finite damage", (b: any) => { b.runs[0].skillDamage = { fire: Infinity }; }],
+    ["negative purchase count", (b: any) => { b.runs[0].purchases = { "equip-0": -1 }; }],
+    ["fractional purchase count", (b: any) => { b.runs[0].purchases = { "equip-0": 1.5 }; }],
+    ["negative rerolls", (b: any) => { b.runs[0].rerolls = -2; }],
     ["unexpected fields", (b: any) => { b.extra = true; }],
   ])("rejects %s without modifying current progress", async (_, mutate) => {
     const source = await fixture(); mutate(source);

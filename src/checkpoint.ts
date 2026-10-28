@@ -129,6 +129,7 @@ export const checkpointSchema = z.object({
   lastWaveGold: int(100_000_000),
   lastWaveKills: int(Number.MAX_SAFE_INTEGER),
   damageDealt: z.record(z.string().max(100), finite),
+  purchases: z.record(z.string().max(100), int(99)).default({}),
   combatRecovery: z.object({
     healing: z.object({ onKill: finite, lifeSteal: finite }).strict(),
     killReadyAt: finite,
@@ -186,6 +187,9 @@ export function sanitizeCheckpoint(value: unknown): RunCheckpoint | null {
   cp.upgrades = Object.fromEntries(
     Object.entries(cp.upgrades).filter(([key]) => Object.hasOwn(STAT_NAMES, key)),
   ) as RunCheckpoint["upgrades"];
+  cp.purchases = Object.fromEntries(
+    Object.entries(cp.purchases).filter(([id, n]) => itemIds.has(id) && n > 0),
+  );
   cp.offers = cp.offers.filter((o) => itemIds.has(o.itemId));
   if (cp.phase !== "shop") cp.offers = [];
   cp.choices = cp.phase === "upgrade"

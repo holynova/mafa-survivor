@@ -17,13 +17,15 @@ export const progressSchema = z.object({
 }).strict().refine(p => p.unlockedMaps.includes("biche") && new Set(p.unlockedMaps).size === p.unlockedMaps.length);
 export type Progress = z.infer<typeof progressSchema>;
 const totals = z.record(z.string().max(100), amount).refine(value => Object.keys(value).length <= 100);
+const counts = z.record(z.string().max(100), z.number().int().min(0).max(99)).refine(value => Object.keys(value).length <= 100);
 const runSchema = z.object({
   runId: z.string().min(1).max(200), mode: z.enum(["normal", "trial"]), seed: integer.max(0xffffffff),
   classId: z.enum(["wizard", "warrior", "taoist"]).optional(),
   mapId: z.enum(["biche", "mine", "woma", "zuma"]).optional(),
   won: z.boolean(), wave: integer.min(1).max(12), kills: integer, seconds: amount,
   level: integer.min(1), gold: amount, crystals: integer,
-  skillDamage: totals, healing: totals.optional(),
+  skillDamage: totals, purchases: counts.optional(), rerolls: integer.max(100).optional(),
+  healing: totals.optional(),
   combatHealing: z.object({ onKill: amount, lifeSteal: amount }).strict().optional(),
   damageTaken: z.object({ physical: amount, magic: amount, sources: totals }).strict().optional(),
   skills: z.array(z.string().max(100)).max(6), savedAt: integer,

@@ -2063,3 +2063,77 @@ body:has(.lobby) .vignette {
 .appearance-notice button { margin-left: 12px; padding: 3px 8px; }
 
 .chapter-picker { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+.damage-list em {
+  min-width: 110px;
+  text-align: right;
+  font-size: 10px;
+  font-style: normal;
+  color: var(--muted);
+}
+.stat-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 22px;
+}
+.stat-chips span {
+  border: 1px solid var(--line);
+  padding: 4px 8px;
+  font-size: 10px;
+  color: #d9cfae;
+}
+.records article {
+  flex-wrap: wrap;
+}
+.records .record-detail {
+  flex-basis: 100%;
+  margin-top: 10px;
+}
+.records .record-detail summary {
+  cursor: pointer;
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+.records .record-detail > div {
+  display: grid;
+  grid-template-columns: 1fr auto 110px;
+  gap: 10px;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid #ffffff08;
+  font-size: 11px;
+}
+.records .record-detail b {
+  font-family: Georgia, serif;
+  font-weight: 400;
+  text-align: right;
+}
+.records .record-detail em {
+  font-style: normal;
+  color: var(--muted);
+  text-align: right;
+  font-size: 10px;
+}
+.records .record-detail p {
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+.purchase-list {
+  margin: 0 0 18px;
+}
+.purchase-list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 7px 0;
+  border-bottom: 1px solid #ffffff08;
+  font-size: 11px;
+}
+.purchase-list b {
+  font-family: Georgia, serif;
+  font-weight: 400;
+  color: var(--gold);
+}

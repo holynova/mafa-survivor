@@ -33,6 +33,7 @@ import { TestTools } from "./TestTools";
 import { saveRun, history, loadProgress, unlockChapter, buyTalent, readCheckpoint, writeCheckpoint, clearCheckpoint } from "./save";
 import { SaveManager } from "./SaveManager";
 import {damageSourceName} from "./damage-taken";
+import {damageRows, purchaseRows, statRows, dpsText} from "./run-stats";
 import {TALENTS, talentCost, talentLevel} from "./talents";
 import type {RunCheckpoint} from "./checkpoint";
 const time = (seconds: number) =>
@@ -541,6 +542,26 @@ export function App() {
                         </span>
                       </div>
                       <b>{time(r.seconds)}</b>
+                      <details className="record-detail">
+                        <summary>本局详情</summary>
+                        {damageRows(r.skillDamage, r.seconds).map((row) => (
+                          <div key={row.id}>
+                            <span>{row.name}</span>
+                            <b>{Math.round(row.damage)}</b>
+                            <em>
+                              {dpsText(row.dps)}/秒 · {row.share.toFixed(0)}%
+                            </em>
+                          </div>
+                        ))}
+                        {purchaseRows(r.purchases).length > 0 && (
+                          <p>
+                            购买：
+                            {purchaseRows(r.purchases)
+                              .map((row) => `${row.name}×${row.count}`)
+                              .join(" · ")}
+                          </p>
+                        )}
+                      </details>
                     </article>
                   ))
                 ) : (
@@ -1116,23 +1137,44 @@ export function App() {
               </div>
             </div>
             <div className="damage-list">
-              {Object.entries(game.damageDealt).map(([id, value]) => (
-                <div key={id}>
-                  <span>
-                    {SKILLS.find((s) => s.id === id)?.name ??
-                      (id === "basic" ? "普通攻击" : id)}
-                  </span>
+              <p className="muted">
+                伤害构成 · 战斗 {game.clock.toFixed(1)} 秒
+                {game.rerolls ? ` · 商店刷新 ${game.rerolls} 次` : ""}
+              </p>
+              {damageRows(game.damageDealt, game.clock).map((row) => (
+                <div key={row.id}>
+                  <span>{row.name}</span>
                   <div className="damage-track">
-                    <i
-                      style={{
-                        width: `${(value / Math.max(1, ...Object.values(game.damageDealt))) * 100}%`,
-                      }}
-                    />
+                    <i style={{ width: `${row.share}%` }} />
                   </div>
-                  <b>{Math.round(value)}</b>
+                  <b>{Math.round(row.damage)}</b>
+                  <em>
+                    {dpsText(row.dps)}/秒 · {row.share.toFixed(0)}%
+                  </em>
                 </div>
               ))}
             </div>
+            {purchaseRows(game.purchases).length > 0 && (
+              <div className="purchase-list" aria-label="本局商店购买">
+                <p className="muted">本局购买</p>
+                {purchaseRows(game.purchases).map((row) => (
+                  <div key={row.itemId}>
+                    <span>{row.name}</span>
+                    <b>×{row.count}</b>
+                  </div>
+                ))}
+              </div>
+            )}
+            {statRows(game.stats).length > 0 && (
+              <div className="stat-chips" aria-label="本局属性">
+                {statRows(game.stats).map((row) => (
+                  <span key={row.key}>
+                    {row.name} {row.prefix}{Number(row.value.toFixed(1))}
+                    {row.unit}
+                  </span>
+                ))}
+              </div>
+            )}
             {(game.combatRecovery.healing.onKill || game.combatRecovery.healing.lifeSteal) ? <p className="muted">
               本局实际战斗回复：击杀 {game.combatRecovery.healing.onKill.toFixed(2)} 点 ·
               生命偷取 {game.combatRecovery.healing.lifeSteal.toFixed(2)} 点
