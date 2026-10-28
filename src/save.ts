@@ -2,6 +2,7 @@ import { openDB, type DBSchema, type IDBPTransaction } from "idb";
 import type { RunResult } from "./game";
 import { MAPS, PLAYABLE_MAP_IDS, type MapId } from "./content";
 import { progressSchema, parseBackup, type SaveBackup, type Progress } from "./save-format";
+import { TALENTS, talentCost, talentLevel, type TalentId } from "./talents";
 export type { Progress } from "./save-format";
 type RawSnapshot = { progress: unknown; runs: (RunResult & { savedAt: number })[] };
 type RestorePoint = RawSnapshot & { kind: "restore-point"; createdAt: number };
@@ -36,7 +37,7 @@ async function readProgress(tx: ProgressTransaction): Promise<Progress> {
   // v1 stored settlements only. Migrate their earned crystals exactly once.
   const runs = await tx.objectStore("runs").getAll();
   const progress: Progress = { schemaVersion: 1, crystals: runs.reduce((total, r) =>
-    total + (r.mode === "normal" && r.won && Number.isInteger(r.crystals) && r.crystals > 0 ? r.crystals : 0), 0), unlockedMaps: ["biche"] };
+    total + (r.mode === "normal" && r.won && Number.isInteger(r.crystals) && r.crystals > 0 ? r.crystals : 0), 0), unlockedMaps: ["biche"], talents: {} };
   await meta.put(progress, "progress");
   return progress;
 }
@@ -67,6 +68,21 @@ export async function unlockChapter(id: MapId): Promise<Progress> {
       progress.crystals -= MAPS[id].unlockCost; progress.unlockedMaps.push(id);
       await tx.objectStore("meta").put(progress, "progress");
     }
+    return progress;
+  });
+}
+export async function buyTalent(id: TalentId): Promise<Progress> {
+  const def = TALENTS.find((t) => t.id === id);
+  if (!def) throw new Error("未知天赋。");
+  return withProgressTransaction(async (tx) => {
+    const progress = await readProgress(tx);
+    const level = talentLevel(progress.talents, id);
+    if (level >= def.maxLevel) throw new Error("该天赋已满级。");
+    const cost = talentCost(level);
+    if (progress.crystals < cost) throw new Error(`需要 ${cost} 玛法结晶。`);
+    progress.crystals -= cost;
+    progress.talents = { ...progress.talents, [id]: level + 1 };
+    await tx.objectStore("meta").put(progress, "progress");
     return progress;
   });
 }
@@ -113,7 +129,7 @@ export async function prepareRestore(text?: string): Promise<RestorePreview> {
       const previous = await tx.objectStore("meta").get("before-restore");
       if (!previous || !("kind" in previous)) throw new Error("还没有恢复前备份。");
       const progress = previous.progress ?? { schemaVersion: 1, crystals: previous.runs.reduce((total, run) =>
-        total + (run.mode === "normal" && run.won && Number.isSafeInteger(run.crystals) && run.crystals > 0 ? run.crystals : 0), 0), unlockedMaps: ["biche"] };
+        total + (run.mode === "normal" && run.won && Number.isSafeInteger(run.crystals) && run.crystals > 0 ? run.crystals : 0), 0), unlockedMaps: ["biche"], talents: {} };
       try { backup = parseBackup(JSON.stringify(envelope({ progress, runs: previous.runs }, previous.createdAt))); }
       catch { throw new Error("恢复前的数据含异常，无法直接恢复；可下载原始数据保留排查。当前存档未修改。"); }
     }

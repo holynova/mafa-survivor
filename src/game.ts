@@ -40,6 +40,7 @@ import { hasWorldAppearance } from "./appearance";
 import {isPrimaryWeaponUpgrade} from "./equipment";
 import { newTestSettings } from "./test-mode";
 import { CLASSES, type ClassId } from "./classes";
+import { talentBonuses, sanitizeTalents, type TalentId } from "./talents";
 import {
   Rng,
   clamp,
@@ -286,6 +287,9 @@ export class Game {
   equipment: Partial<Record<Slot, Equipped>> = {};
   passives: Record<string, number> = {};
   upgrades: Bonuses = {};
+  /** Permanent cross-run talent levels and the stat bonuses they derive. */
+  talents: Record<TalentId, number> = sanitizeTalents(undefined);
+  talentBonuses: Bonuses = {};
   offers: Offer[] = [];
   choices: Upgrade[] = [];
   rerolls = 0;
@@ -362,9 +366,12 @@ export class Game {
     this.mapId = mapId;
     this.emit();
   }
-  applyProgress(progress: { crystals: number; unlockedMaps: MapId[] }) {
+  applyProgress(progress: { crystals: number; unlockedMaps: MapId[]; talents?: Partial<Record<TalentId, number>> }) {
     this.crystals = progress.crystals;
     this.unlockedMaps = new Set(["biche", ...progress.unlockedMaps]);
+    this.talents = sanitizeTalents(progress.talents);
+    this.talentBonuses = talentBonuses(this.talents);
+    this.recompute();
     this.emit();
   }
   get spawnBudget() { return waveSpawnBudget(this.mapId,this.wave,this.mode==="trial"); }
@@ -480,6 +487,7 @@ export class Game {
     this.notice = "";
     this.input = { x: 0, y: 0 };
     this.recompute();
+    this.player.hp = this.maxHP;
     this.phase = "battle";
     this.emit();
   }
@@ -499,6 +507,7 @@ export class Game {
   private statSources(equipment:Partial<Record<Slot,Equipped>>=this.equipment) {
     return [
       this.classInfo.base,
+      this.talentBonuses,
       this.upgrades,
       ...Object.values(equipment).map((e) => getItem(e.itemId).stats),
       ...Object.entries(this.passives).map(([id, n]) =>

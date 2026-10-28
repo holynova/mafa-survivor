@@ -16,7 +16,7 @@ describe("portable progress backups", () => {
     await unlockChapter("mine");
     const backup = parseBackup(await exportSave());
     expect(await history()).toHaveLength(10); expect(backup.runs).toHaveLength(12);
-    expect(backup.progress).toEqual({ schemaVersion: 1, crystals: 33, unlockedMaps: ["biche", "mine"] });
+    expect(backup.progress).toEqual({ schemaVersion: 1, crystals: 33, unlockedMaps: ["biche", "mine"], talents: {} });
   });
   it("previews without writing, replaces rather than adds crystals, and settlement replay stays idempotent", async () => {
     const result = await victory(); const text = await exportSave(); await unlockChapter("mine");
@@ -26,7 +26,7 @@ describe("portable progress backups", () => {
     expect((await loadProgress()).crystals).toBe(3); expect(await history()).toHaveLength(1);
     expect(await hasRestorePoint()).toBe(true);
     await restoreSave(await prepareRestore());
-    expect(await loadProgress()).toEqual({ schemaVersion: 1, crystals: 0, unlockedMaps: ["biche", "mine"] });
+    expect(await loadProgress()).toEqual({ schemaVersion: 1, crystals: 0, unlockedMaps: ["biche", "mine"], talents: {} });
   });
   it("restores a valid backup over malformed progress and preserves the malformed original for rescue", async () => {
     const text = await exportSave(); const database = await openDB("mafa-survivor", 2);

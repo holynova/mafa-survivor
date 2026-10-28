@@ -30,9 +30,10 @@ import {
   repositoryUrl,
 } from "./release";
 import { TestTools } from "./TestTools";
-import { saveRun, history, loadProgress, unlockChapter } from "./save";
+import { saveRun, history, loadProgress, unlockChapter, buyTalent } from "./save";
 import { SaveManager } from "./SaveManager";
 import {damageSourceName} from "./damage-taken";
+import {TALENTS, talentCost, talentLevel} from "./talents";
 const time = (seconds: number) =>
   `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 function Art({
@@ -129,9 +130,9 @@ export function App() {
   const [ready, setReady] = useState(isReady());
   const [assetError, setAssetError] = useState(false);
   const [records, setRecords] = useState<RunResult[]>([]);
-  const [tab, setTab] = useState<"play" | "guide" | "records" | "skills">(
-    "play",
-  );
+  const [tab, setTab] = useState<
+    "play" | "guide" | "talents" | "records" | "skills"
+  >("play");
   const [inventory, setInventory] = useState(false);
   const [seed, setSeed] = useState("176");
   const [saveError, setSaveError] = useState("");
@@ -247,13 +248,13 @@ export function App() {
             </h1>
             <p className="tagline">故地重临，一人生还。</p>
             <nav className="lobby-tabs" aria-label="主菜单">
-              {(["play", "guide", "records", "skills"] as const).map((t, i) => (
+              {(["play", "guide", "talents", "records", "skills"] as const).map((t, i) => (
                 <button
                   key={t}
                   className={tab === t ? "selected" : ""}
                   onClick={() => setTab(t)}
                 >
-                  {["踏入荒野", "行前须知", "征战记录", "技能图鉴"][i]}
+                  {["踏入荒野", "行前须知", "玛法天赋", "征战记录", "技能图鉴"][i]}
                 </button>
               ))}
             </nav>
@@ -368,6 +369,51 @@ export function App() {
                   项。普通攻击独立于技能槽；空格可触发瞬移、冲撞或手动技能。
                   道士可在行囊中切换红绿毒和治疗优先目标。
                 </p>
+              </div>
+            )}
+            {tab === "talents" && (
+              <div className="talents" aria-label="玛法天赋">
+                <p className="muted">
+                  用玛法结晶永久强化本机进度 · 每项最多 5 级 · 每级 +1%（体魄为
+                  +1 生命）· 玛法结晶 {game.crystals}
+                </p>
+                {TALENTS.map((def) => {
+                  const level = talentLevel(game.talents, def.id);
+                  const maxed = level >= def.maxLevel;
+                  const cost = talentCost(level);
+                  return (
+                    <article key={def.id}>
+                      <div>
+                        <h3>
+                          {def.name}
+                          <small>
+                            Lv.{level}/{def.maxLevel}
+                          </small>
+                        </h3>
+                        <p>{def.description}</p>
+                      </div>
+                      <button
+                        disabled={progressBusy || maxed || game.crystals < cost}
+                        onClick={async () => {
+                          setProgressBusy(true);
+                          setChapterError("");
+                          try {
+                            game.applyProgress(await buyTalent(def.id));
+                          } catch (error) {
+                            setChapterError(
+                              error instanceof Error ? error.message : "天赋未保存，请重试。",
+                            );
+                          } finally {
+                            setProgressBusy(false);
+                          }
+                        }}
+                      >
+                        {maxed ? "已满级" : `升级 · ${cost} 结晶`}
+                      </button>
+                    </article>
+                  );
+                })}
+                {chapterError && <p className="inline-error">{chapterError}</p>}
               </div>
             )}
             {tab === "skills" && (

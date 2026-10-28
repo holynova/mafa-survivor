@@ -1,10 +1,19 @@
 import { z } from "zod";
+import { TALENT_IDS } from "./talents";
 
 const integer = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const amount = z.number().nonnegative().max(Number.MAX_SAFE_INTEGER);
+const talents = z.record(
+  z.string().max(40),
+  z.number().int().min(0).max(5),
+).default({}).refine(
+  value => Object.keys(value).every(key => (TALENT_IDS as readonly string[]).includes(key)),
+  "unknown talent id",
+);
 export const progressSchema = z.object({
   schemaVersion: z.literal(1), crystals: integer,
   unlockedMaps: z.array(z.enum(["biche", "mine", "woma", "zuma"])).min(1).max(4),
+  talents,
 }).strict().refine(p => p.unlockedMaps.includes("biche") && new Set(p.unlockedMaps).size === p.unlockedMaps.length);
 export type Progress = z.infer<typeof progressSchema>;
 const totals = z.record(z.string().max(100), amount).refine(value => Object.keys(value).length <= 100);
