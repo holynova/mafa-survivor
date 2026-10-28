@@ -25,7 +25,22 @@
     "zumaGuard": 84,
     "zumaArcher": 82,
     "zumaStatue": 83,
-    "zumaLord": 85
+    "zumaLord": 85,
+    "giantBug": 64,
+    "centipede": 66,
+    "chulong": 67,
+    "pincer": 69,
+    "evilPincer": 70,
+    "redBoar": 76,
+    "blackBoar": 77,
+    "whiteBoar": 78,
+    "scorpionSnake": 79,
+    "evilSnake": 80,
+    "moonSpider": 101,
+    "oneEyeSpider": 102,
+    "tianlangSpider": 103,
+    "redMoon": 104,
+    "overlord": 120
   },
   "mineModels": [
     "skeletonWarrior",
@@ -42,5 +57,26 @@
     "zumaArcher",
     "zumaStatue",
     "zumaLord"
+  ],
+  "stationaryModels": [
+    "chulong",
+    "redMoon"
+  ],
+  "expansionModels": [
+    "giantBug",
+    "centipede",
+    "chulong",
+    "pincer",
+    "evilPincer",
+    "redBoar",
+    "blackBoar",
+    "whiteBoar",
+    "scorpionSnake",
+    "evilSnake",
+    "moonSpider",
+    "oneEyeSpider",
+    "tianlangSpider",
+    "redMoon",
+    "overlord"
   ]
 }

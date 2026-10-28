@@ -1,5 +1,5 @@
 import { getSkill } from "./spells";
-import { ITEMS } from "./content";
+import { ITEMS,MAPS,MONSTERS,isBossKind } from "./content";
 import { hasWorldAppearance } from "./appearance";
 import { clearTaoSkill } from "./taoist";
 import type { Game } from "./game";
@@ -95,6 +95,24 @@ export function testSpellVisual(g: Game, sample: "hellfire" | "beast" | "poison"
   for(let i=0;i<12;i++)g.step(1/60);
   g.pause();g.emit();
   return sample!=="beast" || g.effects.some(f=>f.kind==="beastflame");
+}
+/** Source chapter floor and actual roster, paused so models can be compared. */
+export function testChapterVisual(g:Game) {
+  if(g.mode!=="test")return false;
+  g.start("test",g.seed,g.classId,false,g.mapId);
+  g.test.spawning=false;g.skills=[];g.basicCD=Infinity;
+  const kinds=[MAPS[g.mapId].boss,...MAPS[g.mapId].monsterPool];
+  const targets=[[185,0],[-185,0],[-110,-105],[100,-105],[0,125],[-90,125],[130,120],[0,-140]];
+  const points=g.navigation?.reachablePoints(g.player,80,260).filter(p=>g.attackLineClear(g.player,p));
+  for(let i=0;i<kinds.length;i++) {
+    const [dx,dy]=targets[i%targets.length],desired={x:g.player.x+dx,y:g.player.y+dy};
+    const candidates=points?.filter(p=>g.enemies.every(e=>Math.hypot(e.x-p.x,e.y-p.y)>66));
+    const point=candidates?.length ? candidates.reduce((a,b)=>Math.hypot(a.x-desired.x,a.y-desired.y)<Math.hypot(b.x-desired.x,b.y-desired.y) ? a : b) : !g.navigation ? desired : null;
+    if(!point)continue;
+    const e=g.spawnEnemy(kinds[i]);Object.assign(e,point,{awakenAt:undefined});
+    g.floating.push({id:-e.id,x:e.x,y:e.y-(isBossKind(e.kind) ? 100 : 65),life:100,text:MONSTERS.find(m=>m.id===e.kind)!.name+(e.elite ? " · 精英" : ""),color:isBossKind(e.kind) ? "#ffdd8a" : e.elite ? "#ffa971" : "#e4e3cb"});
+  }
+  g.pause();g.emit();return g.enemies.length===kinds.length;
 }
 /** Isolated, source-map wall probe. No ordinary run can load this scenario. */
 export function testMeleeWall(g: Game) {

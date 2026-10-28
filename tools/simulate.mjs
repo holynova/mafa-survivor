@@ -14,7 +14,7 @@ const seeds=(args.seeds ?? "176").split(",").map(Number);
 const maps=(args.maps ?? "biche,mine,woma,zuma").split(",");
 const classes=(args.classes ?? "wizard,warrior,taoist").split(",");
 const mode=args.mode ?? "normal";
-if(seeds.some(s=>!Number.isSafeInteger(s)) || maps.some(m=>!["biche","mine","woma","zuma"].includes(m)) ||
+if(seeds.some(s=>!Number.isSafeInteger(s)) || maps.some(m=>!["biche","mine","woma","zuma","mengzhong","centipede","stone","redmoon"].includes(m)) ||
   classes.some(c=>!["wizard","warrior","taoist"].includes(c)) || !["normal","trial"].includes(mode) || args.trace && args.trace!=="shops")throw new Error("Invalid simulation matrix");
 const server=await createServer({root,server:{middlewareMode:true,watch:null,hmr:false},appType:"custom"});
 try {

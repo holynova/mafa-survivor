@@ -12,6 +12,6 @@ export function damageSourceName(source: string) {
   if (source === "unknown") return "其他伤害";
   if (source === "recoil") return "野蛮撞墙";
   const [enemy, attack] = source.split(":");
-  const names: Record<string, string> = { melee: "挥击", charge: "冲锋", jump: "跃击", stomp: "震地", projectile: "弹体", shock: "冲击" };
+  const names: Record<string, string> = { melee: "挥击", charge: "冲锋", jump: "跃击", stomp: "震地", projectile: "弹体", shock: "冲击",poison:"喷毒" };
   return `${MONSTERS.find(m => m.id === enemy)?.name ?? "敌方"} · ${names[attack] ?? "攻击"}`;
 }

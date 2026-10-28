@@ -32,6 +32,38 @@
       "width": 46,
       "height": 48,
       "sha256": "670fd302c3e62e54405cc17ff577b0f5004c38c44679142e79a7aa627c54e2c2"
+    },
+    "mengzhong": {
+      "file": "5.bin",
+      "x": 50,
+      "y": 234,
+      "width": 46,
+      "height": 48,
+      "sha256": "16ce2f4a33ce9c841a93ea0adf9203376b6f0cbce63feac57db19463d940ce82"
+    },
+    "stone": {
+      "file": "D711.bin",
+      "x": 274,
+      "y": 82,
+      "width": 46,
+      "height": 48,
+      "sha256": "0001af078a23201b8292b97541c883dce7af18542dc42a485bd6bf9c20292c60"
+    },
+    "centipede": {
+      "file": "1_020.bin",
+      "x": 140,
+      "y": 8,
+      "width": 46,
+      "height": 48,
+      "sha256": "e6a7e25a5263f378ff5d7f5c7c2bd82848736dc5adf43106010bc2de51f05db6"
+    },
+    "redmoon": {
+      "file": "D1001.bin",
+      "x": 292,
+      "y": 244,
+      "width": 46,
+      "height": 48,
+      "sha256": "28fb4d2dcb555c9788acfed4827e242106fa1a637a81c0ab8f3cdace9e369a0b"
     }
   }
 }

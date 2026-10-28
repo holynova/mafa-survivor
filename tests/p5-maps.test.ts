@@ -11,7 +11,7 @@ function mineGrid(): WorldLayout {
 afterEach(() => setWorldLayouts({}));
 describe("playable chapter runtime", () => {
   it("offers both original temple chapters as free trials while gating normal mode", () => {
-    expect(PLAYABLE_MAP_IDS).toEqual(["biche","mine","woma","zuma"]);
+    expect(PLAYABLE_MAP_IDS).toEqual(["biche","mine","woma","zuma","mengzhong","centipede","stone","redmoon"]);
     for(const id of ["woma","zuma"] as const) {
       const g=new Game();g.selectMap(id);g.start("normal");expect(g.phase).toBe("lobby");
       g.start("trial");expect(g.mapId).toBe(id);expect(g.phase).toBe("battle");

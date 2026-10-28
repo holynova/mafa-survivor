@@ -60,7 +60,7 @@ for shape in sorted(set(appearance['weapons'].values())):
 monster_motions={'idle':0,'walk':1,'attack':2,'hurt':3,'death':4}
 monster_models=json.loads((ROOT/'tools/monster-models.json').read_text())
 for name,look in monster_models['models'].items():
- motions={**monster_motions,**({'awaken':8} if name=='zumaStatue' else {})}
+ motions={**monster_motions,**({'awaken':8} if name in ['zumaStatue','chulong'] else {})}
  actor('monster',name,look,motions)
  actor('monster',name+'-shadow',look|(1<<11),motions,source_entries['monster'])
  if name=='zumaStatue':
@@ -95,6 +95,9 @@ for direction in range(16):
 for name,start,count in [('womaFlame',0x03000208,7),('womaShock',0x030001B8,6)]:
  for direction in range(8):
   animations[f'{name}/{direction}']=[select('magic',magic[start+direction*10+i],f'{name}/{direction}/{i}') for i in range(count)]
+for direction in range(8):
+ animations[f'overlordBlade/{direction}']=[select('magic',magic[0x03000708+direction*10+i],f'overlordBlade/{direction}/{i}') for i in range(7)]
+animations['overlordDeath']=[select('magic',magic[0x03000762+i],f'overlordDeath/{i}') for i in range(18)]
 from map_region import load_regions
 world_layouts=load_regions(CACHE,request,REF)
 world_layout=world_layouts['biche']
@@ -124,6 +127,11 @@ for n in names:
 # Gold is a normal, source-backed item icon.
 for n in ['金币（小）','金创药（小）','魔法药（小）']:
  if n in itemmap and itemmap[n] in items:select('item',items[itemmap[n]],'item/'+n)
+
+# Classic client control board and windows, with exact source PNGs for DOM UI.
+ui_catalog=json.loads((ROOT/'tools/ui-assets.json').read_text())
+assert ui_catalog['repository']==REPO and ui_catalog['ref']==REF
+for name,entry in ui_catalog['frames'].items():select('proguse',entry,'ui/'+name)
 
 for key,filename in [('deadwood','000A000A.PNG'),('sign','000A00FA.PNG'),('shrub','000A012C.PNG')]:
  f=CACHE/'objects'/filename
@@ -161,11 +169,20 @@ mine_only={f'map/{code:08X}' for code in {p['texture'] for p in world_layouts['m
            -{p['texture'] for p in world_layouts['biche']['tiles']+world_layouts['biche']['objects']}}
 temple_only={f'map/{code:08X}' for id in ['woma','zuma'] for code in {p['texture'] for p in world_layouts[id]['tiles']+world_layouts[id]['objects']}
              -{p['texture'] for id in ['biche','mine'] for p in world_layouts[id]['tiles']+world_layouts[id]['objects']}}
+old_ids={p['texture'] for id in ['biche','mine','woma','zuma'] for p in world_layouts[id]['tiles']+world_layouts[id]['objects']}
+new_map_groups={}
+for id,world in world_layouts.items():
+ if id in ['biche','mine','woma','zuma']:continue
+ for part in world['tiles']+world['objects']:
+  if part['texture'] not in old_ids:new_map_groups.setdefault(f'map/{part["texture"]:08X}','world-'+id)
 for record in loaded:
  name=record[0].split('/')[0]
  group=name.replace('-shadow','') if name.startswith(('dress-','weapon-')) and name not in ['dress-1','dress-1-shadow','weapon-8'] else 'core'
  if name.removesuffix('-shadow') in monster_models['mineModels'] or name=='arrow' or record[0] in mine_only:group='chapter-mine'
  if name.removesuffix('-shadow') in monster_models['templeModels'] or name in ['womaFlame','womaShock'] or record[0] in temple_only:group='chapter-temple'
+ if name.removesuffix('-shadow') in monster_models['expansionModels']:group='monster-'+name.removesuffix('-shadow')
+ if name in ['overlordBlade','overlordDeath']:group='monster-overlord'
+ if record[0] in new_map_groups:group=new_map_groups[record[0]]
  groups.setdefault(group,[]).append(record)
 page=0
 for group in sorted(groups, key=lambda g:(g!='core',g)):
@@ -184,7 +201,15 @@ for group in sorted(groups, key=lambda g:(g!='core',g)):
   atlas.paste(im,(x,y));frames[key]={'frame':{'x':x,'y':y,'w':im.width,'h':im.height},'rotated':False,'trimmed':False,'spriteSourceSize':{'x':0,'y':0,'w':im.width,'h':im.height},'sourceSize':{'w':im.width,'h':im.height}}
   meta[key]={**info,'texture':f'mir-{page}','originX':24-info['dx'],'originY':16-info['dy']};x+=im.width+2;rowH=max(rowH,im.height)
  flush();page+=1
-manifest={'schemaVersion':2,'repository':REPO,'ref':REF,'referenceVersion':'mir2x 1.45 reference; gameplay 1.76 candidate','rightsStatus':'UNVERIFIED_THIRD_PARTY_ART','distribution':'LOCAL_EVALUATION_ONLY','releaseStatus':'BLOCKED_BY_ASSET_RIGHTS','world':world_layout,'worlds':world_layouts,'pages':pages,'animations':animations,'frames':meta}
+ui_files={}
+for name,entry in ui_catalog['frames'].items():
+ target=OUT/'ui'/f'{name}.png';target.parent.mkdir(exist_ok=True)
+ data=(CACHE/'raw/proguse'/entry['path']).read_bytes()
+ if 'crop' in entry:
+  x,y,w,h=entry['crop'];Image.open(io.BytesIO(data)).crop((x,y,x+w,y+h)).save(target)
+ else:target.write_bytes(data)
+ ui_files[name]={'file':'ui/'+name+'.png','sha256':hashlib.sha256(target.read_bytes()).hexdigest(),'sourceSha256':hashlib.sha256(data).hexdigest(),'frame':'ui/'+name,**({'crop':entry['crop']} if 'crop' in entry else {})}
+manifest={'schemaVersion':2,'repository':REPO,'ref':REF,'referenceVersion':'mir2x 1.45 reference; gameplay 1.76 candidate','rightsStatus':'UNVERIFIED_THIRD_PARTY_ART','distribution':'LOCAL_EVALUATION_ONLY','releaseStatus':'BLOCKED_BY_ASSET_RIGHTS','world':world_layout,'worlds':world_layouts,'pages':pages,'animations':animations,'frames':meta,'uiFiles':ui_files}
 authorize(manifest, ['images', 'map'])
 (OUT/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2))
 public_ledger={**manifest,'world':{k:v for k,v in manifest['world'].items() if k in ['sourcePath','sourceSha256','sourceRegion','width','height']}}

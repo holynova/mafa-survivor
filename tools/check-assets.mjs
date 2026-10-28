@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import {createHash} from "node:crypto";
 import appearance from "./equipment-appearance.json" with { type: "json" };
 import monsters from "./monster-models.json" with { type: "json" };
 import { checkReleaseAuthorization } from "./asset-authorization.mjs";
@@ -8,6 +9,7 @@ const manifest = JSON.parse(
 );
 const frames = {};
 const failures = [];
+const stationary=new Set(monsters.stationaryModels ?? []);
 for (const page of manifest.pages) {
   const atlas = JSON.parse(fs.readFileSync(new URL(page.data, root), "utf8"));
   if (page.width > 4096 || page.height > 4096)
@@ -31,8 +33,8 @@ for (const [name, sequence] of Object.entries(manifest.animations)) {
 for (const actor of ["taoist", "wizard", "warrior", ...Object.keys(monsters.models)])
   for (const motion of ["wizard", "warrior", "taoist"].includes(actor)
     ? ["idle", "walk", "cast", "attack", "hurt", "death"]
-    : ["idle", "walk", "attack", "hurt", "death"])
-    for (let dir = 0; dir < 8; dir++)
+    : stationary.has(actor) ? ["idle","attack","hurt","death"] : ["idle", "walk", "attack", "hurt", "death"])
+    for (let dir = 0; dir < (stationary.has(actor) ? 1 : 8); dir++)
       if (!manifest.animations[`${actor}/${motion}/${dir}`])
         failures.push(`${actor}/${motion}/${dir}: missing`);
 for (const spell of [
@@ -72,7 +74,7 @@ for (const [mapId, m] of Object.entries(manifest.worlds ?? { biche: manifest.wor
     if (!frames[id]) failures.push("map: missing " + id);
   }
 }
-for (const chapter of ["biche","mine","woma","zuma"]) {
+for (const chapter of Object.keys(manifest.worlds)) {
   const fixture = JSON.parse(fs.readFileSync(new URL(`../tests/fixtures/${chapter}-layout.json`, import.meta.url), "utf8"));
   if (JSON.stringify(manifest.worlds?.[chapter]?.walk) !== JSON.stringify(fixture.walk) || manifest.worlds?.[chapter]?.sourceSha256 !== fixture.sourceSha256)
     failures.push(`${chapter}: checked navigation fixture differs from imported pinned source map`);
@@ -101,8 +103,18 @@ for (const model of new Set(Object.values(appearance.weapons))) {
       failures.push(`weapon-${model}: missing matching body index ${frame}`);
   }
 }
-for (const name of Object.keys(monsters.models))
-  requireActor(name + "-shadow", ["idle", "walk", "attack", "hurt", "death"]);
+for (const name of Object.keys(monsters.models)) {
+  if(stationary.has(name)) {
+    for(const motion of ["idle","attack","hurt","death"])
+      if(!manifest.animations[`${name}-shadow/${motion}/0`]?.length)failures.push(`${name}: missing stationary shadow ${motion}`);
+  } else requireActor(name + "-shadow", ["idle", "walk", "attack", "hurt", "death"]);
+}
+for(const [name,ui] of Object.entries(manifest.uiFiles ?? {})) {
+  const sha=createHash("sha256").update(fs.readFileSync(new URL(ui.file,root))).digest("hex");
+  if(sha!==ui.sha256 || ui.sourceSha256!==manifest.frames[ui.frame]?.sha256)failures.push(name+": UI PNG differs from original source");
+}
+for(const name of ["board","chat","hp","mp","panel"])
+  if(!manifest.uiFiles?.[name])failures.push(name+": missing original UI asset");
 // New forest species must use their own source lookID in all eight directions.
 for (const [name, look] of Object.entries(monsters.models))
   for (const [id, frame] of Object.entries(manifest.frames)) {

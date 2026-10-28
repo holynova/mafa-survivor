@@ -2,6 +2,8 @@
 import hashlib
 import os
 import threading
+import tempfile
+from pathlib import Path
 
 _locks = {}
 
@@ -22,7 +24,10 @@ def read_source(path, url, expected_sha, request):
         if actual != expected_sha:
             raise ValueError(f'Source blob hash mismatch: {path.name}: expected {expected_sha}, got {actual}')
         path.parent.mkdir(parents=True, exist_ok=True)
-        temporary = path.with_name(path.name + '.part')
-        temporary.write_bytes(data)
-        os.replace(temporary, path)
+        # Separate importer processes do not share the in-process lock table.
+        with tempfile.NamedTemporaryFile(dir=path.parent,prefix=path.name+'.',suffix='.part',delete=False) as handle:
+            handle.write(data)
+            temporary=Path(handle.name)
+        try:os.replace(temporary,path)
+        finally:temporary.unlink(missing_ok=True)
         return data

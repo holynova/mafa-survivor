@@ -1,0 +1,57 @@
+{
+  "repository": "https://github.com/etorth/mir2x_res",
+  "ref": "9e21ea6631317d06e064fbfa7e1ea43af6a2d3e6",
+  "clientReference": {
+    "repository": "https://github.com/etorth/mir2x",
+    "ref": "bb6a22287abcd9f248d2aba755074c254c68787a",
+    "paths": [
+      "client/src/gui/controlboard/cbleft.cpp",
+      "client/src/gui/controlboard/cbmiddle.cpp",
+      "client/src/gui/controlboard/cbright.cpp"
+    ]
+  },
+  "frames": {
+    "board": {
+      "path": "00000012.PNG",
+      "sha": "1626b00c874536eaed79bd2f96149b6bdc8fe914"
+    },
+    "chat": {
+      "path": "00000013.PNG",
+      "sha": "443bb711a912845174ce783bf5a3c6b32736d88c",
+      "crop": [
+        0,
+        0,
+        357,
+        131
+      ]
+    },
+    "hp": {
+      "path": "00000018.PNG",
+      "sha": "482d62d24d71cd926bbbe51925e54487831a5444"
+    },
+    "mp": {
+      "path": "00000019.PNG",
+      "sha": "ae07a6240d57f8f00d97a044951a61f6bac26755"
+    },
+    "panel": {
+      "path": "0000001B.PNG",
+      "sha": "f9b8c2d497483816df1d12cbf48d08699f5c7ba6"
+    },
+    "close": {
+      "path": "0000001C.PNG",
+      "sha": "c637c63e27183ce7cbd891d9b4ee51fb200e9dca"
+    },
+    "character": {
+      "path": "00000032.PNG",
+      "sha": "c29838335b498a1f9ecb0d94426825e78a2c40ee"
+    },
+    "bag": {
+      "path": "00000035.PNG",
+      "sha": "d4d3b3c06e4c4075dd0c4ab7c5521e356f047aeb"
+    },
+    "ornament": {
+      "path": "00000022.PNG",
+      "sha": "7ba5c8371d00d6cfb04cbf485465f48070e98206"
+    }
+  }
+}

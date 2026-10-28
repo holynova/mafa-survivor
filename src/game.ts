@@ -4,6 +4,7 @@ import {
   SKILLS,
   SCENERY,
   CHAPTER_PRESSURE, NATIVE_ELITES, waveSpawnBudget,
+  EXPANSION_RANGED,
   SLOT_KEYS,
   getItem,
   getSkill,
@@ -19,6 +20,7 @@ import {
   PLAYABLE_MAP_IDS,
 } from "./content";
 import {updateRangedEnemy} from "./enemy-ai";
+import {updateExpansionEnemy} from "./expansion-enemies";
 import {ATTACK_CADENCE,cooldownScale,outputScale} from "./cadence";
 import {newCombatRecovery,recoverHit,type DamageOrigin,type CombatHealing} from "./combat-recovery";
 import {newDamageTaken,recordDamageTaken,type DamageTaken} from "./damage-taken";
@@ -165,7 +167,7 @@ export type Drop = Entity & {
   itemId?: string;
 };
 export type Fx = Entity & {
-  kind: SkillId | "hit" | "cast" | "beastflame" | "talismanHit" | "womaShock";
+  kind: SkillId | "hit" | "cast" | "beastflame" | "talismanHit" | "womaShock" | "overlordBlade" | "overlordDeath";
   dir?: number;
   life: number;
   total: number;
@@ -753,7 +755,7 @@ export class Game {
       if (isBossKind(e.kind) && e.hp <= e.maxHp * 0.5 && (e.bossPhase ?? 1) === 1) {
         e.bossPhase = 2; e.speed *= 1.25; e.damage *= 1.25;
       }
-      if (updateRangedEnemy(this,e,dt,victim) || updateTempleEnemy(this,e,dt,victim)) continue;
+      if (updateExpansionEnemy(this,e,dt,victim) || updateRangedEnemy(this,e,dt,victim) || updateTempleEnemy(this,e,dt,victim)) continue;
       if (e.kind === "corpseKing" && this.updateCorpseKing(e, dt)) continue;
       if (e.kind === "boss") {
         e.bossSummonCD=Math.max(0,(e.bossSummonCD ?? 6)-dt);
@@ -812,7 +814,7 @@ export class Game {
         if(e.kind === "womaBrave")e.staggerUntil=this.clock+1.8;
         continue;
       }
-      if ((e.elite || e.kind === "skeletonWarrior") && !e.ranged && victim.visible && d > 90 && d < (e.kind === "skeletonWarrior" ? 180 : 300) && e.chargeCD === 0 && e.windup === 0 && (!this.navigation || this.navigation.lineClear(e, victim))) {
+      if ((e.elite || e.kind === "whiteBoar" || e.kind === "skeletonWarrior") && !e.ranged && victim.visible && d > 90 && d < (e.kind === "skeletonWarrior" ? 180 : 300) && e.chargeCD === 0 && e.windup === 0 && (!this.navigation || this.navigation.lineClear(e, victim))) {
         e.chargeTarget = { x: victim.x, y: victim.y };
         e.chargeWindupUntil = this.clock + (e.kind === "skeletonWarrior" ? 0.5 : 0.7);
         e.chargeUntil = this.clock + (e.kind === "skeletonWarrior" ? 1.1 : 1.6);
@@ -1050,8 +1052,8 @@ export class Game {
     const eliteWave=this.mode==="trial" ? this.wave===2 : [4,7,10,12].includes(this.wave);
     const scheduledElite = eliteWave && this.spawned === Math.floor(this.spawnBudget/2);
     if (!kind && scheduledElite) {
-      if(this.mapId==="biche")kind="orcBrave";
-      if(this.mapId==="woma")kind="womaBrave";
+      const native=MAPS[this.mapId].monsterPool.filter(id=>NATIVE_ELITES.includes(id));
+      if(native.length)kind=native.length===1 ? native[0] : this.rng.pick(native);
     }
     let m;
     if (kind) m = MONSTERS.find((x) => x.id === kind)!;
@@ -1098,12 +1100,13 @@ export class Game {
       born: this.clock,
       summoned,
       ...(m.id === "zumaStatue" ? {dormant:true} : {}),
+      ...(m.id === "chulong" ? {awakenAt:this.clock+1} : {}),
       level: this.wave,
-      defense: m.id === "zumaGuard" ? 18 : isBossKind(m.id) ? 12 : ["orc", "orcWarrior", "orcBrave"].includes(m.id) ? 4 : 2,
+      defense: m.id === "giantBug" ? 22 : m.id === "zumaGuard" ? 18 : isBossKind(m.id) ? 12 : ["orc", "orcWarrior", "orcBrave"].includes(m.id) ? 4 : 2,
       magicDefense: isBossKind(m.id) ? 8 : m.id === "orc" ? 2 : 1,
       ...(isBossKind(m.id)
         ? { bossPhase: 1, bossJumpUntil: 0 }
-        : ["spider", "skeletonArcher", ...TEMPLE_RANGED].includes(m.id) ? { ranged: true, rangedCD: 0 }
+        : ["spider", "skeletonArcher", ...TEMPLE_RANGED,...EXPANSION_RANGED].includes(m.id) ? { ranged: true, rangedCD: 0 }
         : elite
           ? {
               ranged: !nativeElite && this.rng.next() < 0.3,
@@ -1176,14 +1179,15 @@ export class Game {
   fireEliteProjectile(e: Enemy, target: { x: number; y: number } = this.player) {
     const angle = Math.atan2(target.y-e.y,target.x-e.x);
     const arrow=["skeletonArcher","zumaArcher"].includes(e.kind);
-    const speed=e.kind === "spider" ? 160 : 180;
-    for (const offset of e.kind === "zumaArcher" ? [-0.22,0,0.22] : [0]) {
+    const poison=["spider",...EXPANSION_RANGED].includes(e.kind);
+    const speed=poison ? 160 : 180;
+    for (const offset of ["zumaArcher","evilSnake"].includes(e.kind) ? [-0.22,0,0.22] : [0]) {
       const a=angle+offset;
       this.projectiles.push({
         id:++this.id,x:e.x,y:e.y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,
         damage:["spider",...TEMPLE_RANGED].includes(e.kind) ? e.damage : Math.round(e.damage*0.8),
         life:3,dir:(((Math.round(a/(Math.PI/8))+4)%16)+16)%16,
-        faction:"enemy",visual:e.kind === "spider" ? "poison" : arrow ? "arrow" : e.kind==="flameWoma" ? "womaFlame" : undefined,
+        faction:"enemy",visual:poison ? "poison" : arrow ? "arrow" : e.kind==="flameWoma" ? "womaFlame" : undefined,
         damageKind:arrow ? "physical" : "magic",homing:false,hitChance:75,enemyKind:e.kind,
       });
     }
@@ -1998,7 +2002,8 @@ export class Game {
     if (e.hp <= 0) {
       this.kills++;
       this.waveKills++;
-      if (isBossKind(e.kind)) this.bossKilled = true;
+      if (e.kind===MAPS[this.mapId].boss) this.bossKilled = true;
+      if(e.kind==="overlord")this.effect("overlordDeath",e.x,e.y,0,1.8);
       // Summoned reinforcements cannot become an infinite reward source.
       if (e.summoned) return;
       const gold =

@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState, useRef } from "react";
+import { useEffect, useReducer, useState, useRef, type CSSProperties } from "react";
 import { game, type Mode, type RunResult } from "./game";
 import {
   SKILLS,
@@ -8,7 +8,7 @@ import {
   getItem,
   getSkill,
   type Slot,
-  MAPS, MONSTERS, PLAYABLE_MAP_IDS,
+  MAPS, MAP_IDS, MONSTERS, PLAYABLE_MAP_IDS,
 } from "./content";
 import {
   assets,
@@ -253,10 +253,14 @@ export function App() {
   const active = !["lobby", "won", "dead"].includes(game.phase);
   const boss = game.boss;
   const chapter = MAPS[game.mapId];
-  const bossName = MONSTERS.find((m) => m.id === chapter.boss)!.name;
+  const bossName = MONSTERS.find((m) => m.id === (boss?.kind ?? chapter.boss))!.name;
   const chapterUnlocked = game.unlockedMaps.has(game.mapId);
   return (
-    <main>
+    <main className={isGraybox ? "graybox" : "classic-ui"} style={isGraybox ? undefined : {
+      "--mir-board":`url("${assetUrl("ui/board.png")}")`,
+      "--mir-chat":`url("${assetUrl("ui/chat.png")}")`,
+      "--mir-panel":`url("${assetUrl("ui/panel.png")}")`,
+    } as CSSProperties}>
       <div className="vignette" />
       <TestTools />
       {game.mode !== "test" && (appearanceStatus.loading || appearanceStatus.error) && (
@@ -334,7 +338,7 @@ export function App() {
                   </button>)}
                 </div>
                 <div className="chapter">
-                  <span>{game.mapId === "biche" ? "第一章" : game.mapId === "mine" ? "第二章" : "第三章"} · 玛法结晶 {game.crystals}</span>
+                  <span>{["第一章","第二章","第三章","第四章","第五章","第六章","第七章","第八章"][MAP_IDS.indexOf(game.mapId)]} · 玛法结晶 {game.crystals}</span>
                   <h2>{game.mapId === "biche" ? "比奇荒野" : chapter.name}</h2>
                   <p>
                     {game.mapId === "biche" ? "稻草人游荡在旧路旁。在怪潮中收集经验，找回熟悉的力量。" : game.mapId === "mine" ? "沿旧矿道穿过坍塌岩壁，提防转角后的骷髅弓箭手，迎战召唤僵尸的尸王。" : chapter.theme}
@@ -575,7 +579,7 @@ export function App() {
             {saveError && <p className="inline-error">{saveError}</p>}
           </section>
           <div className="world-caption">
-            <span>{game.mapId === "biche" ? "比奇省 · 荒野边境" : game.mapId === "mine" ? "比奇省 · 废矿深处" : chapter.name + " · 祭坛深处"}</span>
+            <span>{game.mapId === "biche" ? "比奇省 · 荒野边境" : game.mapId === "mine" ? "比奇省 · 废矿深处" : chapter.name + " · 远征之地"}</span>
             <small>经典资源 / 幸存者玩法</small>
           </div>
           <footer className="lobby-footer">
@@ -595,33 +599,6 @@ export function App() {
       {active && (
         <>
           <header className="hud">
-            <div className="vitals">
-              <span className="class-seal">{game.classInfo.seal}</span>
-              <div className="life-info">
-                <div>
-                  <strong>
-                    {game.classInfo.name} <small>Lv.{game.level}</small>
-                  </strong>
-                  <span>
-                    {Math.ceil(game.player.hp)} / {Math.ceil(game.maxHP)}
-                  </span>
-                </div>
-                <div className="bar hp">
-                  <i
-                    style={{
-                      width: `${Math.max(0, game.player.hp / game.maxHP) * 100}%`,
-                    }}
-                  />
-                </div>
-                <div className="bar xp">
-                  <i
-                    style={{
-                      width: `${Math.min(1, game.exp / expNeeded(game.level)) * 100}%`,
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
             <div className="wave-info">
               <span>
                 {game.mapId === "biche" ? "比奇荒野" : chapter.name}{game.mode === "trial" ? " · 试玩" : ""}{" "}
@@ -637,19 +614,6 @@ export function App() {
                   style={{ width: `${(game.waveTime / game.duration) * 100}%` }}
                 />
               </div>
-            </div>
-            <div className="hud-right">
-              <span className="wallet">◈ {game.gold}</span>
-              <span className="kills">击败 {game.kills}</span>
-              <button aria-label="查看装备与属性" onClick={toggleInventory}>
-                装备
-              </button>
-              <button
-                aria-label={game.phase === "paused" ? "继续战斗" : "暂停战斗"}
-                onClick={() => game.pause()}
-              >
-                {game.phase === "paused" ? "继续" : "暂停"}
-              </button>
             </div>
           </header>
           {boss && (
@@ -671,6 +635,40 @@ export function App() {
               {time(game.clock)} / {game.mode === "trial" ? "01:45" : "15:00"}
             </small>
           </div>
+          <section className="classic-console" aria-label="经典战斗操作栏">
+            <div className="vitals">
+              {!isGraybox && <div className="classic-orb" aria-hidden="true">
+                <img className="hp-half" src={assetUrl("ui/hp.png")} alt="" style={{clipPath:`inset(${(1-Math.max(0,game.player.hp/game.maxHP))*100}% 0 0 0)`}} />
+                <img className="mp-half" src={assetUrl("ui/mp.png")} alt="" />
+              </div>}
+              <span className="class-seal">{game.classInfo.seal}</span>
+              <div className="life-info"><span className="infinite-mp" title="本作无限MP">MP ∞</span>
+                <div>
+                  <strong>
+                    {game.classInfo.name} <small>Lv.{game.level}</small>
+                  </strong>
+                  <span>
+                    {Math.ceil(game.player.hp)} / {Math.ceil(game.maxHP)}
+                  </span>
+                </div>
+                <div className="bar hp">
+                  <i
+                    style={{
+                      width: `${Math.max(0, game.player.hp / game.maxHP) * 100}%`,
+                    }}
+                  />
+                </div>
+                <div className="bar xp" style={{"--xp-progress":`${Math.min(1,game.exp/expNeeded(game.level))*100}%`} as CSSProperties}>
+                  <i
+                    style={{
+                      width: `${Math.min(1, game.exp / expNeeded(game.level)) * 100}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="console-middle">
+              <div className="console-readout"><span>{chapter.name} · {game.classInfo.name} Lv.{game.level}</span><span>金币 {game.gold}　击败 {game.kills}　经验 {Math.floor(game.exp/expNeeded(game.level)*100)}%</span></div>
           <div className="skill-dock">
             {Array.from({ length: game.maxSkills }, (_, i) => {
               const s = game.skills[i];
@@ -763,6 +761,27 @@ export function App() {
               {game.enemies.length} 怪物 · {frameMS.toFixed(1)} ms
             </span>
           </div>
+            </div>
+            <div className="hud-right">
+              <span className="console-ac">{Math.round(game.stats.def_max ?? 0)}</span>
+              <span className="console-dc">{Math.round(game.stats.dc_max ?? 0)}</span>
+              <span className="wallet">◈ {game.gold}</span>
+              <span className="kills">击败 {game.kills}</span>
+              <button aria-label="查看装备与属性" onClick={toggleInventory}>
+                {!isGraybox && <img src={assetUrl("ui/character.png")} alt="" />}<span>装备</span>
+              </button>
+              <button
+                aria-label={game.phase === "paused" ? "继续战斗" : "暂停战斗"}
+                onClick={() => game.pause()}
+              >
+                {game.phase === "paused" ? "继续" : "暂停"}
+              </button>
+            </div>
+            <div className="console-mobile-actions">
+              <button aria-label="查看装备与属性" onClick={toggleInventory}>装备</button>
+              <button aria-label={game.phase==="paused" ? "继续战斗" : "暂停战斗"} onClick={()=>game.pause()}>{game.phase==="paused" ? "继续" : "暂停"}</button>
+            </div>
+          </section>
         </>
       )}
       {game.phase === "upgrade" && (

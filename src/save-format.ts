@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { TALENT_IDS } from "./talents";
+import {MAP_IDS,type MapId} from "./content";
+const mapId=z.enum(MAP_IDS as [MapId,...MapId[]]);
 
 const integer = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const amount = z.number().nonnegative().max(Number.MAX_SAFE_INTEGER);
@@ -12,7 +14,7 @@ const talents = z.record(
 );
 export const progressSchema = z.object({
   schemaVersion: z.literal(1), crystals: integer,
-  unlockedMaps: z.array(z.enum(["biche", "mine", "woma", "zuma"])).min(1).max(4),
+  unlockedMaps: z.array(mapId).min(1).max(MAP_IDS.length),
   talents,
 }).strict().refine(p => p.unlockedMaps.includes("biche") && new Set(p.unlockedMaps).size === p.unlockedMaps.length);
 export type Progress = z.infer<typeof progressSchema>;
@@ -21,7 +23,7 @@ const counts = z.record(z.string().max(100), z.number().int().min(0).max(99)).re
 const runSchema = z.object({
   runId: z.string().min(1).max(200), mode: z.enum(["normal", "trial"]), seed: integer.max(0xffffffff),
   classId: z.enum(["wizard", "warrior", "taoist"]).optional(),
-  mapId: z.enum(["biche", "mine", "woma", "zuma"]).optional(),
+  mapId: mapId.optional(),
   won: z.boolean(), wave: integer.min(1).max(12), kills: integer, seconds: amount,
   level: integer.min(1), gold: amount, crystals: integer,
   skillDamage: totals, purchases: counts.optional(), rerolls: integer.max(100).optional(),

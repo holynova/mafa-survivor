@@ -8,7 +8,7 @@ import { assetUrl, isGraybox } from "./release";
 import { sounds } from "./sound";
 import { setWorldLayouts, type WorldLayout } from "./world";
 import { MovementInput, inputDiagnostics } from "./input";
-import { SCENERY, ITEMS, MAPS, isBossKind, type MapId } from "./content";
+import { SCENERY, ITEMS, MAPS, STATIONARY_MONSTERS, isBossKind, type MapId } from "./content";
 import { resolveAppearance, weaponBehind } from "./appearance";
 import { game, WORLD, type Enemy } from "./game";
 export type Manifest = {
@@ -419,6 +419,11 @@ class BattleScene extends Phaser.Scene {
       this.hero(motion, dir, x, y, time, depth, alpha);
       return;
     }
+    if(STATIONARY_MONSTERS.includes(name)) {
+      // These source monsters have one fixed body direction and no walk cycle.
+      dir=0;
+      if(motion==="walk")motion="idle";
+    }
     const shadowFrames = assets.animations[`${name}-shadow/${motion}/${dir}`];
     if (shadowFrames?.length) this.draw(key + "-shadow", shadowFrames[Math.floor(time * 9) % shadowFrames.length], x, y, -40, alpha * 0.46, scale);
     const frames =
@@ -467,7 +472,7 @@ class BattleScene extends Phaser.Scene {
     if (!rendererReady) return;
     if (!isGraybox) {
       const kinds = [...new Set([...MAPS[game.mapId].monsterPool, MAPS[game.mapId].boss, ...game.enemies.map((e) => e.kind)])];
-      const models = ["world-" + game.mapId, ...(game.mapId === "woma" || game.mapId === "zuma" ? ["womaFlame", "womaShock", "arrow"] : []), ...kinds.flatMap((kind) => [kind, kind + "-shadow"])];
+      const models = ["world-" + game.mapId, ...(game.mapId === "woma" || game.mapId === "zuma" ? ["womaFlame", "womaShock", "arrow"] : []),...(kinds.includes("overlord") ? ["overlordBlade","overlordDeath"] : []), ...kinds.flatMap((kind) => [kind, kind + "-shadow"])];
       const missing = models.some((name) => [...(this.modelPages.get(name) ?? [])].some((key) => !this.textures.exists(key)));
       if (missing && !this.requireModels(models)) { this.accumulator = 0; return; }
     }
@@ -605,7 +610,7 @@ class BattleScene extends Phaser.Scene {
           e.dir,
           e.x,
           e.y,
-          motion === "awaken" ? Math.min(5,Math.floor((game.clock-((e.awakenAt ?? 0)-0.8))/0.8*6))/9 : t - e.born,
+          motion === "awaken" ? e.kind==="chulong" ? Math.min(9,Math.floor((game.clock-((e.awakenAt ?? 0)-1))*10))/9 : Math.min(5,Math.floor((game.clock-((e.awakenAt ?? 0)-0.8))/0.8*6))/9 : t - e.born,
           e.y,
           1,
           scale,

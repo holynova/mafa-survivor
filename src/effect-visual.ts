@@ -11,7 +11,7 @@ export function effectSprites(f:Fx):EffectSprite[]{
     time:age,depth:f.y+Math.sin(angle)*distance+.2,frameRate:30};
   });
  }
- const directional=["beam","powerstrike","thrust","cleave","firesword","womaShock","beastflame"];
+ const directional=["beam","powerstrike","thrust","cleave","firesword","womaShock","beastflame","overlordBlade"];
  return [{animation:directional.includes(f.kind)?`${f.kind}/${f.dir??4}`:f.kind,x:f.x,y:f.y,time:f.total-f.life,depth:2100}];
 }
 export function poisonTint(enemy:Pick<Enemy,"redPoison"|"greenPoison"> & {hp?:number},clock:number):number|undefined{

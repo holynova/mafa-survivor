@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&display=swap");
 :root {
   font-family: "Noto Serif SC", "Songti SC", serif;
   color: #e3dbbf;
@@ -2137,3 +2136,107 @@ body:has(.lobby) .vignette {
   font-weight: 400;
   color: var(--gold);
 }
+
+/* Classic Mir client: pinned proguse board, orb halves and wooden windows. */
+.classic-ui { font-family: SimSun, "Songti SC", serif; color: #e7ddbd; --panel: #21170ff5; --line:#a79058; --gold:#dbc680; --muted:#b9ae91; }
+.classic-ui button { border-radius:0; background:#261b13; border-color:#79653c; box-shadow:inset 1px 1px #b2985c55,inset -1px -1px #080604; color:#e5d3a1; }
+.classic-ui button:hover:not(:disabled) { background:#443222; border-color:#d6bc72; }
+.classic-ui button.selected,.classic-ui button[aria-pressed="true"] { background:#58351c; color:#ffe3a0; border-color:#c6a763; }
+.classic-ui .modal,.classic-ui .lobby { border:22px solid transparent; border-image:var(--mir-panel) 25 fill stretch; background:none; box-shadow:0 8px 32px #000b; }
+.classic-ui .lobby { top:50%; left:6%; transform:translateY(-50%); width:474px; max-height:calc(100dvh - 100px); padding:12px 14px 18px; overflow-y:auto; scrollbar-color:#8a6d40 #20160e; }
+.classic-ui .lobby .eyebrow { text-align:center; font-size:10px; color:#a8976c; margin-bottom:8px; letter-spacing:3px; }
+.classic-ui h1 { margin:0; font-size:42px; line-height:1.2; text-align:center; color:#e5c980; letter-spacing:7px; text-shadow:1px 2px #4e1710,0 0 8px #000; }
+.classic-ui h1 span { display:inline; }
+.classic-ui .tagline { text-align:center; margin:10px 0 16px; font-size:12px; color:#bfa779; }
+.classic-ui .lobby-tabs { gap:0; margin:12px 0; display:grid; grid-template-columns:repeat(5,1fr); border-bottom:1px solid #8c7146; }
+.classic-ui .lobby-tabs button { padding:8px 1px; font-size:11px; letter-spacing:0; border:0; box-shadow:none; background:#140e0988; }
+.classic-ui .class-picker { margin:12px 0; gap:5px; }
+.classic-ui .class-picker button { padding:7px; font-size:13px; }
+.classic-ui .chapter-picker { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; }
+.classic-ui .chapter-picker button { min-width:0; font-size:11px; padding:8px 1px; letter-spacing:0; }
+.classic-ui .chapter { padding:10px 0; margin:0; border-top:1px solid #665131; }
+.classic-ui .chapter h2 { font-size:24px; margin:8px 0; letter-spacing:3px; }
+.classic-ui .chapter p { font-size:12px; line-height:1.8; }
+.classic-ui .mode-buttons { margin-top:12px; gap:8px; }
+.classic-ui .mode-buttons button { padding:11px 9px; font-size:15px; }
+.classic-ui .class-card { margin:13px 0; padding:10px 6px; border-color:#67502f; background:#0d090577; }
+.classic-ui .test-entry { margin-top:5px; padding:10px; color:#c2b183; }
+.classic-ui .world-caption { color:#f5dfaa; text-shadow:1px 2px #000; }
+.classic-ui .edition { left:auto; right:25px; top:22px; }
+.classic-ui .lobby-footer { font-size:10px; bottom:22px; }
+.classic-ui .modal h2 { color:#e5c980; font-size:26px; }
+.classic-ui .upgrade-card,.classic-ui .shop-card { border-color:#79623b; background:#120c08b8; }
+.classic-ui .test-tools section { background:#21180ff5; border-color:#8c7448; }
+
+.classic-console { position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:min(1100px,100%); height:133px; display:flex; align-items:stretch; pointer-events:none; z-index:3; font-family:SimSun,"Songti SC",serif; text-shadow:1px 1px #000; }
+.classic-console .vitals { position:relative; flex:0 0 178px; width:178px; height:133px; display:block; background:var(--mir-board) left top /800px 133px no-repeat; }
+.classic-orb { position:absolute; inset:0; }
+.classic-orb img { position:absolute; top:7px; width:36px; height:88px; image-rendering:pixelated; }
+.classic-orb .hp-half { left:33px; }.classic-orb .mp-half { left:73px; }
+.classic-console .class-seal { display:none; }
+.classic-console .life-info { position:absolute; inset:0; font-size:11px; }
+.classic-console .life-info>div:first-of-type { position:absolute; top:105px; left:8px; width:128px; margin:0; display:block; text-align:center; }
+.classic-console .life-info strong { font-size:11px; letter-spacing:1px; font-weight:400; }
+.classic-console .life-info>div>span { position:absolute; top:-72px; left:19px; width:85px; font-size:11px; color:#fff3d0; }
+.classic-console .life-info .hp { display:none; }
+.classic-console .life-info .xp { position:absolute; left:147px; top:25px; width:5px; height:87px; margin:0; background:#100a08; box-shadow:none; transform:rotate(180deg); }
+.classic-console .life-info .xp i { width:100% !important; height:var(--xp-progress,0%); background:#ebbd39; }
+.classic-console .infinite-mp { position:absolute; top:65px; left:75px; font-size:9px; color:#e4ddf4; }
+.console-middle { flex:1; min-width:0; height:131px; padding:13px 12px 17px; background:var(--mir-chat) center /100% 131px no-repeat,#090806; }
+.console-readout { display:flex; justify-content:space-between; gap:10px; height:22px; padding:0 4px; color:#d5c59c; font-size:11px; white-space:nowrap; }
+.classic-console .skill-dock { position:static; transform:none; width:100%; max-width:none; display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:4px; }
+.classic-console .skill-slot { width:auto; min-width:0; height:55px; padding:3px; gap:2px; border-color:#796542; background:#20160dc9; box-shadow:inset 1px 1px #b29a6655; }
+.classic-console .skill-slot .icon-box { width:26px; min-width:26px; height:38px; }
+.classic-console .skill-slot strong { font-size:10px; letter-spacing:0; line-height:1.3; }
+.classic-console .skill-slot span { margin-top:4px; font-size:9px; }
+.classic-console .skill-slot em { font-size:9px; margin-left:2px; color:#e0c379; }
+.classic-console .skill-slot.vacant { justify-content:center; background:#0806048c; }
+.classic-console .controls-hint { position:static; display:flex; width:100%; justify-content:space-between; font-size:10px; padding:7px 4px 0; transform:none; color:#a99e81; letter-spacing:0; }
+.classic-console .audio-toggle { padding:0 3px; color:#c8b77b; background:none; border:0; box-shadow:none; font-size:10px; }
+.classic-console .hud-right { position:relative; flex:0 0 166px; width:166px; height:133px; min-width:0; display:block; background:var(--mir-board) right top /800px 133px no-repeat; }
+.classic-console .hud-right .wallet,.classic-console .hud-right .kills { display:none; }
+.classic-console .hud-right button { position:absolute; margin:0; padding:0; width:37px; height:45px; background:transparent; border:0; box-shadow:none; color:#e5d6a9; font-size:10px; pointer-events:auto; }
+.classic-console .hud-right button[aria-label="查看装备与属性"] { top:39px; left:74px; }
+.classic-console .hud-right button[aria-label="查看装备与属性"] img { display:block; width:32px; height:38px; object-fit:contain; image-rendering:pixelated; }
+.classic-console .hud-right button[aria-label="查看装备与属性"] span { position:absolute; left:-2px; bottom:-12px; width:42px; }
+.classic-console .hud-right button[aria-label="暂停战斗"],.classic-console .hud-right button[aria-label="继续战斗"] { top:8px; left:73px; height:22px; width:43px; background:#1c1109d9; border:1px solid #a58b53; }
+.classic-console .console-ac,.classic-console .console-dc { position:absolute; bottom:13px; font:11px Georgia,serif; color:#f3d99e; }
+.classic-console .console-ac { left:54px; }.classic-console .console-dc { left:132px; }
+.classic-ui .hud { padding:8px 20px; justify-content:center; background:none; }
+.classic-ui .wave-info { padding:4px 17px; background:#160f09bf; border:1px solid #77623e; min-width:200px; }
+.classic-ui .wave-info>span { letter-spacing:1px; font-size:11px; }
+.classic-ui .wave-info>strong { font-size:22px; line-height:1.5; letter-spacing:2px; }
+.classic-ui .wave-info .wave { height:2px; }
+.classic-ui .battle-location { top:24px; left:20px; font-size:12px; letter-spacing:1px; color:#ffe8ac; }
+.classic-ui .boss-bar { top:90px; }
+.classic-ui .release-badge { top:10px; bottom:auto; left:auto; right:12px; font-size:9px; background:#160f09d9; border:1px solid #655231; gap:8px; }
+.classic-ui:has(.lobby) .release-badge { bottom:48px; top:auto; }
+.classic-ui .appearance-notice { bottom:144px; }
+@media(max-width:950px) {
+ .classic-console .skill-slot .icon-box { width:22px; min-width:22px; }.classic-console .skill-slot strong { font-size:9px; }
+ .classic-console .skill-slot { flex-direction:column; gap:0; height:61px; justify-content:center; }
+ .classic-console .skill-slot .icon-box { height:26px; }.classic-console .skill-slot span { margin-top:1px; }
+ .classic-console .controls-hint { font-size:9px; padding-top:4px; }.console-readout { font-size:10px; }
+}
+@media(max-width:700px) {
+ .classic-ui .lobby { width:calc(100% - 28px); left:14px; max-height:calc(100dvh - 70px); padding:4px 5px 9px; border-width:18px; }
+ .classic-ui h1 { font-size:32px; letter-spacing:4px; }.classic-ui .lobby-tabs button { font-size:10px; }
+ .classic-console { height:122px; }.classic-console .vitals { flex-basis:130px; width:130px; }.classic-console .hud-right { flex-basis:0; width:0; overflow:hidden; }
+ .console-middle { padding:10px 9px 16px; }.console-readout { height:20px; overflow:hidden; font-size:9px; }
+ .console-readout span:first-child { display:none; }.classic-console .skill-slot { height:57px; padding:1px; }.classic-console .skill-slot strong { font-size:8px; }
+ .classic-console .skill-slot .icon-box { min-width:20px; width:20px; }.classic-console .skill-slot em { display:block; }
+ .classic-ui .hud { justify-content:flex-end; padding:7px; }.classic-ui .wave-info { min-width:150px; padding:4px 8px; }.classic-ui .wave-info>strong { font-size:18px; }
+ .classic-ui .battle-location { left:8px; top:10px; font-size:10px; }.classic-ui .release-badge { top:90px; right:auto; left:8px; }
+ .classic-ui .boss-bar { top:132px; }.classic-ui .controls-hint>span:last-child { display:none; }
+}
+
+.console-mobile-actions {display:none;}
+@media(max-width:700px) {.console-mobile-actions {display:flex;position:fixed;right:7px;bottom:147px;gap:5px;pointer-events:auto;} .console-mobile-actions button {padding:7px 12px;font-size:11px;}}
+.classic-ui .lobby-footer {letter-spacing:0;font-size:10px;}
+
+@media(max-width:700px) {
+ .classic-ui .hud {top:0;}
+ .classic-console .hud-right,.classic-console .life-info .xp {display:none;}
+}
+
+.classic-ui .wave-info {position:static;left:auto;top:auto;transform:none;}

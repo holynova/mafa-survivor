@@ -7,10 +7,10 @@ m=json.loads((root/'public/assets/mir/manifest.json').read_text())
 hero={int(e['path'][:8],16):e for e in json.loads((root/'.cache/hero.json').read_text())['tree']}
 atlases={p['key']:json.loads((root/'public/assets/mir'/p['data']).read_text()) for p in m['pages']}
 images={}
-errors=[];composites=weapons=shadows=monsters=0
+errors=[];composites=weapons=shadows=monsters=ui=terrain=magic=0
 for key,f in m['frames'].items():
  kind=f['sourcePath'].split('/')[1]
- if kind not in ['hero','weapon','monster']:continue
+ if kind not in ['hero','weapon','monster','proguse','map','magic']:continue
  code=int(Path(f['sourcePath']).name[:8],16)
  expected=Image.open(root/'.cache/raw'/kind/Path(f['sourcePath']).name).convert('RGBA')
  if kind=='hero' and not code&(1<<23):
@@ -23,10 +23,20 @@ for key,f in m['frames'].items():
    expected=Image.alpha_composite(expected,overlay);composites+=1
  if kind=='weapon':weapons+=1
  if kind=='monster' and not code&(1<<23):monsters+=1
+ if kind=='proguse':ui+=1
+ if kind=='map':terrain+=1
+ if kind=='magic':magic+=1
  if code&(1<<23):shadows+=1
  if f['texture'] not in images:images[f['texture']]=Image.open(root/'public/assets/mir'/next(p['image'] for p in m['pages'] if p['key']==f['texture'])).convert('RGBA')
  rect=atlases[f['texture']]['frames'][key]['frame']
  actual=images[f['texture']].crop((rect['x'],rect['y'],rect['x']+rect['w'],rect['y']+rect['h']))
  if actual.size!=expected.size or actual.tobytes()!=expected.tobytes():errors.append(key+': atlas pixels differ from source assembly')
-print(json.dumps({'verifiedHeroComposites':composites,'verifiedWeaponFrames':weapons,'verifiedMonsterFrames':monsters,'verifiedShadowFrames':shadows,'failures':len(errors),'examples':errors[:5]},indent=2))
+for name,part in m.get('uiFiles',{}).items():
+ source=m['frames'][part['frame']]['sourcePath']
+ expected=Image.open(root/'.cache/raw/proguse'/Path(source).name).convert('RGBA')
+ if 'crop' in part:
+  x,y,w,h=part['crop'];expected=expected.crop((x,y,x+w,y+h))
+ actual=Image.open(root/'public/assets/mir'/part['file']).convert('RGBA')
+ if actual.size!=expected.size or actual.tobytes()!=expected.tobytes():errors.append(name+': UI pixels differ from source rectangle')
+print(json.dumps({'verifiedHeroComposites':composites,'verifiedWeaponFrames':weapons,'verifiedMonsterFrames':monsters,'verifiedShadowFrames':shadows,'verifiedUIFrames':ui,'verifiedTerrainFrames':terrain,'verifiedMagicFrames':magic,'failures':len(errors),'examples':errors[:5]},indent=2))
 sys.exit(bool(errors))

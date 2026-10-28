@@ -1,12 +1,25 @@
 import tempfile
 import time
 import unittest
+import runpy
+import threading
+import source_cache
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 from source_cache import blob_sha, read_source
 
 
 class SharedSourceCacheTests(unittest.TestCase):
+    def test_independent_importers_never_share_a_temporary_filename(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/'same.PNG';data=b'original pixels'
+            readers=[runpy.run_path(source_cache.__file__)['read_source'] for _ in range(2)]
+            barrier=threading.Barrier(2)
+            def request(_):barrier.wait(timeout=3);return data
+            with ThreadPoolExecutor(2) as pool:
+                results=list(pool.map(lambda read:read(path,'source',blob_sha(data),request),readers))
+            self.assertEqual(results,[data,data]);self.assertEqual(path.read_bytes(),data)
+            self.assertEqual(list(Path(directory).iterdir()),[path])
     def test_shared_frame_is_fetched_once_for_concurrent_consumers(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'shared-book.PNG'

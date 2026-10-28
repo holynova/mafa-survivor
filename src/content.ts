@@ -298,8 +298,8 @@ export const WAVE_BUDGET = [
 ];
 // Later chapters spend their threat budget on fewer, tougher enemies. Rewards
 // compensate for that lower count without changing the GDD monster HP/damage.
-export const CHAPTER_PRESSURE = { biche:1, mine:1.7, woma:2.8, zuma:3.8 };
-export const NATIVE_ELITES = ["orcBrave","womaBrave"];
+export const CHAPTER_PRESSURE = { biche:1, mine:1.7, woma:2.8, zuma:3.8, mengzhong:3.2,centipede:3.5,stone:3.8,redmoon:4.2 };
+export const NATIVE_ELITES = ["orcBrave","womaBrave","giantBug","evilPincer","evilSnake","oneEyeSpider"];
 export function waveSpawnBudget(mapId:MapId,wave:number,trial=false) {
   return Math.max(1,Math.ceil(WAVE_BUDGET[wave-1]/CHAPTER_PRESSURE[mapId]*(trial ? 0.7 : 1)));
 }
@@ -326,8 +326,25 @@ export const MONSTERS = [
   { id: "zumaArcher", name: "祖玛弓箭手", hp: 85, damage: 10, speed: 30, exp: 7 },
   { id: "zumaStatue", name: "祖玛雕像", hp: 120, damage: 10, speed: 45, exp: 8 },
   { id: "zumaLord", name: "祖玛教主", hp: 2500, damage: 30, speed: 52, exp: 130 },
+  {id:"giantBug",name:"巨型多角虫",hp:360,damage:16,speed:43,exp:24},
+  {id:"centipede",name:"洞穴蜈蚣",hp:85,damage:8,speed:48,exp:6},
+  {id:"pincer",name:"钳虫",hp:125,damage:12,speed:39,exp:7},
+  {id:"evilPincer",name:"邪恶钳虫",hp:600,damage:21,speed:43,exp:35},
+  {id:"chulong",name:"触龙神",hp:2600,damage:29,speed:0,exp:135},
+  {id:"redBoar",name:"红野猪",hp:110,damage:12,speed:41,exp:7},
+  {id:"blackBoar",name:"黑野猪",hp:145,damage:14,speed:38,exp:8},
+  {id:"whiteBoar",name:"白野猪",hp:2300,damage:28,speed:45,exp:120},
+  {id:"scorpionSnake",name:"蝎蛇",hp:105,damage:12,speed:47,exp:7},
+  {id:"evilSnake",name:"邪恶毒蛇",hp:550,damage:22,speed:50,exp:33},
+  {id:"moonSpider",name:"月魔蜘蛛",hp:120,damage:13,speed:65,exp:8},
+  {id:"oneEyeSpider",name:"独眼蜘蛛",hp:650,damage:25,speed:34,exp:40},
+  {id:"tianlangSpider",name:"天狼蜘蛛",hp:150,damage:15,speed:46,exp:9},
+  {id:"redMoon",name:"赤月恶魔",hp:3000,damage:32,speed:0,exp:150},
+  {id:"overlord",name:"霸王教主",hp:2300,damage:27,speed:48,exp:120},
 ];
-export const isBossKind = (kind: string) => ["boss", "corpseKing", "womaLord", "zumaLord"].includes(kind);
+export const STATIONARY_MONSTERS=["chulong","redMoon"];
+export const isBossKind = (kind: string) => ["boss", "corpseKing", "womaLord", "zumaLord","chulong","whiteBoar","redMoon","overlord"].includes(kind);
+export const EXPANSION_RANGED=["moonSpider","evilSnake","oneEyeSpider"];
 export const getItem = (id: string) => {
   const item = ITEMS.find((x) => x.id === id);
   if (!item) throw new Error("Unknown item: " + id);
@@ -353,9 +370,9 @@ export const SCENERY = [
 // Chapter map data (GDD §11). Each chapter has its own scenery obstacle set
 // and monster pool; chapters are unlocked out-of-run with Mafa Crystals.
 // ---------------------------------------------------------------------------
-export type MapId = "biche" | "mine" | "woma" | "zuma";
+export type MapId = "biche" | "mine" | "woma" | "zuma" | "mengzhong" | "centipede" | "stone" | "redmoon";
 
-export const MAP_IDS: MapId[] = ["biche", "mine", "woma", "zuma"];
+export const MAP_IDS: MapId[] = ["biche", "mine", "woma", "zuma","mengzhong","centipede","stone","redmoon"];
 export const PLAYABLE_MAP_IDS: MapId[] = [...MAP_IDS];
 
 export const MAP_SCENERY: Record<MapId, typeof SCENERY> = {
@@ -388,6 +405,7 @@ export const MAP_SCENERY: Record<MapId, typeof SCENERY> = {
     { id: "pillar", x: 700, y: 500, r: 20 },
     { id: "pillar", x: 1500, y: 1000, r: 20 },
   ],
+  mengzhong:[],centipede:[],stone:[],redmoon:[],
 };
 
 export const MAPS: Record<MapId, { id: MapId; name: string; theme: string; monsterPool: string[]; boss: string; unlockCost: number }> = {
@@ -423,4 +441,8 @@ export const MAPS: Record<MapId, { id: MapId; name: string; theme: string; monst
     boss: "zumaLord",
     unlockCost: 9,
   },
+  mengzhong:{id:"mengzhong",name:"盟重土城",theme:"沙漠土城原图：黄沙、城墙与石路；巨型多角虫与霸王教主来袭",monsterPool:["centipede","pincer","scorpionSnake","giantBug"],boss:"overlord",unlockCost:12},
+  centipede:{id:"centipede",name:"蜈蚣洞",theme:"原版虫洞的曲折石壁与窄道；邪恶钳虫突进，触龙神驻地喷毒",monsterPool:["centipede","pincer","scorpionSnake","evilPincer"],boss:"chulong",unlockCost:15},
+  stone:{id:"stone",name:"石阁地宫",theme:"原版石阁一层：砌石房间、甬道与台阶；红黑野猪与白野猪首领",monsterPool:["redBoar","blackBoar","scorpionSnake","evilSnake"],boss:"whiteBoar",unlockCost:18},
+  redmoon:{id:"redmoon",name:"赤月山谷",theme:"原版赤月一层的岩窟、碎石与交错通道；月魔／天狼蜘蛛与赤月恶魔",monsterPool:["moonSpider","tianlangSpider","spider","oneEyeSpider"],boss:"redMoon",unlockCost:21},
 } as const;

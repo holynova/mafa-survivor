@@ -9,7 +9,7 @@ import { inputDiagnostics } from "./input";
 import { hasWorldAppearance } from "./appearance";
 import { appearanceStatus } from "./renderer";
 import { ITEMS, getItem } from "./content";
-import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual } from "./test-mode";
+import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual,testChapterVisual } from "./test-mode";
 import {damageSourceName} from "./damage-taken";
 export function TestTools() {
   const [open, setOpen] = useState(true),
@@ -67,6 +67,7 @@ export function TestTools() {
             <button onClick={()=>testSpellVisual(game,"beast")}>神兽喷火定格样例</button>
             <button onClick={()=>testSpellVisual(game,"poison")}>红蓝中毒定格样例</button>
           </div>
+          <button onClick={()=>testChapterVisual(game)}>重置本章并展陈怪物（暂停）</button>
           {game.mapId==="mine" && <>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testIncomingWall(game)}>重置并载入敌伤隔墙样例</button>
             {game.test.incomingWallSample && <>
