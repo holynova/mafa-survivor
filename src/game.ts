@@ -19,6 +19,7 @@ import {
   PLAYABLE_MAP_IDS,
 } from "./content";
 import {updateRangedEnemy} from "./enemy-ai";
+import {newCombatRecovery,recoverHit,type DamageOrigin,type CombatHealing} from "./combat-recovery";
 import { TEMPLE_RANGED, updateTempleEnemy } from "./temple";
 import type { SkillField } from "./spells";
 import {
@@ -218,6 +219,7 @@ export type RunResult = {
   crystals: number;
   skillDamage: Record<string, number>;
   healing?: Record<string, number>;
+  combatHealing?: CombatHealing;
   skills: string[];
 };
 export class Game {
@@ -251,6 +253,7 @@ export class Game {
   bossSpawned = false;
   bossKilled = false;
   damageDealt: Record<string, number> = {};
+  combatRecovery=newCombatRecovery();
   player = {
     x: WORLD.w / 2,
     y: WORLD.h / 2,
@@ -464,6 +467,7 @@ export class Game {
     this.rerolls = 0;
     this.result = null;
     this.damageDealt = {};
+    this.combatRecovery=newCombatRecovery();
     this.spawned = 0;
     this.spawnTimer = 0.25;
     this.waveKills = 0;
@@ -1174,7 +1178,7 @@ export class Game {
       0,
     );
     const actual = Math.min(damage, target.hp);
-    this.hit(target, damage, "basic");
+    this.hit(target, damage, "basic", "direct", "weapon");
     for (const part of parts.slice(1)) {
       const dealt = (actual * part.value) / total;
       this.damageDealt.basic -= dealt;
@@ -1332,7 +1336,7 @@ export class Game {
             this.enemyDefense(e, "physical"),
             0,
           ),
-          s.id,
+          s.id,"direct","weapon",
         );
     this.player.attackUntil = this.clock + 0.35;
     this.player.attackDir = this.player.dir;
@@ -1557,11 +1561,11 @@ export class Game {
               (ex * dx + ey * dy) / Math.max(1, length * d) >=
                 Math.cos(Math.PI / 5)
             )
-              this.hit(e, damage, source, "magic");
+              this.hit(e, damage, source, "magic", "summon");
           }
           this.sound("beastflame");
           this.effect("beastflame", p.x, p.y, range, 0.6, p.dir);
-        } else this.hit(target, damage, source, "physical");
+        } else this.hit(target, damage, source, "physical", "summon");
         p.cd = source === "beast" ? 1.6 : 1.1;
         p.attackUntil = this.clock + 0.4;
       } else if (d > (target ? range * 0.75 : 80)) {
@@ -1716,7 +1720,7 @@ export class Game {
             0.9,
           )
         )
-          this.hit(e, e.hp, s.id);
+          this.hit(e, e.hp, s.id, "direct", "execution");
         this.effect("holy", e.x, e.y, 0, 1.1);
       }
     } else if (s.id === "hellfire" || s.id === "beam") {
@@ -1810,6 +1814,7 @@ export class Game {
     damage: number,
     skill: string,
     kind: "direct" | "physical" | "magic" = "direct",
+    origin: DamageOrigin = "spell",
   ) {
     if (e.hp <= 0 || this.phase !== "battle") return;
     if (kind !== "direct")
@@ -1822,6 +1827,7 @@ export class Game {
     e.hp -= damage;
     e.hitAt = this.clock;
     this.damageDealt[skill] = (this.damageDealt[skill] ?? 0) + dealt;
+    recoverHit(this,e,dealt,origin);
     if (this.floating.length < 45)
       this.floating.push({
         id: ++this.id,
@@ -2311,6 +2317,7 @@ export class Game {
       crystals: runCrystals,
       skillDamage: { ...this.damageDealt },
       healing: { ...this.tao.healing },
+      combatHealing:{...this.combatRecovery.healing},
       skills: this.skills.map((s) => `${getSkill(s.id).name} Lv.${s.rank}`),
     };
     this.input = { x: 0, y: 0 };

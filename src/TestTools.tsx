@@ -9,7 +9,7 @@ import { inputDiagnostics } from "./input";
 import { hasWorldAppearance } from "./appearance";
 import { appearanceStatus } from "./renderer";
 import { ITEMS, getItem } from "./content";
-import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing } from "./test-mode";
+import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery } from "./test-mode";
 export function TestTools() {
   const [open, setOpen] = useState(true),
     [kind, setKind] = useState("orc"),
@@ -50,6 +50,15 @@ export function TestTools() {
             画面：{motionNames[pose.motion] ?? pose.motion} · {directions[pose.dir]}<br />
             移动朝向：{directions[game.player.dir]} · 最近挥砍：{game.player.attackUntil>0 ? directions[game.player.attackDir] : "尚未出手"}
           </output>
+          <output aria-label="战斗回复诊断">
+            生命 {game.player.hp.toFixed(2)} / {game.maxHP.toFixed(0)}<br />
+            本局击杀回复 {game.combatRecovery.healing.onKill.toFixed(2)} ·
+            本局生命偷取 {game.combatRecovery.healing.lifeSteal.toFixed(2)}
+          </output>
+          <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testCombatRecovery(game)}>
+            重置并载入续航样例
+          </button>
+          {game.test.recoverySample && <p role="status">续航样例：用测试金币买满两种道具，半血、无敌、仅普攻；击杀固定稻草人后暂停，可在属性面板查看实际回复。</p>}
           <p>
             {sounds.status} · 已播放 {sounds.played} 次
           </p>

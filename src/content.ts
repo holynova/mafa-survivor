@@ -25,6 +25,8 @@ export type StatKey =
   | "healing_received"
   | "hp_max"
   | "hp_regen"
+  | "hp_on_kill"
+  | "lifesteal"
   | "mc_flat"
   | "mc_bonus_pct"
   | "def_flat"
@@ -63,6 +65,8 @@ export const STAT_NAMES: Record<StatKey, string> = {
   healing_received: "治疗加成",
   hp_max: "生命",
   hp_regen: "生命回复",
+  hp_on_kill: "击杀回复",
+  lifesteal: "生命偷取",
   mc_flat: "魔法",
   mc_bonus_pct: "魔法伤害",
   def_flat: "防御",
@@ -253,6 +257,8 @@ const passiveDrafts = [
       String(x[1]),
     ),
   ),
+  // Append to preserve the IDs already stored in historical runs.
+  ...draft.passiveItemProposals.filter(x=>["hp_on_kill","lifesteal"].includes(String(x[1]))),
 ];
 const passives: Item[] = passiveDrafts.map(
   (x, i) =>
@@ -261,10 +267,12 @@ const passives: Item[] = passiveDrafts.map(
       name: x[0],
       kind: "passive",
       price: x[3],
-      tier: x[5] === "稀有" ? 2 : 1,
+      tier: x[5] === "史诗" ? 3 : x[5] === "稀有" ? 2 : 1,
       stats: { [String(x[1])]: Number(x[2]) },
       maxCount: Number(x[4]) === 99 ? null : Number(x[4]),
-      description: `${STAT_NAMES[x[1] as StatKey]} +${x[2]}${["hp_max", "def_flat", "mdef_flat"].includes(String(x[1])) ? "" : x[1] === "hp_regen" ? "/秒" : x[1] === "crit_mult" ? "倍" : "%"} · ${Number(x[4]) === 99 ? "可重复叠加" : `最多 ${x[4]} 件`}`,
+      description: x[1]==="hp_on_kill" ? "击杀回复 +0.2点 · 共享0.1秒冷却、每秒上限5点 · 最多5件" :
+        x[1]==="lifesteal" ? "自身有效伤害的1%转为生命，法术按1/3计；宝宝与处决不吸血 · 最多3件" :
+        `${STAT_NAMES[x[1] as StatKey]} +${x[2]}${["hp_max", "def_flat", "mdef_flat"].includes(String(x[1])) ? "" : x[1] === "hp_regen" ? "/秒" : x[1] === "crit_mult" ? "倍" : "%"} · ${Number(x[4]) === 99 ? "可重复叠加" : `最多 ${x[4]} 件`}`,
     }) as Item,
 );
 export const ITEMS: Item[] = [

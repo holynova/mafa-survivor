@@ -882,6 +882,8 @@ export function App() {
                     "%",
                 ],
                 ["生命回复", (game.stats.hp_regen ?? 0) + "/s"],
+                ["击杀回复", (game.stats.hp_on_kill ?? 0) + " 点/次"],
+                ["生命偷取", (game.stats.lifesteal ?? 0) + "% · 法术按1/3"],
               ].map(([n, v]) => (
                 <div key={n}>
                   <span>{n}</span>
@@ -889,6 +891,11 @@ export function App() {
                 </div>
               ))}
             </div>
+            {(game.stats.hp_on_kill || game.stats.lifesteal) ? <p>
+              本局实际战斗回复：击杀 {game.combatRecovery.healing.onKill.toFixed(2)} 点 ·
+              生命偷取 {game.combatRecovery.healing.lifeSteal.toFixed(2)} 点。
+              击杀回复共享0.1秒冷却，每秒最多5点；无奖励援军不提供回复。
+            </p> : null}
             {game.classId === "taoist" && (
               <div className="taoist-status">
                 <h3>道士修为</h3>
@@ -998,6 +1005,10 @@ export function App() {
                 </div>
               ))}
             </div>
+            {(game.combatRecovery.healing.onKill || game.combatRecovery.healing.lifeSteal) ? <p className="muted">
+              本局实际战斗回复：击杀 {game.combatRecovery.healing.onKill.toFixed(2)} 点 ·
+              生命偷取 {game.combatRecovery.healing.lifeSteal.toFixed(2)} 点
+            </p> : null}
             <p className="muted">
               种子 {game.seed} ·{" "}
               {game.mode === "trial"

@@ -13,6 +13,7 @@ export const newTestSettings = () => ({
   pose: "live",
   direction: 4,
   visualEpoch: 0,
+  recoverySample:false,
 });
 export function testSpawn(g: Game, kind: string, count: number) {
   if (g.mode !== "test" || !["battle", "paused"].includes(g.phase)) return;
@@ -132,4 +133,31 @@ export function testMeleeFacing(g:Game) {
     g.cast(s);g.pause();g.emit();return true;
   }
   return false;
+}
+
+/** Buy real capped items, then run real fixed steps through one isolated kill. */
+export function testCombatRecovery(g:Game) {
+  if(g.mode!=="test" || !["battle","paused"].includes(g.phase))return false;
+  g.start("test",g.seed,g.classId,false,g.mapId);
+  const points=g.navigation?.reachablePoints(g.player,20,35)
+    .filter(p=>g.canStand(p.x,p.y) && g.navigation!.lineClear(g.player,p,0));
+  const fallback=[[28,0],[-28,0],[0,28],[0,-28],[20,0],[-20,0],[0,20],[0,-20]]
+    .map(([dx,dy])=>({x:g.player.x+dx,y:g.player.y+dy}))
+    .find(p=>g.canStand(p.x,p.y) && (!g.navigation || g.navigation.lineClear(g.player,p,0)) &&
+      g.obstacles.every(o=>Math.hypot(p.x-o.x,p.y-o.y)>o.r+12));
+  const point=points?.[0] ?? fallback;
+  if(!point)return false;
+  g.test.spawning=false;g.test.recoverySample=true;
+  g.endWave();g.gold=2000;
+  for(const name of ["击杀回复强化","生命偷取强化"]) {
+    const item=ITEMS.find(i=>i.name===name)!;
+    for(let i=0;i<item.maxCount!;i++) {
+      g.offers=[{id:g.nextEntityId(),itemId:item.id,price:item.price,locked:false,sold:false}];
+      if(!g.buy(g.offers[0].id))return false;
+    }
+  }
+  g.nextWave();g.skills=[];g.player.hp=g.maxHP/2;
+  const target=g.spawnEnemy("scarecrow");Object.assign(target,point,{speed:0});
+  for(let tick=0;tick<900 && target.hp>0 && g.phase==="battle";tick++)g.step(1/60);
+  if(g.phase==="battle")g.pause();g.emit();return target.hp<=0;
 }
