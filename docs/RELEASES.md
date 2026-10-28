@@ -114,3 +114,8 @@ Pages 测试地址：https://holynova.github.io/mafa-survivor/
 ## alpha.19 血瓶与原版掉落、伤亡反馈
 
 [v0.1.0-alpha.19](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.19)发布提交`c25475c906978d016c2099c622a11c076fa6b0e3`；[Pages与Release](https://github.com/holynova/mafa-survivor/actions/runs/40749747882)和[Source checks](https://github.com/holynova/mafa-survivor/actions/runs/40749741925)成功。429项游戏测试／7项Python／原图像素／29个WAV／生产构建通过，干净13ae123固定V5控制器72局0异常、4法师通关，整体平衡仍未通过。公网版本original／alpha.19／c25475c匹配；真实后台浏览器验证五档金币、原版掉落、血瓶实际回复7、受击和阵亡音效计数各1、测试结算0结晶。截图、诊断和矩阵附Release，未操作用户现有页面。
+
+
+## alpha.20 召唤物隔墙与自动寻药
+
+[v0.1.0-alpha.20](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.20)发布提交`1e76796b5c5964e5dfef9e15c74cd81ddc8b84ef`；[Pages与Release](https://github.com/holynova/mafa-survivor/actions/runs/40761322771)及[Source checks](https://github.com/holynova/mafa-survivor/actions/runs/40761318154)成功。438项游戏测试、7项Python、资源原图／WAV／生产构建通过，干净22afd57同V6控制器72局0异常／3通关，旧引擎同V6也是3通关，整体平衡仍未达标。真实公网后台样例验证神兽同锥形内可见16／墙后0，自动走位75→135实际回血60；版本original／alpha.20／1e76796匹配，截图、诊断与完整对照附Release。用户现有页面保留。

@@ -472,3 +472,5 @@ alpha.19已公开发布：标签`c25475c906978d016c2099c622a11c076fa6b0e3`，Sta
 alpha.20最终干净72局：引擎`22afd57ed9c1c5b952e6a598e582b4769054d5f9`、sourceDirty=false，V6 SHA与旧引擎完全相同。72局全部终结／0异常、旧新均3局比奇法师通关；法师／战士48局逐项相同，道士24局有10局变化。道士176盟重10→12波、17矿洞9→10波、991矿洞10→7波，回退如实保留；不能把索敌修复等同于胜率改善。新报告中道士HP耗尽15→13局、Boss超时9→11局。alpha20-before72.json／clean72.json／comparison.json保留完整终态。
 
 390×844真实iframe视口实际进入原矿洞新对照按钮，墙后0／可见16的输出和按钮完整可读；alpha20-mobile.jpg已保存查看。测试HTML仅在忽略的dist，不属于发布产物。基础HP／伤害／掉率／冷却未改，1.76石墓／白日门资源缺口与整体平衡仍未完成。
+
+alpha.20已公开发布：标签`1e76796b5c5964e5dfef9e15c74cd81ddc8b84ef`，Stage release and Pages **40761322771**的build／deploy／release全部成功，Source checks **40761318154**成功。公网version.json核对original／v0.1.0-alpha.20／1e76796。独立后台IAB26实际进入原矿洞对照，墙后0／可见16；再进入自动寻药样例，点击继续，由真实Scene输入拾药75→135，实际回复60、随后收4金币。alpha20-online-summon-wall.jpg与alpha20-online-health.jpg已保存查看，线上诊断文本和浏览器空warn/error已核验。截图、原始失败／通过日志、旧新同策略72局和比较JSON附Release；未操作用户现有5182页面或前台Chrome。
