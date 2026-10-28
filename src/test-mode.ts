@@ -14,6 +14,7 @@ export const newTestSettings = () => ({
   direction: 4,
   visualEpoch: 0,
   recoverySample:false,
+  incomingWallSample:false,
 });
 export function testSpawn(g: Game, kind: string, count: number) {
   if (g.mode !== "test" || !["battle", "paused"].includes(g.phase)) return;
@@ -160,4 +161,32 @@ export function testCombatRecovery(g:Game) {
   const target=g.spawnEnemy("scarecrow");Object.assign(target,point,{speed:0});
   for(let tick=0;tick<900 && target.hp>0 && g.phase==="battle";tick++)g.step(1/60);
   if(g.phase==="battle")g.pause();g.emit();return target.hp<=0;
+}
+
+/** Real mine geometry and real stomp AI, first behind a wall, then in sight. */
+export function testIncomingWall(g:Game, visible = false) {
+  if(g.mode!=="test" || g.mapId!=="mine" || !["battle","paused"].includes(g.phase) || !g.navigation)return false;
+  if(!visible) {
+    const nav=g.navigation;
+    const homes=[...nav.points].sort((a,b)=>Math.hypot(a.x-g.player.x,a.y-g.player.y)-Math.hypot(b.x-g.player.x,b.y-g.player.y));
+    const pair=homes.flatMap(home=>[-1,1].map(sign=>({home,enemy:{x:home.x,y:home.y+sign*64}})))
+      .find(({home,enemy})=>g.canStand(enemy.x,enemy.y) && nav.connected(home,enemy) && !nav.lineClear(home,enemy,0));
+    if(!pair)return false;
+    g.start("test",17,g.classId,false,"mine");
+    Object.assign(g.player,pair.home,{moving:false});
+    g.test.incomingWallSample=true;g.test.spawning=false;g.test.god=false;g.skills=[];g.basicCD=Infinity;
+    Object.assign(g.spawnEnemy("corpseKing"),pair.enemy,{speed:0,attackCD:Infinity,bossSummonCD:Infinity,stompCD:0});
+  } else {
+    if(!g.test.incomingWallSample)return false;
+    const boss=g.enemies.find(e=>e.kind==="corpseKing" && e.hp>0);
+    if(!boss)return false;
+    const point=g.navigation.reachablePoints(boss,50,100)
+      .filter(p=>g.canStand(p.x,p.y) && g.attackLineClear(boss,p))
+      .sort((a,b)=>Math.hypot(a.x-g.player.x,a.y-g.player.y)-Math.hypot(b.x-g.player.x,b.y-g.player.y))[0];
+    if(!point)return false;
+    Object.assign(g.player,point,{moving:false});boss.stompCD=0;
+    if(g.phase==="paused")g.pause();
+  }
+  for(let tick=0;tick<66 && g.phase==="battle";tick++)g.step(1/60);
+  if(g.phase==="battle")g.pause();g.emit();return true;
 }

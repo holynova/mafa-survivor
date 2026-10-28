@@ -9,7 +9,8 @@ import { inputDiagnostics } from "./input";
 import { hasWorldAppearance } from "./appearance";
 import { appearanceStatus } from "./renderer";
 import { ITEMS, getItem } from "./content";
-import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery } from "./test-mode";
+import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall } from "./test-mode";
+import {damageSourceName} from "./damage-taken";
 export function TestTools() {
   const [open, setOpen] = useState(true),
     [kind, setKind] = useState("orc"),
@@ -55,6 +56,18 @@ export function TestTools() {
             本局击杀回复 {game.combatRecovery.healing.onKill.toFixed(2)} ·
             本局生命偷取 {game.combatRecovery.healing.lifeSteal.toFixed(2)}
           </output>
+          <output aria-label="实际承伤诊断">
+            实际承伤：物理 {game.damageTaken.physical.toFixed(2)} · 法术 {game.damageTaken.magic.toFixed(2)}<br />
+            {Object.entries(game.damageTaken.sources).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([source,value])=>
+              <span key={source}>{damageSourceName(source)} {value.toFixed(2)}<br /></span>)}
+          </output>
+          {game.mapId==="mine" && <>
+            <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testIncomingWall(game)}>重置并载入敌伤隔墙样例</button>
+            {game.test.incomingWallSample && <>
+              <p>敌伤样例：固定种子17，无敌已关闭、关闭刷怪与玩家攻击，尸王实际震地后暂停。先检查隔墙零承伤，再移至可见地面作对照；正常闪避仍生效，测试不保存战绩。</p>
+              <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testIncomingWall(game,true)}>移至可见地面并复测震地</button>
+            </>}
+          </>}
           <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testCombatRecovery(game)}>
             重置并载入续航样例
           </button>

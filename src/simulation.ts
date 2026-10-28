@@ -161,6 +161,7 @@ export function runSimulation(options:SimulationOptions) {
     if(g.mode==="test")return "test immunity must not enter a balance probe";
     if(!Number.isFinite(g.player.hp) || !Number.isFinite(g.clock))return "non-finite combat state";
     if(g.player.hp>g.maxHP+1e-6)return "healing exceeded maximum health";
+    if(g.damageTaken && Math.abs(g.damageTaken.physical+g.damageTaken.magic-Object.values(g.damageTaken.sources).reduce((a,b)=>a+b,0))>1e-6)return "incoming damage totals disagree with source ledger";
     if(g.gold<0 || g.enemies.length>300 || g.drops.length>300 || g.skills.length>g.maxSkills)return "economy/entity/skill cap violated";
     if(!g.canStand(g.player.x,g.player.y))return "player left source walkable floor";
     for(const e of g.enemies)if(e.hp>0 && (e.bossJumpUntil ?? 0)<=g.clock && !g.canStand(e.x,e.y))return `grounded ${e.kind} left source walkable floor`;
@@ -199,6 +200,7 @@ export function runSimulation(options:SimulationOptions) {
     bossHP:lastBoss ? {...lastBoss,hp:g.bossKilled ? 0 : lastBoss.hp} : null,
     goldEarned:g.totalGold,goldRemaining:g.gold,equipment:{...g.equipment},passives:{...g.passives},
     skills:g.result?.skills ?? g.skills.map(s=>`${s.id}:${s.rank}`),damage:{...g.damageDealt},
-    combatHealing:{...(g.combatRecovery?.healing ?? {onKill:0,lifeSteal:0})},waves,shopTrace};
+    combatHealing:{...(g.combatRecovery?.healing ?? {onKill:0,lifeSteal:0})},
+    damageTaken:g.damageTaken ? {...g.damageTaken,sources:{...g.damageTaken.sources}} : undefined,waves,shopTrace};
   return report;
 }

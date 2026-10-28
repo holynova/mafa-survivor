@@ -40,8 +40,8 @@ export function updateTempleEnemy(g: Game, e: Enemy, dt: number, victim: Point &
     if(g.clock>=e.shock.at) {
       const shock=e.shock;
       for(const actor of [g.player,...g.pets.filter(p=>p.hp>0)]) {
-        if(inShockLane(actor,shock.origin,shock.target) && (!g.navigation || g.navigation.lineClear(shock.origin,actor,0))) {
-          if(actor===g.player)g.hurt(e.damage*1.15,"magic");
+        if(inShockLane(actor,shock.origin,shock.target) && g.attackLineClear(shock.origin,actor)) {
+          if(actor===g.player)g.hurt(e.damage*1.15,"magic",false,`${e.kind}:shock`);
           else g.hurtPet(actor as typeof g.pets[number],e.damage*1.15,"magic");
         }
       }

@@ -16,6 +16,7 @@ const runSchema = z.object({
   level: integer.min(1), gold: amount, crystals: integer,
   skillDamage: totals, healing: totals.optional(),
   combatHealing: z.object({ onKill: amount, lifeSteal: amount }).strict().optional(),
+  damageTaken: z.object({ physical: amount, magic: amount, sources: totals }).strict().optional(),
   skills: z.array(z.string().max(100)).max(6), savedAt: integer,
 }).strict().refine(r => r.crystals === 0 || (r.mode === "normal" && r.won));
 export const backupSchema = z.object({

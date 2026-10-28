@@ -32,6 +32,7 @@ import {
 import { TestTools } from "./TestTools";
 import { saveRun, history, loadProgress, unlockChapter } from "./save";
 import { SaveManager } from "./SaveManager";
+import {damageSourceName} from "./damage-taken";
 const time = (seconds: number) =>
   `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 function Art({
@@ -1014,6 +1015,11 @@ export function App() {
               本局实际战斗回复：击杀 {game.combatRecovery.healing.onKill.toFixed(2)} 点 ·
               生命偷取 {game.combatRecovery.healing.lifeSteal.toFixed(2)} 点
             </p> : null}
+            <div className="damage-list" aria-label="本局实际承伤">
+              <p className="muted">实际承伤：物理 {game.damageTaken.physical.toFixed(1)} · 法术 {game.damageTaken.magic.toFixed(1)}（累计HP扣除，回复不抵消）</p>
+              {Object.entries(game.damageTaken.sources).sort((a,b)=>b[1]-a[1]).map(([source,value])=>
+                <div key={source}><span>{damageSourceName(source)}</span><b>{value.toFixed(1)}</b></div>)}
+            </div>
             <p className="muted">
               种子 {game.seed} ·{" "}
               {game.mode === "trial"

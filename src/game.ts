@@ -20,6 +20,7 @@ import {
 } from "./content";
 import {updateRangedEnemy} from "./enemy-ai";
 import {newCombatRecovery,recoverHit,type DamageOrigin,type CombatHealing} from "./combat-recovery";
+import {newDamageTaken,recordDamageTaken,type DamageTaken} from "./damage-taken";
 import { TEMPLE_RANGED, updateTempleEnemy } from "./temple";
 import type { SkillField } from "./spells";
 import {
@@ -143,6 +144,7 @@ export type Projectile = Entity & {
   skill?: SkillId;
   targetId?: number;
   hitChance?: number;
+  enemyKind?: string;
   homing?: boolean;
   faction?: "enemy";
   visual?: "poison" | "arrow" | "womaFlame";
@@ -220,6 +222,7 @@ export type RunResult = {
   skillDamage: Record<string, number>;
   healing?: Record<string, number>;
   combatHealing?: CombatHealing;
+  damageTaken?: DamageTaken;
   skills: string[];
 };
 export class Game {
@@ -254,6 +257,7 @@ export class Game {
   bossKilled = false;
   damageDealt: Record<string, number> = {};
   combatRecovery=newCombatRecovery();
+  damageTaken=newDamageTaken();
   player = {
     x: WORLD.w / 2,
     y: WORLD.h / 2,
@@ -468,6 +472,7 @@ export class Game {
     this.result = null;
     this.damageDealt = {};
     this.combatRecovery=newCombatRecovery();
+    this.damageTaken=newDamageTaken();
     this.spawned = 0;
     this.spawnTimer = 0.25;
     this.waveKills = 0;
@@ -618,8 +623,8 @@ export class Game {
             e.windup=0;continue;
           }
           e.x=target.x;e.y=target.y;
-          if(Math.hypot(this.player.x-e.x,this.player.y-e.y)<110)this.hurt(e.damage*1.5,"magic");
-          for(const pet of this.pets)if(pet.hp>0 && Math.hypot(pet.x-e.x,pet.y-e.y)<110)this.hurtPet(pet,e.damage*1.5,"magic");
+          if(Math.hypot(this.player.x-e.x,this.player.y-e.y)<110 && this.attackLineClear(e,this.player))this.hurt(e.damage*1.5,"magic",false,`${e.kind}:jump`);
+          for(const pet of this.pets)if(pet.hp>0 && Math.hypot(pet.x-e.x,pet.y-e.y)<110 && this.attackLineClear(e,pet))this.hurtPet(pet,e.damage*1.5,"magic");
           e.bossJumpTarget=undefined;e.bossJumpOrigin=undefined;e.windup=0;e.attackCD=1;e.staggerUntil=this.clock+0.6;
           continue;
         }
@@ -647,9 +652,9 @@ export class Game {
             e.x = nx; e.y = ny;
           } else e.chargeUntil = 0;
           const hit = [this.player, ...this.pets.filter((p) => p.hp > 0)]
-            .find((a) => Math.hypot(a.x - e.x, a.y - e.y) < 32);
+            .find((a) => Math.hypot(a.x - e.x, a.y - e.y) < 32 && this.attackLineClear(e,a));
           if (hit) {
-            if (hit === this.player) this.hurt(e.damage * 1.3);
+            if (hit === this.player) this.hurt(e.damage * 1.3,"physical",false,`${e.kind}:charge`);
             else this.hurtPet(hit as Pet, e.damage * 1.3, "physical");
             e.chargeUntil = 0;
           }
@@ -677,10 +682,11 @@ export class Game {
           if (
             locked &&
             canDetect(this, e, e.attackTarget ?? 0, locked) &&
+            this.attackLineClear(e,locked) &&
             Math.hypot(locked.x - e.x, locked.y - e.y) <
               (isBossKind(e.kind) ? 105 : 46)
           ) {
-            if (locked === this.player) this.hurt(e.damage);
+            if (locked === this.player) this.hurt(e.damage,"physical",false,`${e.kind}:melee`);
             else {
               this.hurtPet(locked as Pet, e.damage, "physical");
             }
@@ -692,7 +698,8 @@ export class Game {
       if (
         victim.visible &&
         d < (isBossKind(e.kind) ? 72 : 29) &&
-        e.attackCD === 0
+        e.attackCD === 0 &&
+        this.attackLineClear(e,victim)
       ) {
         e.attackTarget = victim.id;
         e.windup = isBossKind(e.kind) ? 0.65 : 0.4;
@@ -789,7 +796,7 @@ export class Game {
             return { actor, fraction, distance: Math.hypot(actor.x - previous.x - dx * fraction, actor.y - previous.y - dy * fraction) };
           }).filter((a) => a.distance < 18).sort((a, b) => a.fraction - b.fraction)[0];
         if (target && p.life > 0) {
-          if (target.actor === this.player) this.hurt(p.damage, p.damageKind ?? "magic");
+          if (target.actor === this.player) this.hurt(p.damage, p.damageKind ?? "magic",false,`${p.enemyKind ?? "enemy"}:projectile`);
           else this.hurtPet(target.actor as Pet, p.damage, p.damageKind ?? "magic");
           if (p.visual === "poison") this.effect("poison", target.actor.x, target.actor.y, 0, 0.5);
           p.life = 0;
@@ -1003,9 +1010,9 @@ export class Game {
     if (e.stompAt !== undefined) {
       if (this.clock >= e.stompAt) {
         const origin = e.stompOrigin!;
-        if (Math.hypot(this.player.x - origin.x, this.player.y - origin.y) < 130)
-          this.hurt(e.damage * 1.4, "physical");
-        for (const pet of this.pets) if (pet.hp > 0 && Math.hypot(pet.x - origin.x, pet.y - origin.y) < 130)
+        if (Math.hypot(this.player.x - origin.x, this.player.y - origin.y) < 130 && this.attackLineClear(origin,this.player))
+          this.hurt(e.damage * 1.4, "physical",false,`${e.kind}:stomp`);
+        for (const pet of this.pets) if (pet.hp > 0 && Math.hypot(pet.x - origin.x, pet.y - origin.y) < 130 && this.attackLineClear(origin,pet))
           this.hurtPet(pet, e.damage * 1.4, "physical");
         e.stompAt = undefined; e.stompOrigin = undefined; e.attackCD = 1;
       }
@@ -1031,7 +1038,7 @@ export class Game {
         damage:["spider",...TEMPLE_RANGED].includes(e.kind) ? e.damage : Math.round(e.damage*0.8),
         life:3,dir:(((Math.round(a/(Math.PI/8))+4)%16)+16)%16,
         faction:"enemy",visual:e.kind === "spider" ? "poison" : arrow ? "arrow" : e.kind==="flameWoma" ? "womaFlame" : undefined,
-        damageKind:arrow ? "physical" : "magic",homing:false,hitChance:75,
+        damageKind:arrow ? "physical" : "magic",homing:false,hitChance:75,enemyKind:e.kind,
       });
     }
     this.effect("cast", e.x, e.y, 0, 0.5);
@@ -1065,7 +1072,10 @@ export class Game {
     return { x: Math.cos(angle), y: Math.sin(angle) };
   }
   private meleeReachable(e: Enemy) {
-    return !this.navigation || this.navigation.lineClear(this.player, e, 0);
+    return this.attackLineClear(this.player,e);
+  }
+  attackLineClear(from: {x:number;y:number}, to: {x:number;y:number}) {
+    return !this.navigation || this.navigation.lineClear(from,to,0);
   }
   private meleeAim(targets: Enemy[]) {
     if (this.player.moving || !targets.length) return this.facing();
@@ -1286,7 +1296,7 @@ export class Game {
       this.player.dir = this.direction(aim.x, aim.y);
       this.player.attackUntil = this.clock + 0.25;
       this.player.attackDir = this.player.dir;
-      if (wall) this.hurt(8, "physical", true);
+      if (wall) this.hurt(8, "physical", true,"recoil");
       return true;
     }
     if (s.id === "powerstrike" || s.id === "firesword") {
@@ -1896,7 +1906,7 @@ export class Game {
         });
     }
   }
-  hurt(raw: number, kind: "physical" | "magic" = "physical", force = false) {
+  hurt(raw: number, kind: "physical" | "magic" = "physical", force = false, source = "unknown") {
     if (this.mode === "test" && this.test.god) return;
     if (
       this.phase !== "battle" ||
@@ -1933,7 +1943,9 @@ export class Game {
         buffDefense(this, 0, kind),
       shield,
     );
+    const before = this.player.hp;
     this.player.hp = Math.max(0, this.player.hp - damage);
+    recordDamageTaken(this.damageTaken,kind,source,before-this.player.hp);
     this.player.hitUntil = this.clock + 0.45;
     this.sound("hurt");
     this.floating.push({
@@ -2318,6 +2330,7 @@ export class Game {
       skillDamage: { ...this.damageDealt },
       healing: { ...this.tao.healing },
       combatHealing:{...this.combatRecovery.healing},
+      damageTaken:{...this.damageTaken,sources:{...this.damageTaken.sources}},
       skills: this.skills.map((s) => `${getSkill(s.id).name} Lv.${s.rank}`),
     };
     this.input = { x: 0, y: 0 };
