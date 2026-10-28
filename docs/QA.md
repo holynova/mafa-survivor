@@ -329,3 +329,13 @@ alpha.2 已成功绕过超大地图目录，但多个技能书共用 `texture/it
 - 最终D600ms实际1104→1227、松键为空、KeyD/d；切表单后点Canvas仍可右移。井中月／重盔甲、完整树冠、被遮挡轮廓及开阔地可见半兽人与原动作阴影已检查，alpha12-input-forest.jpg／alpha12-models-shadows.jpg；工具实际生成5怪，图中只宣称可见模型完整。
 - 29文件288项游戏测试、6项Python、22,709帧／42图集、28原WAV／29映射、人物2720／武器5168／怪物5376／阴影7280像素0差异、生产Pages构建通过。warn/error为空；Vite体积警告保留，不作300怪P95／移动内存达标声明。冻结模拟与公网结果另记。
 - 新样例和诊断仅测试模式可用，正常／试玩不能调用；测试不写战绩、不发结晶。用户现有测试页与前台Chrome未操作。
+
+- 干净冻结提交6b28d9d659e034bf9c4db577703ebf1f066a6677复跑36局，sourceDirty=false、V5组合哈希不变；结果含shopTrace与alpha.11逐项深比较完全一致，0不变量异常／2法师通关。Source checks [40628777694](https://github.com/holynova/mafa-survivor/actions/runs/40628777694)成功。
+
+
+### alpha.12 发布与公网核验
+
+- 固定源码6b28d9d659e034bf9c4db577703ebf1f066a6677，[工作流40628990100](https://github.com/holynova/mafa-survivor/actions/runs/40628990100)build／deploy／release成功，[v0.1.0-alpha.12](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.12)为公开预发布。
+- version.json为alpha.12／original／6b28d9d。四源地图路径／SHA／walk夹具一致；22,709帧／42张PNG逐一HEAD200/image/png，28原WAV实际下载SHA256匹配，JS入口200且类型正确，alpha12-online-http.json已附Release。
+- 本次独立本地生产测试页在完成截图后关闭；用户现有测试页与前台Chrome没有操作。后台IAB打开?stage=v0.1.0-alpha.12在25秒超时，没有取得新版公网菜单或交互／截图。明确保留此未完成项，没有继续重试已知失败流程或借用旧公网图。
+- Release附六张本地图片（最终矿洞朝向／诊断、森林输入／模型、细线修复前／后）与冻结36局、冻结汇总、公网HTTP三份JSON。细线前后图有小幅取景差异，只作视觉复核，不作同机位逐像素断言；原素材像素来源核验另行独立通过。

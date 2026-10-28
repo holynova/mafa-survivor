@@ -81,7 +81,7 @@ npm run build
 
 [源码仓库](https://github.com/holynova/mafa-survivor) · [阶段版本记录](https://github.com/holynova/mafa-survivor/releases)
 
-GitHub Pages 使用 Actions 发布，在线测试地址为 [holynova.github.io/mafa-survivor](https://holynova.github.io/mafa-survivor/)。公开展示版使用原版图片、地图和 WAV 音效；当前公开版本为 **v0.1.0-alpha.11**。
+GitHub Pages 使用 Actions 发布，在线测试地址为 [holynova.github.io/mafa-survivor](https://holynova.github.io/mafa-survivor/)。公开展示版使用原版图片、地图和 WAV 音效；当前公开版本为 **v0.1.0-alpha.12**。
 
 每个阶段通过测试与截图验收后，更新 CHANGELOG、推送递增的 `v0.1.0-alpha.N` 标签；工作流部署成功后自动创建预发布版本。页面显示版本和提交号，可通过反馈入口报告问题。配置与门禁见 [阶段发布说明](docs/RELEASES.md)。
 
