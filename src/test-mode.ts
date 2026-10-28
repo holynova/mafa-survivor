@@ -110,3 +110,26 @@ export function testWear(g: Game, itemId: string) {
   g.emit();
   return true;
 }
+
+/** Pause just after one real cleave, with a closer blocked target behind it. */
+export function testMeleeFacing(g:Game) {
+  if(g.mode!=="test" || g.classId!=="warrior" || !["battle","paused"].includes(g.phase) || !g.navigation)return false;
+  const nav=g.navigation;
+  const homes=[...nav.points].sort((a,b)=>Math.hypot(a.x-g.player.x,a.y-g.player.y)-Math.hypot(b.x-g.player.x,b.y-g.player.y));
+  for(const home of homes)for(const sign of [-1,1]) {
+    const blocked={x:home.x,y:home.y+sign*64};
+    const visible=[-45,45].map(dx=>({x:home.x+dx,y:home.y-sign*50}));
+    if(![blocked,...visible].every(p=>g.canStand(p.x,p.y) && nav.connected(home,p)) ||
+      nav.lineClear(home,blocked,0) || !visible.every(p=>nav.lineClear(home,p,0)))continue;
+    testClear(g);
+    Object.assign(g.player,home,{dir:sign>0 ? 4 : 0,moving:false,attackUntil:0});
+    g.input={x:0,y:0};g.basicCD=0;g.charges={};
+    const s=g.newSkill("cleave");s.cd=0;g.skills=[s];
+    Object.assign(g.test,{spawning:false,autowalk:false,pose:"live"});
+    for(const point of [blocked,...visible])Object.assign(g.spawnEnemy("skeletonWarrior"),point,{speed:0});
+    g.recompute();
+    if(g.phase==="paused")g.pause();
+    g.cast(s);g.pause();g.emit();return true;
+  }
+  return false;
+}

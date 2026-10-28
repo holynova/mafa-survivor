@@ -1,3 +1,4 @@
+import {heroPose} from "./hero-pose";
 import { isGraybox } from "./release";
 import { useEffect, useState } from "react";
 import { sounds } from "./sound";
@@ -8,7 +9,7 @@ import { inputDiagnostics } from "./input";
 import { hasWorldAppearance } from "./appearance";
 import { appearanceStatus } from "./renderer";
 import { ITEMS, getItem } from "./content";
-import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall } from "./test-mode";
+import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing } from "./test-mode";
 export function TestTools() {
   const [open, setOpen] = useState(true),
     [kind, setKind] = useState("orc"),
@@ -25,6 +26,9 @@ export function TestTools() {
     }
   }, [game.phase]);
   if (game.mode !== "test" || game.phase === "lobby") return null;
+  const pose=heroPose(game,game.clock);
+  const motionNames:Record<string,string>={idle:"站立",walk:"行走",attack:"挥砍",cast:"施法",hit:"受击",death:"死亡"};
+  const directions=["上","右上","右","右下","下","左下","左","左上"];
   return (
     <aside className="test-tools">
       <button className="test-toggle" onClick={() => setOpen(!open)}>
@@ -41,6 +45,10 @@ export function TestTools() {
             按住：{inputDiagnostics.held}
             <br />
             输入：{inputDiagnostics.last}
+          </output>
+          <output aria-label="攻击画面诊断">
+            画面：{motionNames[pose.motion] ?? pose.motion} · {directions[pose.dir]}<br />
+            移动朝向：{directions[game.player.dir]} · 最近挥砍：{game.player.attackUntil>0 ? directions[game.player.attackDir] : "尚未出手"}
           </output>
           <p>
             {sounds.status} · 已播放 {sounds.played} 次
@@ -106,6 +114,8 @@ export function TestTools() {
           {game.classId==="warrior" && <>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>
               setScenarioNotice(testMeleeWall(game) ? "已固定两只骷髅战士，装配半月和刺杀并关闭自然刷怪。切回实战，观察墙后敌人不受伤；可手动绕墙接敌。" : "此地图未找到合适的隔墙位置，请切换到矿洞重试。")}>载入隔墙近战样例</button>
+            <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>
+              setScenarioNotice(testMeleeFacing(game) ? "已暂停在一次真实半月之后：两只可见骷髅与一只更近的墙后骷髅，检查人物／武器／半月朝向及受伤对象。" : "此地图未找到合适位置，请切换到矿洞重试。")}>载入近战朝向样例</button>
             {scenarioNotice && <p role="status">{scenarioNotice}</p>}
           </>}
           <label>

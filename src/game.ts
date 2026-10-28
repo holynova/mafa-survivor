@@ -261,6 +261,7 @@ export class Game {
     castUntil: 0,
     shieldUntil: 0,
     attackUntil: 0,
+    attackDir: 4,
   };
   skills: Skill[] = [];
   pets: Pet[] = [];
@@ -442,6 +443,7 @@ export class Game {
       castUntil: 0,
       shieldUntil: 0,
       attackUntil: 0,
+      attackDir: 4,
     };
     this.skills = [this.newSkill(this.classInfo.startingSkill)];
     this.basicCD = 0;
@@ -1131,6 +1133,7 @@ export class Game {
     this.basicCD = this.classInfo.interval;
     this.sound(this.equipment.weapon ? "attack" : "unarmed");
     this.player.attackUntil = this.clock + 0.35;
+    this.player.attackDir = this.player.dir;
     const landed = this.physicalHit(target, power?.accuracy ?? 0);
     // Each charge modifies this one swing, including a missed swing. Never create
     // another attack or projectile; split the actual damage only for attribution.
@@ -1278,6 +1281,7 @@ export class Game {
       }
       this.player.dir = this.direction(aim.x, aim.y);
       this.player.attackUntil = this.clock + 0.25;
+      this.player.attackDir = this.player.dir;
       if (wall) this.hurt(8, "physical", true);
       return true;
     }
@@ -1331,6 +1335,7 @@ export class Game {
           s.id,
         );
     this.player.attackUntil = this.clock + 0.35;
+    this.player.attackDir = this.player.dir;
     this.effect(
       s.id,
       this.player.x,
@@ -1780,7 +1785,7 @@ export class Game {
         (1 - Math.min(60, s.localCDR) / 100),
     );
     if (this.classId !== "warrior") this.player.castUntil = this.clock + 0.25;
-    if (targets[0] && !this.player.moving && s.id !== "dash")
+    if (targets[0] && !this.player.moving && getSkill(s.id).classId !== "warrior")
       this.player.dir = this.direction(
         targets[0].x - this.player.x,
         targets[0].y - this.player.y,

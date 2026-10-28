@@ -1,4 +1,6 @@
 import Phaser from "phaser";
+import {alignCameraScroll} from "./camera-grid";
+import {heroPose} from "./hero-pose";
 import {simulationInput} from "./simulation";
 import { mapObjectAlpha, mapObjectDepth, coversActor, type Occluder } from "./map-render";
 import { assetUrl, isGraybox } from "./release";
@@ -96,6 +98,7 @@ class BattleScene extends Phaser.Scene {
     if (this.failed) return;
     this.cameras.main.setBounds(0, 0, WORLD.w, WORLD.h);
     this.cameras.main.setZoom(this.zoom());
+    this.cameras.main.roundPixels=false;
     this.paintGround();
     for (const [name, sequence] of Object.entries(assets.animations)) {
       const model = name.split("/")[0];
@@ -174,6 +177,12 @@ class BattleScene extends Phaser.Scene {
     rendererReady = true;
     for (const f of readyListeners) f();
     game.emit();
+  }
+  private centerCamera(x:number,y:number) {
+    const camera=this.cameras.main;
+    camera.centerOn(x,y);
+    camera.scrollX=alignCameraScroll(camera.scrollX,camera.zoomX,camera.width*camera.originX,camera.x,{min:camera.clampX(-Number.MAX_SAFE_INTEGER),max:camera.clampX(Number.MAX_SAFE_INTEGER)});
+    camera.scrollY=alignCameraScroll(camera.scrollY,camera.zoomY,camera.height*camera.originY,camera.y,{min:camera.clampY(-Number.MAX_SAFE_INTEGER),max:camera.clampY(Number.MAX_SAFE_INTEGER)});
   }
   private zoom() {
     return this.scale.width < 700 ? 1.15 : 1.5;
@@ -525,7 +534,7 @@ class BattleScene extends Phaser.Scene {
     this.bars.clear();
     const t = game.clock;
     if (game.phase === "lobby") {
-      this.cameras.main.centerOn(WORLD.w / 2 + 70, WORLD.h / 2);
+      this.centerCamera(WORLD.w / 2 + 70, WORLD.h / 2);
       this.actor(
         "hero",
         game.classId,
@@ -554,7 +563,7 @@ class BattleScene extends Phaser.Scene {
         ),
       );
     } else {
-      this.cameras.main.centerOn(game.player.x, game.player.y);
+      this.centerCamera(game.player.x, game.player.y);
       for (const [id, e] of this.lastEnemies)
         if (!game.enemies.some((n) => n.id === id) && e.hp <= 0)
           this.corpses.push({
@@ -738,26 +747,15 @@ class BattleScene extends Phaser.Scene {
           );
         }
       }
+      const hero=heroPose(game,_time/1000);
       this.actor(
         "hero",
         game.classId,
-        game.mode === "test" && game.test.pose !== "live"
-          ? game.test.pose
-          : game.phase === "dead"
-            ? "death"
-            : t < game.player.attackUntil
-              ? "attack"
-              : game.player.moving
-                ? "walk"
-                : t < game.player.castUntil
-                  ? "cast"
-                  : "idle",
-        game.mode === "test" && game.test.pose !== "live"
-          ? game.test.direction
-          : game.player.dir,
+        hero.motion,
+        hero.dir,
         game.player.x,
         game.player.y,
-        game.mode === "test" && game.test.pose !== "live" ? _time / 1000 : t,
+        hero.time,
         game.player.y + 0.5,
         t < game.player.hitUntil ? 0.65 : 1,
       );

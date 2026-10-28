@@ -319,3 +319,13 @@ alpha.2 已成功绕过超大地图目录，但多个技能书共用 `texture/it
 - version.json为alpha.11／original／00fd3dd。四地图源路径／SHA／walk夹具一致，22,709帧／42张PNG逐一HEAD200且image/png，28原WAV实际下载SHA256全部相同，JS入口200且类型正确；alpha11-online-http.json附Release。
 - 独立后台IAB真实打开?stage=v0.1.0-alpha.11，菜单AX显示alpha.11／00fd3dd；首次观察素材仍在加载。截图请求20秒超时导致连接失效；仅再检查同一后台页连接，15秒仍超时，停止重试。未取得alpha.11公网截图或有效交互证据，不能声称公开商店／战斗已测过。未操作用户现有页或前台Chrome。
 - Release四张图片均明确为本地生产证据；附件另有冻结36局／冻结汇总／旧引擎＋V5／三组比较／公网HTTP五份JSON。完整平衡与GDD退出条件仍未完成，继续保留在STATUS／ACCEPTANCE。
+
+
+## alpha.12 近战朝向与细线阶段本地验收 · 2026-10-28
+
+- 红色命令 `npx vitest run tests/melee-facing.test.ts --reporter=verbose`：实际cast调用中，半月／刺杀命中上方可见目标、效果dir=0，但人物dir=4朝向更近墙后目标；另一个实际挥砍＋step左移场景中，Phaser共用heroPose返回dir=6而应维持2。三项均先失败，再修复公共朝向收尾与出手方向。最终5项覆盖暂停、到期、死亡、人工动作预览、下一次挥砍及正常局隔离。
+- 源矿洞样例通过真实spawnEnemy和cast执行半月后暂停，关闭自然刷怪；源足点合法、两前方可见怪受伤而更近墙后怪未受伤、无金币／经验／击杀奖励。最终本地生产IAB坐标984／944，人物／原木剑／效果和诊断同为左上，可见两怪分别出现23／20伤害，墙后怪保持满血；alpha12-facing-diagnostic.jpg与alpha12-facing-world.jpg已查看。此隔离测试不作正常成长或通关证据。
+- 最终森林截图另捕捉到相邻48px源物件条带细竖线。旧相机按世界整数取整，在1.5倍的奇数scroll形成半屏幕像素；camera-grid.test.ts的1.5／1.15两项先红。屏幕像素对齐及边界约束后3项通过；原图、alpha和深度不变。alpha12-ground-probe.jpg保留旧细线，alpha12-ground-green.jpg与最终alpha12-models-shadows.jpg实拍确认消失；两次取景有小幅移动，未伪称逐像素同机位比较。
+- 最终D600ms实际1104→1227、松键为空、KeyD/d；切表单后点Canvas仍可右移。井中月／重盔甲、完整树冠、被遮挡轮廓及开阔地可见半兽人与原动作阴影已检查，alpha12-input-forest.jpg／alpha12-models-shadows.jpg；工具实际生成5怪，图中只宣称可见模型完整。
+- 29文件288项游戏测试、6项Python、22,709帧／42图集、28原WAV／29映射、人物2720／武器5168／怪物5376／阴影7280像素0差异、生产Pages构建通过。warn/error为空；Vite体积警告保留，不作300怪P95／移动内存达标声明。冻结模拟与公网结果另记。
+- 新样例和诊断仅测试模式可用，正常／试玩不能调用；测试不写战绩、不发结晶。用户现有测试页与前台Chrome未操作。
