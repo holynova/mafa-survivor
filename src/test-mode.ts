@@ -15,6 +15,8 @@ export const newTestSettings = () => ({
   direction: 4,
   visualEpoch: 0,
   recoverySample:false,
+  summonWallSample:false,
+  healthWalkSample:false,
   incomingWallSample:false,
   showDetection:false,
   lootLabels:false,
@@ -121,6 +123,38 @@ function lootArena(g:Game) {
   g.start("test",176,g.classId,false,"woma");
   g.test.spawning=false;g.skills=[];g.basicCD=Infinity;return true;
 }
+/** Real mine geometry: the fire cone has a visible target and a wall-side one. */
+export function testSummonWall(g:Game) {
+  if(g.mode!=="test")return false;
+  g.start("test",176,"taoist",false,"mine");
+  g.test.spawning=false;g.skills=[];g.basicCD=Infinity;
+  const nav=g.navigation;if(!nav)return false;
+  const homes=[...nav.points].sort((a,b)=>Math.hypot(a.x-g.player.x,a.y-g.player.y)-Math.hypot(b.x-g.player.x,b.y-g.player.y));
+  for(const home of homes) {
+    const nearby=nav.reachablePoints(home,25,135);
+    for(const blocked of nearby.filter(p=>!g.attackLineClear(home,p))) {
+      const bx=blocked.x-home.x,by=blocked.y-home.y,bd=Math.hypot(bx,by);
+      const visible=nearby.find(p=>{
+        const dx=p.x-home.x,dy=p.y-home.y,d=Math.hypot(dx,dy);
+        return d<bd && g.attackLineClear(home,p) && (dx*bx+dy*by)/(d*bd)>Math.cos(Math.PI/5);
+      });
+      const owner=nav.reachablePoints(home,90,150).find(p=>g.attackLineClear(home,p) && Math.hypot(p.x-blocked.x,p.y-blocked.y)>100);
+      if(!visible || !owner)continue;
+      Object.assign(g.player,owner);
+      const skill=g.newSkill("beast");skill.cd=0;g.skills=[skill];g.cast(skill);skill.cd=999;
+      const pet=g.pets[0];if(!pet)return false;
+      Object.assign(pet,home,{cd:0,speed:0});
+      for(const point of [blocked,visible]) {
+        const e=g.spawnEnemy("orcWarrior");Object.assign(e,point,{hp:600,maxHp:600,speed:0,attackCD:Infinity});
+      }
+      for(let i=0;i<12;i++)g.step(1/60);
+      g.test.summonWallSample=true;
+      g.enemies.forEach((e,i)=>g.floating.push({id:g.nextEntityId(),x:e.x,y:e.y-80,text:`${i ? "可见" : "墙后"} · ${Math.round(e.maxHp-e.hp)}伤害`,color:i ? "#f2cf8a" : "#9bd3e0",life:100}));
+      g.pause();g.emit();return true;
+    }
+  }
+  return false;
+}
 export function testLootVisual(g:Game) {
   if(!lootArena(g))return false;
   g.test.lootLabels=true;g.player.hp=g.maxHP-7;
@@ -141,6 +175,17 @@ export function testPotionPickup(g:Game) {
   g.player.hp=g.maxHP-7;
   for(let i=0;i<3;i++)appendLoot(g.drops,{id:g.nextEntityId(),x:g.player.x+i*10,y:g.player.y,born:0,exp:0,gold:0,heal:20});
   g.step(1/60);g.pause();g.emit();return true;
+}
+export function testHealthWalk(g:Game) {
+  if(!lootArena(g))return false;
+  const points=g.navigation?.reachablePoints(g.player,90,160).filter(p=>g.attackLineClear(g.player,p));
+  const potion=points?.sort((a,b)=>Math.hypot(a.x-g.player.x-120,a.y-g.player.y)-Math.hypot(b.x-g.player.x-120,b.y-g.player.y))[0];
+  if(!potion)return false;
+  const coin=points?.find(p=>(p.x-g.player.x)*(potion.x-g.player.x)+(p.y-g.player.y)*(potion.y-g.player.y)<0);
+  g.player.hp=g.maxHP-60;g.test.autowalk=true;g.test.healthWalkSample=true;g.test.lootLabels=true;
+  appendLoot(g.drops,{id:g.nextEntityId(),...potion,exp:0,gold:0,heal:20,count:3,born:0});
+  if(coin)appendLoot(g.drops,{id:g.nextEntityId(),...coin,exp:2,gold:4,born:0});
+  g.pause();g.emit();return true;
 }
 export function testPlayerFeedback(g:Game,lethal=false) {
   if(!lootArena(g))return false;

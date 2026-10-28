@@ -97,12 +97,14 @@ export function simulateShop(g:Game,trace?:ShopTrace[]) {
 /** Observes the same combat state the view consumes; only returns legal input. */
 export function simulationInput(g:Game,previous={x:0,y:0}) {
   const p=g.player;
+  const health=p.hp/g.maxHP;
   const enemies=g.enemies.filter(e=>e.hp>0 && distance(e,p)<650)
     .sort((a,b)=>distance(a,p)-distance(b,p)).slice(0,35);
-  const drop=g.drops.filter(d=>d.exp>0 || d.gold>0 || d.itemId)
+  const drop=g.drops.filter(d=>d.exp>0 || d.gold>0 || d.itemId || d.heal && health<1)
     .filter(d=>!g.navigation || g.navigation.connected(p,d))
-    .sort((a,b)=>distance(a,p)-distance(b,p))[0];
-  const destination=g.classId==="warrior" && g.boss ? g.boss : drop ?? (g.classId==="warrior" ? enemies[0] : undefined);
+    .sort((a,b)=>(distance(a,p)-(a.heal && health<.7 ? 200*(1-health) : 0))-
+      (distance(b,p)-(b.heal && health<.7 ? 200*(1-health) : 0)))[0];
+  const destination=drop?.heal && health<.7 ? drop : g.classId==="warrior" && g.boss ? g.boss : drop ?? (g.classId==="warrior" ? enemies[0] : undefined);
   const goal=destination && g.navigation ? g.navigation.waypoint(p,destination) : destination;
   const candidates=[{x:0,y:0},...Array.from({length:8},(_,i)=>({x:Math.cos(i*Math.PI/4),y:Math.sin(i*Math.PI/4)}))];
   if(goal){const dx=goal.x-p.x,dy=goal.y-p.y,d=Math.hypot(dx,dy);if(d>0)candidates.push({x:dx/d,y:dy/d});}
@@ -197,10 +199,12 @@ export function runSimulation(options:SimulationOptions) {
   const terminal=g.phase==="won" || g.phase==="dead";
   const report={...options,phase:g.phase,terminal,failure,ticks,seconds:g.clock,wave:g.wave,kills:g.kills,
     level:g.level,shops,upgrades,purchases,hpLost,longestStationary,bossKilled:g.bossKilled,
+    finalHP:g.player.hp,maxHP:g.maxHP,endReason:g.phase==="won" ? "victory" : g.player.hp<=0 ? "hp-depleted" : terminal ? "boss-timeout" : "incomplete",
     bossHP:lastBoss ? {...lastBoss,hp:g.bossKilled ? 0 : lastBoss.hp} : null,
     goldEarned:g.totalGold,goldRemaining:g.gold,equipment:{...g.equipment},passives:{...g.passives},
     skills:g.result?.skills ?? g.skills.map(s=>`${s.id}:${s.rank}`),damage:{...g.damageDealt},
     combatHealing:{...(g.combatRecovery?.healing ?? {onKill:0,lifeSteal:0})},
+    healing:{...g.tao.healing},
     damageTaken:g.damageTaken ? {...g.damageTaken,sources:{...g.damageTaken.sources}} : undefined,waves,shopTrace};
   return report;
 }

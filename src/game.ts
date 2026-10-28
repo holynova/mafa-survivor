@@ -1650,12 +1650,13 @@ export class Game {
         skill = this.skills.find((s) => s.id === source);
       p.cd = Math.max(0, p.cd - dt);
       p.moving = false;
-      if (Math.hypot(p.x - this.player.x, p.y - this.player.y) > 600) {
+      if (Math.hypot(p.x - this.player.x, p.y - this.player.y) > 600 ||
+          this.navigation && !this.navigation.connected(p,this.player)) {
         for (let i = 0; i < 16; i++) {
           const a = (i * Math.PI) / 8,
             x = this.player.x + Math.cos(a) * 65,
             y = this.player.y + Math.sin(a) * 65;
-          if (this.freePoint(x, y, 0)) {
+          if (this.freePoint(x, y, 0) && (!this.navigation || this.navigation.connected(this.player,{x,y}))) {
             p.x = x;
             p.y = y;
             break;
@@ -1663,27 +1664,31 @@ export class Game {
         }
         revealActor(this, p.id);
       }
-      const target = invisible(this, p.id)
-        ? undefined
+      const range = source === "beast" ? 140 * (1 + (skill?.radius ?? 0) / 100) : 42;
+      const candidates = invisible(this, p.id)
+        ? []
         : this.enemies
             .filter(
               (e) =>
                 e.hp > 0 &&
-                Math.hypot(e.x - this.player.x, e.y - this.player.y) < 600,
+                Math.hypot(e.x - this.player.x, e.y - this.player.y) < 600 &&
+                (!this.navigation || this.navigation.connected(p,e)),
             )
             .sort(
               (a, b) =>
                 Math.hypot(a.x - p.x, a.y - p.y) -
                 Math.hypot(b.x - p.x, b.y - p.y),
-            )[0];
+            );
+      // Prefer a target we can actually attack; a closer wall-side enemy must
+      // not steal a ready swing or flame from a visible enemy beside the pet.
+      const target=candidates.find(e=>Math.hypot(e.x-p.x,e.y-p.y)<range && this.attackLineClear(p,e)) ?? candidates[0];
       const destination = target ?? this.player,
         dx = destination.x - p.x,
         dy = destination.y - p.y,
         d = Math.hypot(dx, dy);
       if (d > 1) p.dir = this.direction(dx, dy);
-      const range =
-        source === "beast" ? 140 * (1 + (skill?.radius ?? 0) / 100) : 42;
-      if (target && d < range && p.cd === 0) {
+      const clear=!target || this.attackLineClear(p,target);
+      if (target && d < range && clear && p.cd === 0) {
         revealActor(this, p.id);
         const sc = source === "charm" ? 0 : this.rollStat("sc") * 0.8;
         const damage = Math.round(
@@ -1702,7 +1707,7 @@ export class Game {
               length = Math.hypot(ex, ey);
             if (
               e.hp > 0 &&
-              length <= range &&
+              length <= range && this.attackLineClear(p,e) &&
               (ex * dx + ey * dy) / Math.max(1, length * d) >=
                 Math.cos(Math.PI / 5)
             )
@@ -1713,7 +1718,7 @@ export class Game {
         } else this.hit(target, damage, source, "physical", "summon");
         p.cd = (source === "beast" ? 1.6 : 1.1)*ATTACK_CADENCE;
         p.attackUntil = this.clock + 0.4;
-      } else if (d > (target ? range * 0.75 : 80)) {
+      } else if (!clear || d > (target ? range * 0.75 : 80)) {
         const waypoint = this.navigation?.waypoint(p,destination) ?? destination;
         const mx = waypoint.x - p.x, my = waypoint.y - p.y, length = Math.max(1, Math.hypot(mx, my));
         p.dir = this.direction(mx, my);

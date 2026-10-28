@@ -36,7 +36,7 @@ try {
     console.log(JSON.stringify({seed,mapId,classId,phase:result.phase,wave:result.wave,seconds:Math.round(result.seconds),kills:result.kills,level:result.level,failure:result.failure}));
   }
   const snapshot=await fs.readFile(new URL("../.source-commit",import.meta.url),"utf8").catch(e=>{if(e.code==="ENOENT")return null;throw e;});
-  const report={schemaVersion:2,policy:"fixed-step-kiting-v5-budget",policySha256,policySources,sourceCommit:snapshot?.trim() ?? execFileSync("git",["rev-parse","HEAD"],{cwd:root,encoding:"utf8"}).trim(),
+  const report={schemaVersion:2,policy:"fixed-step-kiting-v6-health-loot",policySha256,policySources,sourceCommit:snapshot?.trim() ?? execFileSync("git",["rev-parse","HEAD"],{cwd:root,encoding:"utf8"}).trim(),
     sourceSnapshot:snapshot ? "git-archive engine with separately hashed current controller" : null,
     sourceDirty:snapshot ? null : !!execFileSync("git",["status","--porcelain"],{cwd:root,encoding:"utf8"}).trim(),generatedAt:new Date().toISOString(),
     sourceMaps:Object.fromEntries(Object.entries(layouts).map(([id,layout])=>[id,{sourcePath:layout.sourcePath,sourceSha256:layout.sourceSha256}])),results};

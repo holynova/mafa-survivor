@@ -457,3 +457,14 @@ alpha.19最终干净72局：`13ae123a4fc978930b8ee0d634c17d4427c6f181`，sourceD
 390×844真实iframe视口中实际点击「验证血瓶拾取」，HP100/100、实际回血7；面板可滚动到新增四个测试按钮与音效／血瓶统计。alpha19-mobile.jpg和alpha19-mobile-diagnostics.jpg已保存查看，按钮与诊断未超出窄屏横向边界。测试HTML仅在忽略的dist，不属于发布产物。
 
 alpha.19已公开发布：标签`c25475c906978d016c2099c622a11c076fa6b0e3`，Stage release and Pages **40749747882**的build／deploy／release全部成功，Source checks **40749741925**成功。公网version.json核对为original／v0.1.0-alpha.19／c25475c，后台独立IAB24实际进入测试并点击原版掉落展陈、真实回血、受伤与死亡：已保存查看alpha19-online-loot.jpg、alpha19-online-healing.jpg、alpha19-online-death-action.jpg、alpha19-online-sound-result.jpg；分别可见五档金币／装备落地图、实际回血7与余药、结算前的死亡动作起帧、受击1／阵亡1与0结晶。公共页面warn／error日志为空。截图、诊断文本、在线版本与干净72局JSON附在Release。用户现有5182页面与前台Chrome未操作。
+
+
+## alpha.20 召唤物隔墙与真实自动寻药
+
+最小反馈循环：`npx vitest run tests/summon-navigation.test.ts tests/simulation-health.test.ts`，先实测2文件／5用例失败（alpha20-repro-red.txt，179ms）：神兽确实将墙后敌人HP10000打到9984／9985，包括扇形次目标；控制器忽略纯血瓶。修复后最初5用例通过，继续补失散召唤物回到合法连通地面、原矿洞真实喷火、低血战士先拾药及源沃玛实际移动拾药，最终9用例／438全量测试／47文件通过。7项Python、资源／138物品等像素0差异、原版29WAV和生产构建通过。
+
+修复根因：召唤物候选只看主人600px距离、攻击只看射程，未校验连通和视线；喷火扇形的次目标也无墙体校验。现在优先范围内可见者，近战与逐个扇形命中校验源阻挡，墙后连通目标走门口；落在断开区域的宝宝返回主人附近合法连通位置。不增加伤害／HP／掉率／冷却，不通过隔墙伤害补偿输出。控制器此前只收经验、金币和装备，新增可拾血瓶与低血优先；满血忽略纯血瓶。
+
+后台独立IAB25，原版生产预览5184真实点击新样例：alpha20-summon-wall.jpg已保存查看，源D401矿洞中同一神兽喷火可见目标实际伤害16、墙后0；完整原兽身／阴影／怪物与火焰可见。alpha20-health-before.jpg和after.jpg已保存查看：道士75/135，点击继续后由Scene实际自动走位拾药到135/135，实际回复60，随后收4金币；没有浏览器注入状态或跳时钟。浏览器warn/error为空。森林D600ms 1104→1233，KeyD/d，alpha20-input-forest.jpg查看树冠条带、完整轮廓和无细线。
+
+对照控制器V6 SHA `94c6a445161e0cb43682d9fbff5902a8b99e8de3061e419fa885246318d07e4e`，旧alpha.19引擎从c25475c归档并替换完全相同的simulation.ts／报告器（不替换战斗规则），72局0异常、3法师比奇通关，实际血瓶回复合计3718.41，21局为Boss超时。归档来源与控制器SHA分开登记。旧V5的4通关不能与新V6混作规则收益；新版规则同V6干净72局与公网验收待冻结部署。

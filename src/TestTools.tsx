@@ -9,7 +9,7 @@ import { inputDiagnostics } from "./input";
 import { hasWorldAppearance } from "./appearance";
 import { appearanceStatus } from "./renderer";
 import { ITEMS, getItem } from "./content";
-import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual,testChapterVisual,testLootVisual,testPotionPickup,testPlayerFeedback } from "./test-mode";
+import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual,testChapterVisual,testLootVisual,testPotionPickup,testPlayerFeedback,testSummonWall,testHealthWalk } from "./test-mode";
 import {damageSourceName} from "./damage-taken";
 export function TestTools() {
   const [open, setOpen] = useState(true),
@@ -66,15 +66,19 @@ export function TestTools() {
             <button onClick={()=>testSpellVisual(game,"hellfire")}>地狱火定格样例</button>
             <button onClick={()=>testSpellVisual(game,"beast")}>神兽喷火定格样例</button>
             <button onClick={()=>testSpellVisual(game,"poison")}>红蓝中毒定格样例</button>
+            <button onClick={()=>testSummonWall(game)}>神兽隔墙喷火对照（矿洞）</button>
           </div>
+          {game.test.summonWallSample && <output aria-label="神兽隔墙伤害诊断">{game.enemies.slice(0,2).map((e,i)=><span key={e.id}>{i ? "可见" : "墙后"}目标实际伤害 {Math.round(e.maxHp-e.hp)}<br /></span>)}同一喷火扇形，按原地图阻挡判定。测试不保存战绩。</output>}
           <button onClick={()=>testChapterVisual(game)}>重置本章并展陈怪物（暂停）</button>
           <div className="test-row">
             <button onClick={()=>testLootVisual(game)}>原版掉落展陈（沃玛）</button>
             <button onClick={()=>testPotionPickup(game)}>验证血瓶拾取</button>
+            <button onClick={()=>testHealthWalk(game)}>自动寻药样例（沃玛）</button>
             <button onClick={async()=>{await sounds.unlock();testPlayerFeedback(game);}}>真实受伤后定格</button>
             <button onClick={async()=>{await sounds.unlock();testPlayerFeedback(game,true);}}>真实死亡演示</button>
           </div>
-          {game.test.lootLabels && <p>五档原版金币堆表示经验／金币，装备与血瓶使用独立落地图。靠近拾取；满血保留血瓶，空槽穿戴装备，否则出售。测试不保存战绩。</p>}
+          {game.test.healthWalkSample && <p>已关闭刷怪，开局缺血60点，自动走位已开启。点击「继续」观察角色自行绕行拾药；方向键和拖动可随时接管。</p>}
+          {game.test.lootLabels && !game.test.healthWalkSample && <p>五档原版金币堆表示经验／金币，装备与血瓶使用独立落地图。靠近拾取；满血保留血瓶，空槽穿戴装备，否则出售。测试不保存战绩。</p>}
           {game.mapId==="mine" && <>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testIncomingWall(game)}>重置并载入敌伤隔墙样例</button>
             {game.test.incomingWallSample && <>
