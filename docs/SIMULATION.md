@@ -116,3 +116,5 @@ alpha.10的12局战士最终全持木剑。种子176比奇复盘与原冻结终�
 两组V5 SHA一致：`106def256f3aa6ca2ad7d9f2d6adfa34a8d5bdf3d4849e015c053610d0c3681c`。旧引擎由alpha.10标签1bab703导出，另注入上述两文件和CLI，sourceSnapshot清楚记录归属；未把当前游戏伪装成旧引擎。对照文件alpha11-before-budget.json／alpha11-after-matrix.json与alpha11-comparison-summary.json逐项保留36局结果。每组仍只有相同三个种子，重跑不增加独立种子数。
 
 新规则通关为种子17矿洞法师、种子991比奇法师，战士和道士仍为0；比奇战士176从旧引擎＋V5的11波360杀回退为8波249杀。武器获取改善不能证明整体难度改善；保留此回退，继续检查近战Boss窗口、经济与防御取舍。补货会消耗共享种子RNG，后续升级／掉落并不逐项相同。36局不能证明人类通关率、完整多构筑、10k或性能验收。
+
+alpha.11冻结复测：提交`00fd3dd2661fb407fdcd0eac143cea3294a6e817`、sourceDirty=false，V5组合哈希不变；36局终态含逐轮商店trace与冻结前逐项一致。0不变量异常、2局法师通关，战士最终非木剑7／12且0通关；alpha11-frozen-matrix.json和alpha11-frozen-summary.json保留发布附件。

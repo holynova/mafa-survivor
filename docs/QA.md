@@ -309,3 +309,13 @@ alpha.2 已成功绕过超大地图目录，但多个技能书共用 `texture/it
 - 用可见测试工具加1000金币后实际购买破魂，按191报价扣款及木剑25回收，余额834；属性面板攻击14–22，与卡片预览一致。alpha11-purchased-stats.jpg已查看。加金币／跳波不进入正常战绩或结晶。
 - 切换真实井中月／重盔甲，表单操作后点战场D600ms，X1104→1230.4，松键为空，诊断KeyD/d，alpha11-input.jpg已查看；完整树冠遮挡时角色轮廓保留。向左移动到开阔地，用真实刷怪工具生成5半兽人再冻结；alpha11-models-shadows.jpg已查看，画面中的人物和可见半兽人身体完整、原动作影子落地、原地面无额外黑格线。warn/error日志为空。没有操作用户现有页或前台Chrome。
 - 旧引擎＋V4／旧引擎＋V5／新引擎＋V5三组均36真实正常局，通关分别1／3／2，0不变量异常；V5两组哈希相同。战士最终非木剑0／3／7局，仍0通关；完整平衡未通过。冻结复测与公网结果发布后另记。
+
+- 干净冻结提交`00fd3dd2661fb407fdcd0eac143cea3294a6e817`重新执行相同36局，sourceDirty=false、V5组合SHA不变，包含shopTrace的全部results与冻结前深比较完全一致。0不变量异常、2通关；重复复测不算新增独立种子。Source checks [40622380444](https://github.com/holynova/mafa-survivor/actions/runs/40622380444)成功。
+
+
+### alpha.11 发布与公网核验
+
+- [标签工作流40622617989](https://github.com/holynova/mafa-survivor/actions/runs/40622617989)build／deploy／release成功，固定`00fd3dd2661fb407fdcd0eac143cea3294a6e817`；[v0.1.0-alpha.11](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.11)为公开预发布。
+- version.json为alpha.11／original／00fd3dd。四地图源路径／SHA／walk夹具一致，22,709帧／42张PNG逐一HEAD200且image/png，28原WAV实际下载SHA256全部相同，JS入口200且类型正确；alpha11-online-http.json附Release。
+- 独立后台IAB真实打开?stage=v0.1.0-alpha.11，菜单AX显示alpha.11／00fd3dd；首次观察素材仍在加载。截图请求20秒超时导致连接失效；仅再检查同一后台页连接，15秒仍超时，停止重试。未取得alpha.11公网截图或有效交互证据，不能声称公开商店／战斗已测过。未操作用户现有页或前台Chrome。
+- Release四张图片均明确为本地生产证据；附件另有冻结36局／冻结汇总／旧引擎＋V5／三组比较／公网HTTP五份JSON。完整平衡与GDD退出条件仍未完成，继续保留在STATUS／ACCEPTANCE。
