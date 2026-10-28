@@ -83902,7 +83902,7 @@
       "image": "atlas-4.png",
       "data": "atlas-4.json",
       "width": 2048,
-      "height": 4078,
+      "height": 3969,
       "lazy": false,
       "group": "core"
     },
@@ -83911,7 +83911,7 @@
       "image": "atlas-5.png",
       "data": "atlas-5.json",
       "width": 2048,
-      "height": 4088,
+      "height": 4016,
       "lazy": false,
       "group": "core"
     },
@@ -83920,7 +83920,7 @@
       "image": "atlas-6.png",
       "data": "atlas-6.json",
       "width": 2048,
-      "height": 4072,
+      "height": 4058,
       "lazy": false,
       "group": "core"
     },
@@ -83929,7 +83929,7 @@
       "image": "atlas-7.png",
       "data": "atlas-7.json",
       "width": 2048,
-      "height": 4070,
+      "height": 4074,
       "lazy": false,
       "group": "core"
     },
@@ -83938,7 +83938,7 @@
       "image": "atlas-8.png",
       "data": "atlas-8.json",
       "width": 2048,
-      "height": 4079,
+      "height": 4047,
       "lazy": false,
       "group": "core"
     },
@@ -83947,7 +83947,7 @@
       "image": "atlas-9.png",
       "data": "atlas-9.json",
       "width": 2048,
-      "height": 4076,
+      "height": 4062,
       "lazy": false,
       "group": "core"
     },
@@ -83956,7 +83956,7 @@
       "image": "atlas-10.png",
       "data": "atlas-10.json",
       "width": 2048,
-      "height": 1270,
+      "height": 1667,
       "lazy": false,
       "group": "core"
     },
@@ -126841,6 +126841,54 @@
       "originX": 24,
       "originY": 16
     },
+    "package/骨玉权杖": {
+      "sourcePath": "texture/item/0100043C.PNG",
+      "sha1": "0ab1ae180bddd66d4e89f8e6609dbe3bd8244c44",
+      "sha256": "7a006c80b6bdfab83f51525bee2716db5ff7993d970c73b785a4400e8b93d4fc",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 208,
+      "texture": "mir-4",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/无极棍": {
+      "sourcePath": "texture/item/0100044F.PNG",
+      "sha1": "a3b344c7b0a46ea32020a84c819a00da5df94031",
+      "sha256": "b379649b452fa9635d40bafba52d1bd3033d048f275f3d710423cd8c4dffe1cb",
+      "dx": 0,
+      "dy": 0,
+      "width": 12,
+      "height": 202,
+      "texture": "mir-4",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/偃月": {
+      "sourcePath": "texture/item/01000439.PNG",
+      "sha1": "8c4edce436f6594336e580640e449bb6e5af0127",
+      "sha256": "d03dce274545d7d13822cf945a55e3c54faa126ad81cef77aa009aeb0d491966",
+      "dx": 0,
+      "dy": 0,
+      "width": 28,
+      "height": 198,
+      "texture": "mir-4",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/炼狱": {
+      "sourcePath": "texture/item/0100042A.PNG",
+      "sha1": "ca77b1eeab1eaa8dee78d9d1586d636cce6a8264",
+      "sha256": "26a9b4e29fb9b7ccd1b94784f5e36fad93a93f5d96101ab86feed6ea34e68ab1",
+      "dx": 0,
+      "dy": 0,
+      "width": 52,
+      "height": 196,
+      "texture": "mir-4",
+      "originX": 24,
+      "originY": 16
+    },
     "map/000A0BC6": {
       "sourcePath": "texture/map/000A0BC6.PNG",
       "sha1": "3228bec34954364c30fc22236ab7fcd075b4ba03",
@@ -126901,6 +126949,18 @@
       "originX": 24,
       "originY": 16
     },
+    "package/屠龙": {
+      "sourcePath": "texture/item/0100042E.PNG",
+      "sha1": "67c266145ec76f33be2c585a6469813acdf6f8a1",
+      "sha256": "117ebd663a92671ba4fa710fb1a749b00014d821729a45b530013cff2219ef7e",
+      "dx": 0,
+      "dy": 0,
+      "width": 40,
+      "height": 184,
+      "texture": "mir-4",
+      "originX": 24,
+      "originY": 16
+    },
     "beast/death/5/9": {
       "sourcePath": "texture/monster/0005A4A90000350075.PNG",
       "sha1": "b44736673453e48b2d2793b879827178f0535e59",
@@ -126924,6 +126984,18 @@
       "texture": "mir-4",
       "originX": 37,
       "originY": 132
+    },
+    "package/魔杖": {
+      "sourcePath": "texture/item/0100043A.PNG",
+      "sha1": "a00b1ed26b165df2553b02441fb8441135b4beeb",
+      "sha256": "f0ba5768a211e8dfc4d600df7a2e92e021eb0f43e71303598ba64490c28bc0e9",
+      "dx": 0,
+      "dy": 0,
+      "width": 36,
+      "height": 170,
+      "texture": "mir-4",
+      "originX": 24,
+      "originY": 16
     },
     "beast/death/1/9": {
       "sourcePath": "texture/monster/0005A429000042005B.PNG",
@@ -126972,6 +127044,18 @@
       "texture": "mir-4",
       "originX": 20,
       "originY": 140
+    },
+    "package/海魂": {
+      "sourcePath": "texture/item/01000438.PNG",
+      "sha1": "eea05dd64324fd22a78394fe2772d19984e43c0b",
+      "sha256": "fe5bb28477f7cdf3633eee933dfaa7ab73b001a63ad5a293b161020ea5b05855",
+      "dx": 0,
+      "dy": 0,
+      "width": 24,
+      "height": 162,
+      "texture": "mir-4",
+      "originX": 24,
+      "originY": 16
     },
     "boss/attack/7/2": {
       "sourcePath": "texture/monster/000242E20000050084.PNG",
@@ -127080,6 +127164,18 @@
       "texture": "mir-4",
       "originX": 52,
       "originY": 99
+    },
+    "package/银蛇": {
+      "sourcePath": "texture/item/0100044E.PNG",
+      "sha1": "d50267dedbdb2d7aa503ae573f3df7e347195956",
+      "sha256": "9a779d4ca65d5e975feffc73186c6e10db677cefaeeb4058d88ab6c304682957",
+      "dx": 0,
+      "dy": 0,
+      "width": 28,
+      "height": 150,
+      "texture": "mir-4",
+      "originX": 24,
+      "originY": 16
     },
     "beast/death/2/8": {
       "sourcePath": "texture/monster/0005A448000024005F.PNG",
@@ -127297,6 +127393,30 @@
       "originX": 34,
       "originY": 117
     },
+    "package/裁决之杖": {
+      "sourcePath": "texture/item/0100042D.PNG",
+      "sha1": "1a2ff515b593ab9f7629299f462e5b301e69fa77",
+      "sha256": "28c9ebb14e892af5dc8e6d3ae756b73ae62ed0e4fc31b391d68ea2b8b6d2fcef",
+      "dx": 0,
+      "dy": 0,
+      "width": 24,
+      "height": 138,
+      "texture": "mir-4",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/龙纹剑": {
+      "sourcePath": "texture/item/01000450.PNG",
+      "sha1": "a3b43b8d480147d6e9a3d9e5c57236894f0d657b",
+      "sha256": "535d861d9cd2dbfe7f20ed713aa3a86084104a7eca0a612f8d1d6a9c9b794d40",
+      "dx": 0,
+      "dy": 0,
+      "width": 24,
+      "height": 138,
+      "texture": "mir-4",
+      "originX": 24,
+      "originY": 16
+    },
     "beast/death/3/8": {
       "sourcePath": "texture/monster/0005A4680000290063.PNG",
       "sha1": "dc8893583257d23b744efc2a03572b2b07698608",
@@ -127416,6 +127536,18 @@
       "texture": "mir-4",
       "originX": 47,
       "originY": 110
+    },
+    "package/井中月": {
+      "sourcePath": "texture/item/0100042C.PNG",
+      "sha1": "3a9181c46d03e922aab784723b7f91db9bb88aa6",
+      "sha256": "bf7c10fd02ecde05d94cc7399efdd1fa38ef42b4bbc066f0adcb3fc5646c6ccf",
+      "dx": 0,
+      "dy": 0,
+      "width": 28,
+      "height": 134,
+      "texture": "mir-4",
+      "originX": 24,
+      "originY": 16
     },
     "ui/board": {
       "sourcePath": "texture/proguse/00000012.PNG",
@@ -127608,6 +127740,30 @@
       "texture": "mir-4",
       "originX": 45,
       "originY": 111
+    },
+    "package/凝霜": {
+      "sourcePath": "texture/item/01000414.PNG",
+      "sha1": "f0945a869797230713a24faacb773e53c486e76c",
+      "sha256": "3c8a403f27d8b0d6dec47a4d6365f26a0f331d130ef8c9e7665a464503b4457e",
+      "dx": 0,
+      "dy": 0,
+      "width": 20,
+      "height": 130,
+      "texture": "mir-4",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/灵魂战衣（男）": {
+      "sourcePath": "texture/item/010003E8.PNG",
+      "sha1": "8b450168c75db0d4c92f04d714bc6fb71ce75066",
+      "sha256": "ef0e19e19c2d9ddfbceeb85165d2a0cf404f431a65b06d742c79e59d88c45aac",
+      "dx": 0,
+      "dy": 0,
+      "width": 48,
+      "height": 130,
+      "texture": "mir-4",
+      "originX": 24,
+      "originY": 16
     },
     "spider/attack/3/5": {
       "sourcePath": "texture/monster/000192650000260014.PNG",
@@ -128301,7 +128457,7 @@
       "dy": -36,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 88,
       "originY": 52
     },
@@ -128313,7 +128469,7 @@
       "dy": -37,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 89,
       "originY": 53
     },
@@ -128325,7 +128481,7 @@
       "dy": -37,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 91,
       "originY": 53
     },
@@ -128337,7 +128493,7 @@
       "dy": -49,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 92,
       "originY": 65
     },
@@ -128349,7 +128505,7 @@
       "dy": -51,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 95,
       "originY": 67
     },
@@ -128361,7 +128517,7 @@
       "dy": -50,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 94,
       "originY": 66
     },
@@ -128373,7 +128529,7 @@
       "dy": -48,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 92,
       "originY": 64
     },
@@ -128385,7 +128541,7 @@
       "dy": -50,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 95,
       "originY": 66
     },
@@ -128397,7 +128553,7 @@
       "dy": -49,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 93,
       "originY": 65
     },
@@ -128409,7 +128565,7 @@
       "dy": -64,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 90,
       "originY": 80
     },
@@ -128421,7 +128577,7 @@
       "dy": -64,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 90,
       "originY": 80
     },
@@ -128433,7 +128589,7 @@
       "dy": -62,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 88,
       "originY": 78
     },
@@ -128445,7 +128601,7 @@
       "dy": -64,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 91,
       "originY": 80
     },
@@ -128457,7 +128613,7 @@
       "dy": -63,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 91,
       "originY": 79
     },
@@ -128469,7 +128625,7 @@
       "dy": -75,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 79,
       "originY": 91
     },
@@ -128481,7 +128637,7 @@
       "dy": -72,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 75,
       "originY": 88
     },
@@ -128493,7 +128649,7 @@
       "dy": -75,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 78,
       "originY": 91
     },
@@ -128505,7 +128661,7 @@
       "dy": -76,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 80,
       "originY": 92
     },
@@ -128517,7 +128673,7 @@
       "dy": -74,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 75,
       "originY": 90
     },
@@ -128529,7 +128685,7 @@
       "dy": -74,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 78,
       "originY": 90
     },
@@ -128541,7 +128697,7 @@
       "dy": -81,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 59,
       "originY": 97
     },
@@ -128553,7 +128709,7 @@
       "dy": -82,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 61,
       "originY": 98
     },
@@ -128565,7 +128721,7 @@
       "dy": -83,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 63,
       "originY": 99
     },
@@ -128577,7 +128733,7 @@
       "dy": -81,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 60,
       "originY": 97
     },
@@ -128589,7 +128745,7 @@
       "dy": -82,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 62,
       "originY": 98
     },
@@ -128601,7 +128757,7 @@
       "dy": -83,
       "width": 128,
       "height": 128,
-      "texture": "mir-4",
+      "texture": "mir-5",
       "originX": 63,
       "originY": 99
     },
@@ -131905,6 +132061,18 @@
       "originX": 27,
       "originY": 81
     },
+    "package/恶魔长袍（男）": {
+      "sourcePath": "texture/item/010003FD.PNG",
+      "sha1": "b9316818b2fc35698faad0073af847702172f21e",
+      "sha256": "3feb892e84b44d88c484308cbc7273ceab11a561c008f6e4baf143d8034da3e8",
+      "dx": 0,
+      "dy": 0,
+      "width": 64,
+      "height": 126,
+      "texture": "mir-5",
+      "originX": 24,
+      "originY": 16
+    },
     "spider/attack/7/4": {
       "sourcePath": "texture/monster/000192E4000048003E.PNG",
       "sha1": "01aaefa0acf574c202ab8f2205f73752c8e97e34",
@@ -132072,6 +132240,30 @@
       "texture": "mir-5",
       "originX": 22,
       "originY": 102
+    },
+    "package/幽灵战衣（男）": {
+      "sourcePath": "texture/item/010003E9.PNG",
+      "sha1": "b693565878c1feedbab5e10a1d8e631680b849cb",
+      "sha256": "490a8a15b53914d9e94a76885fcfcf5f56302d70040f97d509cddc3cf38bb569",
+      "dx": 0,
+      "dy": 0,
+      "width": 52,
+      "height": 124,
+      "texture": "mir-5",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/魔法长袍（男）": {
+      "sourcePath": "texture/item/010003FC.PNG",
+      "sha1": "3701bf05278a7b2d847d8cc43a03dc26491bde0c",
+      "sha256": "1bcd554f600f2715038556acb0a52027d6f014221ef60b98778d42b13a7fc90e",
+      "dx": 0,
+      "dy": 0,
+      "width": 64,
+      "height": 124,
+      "texture": "mir-5",
+      "originX": 24,
+      "originY": 16
     },
     "spider/attack/7/5": {
       "sourcePath": "texture/monster/000192E5000069003A.PNG",
@@ -132444,6 +132636,42 @@
       "texture": "mir-5",
       "originX": 47,
       "originY": 104
+    },
+    "package/凌风": {
+      "sourcePath": "texture/item/01000427.PNG",
+      "sha1": "25f0e59e9251501ca44848e48ef797ae167a3fa5",
+      "sha256": "0ebba803d1919feed6342e28ec7cb5946c32de54b3f4e9d867cbbb968821c461",
+      "dx": 0,
+      "dy": 0,
+      "width": 16,
+      "height": 120,
+      "texture": "mir-5",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/斩马刀": {
+      "sourcePath": "texture/item/01000427.PNG",
+      "sha1": "25f0e59e9251501ca44848e48ef797ae167a3fa5",
+      "sha256": "0ebba803d1919feed6342e28ec7cb5946c32de54b3f4e9d867cbbb968821c461",
+      "dx": 0,
+      "dy": 0,
+      "width": 16,
+      "height": 120,
+      "texture": "mir-5",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/降魔": {
+      "sourcePath": "texture/item/0100044D.PNG",
+      "sha1": "162956a33cfb1d475b88c7a675cdada25f9e1975",
+      "sha256": "16f0c43979869f2cca10b8f14e7d5d30cd97884c9f48e25bc11f8208d4a07cb3",
+      "dx": 0,
+      "dy": 0,
+      "width": 28,
+      "height": 120,
+      "texture": "mir-5",
+      "originX": 24,
+      "originY": 16
     },
     "beast-shadow/death/2/8": {
       "sourcePath": "texture/monster/0085A44800000C002E.PNG",
@@ -133129,6 +133357,18 @@
       "originX": 83,
       "originY": 68
     },
+    "package/半月": {
+      "sourcePath": "texture/item/0100044C.PNG",
+      "sha1": "9ffdefc6545520fd716fa3a5d6ebbb96b91f97ab",
+      "sha256": "91354546b42112ec0fd9de0fca0068f7114061a29b990b3d4507b30627a4d61f",
+      "dx": 0,
+      "dy": 0,
+      "width": 56,
+      "height": 114,
+      "texture": "mir-5",
+      "originX": 24,
+      "originY": 16
+    },
     "spider/hurt/1/0": {
       "sourcePath": "texture/monster/000193200000300020.PNG",
       "sha1": "dc8e1613f190b28e764e5e2a1a3267a9ba9b81ad",
@@ -133524,6 +133764,18 @@
       "texture": "mir-5",
       "originX": 49,
       "originY": 84
+    },
+    "package/战神盔甲（男）": {
+      "sourcePath": "texture/item/010003D5.PNG",
+      "sha1": "be645b314b41807afb35b954e2e52b6e75d2c203",
+      "sha256": "f5cdc0509f17bd60f8cf89401ecf40f5023cbc533b5bb54628c4e1e9f661a184",
+      "dx": 0,
+      "dy": 0,
+      "width": 64,
+      "height": 112,
+      "texture": "mir-5",
+      "originX": 24,
+      "originY": 16
     },
     "spider/death/0/1": {
       "sourcePath": "texture/monster/0001940100001D0032.PNG",
@@ -134088,6 +134340,18 @@
       "texture": "mir-5",
       "originX": 95,
       "originY": 58
+    },
+    "package/修罗": {
+      "sourcePath": "texture/item/01000429.PNG",
+      "sha1": "7c22b3cf3e34c853a12b1e79839fb0c43fdfacda",
+      "sha256": "c2140d595b29eb9d436166859dfe50590fd12ab9b13125444c5a894535f49cf2",
+      "dx": 0,
+      "dy": 0,
+      "width": 52,
+      "height": 110,
+      "texture": "mir-5",
+      "originX": 24,
+      "originY": 16
     },
     "spider/attack/0/3": {
       "sourcePath": "texture/monster/0001920300001E0033.PNG",
@@ -134745,7 +135009,7 @@
       "dy": -34,
       "width": 128,
       "height": 108,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 51,
       "originY": 50
     },
@@ -134757,7 +135021,7 @@
       "dy": -29,
       "width": 108,
       "height": 108,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 53,
       "originY": 45
     },
@@ -134769,7 +135033,7 @@
       "dy": -29,
       "width": 108,
       "height": 108,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 53,
       "originY": 45
     },
@@ -134781,7 +135045,7 @@
       "dy": -28,
       "width": 108,
       "height": 108,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 53,
       "originY": 44
     },
@@ -134793,7 +135057,7 @@
       "dy": -25,
       "width": 124,
       "height": 108,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 53,
       "originY": 41
     },
@@ -134805,7 +135069,7 @@
       "dy": -25,
       "width": 124,
       "height": 108,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 53,
       "originY": 41
     },
@@ -134817,7 +135081,7 @@
       "dy": -25,
       "width": 120,
       "height": 108,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 52,
       "originY": 41
     },
@@ -134829,7 +135093,7 @@
       "dy": -25,
       "width": 120,
       "height": 108,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 52,
       "originY": 41
     },
@@ -134841,7 +135105,7 @@
       "dy": -29,
       "width": 108,
       "height": 108,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 53,
       "originY": 45
     },
@@ -134853,7 +135117,7 @@
       "dy": -25,
       "width": 124,
       "height": 108,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 53,
       "originY": 41
     },
@@ -134865,7 +135129,7 @@
       "dy": -63,
       "width": 164,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 61,
       "originY": 79
     },
@@ -134877,7 +135141,7 @@
       "dy": -60,
       "width": 184,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 63,
       "originY": 76
     },
@@ -134889,7 +135153,7 @@
       "dy": -82,
       "width": 88,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 43,
       "originY": 98
     },
@@ -134901,7 +135165,7 @@
       "dy": -83,
       "width": 88,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 42,
       "originY": 99
     },
@@ -134913,7 +135177,7 @@
       "dy": -83,
       "width": 76,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 36,
       "originY": 99
     },
@@ -134925,7 +135189,7 @@
       "dy": -78,
       "width": 72,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 30,
       "originY": 94
     },
@@ -134937,7 +135201,7 @@
       "dy": -80,
       "width": 88,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 44,
       "originY": 96
     },
@@ -134949,7 +135213,7 @@
       "dy": -81,
       "width": 64,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 35,
       "originY": 97
     },
@@ -134961,7 +135225,7 @@
       "dy": -82,
       "width": 72,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 39,
       "originY": 98
     },
@@ -134973,7 +135237,7 @@
       "dy": -82,
       "width": 72,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 41,
       "originY": 98
     },
@@ -134985,7 +135249,7 @@
       "dy": -70,
       "width": 80,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 53,
       "originY": 86
     },
@@ -134997,7 +135261,7 @@
       "dy": -87,
       "width": 72,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 34,
       "originY": 103
     },
@@ -135009,7 +135273,7 @@
       "dy": -87,
       "width": 92,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 45,
       "originY": 103
     },
@@ -135021,7 +135285,7 @@
       "dy": -86,
       "width": 104,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 52,
       "originY": 102
     },
@@ -135033,7 +135297,7 @@
       "dy": -77,
       "width": 80,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 54,
       "originY": 93
     },
@@ -135045,7 +135309,7 @@
       "dy": -75,
       "width": 80,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 16,
       "originY": 91
     },
@@ -135057,7 +135321,7 @@
       "dy": -78,
       "width": 64,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 21,
       "originY": 94
     },
@@ -135069,7 +135333,7 @@
       "dy": -78,
       "width": 60,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 21,
       "originY": 94
     },
@@ -135081,7 +135345,7 @@
       "dy": -78,
       "width": 60,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 21,
       "originY": 94
     },
@@ -135093,7 +135357,7 @@
       "dy": -78,
       "width": 68,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 21,
       "originY": 94
     },
@@ -135105,7 +135369,7 @@
       "dy": -77,
       "width": 68,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 44,
       "originY": 93
     },
@@ -135117,7 +135381,7 @@
       "dy": -82,
       "width": 68,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 41,
       "originY": 98
     },
@@ -135129,7 +135393,7 @@
       "dy": -83,
       "width": 68,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 36,
       "originY": 99
     },
@@ -135141,7 +135405,7 @@
       "dy": -84,
       "width": 64,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 29,
       "originY": 100
     },
@@ -135153,7 +135417,7 @@
       "dy": -82,
       "width": 60,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 22,
       "originY": 98
     },
@@ -135165,7 +135429,7 @@
       "dy": -77,
       "width": 68,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 31,
       "originY": 93
     },
@@ -135177,7 +135441,7 @@
       "dy": -79,
       "width": 56,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 24,
       "originY": 95
     },
@@ -135189,7 +135453,7 @@
       "dy": -79,
       "width": 64,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 30,
       "originY": 95
     },
@@ -135201,7 +135465,7 @@
       "dy": -75,
       "width": 68,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 28,
       "originY": 91
     },
@@ -135213,7 +135477,7 @@
       "dy": -75,
       "width": 64,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 36,
       "originY": 91
     },
@@ -135225,7 +135489,7 @@
       "dy": -79,
       "width": 64,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 34,
       "originY": 95
     },
@@ -135237,7 +135501,7 @@
       "dy": -79,
       "width": 56,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 32,
       "originY": 95
     },
@@ -135249,7 +135513,7 @@
       "dy": -77,
       "width": 64,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 35,
       "originY": 93
     },
@@ -135261,7 +135525,7 @@
       "dy": -82,
       "width": 60,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 36,
       "originY": 98
     },
@@ -135273,7 +135537,7 @@
       "dy": -84,
       "width": 64,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 34,
       "originY": 100
     },
@@ -135285,7 +135549,7 @@
       "dy": 27,
       "width": 84,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 43,
       "originY": -11
     },
@@ -135297,7 +135561,7 @@
       "dy": -10,
       "width": 100,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 48,
       "originY": 26
     },
@@ -135309,7 +135573,7 @@
       "dy": -50,
       "width": 84,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 29,
       "originY": 66
     },
@@ -135321,7 +135585,7 @@
       "dy": -36,
       "width": 72,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 44,
       "originY": 52
     },
@@ -135333,7 +135597,7 @@
       "dy": -87,
       "width": 80,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 46,
       "originY": 103
     },
@@ -135345,7 +135609,7 @@
       "dy": -91,
       "width": 80,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 44,
       "originY": 107
     },
@@ -135357,7 +135621,7 @@
       "dy": -83,
       "width": 124,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 28,
       "originY": 99
     },
@@ -135369,7 +135633,7 @@
       "dy": -68,
       "width": 92,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 58,
       "originY": 84
     },
@@ -135381,7 +135645,7 @@
       "dy": -73,
       "width": 124,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 93,
       "originY": 89
     },
@@ -135393,7 +135657,7 @@
       "dy": -12,
       "width": 100,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 51,
       "originY": 28
     },
@@ -135405,7 +135669,7 @@
       "dy": -59,
       "width": 84,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 33,
       "originY": 75
     },
@@ -135417,7 +135681,7 @@
       "dy": -68,
       "width": 68,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 32,
       "originY": 84
     },
@@ -135429,7 +135693,7 @@
       "dy": -67,
       "width": 60,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 31,
       "originY": 83
     },
@@ -135441,7 +135705,7 @@
       "dy": -67,
       "width": 88,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 52,
       "originY": 83
     },
@@ -135453,7 +135717,7 @@
       "dy": -65,
       "width": 96,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 40,
       "originY": 81
     },
@@ -135465,7 +135729,7 @@
       "dy": -77,
       "width": 64,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 35,
       "originY": 93
     },
@@ -135477,7 +135741,7 @@
       "dy": -72,
       "width": 56,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 30,
       "originY": 88
     },
@@ -135489,7 +135753,7 @@
       "dy": -82,
       "width": 84,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 32,
       "originY": 98
     },
@@ -135501,7 +135765,7 @@
       "dy": -49,
       "width": 76,
       "height": 106,
-      "texture": "mir-5",
+      "texture": "mir-6",
       "originX": 26,
       "originY": 65
     },
@@ -136068,6 +136332,54 @@
       "texture": "mir-6",
       "originX": 32,
       "originY": 40
+    },
+    "package/八荒": {
+      "sourcePath": "texture/item/01000413.PNG",
+      "sha1": "2dfc670401af1b2a395b900d612cb028fda28c0a",
+      "sha256": "609df413e74c6dfef282b4c3b5ccdc244e314c11fcfb1deef7a2a9383432c2e8",
+      "dx": 0,
+      "dy": 0,
+      "width": 28,
+      "height": 104,
+      "texture": "mir-6",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/短剑": {
+      "sourcePath": "texture/item/01000413.PNG",
+      "sha1": "2dfc670401af1b2a395b900d612cb028fda28c0a",
+      "sha256": "609df413e74c6dfef282b4c3b5ccdc244e314c11fcfb1deef7a2a9383432c2e8",
+      "dx": 0,
+      "dy": 0,
+      "width": 28,
+      "height": 104,
+      "texture": "mir-6",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/铁剑": {
+      "sourcePath": "texture/item/01000413.PNG",
+      "sha1": "2dfc670401af1b2a395b900d612cb028fda28c0a",
+      "sha256": "609df413e74c6dfef282b4c3b5ccdc244e314c11fcfb1deef7a2a9383432c2e8",
+      "dx": 0,
+      "dy": 0,
+      "width": 28,
+      "height": 104,
+      "texture": "mir-6",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/青铜剑": {
+      "sourcePath": "texture/item/01000413.PNG",
+      "sha1": "2dfc670401af1b2a395b900d612cb028fda28c0a",
+      "sha256": "609df413e74c6dfef282b4c3b5ccdc244e314c11fcfb1deef7a2a9383432c2e8",
+      "dx": 0,
+      "dy": 0,
+      "width": 28,
+      "height": 104,
+      "texture": "mir-6",
+      "originX": 24,
+      "originY": 16
     },
     "rakecat/attack/0/3": {
       "sourcePath": "texture/monster/00027203100005004E.PNG",
@@ -136704,6 +137016,30 @@
       "texture": "mir-6",
       "originX": 44,
       "originY": 85
+    },
+    "package/乌木剑": {
+      "sourcePath": "texture/item/01000412.PNG",
+      "sha1": "9026b0712fc7b2137415b8b9d2016068069a182b",
+      "sha256": "41b59db4c2f5113f80cc4dbe294e6a9fea1a61ec456d84ed4e21ea00945301dd",
+      "dx": 0,
+      "dy": 0,
+      "width": 16,
+      "height": 102,
+      "texture": "mir-6",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/木剑": {
+      "sourcePath": "texture/item/01000412.PNG",
+      "sha1": "9026b0712fc7b2137415b8b9d2016068069a182b",
+      "sha256": "41b59db4c2f5113f80cc4dbe294e6a9fea1a61ec456d84ed4e21ea00945301dd",
+      "dx": 0,
+      "dy": 0,
+      "width": 16,
+      "height": 102,
+      "texture": "mir-6",
+      "originX": 24,
+      "originY": 16
     },
     "rakecat/attack/5/2": {
       "sourcePath": "texture/monster/000272A21000010055.PNG",
@@ -137376,6 +137712,18 @@
       "texture": "mir-6",
       "originX": 57,
       "originY": 77
+    },
+    "package/青铜斧": {
+      "sourcePath": "texture/item/01000424.PNG",
+      "sha1": "ed59a7cf1c6e399290564cc67727bae700bd9374",
+      "sha256": "831d6c6e99a22e67879513dc087474e4be801691bba89f163f9e06125806cdd6",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 100,
+      "texture": "mir-6",
+      "originX": 24,
+      "originY": 16
     },
     "skeleton/attack/2/3": {
       "sourcePath": "texture/monster/00020243000001003F.PNG",
@@ -138348,6 +138696,18 @@
       "texture": "mir-6",
       "originX": 57,
       "originY": 81
+    },
+    "package/布衣（男）": {
+      "sourcePath": "texture/item/010003AC.PNG",
+      "sha1": "a180c5f599048741da561676fc6e35a25f4a093c",
+      "sha256": "512337b9ebd5b9d57aa145e507a8a019f2fd8e282b3d8f22e47787d0f374ead5",
+      "dx": 0,
+      "dy": 0,
+      "width": 48,
+      "height": 98,
+      "texture": "mir-6",
+      "originX": 24,
+      "originY": 16
     },
     "rakecat/attack/5/1": {
       "sourcePath": "texture/monster/000272A10000110047.PNG",
@@ -143151,6 +143511,18 @@
       "originX": 26,
       "originY": 68
     },
+    "package/重盔甲（男）": {
+      "sourcePath": "texture/item/010003D4.PNG",
+      "sha1": "6c98778e346e179cc0232792319d77b596146a9e",
+      "sha256": "a4ef1a819e637becb3618cd6f492d92d1cf6a01d4689abd927ee0624771fc44e",
+      "dx": 0,
+      "dy": 0,
+      "width": 52,
+      "height": 88,
+      "texture": "mir-6",
+      "originX": 24,
+      "originY": 16
+    },
     "rakecat/death/2/4": {
       "sourcePath": "texture/monster/00027444000008002C.PNG",
       "sha1": "41016a20863d5cc91549ebba02e5736e32858f81",
@@ -146091,7 +146463,7 @@
       "dy": -8,
       "width": 116,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 48,
       "originY": 24
     },
@@ -146103,7 +146475,7 @@
       "dy": -55,
       "width": 72,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 42,
       "originY": 71
     },
@@ -146115,7 +146487,7 @@
       "dy": -46,
       "width": 76,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 50,
       "originY": 62
     },
@@ -146127,7 +146499,7 @@
       "dy": -51,
       "width": 72,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 43,
       "originY": 67
     },
@@ -146139,7 +146511,7 @@
       "dy": -34,
       "width": 108,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 61,
       "originY": 50
     },
@@ -146151,7 +146523,7 @@
       "dy": -46,
       "width": 44,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 22,
       "originY": 62
     },
@@ -146163,7 +146535,7 @@
       "dy": -45,
       "width": 68,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 24,
       "originY": 61
     },
@@ -146175,7 +146547,7 @@
       "dy": -51,
       "width": 72,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 31,
       "originY": 67
     },
@@ -146187,7 +146559,7 @@
       "dy": -47,
       "width": 76,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 28,
       "originY": 63
     },
@@ -146199,7 +146571,7 @@
       "dy": -47,
       "width": 72,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 27,
       "originY": 63
     },
@@ -146211,7 +146583,7 @@
       "dy": -49,
       "width": 56,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 33,
       "originY": 65
     },
@@ -146223,7 +146595,7 @@
       "dy": -49,
       "width": 60,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 30,
       "originY": 65
     },
@@ -146235,7 +146607,7 @@
       "dy": -51,
       "width": 80,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 46,
       "originY": 67
     },
@@ -146247,7 +146619,7 @@
       "dy": -50,
       "width": 60,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 33,
       "originY": 66
     },
@@ -146259,7 +146631,7 @@
       "dy": -49,
       "width": 52,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 21,
       "originY": 65
     },
@@ -146271,7 +146643,7 @@
       "dy": -55,
       "width": 64,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 34,
       "originY": 71
     },
@@ -146283,7 +146655,7 @@
       "dy": -49,
       "width": 60,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 25,
       "originY": 65
     },
@@ -146295,7 +146667,7 @@
       "dy": -50,
       "width": 76,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 30,
       "originY": 66
     },
@@ -146307,7 +146679,7 @@
       "dy": -54,
       "width": 60,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 34,
       "originY": 70
     },
@@ -146319,7 +146691,7 @@
       "dy": -48,
       "width": 68,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 41,
       "originY": 64
     },
@@ -146331,7 +146703,7 @@
       "dy": -65,
       "width": 44,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 24,
       "originY": 81
     },
@@ -146343,7 +146715,7 @@
       "dy": -59,
       "width": 48,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 37,
       "originY": 75
     },
@@ -146355,7 +146727,7 @@
       "dy": -52,
       "width": 60,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 34,
       "originY": 68
     },
@@ -146367,7 +146739,7 @@
       "dy": -58,
       "width": 44,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 21,
       "originY": 74
     },
@@ -146379,7 +146751,7 @@
       "dy": -55,
       "width": 68,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 36,
       "originY": 71
     },
@@ -146391,7 +146763,7 @@
       "dy": -65,
       "width": 56,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 23,
       "originY": 81
     },
@@ -146403,7 +146775,7 @@
       "dy": -59,
       "width": 36,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 12,
       "originY": 75
     },
@@ -146415,7 +146787,7 @@
       "dy": -54,
       "width": 52,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 27,
       "originY": 70
     },
@@ -146427,7 +146799,7 @@
       "dy": -60,
       "width": 44,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 18,
       "originY": 76
     },
@@ -146439,7 +146811,7 @@
       "dy": -62,
       "width": 56,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 13,
       "originY": 78
     },
@@ -146451,7 +146823,7 @@
       "dy": -48,
       "width": 56,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 18,
       "originY": 64
     },
@@ -146463,7 +146835,7 @@
       "dy": -46,
       "width": 60,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 29,
       "originY": 62
     },
@@ -146475,7 +146847,7 @@
       "dy": -50,
       "width": 44,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 27,
       "originY": 66
     },
@@ -146487,7 +146859,7 @@
       "dy": -48,
       "width": 60,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 47,
       "originY": 64
     },
@@ -146499,7 +146871,7 @@
       "dy": -49,
       "width": 60,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 19,
       "originY": 65
     },
@@ -146511,7 +146883,7 @@
       "dy": -51,
       "width": 64,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 28,
       "originY": 67
     },
@@ -146523,7 +146895,7 @@
       "dy": -71,
       "width": 52,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 20,
       "originY": 87
     },
@@ -146535,7 +146907,7 @@
       "dy": -49,
       "width": 48,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 19,
       "originY": 65
     },
@@ -146547,7 +146919,7 @@
       "dy": -53,
       "width": 52,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 22,
       "originY": 69
     },
@@ -146559,7 +146931,7 @@
       "dy": -51,
       "width": 56,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 24,
       "originY": 67
     },
@@ -146571,7 +146943,7 @@
       "dy": -56,
       "width": 48,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 29,
       "originY": 72
     },
@@ -146583,7 +146955,7 @@
       "dy": 12,
       "width": 108,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 86,
       "originY": 4
     },
@@ -146595,7 +146967,7 @@
       "dy": 6,
       "width": 104,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 84,
       "originY": 10
     },
@@ -146607,7 +146979,7 @@
       "dy": 10,
       "width": 104,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 80,
       "originY": 6
     },
@@ -146619,7 +146991,7 @@
       "dy": -56,
       "width": 100,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 33,
       "originY": 72
     },
@@ -146631,7 +147003,7 @@
       "dy": -27,
       "width": 132,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 72,
       "originY": 43
     },
@@ -146643,7 +147015,7 @@
       "dy": -53,
       "width": 36,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 14,
       "originY": 69
     },
@@ -146655,7 +147027,7 @@
       "dy": -47,
       "width": 44,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 17,
       "originY": 63
     },
@@ -146667,7 +147039,7 @@
       "dy": -57,
       "width": 64,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 29,
       "originY": 73
     },
@@ -146679,7 +147051,7 @@
       "dy": -50,
       "width": 48,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 37,
       "originY": 66
     },
@@ -146713,7 +147085,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "eeae811ed1ee5f43503a1eebe5fbb75d8d82c871a8c6a6fc5d3c7423bf477485",
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 26,
       "originY": 75
     },
@@ -146747,7 +147119,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "4ceb98e15975d4dad254ba8993b7348a1de262ea5930581d3121d41a27caaa92",
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 28,
       "originY": 78
     },
@@ -146781,7 +147153,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "e5b622c8e4428ab249303d5ac7a43e5443f962e545fd3d19bc43612619b2a56f",
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 27,
       "originY": 75
     },
@@ -146793,7 +147165,7 @@
       "dy": -53,
       "width": 40,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 17,
       "originY": 69
     },
@@ -146805,7 +147177,7 @@
       "dy": -64,
       "width": 52,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 35,
       "originY": 80
     },
@@ -146817,7 +147189,7 @@
       "dy": -60,
       "width": 44,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 17,
       "originY": 76
     },
@@ -146829,7 +147201,7 @@
       "dy": -58,
       "width": 52,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 26,
       "originY": 74
     },
@@ -146841,7 +147213,7 @@
       "dy": -56,
       "width": 48,
       "height": 84,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 24,
       "originY": 72
     },
@@ -146853,7 +147225,7 @@
       "dy": -37,
       "width": 116,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 14,
       "originY": 53
     },
@@ -146865,7 +147237,7 @@
       "dy": -37,
       "width": 112,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 15,
       "originY": 53
     },
@@ -146877,7 +147249,7 @@
       "dy": -39,
       "width": 120,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 23,
       "originY": 55
     },
@@ -146889,7 +147261,7 @@
       "dy": -35,
       "width": 80,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 30,
       "originY": 51
     },
@@ -146901,7 +147273,7 @@
       "dy": -44,
       "width": 116,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 31,
       "originY": 60
     },
@@ -146913,7 +147285,7 @@
       "dy": -55,
       "width": 128,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 44,
       "originY": 71
     },
@@ -146925,7 +147297,7 @@
       "dy": -49,
       "width": 177,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 27,
       "originY": 65
     },
@@ -146937,7 +147309,7 @@
       "dy": -58,
       "width": 104,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 54,
       "originY": 74
     },
@@ -146949,7 +147321,7 @@
       "dy": -62,
       "width": 96,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 27,
       "originY": 78
     },
@@ -146961,7 +147333,7 @@
       "dy": -56,
       "width": 92,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 63,
       "originY": 72
     },
@@ -146973,7 +147345,7 @@
       "dy": -26,
       "width": 80,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 25,
       "originY": 42
     },
@@ -146985,7 +147357,7 @@
       "dy": -67,
       "width": 56,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 43,
       "originY": 83
     },
@@ -146997,7 +147369,7 @@
       "dy": -75,
       "width": 64,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 17,
       "originY": 91
     },
@@ -147009,7 +147381,7 @@
       "dy": -28,
       "width": 80,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 28,
       "originY": 44
     },
@@ -147043,7 +147415,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "cabc27c5c4d2b47ee9288afc0dc5ed18f1cd27733d4eca546e6a6a91e20d8655",
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 23,
       "originY": 74
     },
@@ -147077,7 +147449,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "30b31959599c9d6b737f842786550cf9fa3689a865335aac2fddaf7e760f2571",
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 19,
       "originY": 72
     },
@@ -147089,7 +147461,7 @@
       "dy": -15,
       "width": 108,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 66,
       "originY": 31
     },
@@ -147101,7 +147473,7 @@
       "dy": -35,
       "width": 148,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 60,
       "originY": 51
     },
@@ -147113,7 +147485,7 @@
       "dy": -47,
       "width": 56,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 25,
       "originY": 63
     },
@@ -147125,7 +147497,7 @@
       "dy": -47,
       "width": 52,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 28,
       "originY": 63
     },
@@ -147137,7 +147509,7 @@
       "dy": -47,
       "width": 72,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 27,
       "originY": 63
     },
@@ -147149,7 +147521,7 @@
       "dy": -58,
       "width": 72,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 29,
       "originY": 74
     },
@@ -147161,7 +147533,7 @@
       "dy": -51,
       "width": 60,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 35,
       "originY": 67
     },
@@ -147173,7 +147545,7 @@
       "dy": -45,
       "width": 68,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 26,
       "originY": 61
     },
@@ -147185,7 +147557,7 @@
       "dy": -38,
       "width": 96,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 36,
       "originY": 54
     },
@@ -147197,7 +147569,7 @@
       "dy": -48,
       "width": 60,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 31,
       "originY": 64
     },
@@ -147209,7 +147581,7 @@
       "dy": -47,
       "width": 56,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 21,
       "originY": 63
     },
@@ -147221,7 +147593,7 @@
       "dy": -61,
       "width": 68,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 41,
       "originY": 77
     },
@@ -147233,7 +147605,7 @@
       "dy": -33,
       "width": 88,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 60,
       "originY": 49
     },
@@ -147245,7 +147617,7 @@
       "dy": -17,
       "width": 108,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 69,
       "originY": 33
     },
@@ -147257,7 +147629,7 @@
       "dy": -54,
       "width": 60,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 34,
       "originY": 70
     },
@@ -147269,7 +147641,7 @@
       "dy": -56,
       "width": 72,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 48,
       "originY": 72
     },
@@ -147281,7 +147653,7 @@
       "dy": -50,
       "width": 96,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 57,
       "originY": 66
     },
@@ -147293,7 +147665,7 @@
       "dy": -46,
       "width": 64,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 37,
       "originY": 62
     },
@@ -147305,7 +147677,7 @@
       "dy": -51,
       "width": 60,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 32,
       "originY": 67
     },
@@ -147317,7 +147689,7 @@
       "dy": -50,
       "width": 88,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 50,
       "originY": 66
     },
@@ -147329,7 +147701,7 @@
       "dy": -45,
       "width": 92,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 48,
       "originY": 61
     },
@@ -147341,7 +147713,7 @@
       "dy": -48,
       "width": 52,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 28,
       "originY": 64
     },
@@ -147353,7 +147725,7 @@
       "dy": -52,
       "width": 120,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 47,
       "originY": 68
     },
@@ -147365,7 +147737,7 @@
       "dy": -37,
       "width": 148,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 63,
       "originY": 53
     },
@@ -147377,7 +147749,7 @@
       "dy": -44,
       "width": 56,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 23,
       "originY": 60
     },
@@ -147389,7 +147761,7 @@
       "dy": -51,
       "width": 56,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 28,
       "originY": 67
     },
@@ -147401,7 +147773,7 @@
       "dy": -50,
       "width": 52,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 31,
       "originY": 66
     },
@@ -147413,7 +147785,7 @@
       "dy": -47,
       "width": 64,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 28,
       "originY": 63
     },
@@ -147425,7 +147797,7 @@
       "dy": -46,
       "width": 60,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 27,
       "originY": 62
     },
@@ -147437,7 +147809,7 @@
       "dy": -50,
       "width": 48,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 26,
       "originY": 66
     },
@@ -147449,7 +147821,7 @@
       "dy": -51,
       "width": 60,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 31,
       "originY": 67
     },
@@ -147461,7 +147833,7 @@
       "dy": -46,
       "width": 64,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 36,
       "originY": 62
     },
@@ -147473,7 +147845,7 @@
       "dy": -49,
       "width": 44,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 18,
       "originY": 65
     },
@@ -147485,7 +147857,7 @@
       "dy": -48,
       "width": 40,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 18,
       "originY": 64
     },
@@ -147497,7 +147869,7 @@
       "dy": -49,
       "width": 44,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 20,
       "originY": 65
     },
@@ -147509,7 +147881,7 @@
       "dy": -48,
       "width": 56,
       "height": 82,
-      "texture": "mir-6",
+      "texture": "mir-7",
       "originX": 23,
       "originY": 64
     },
@@ -161354,6 +161726,18 @@
       "texture": "mir-7",
       "originX": 77,
       "originY": 39
+    },
+    "package/逍遥扇": {
+      "sourcePath": "texture/item/01000451.PNG",
+      "sha1": "388c7ed5eb36ef81e26f6f399e3607d2e8123fd0",
+      "sha256": "ede764b56d7dd6ae99a9eaf07bf370327d6a02fadbf74a9bcbc6c8855b7eccc7",
+      "dx": 0,
+      "dy": 0,
+      "width": 64,
+      "height": 72,
+      "texture": "mir-7",
+      "originX": 24,
+      "originY": 16
     },
     "rakecat-shadow/death/4/9": {
       "sourcePath": "texture/monster/0082748900001B0011.PNG",
@@ -178923,7 +179307,7 @@
       "dy": -42,
       "width": 76,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 48,
       "originY": 58
     },
@@ -178935,7 +179319,7 @@
       "dy": -37,
       "width": 60,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 34,
       "originY": 53
     },
@@ -178947,7 +179331,7 @@
       "dy": -39,
       "width": 60,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 28,
       "originY": 55
     },
@@ -178959,7 +179343,7 @@
       "dy": -45,
       "width": 60,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 22,
       "originY": 61
     },
@@ -178971,7 +179355,7 @@
       "dy": -36,
       "width": 52,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 27,
       "originY": 52
     },
@@ -178983,7 +179367,7 @@
       "dy": -36,
       "width": 52,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 26,
       "originY": 52
     },
@@ -178995,7 +179379,7 @@
       "dy": -35,
       "width": 52,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 26,
       "originY": 51
     },
@@ -179007,7 +179391,7 @@
       "dy": -36,
       "width": 52,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 27,
       "originY": 52
     },
@@ -179019,7 +179403,7 @@
       "dy": -41,
       "width": 56,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 22,
       "originY": 57
     },
@@ -179031,7 +179415,7 @@
       "dy": -41,
       "width": 68,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 46,
       "originY": 57
     },
@@ -179043,7 +179427,7 @@
       "dy": -41,
       "width": 68,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 46,
       "originY": 57
     },
@@ -179055,7 +179439,7 @@
       "dy": -13,
       "width": 261,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 62,
       "originY": 29
     },
@@ -179067,7 +179451,7 @@
       "dy": -32,
       "width": 76,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 53,
       "originY": 48
     },
@@ -179079,7 +179463,7 @@
       "dy": -33,
       "width": 44,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 33,
       "originY": 49
     },
@@ -179091,7 +179475,7 @@
       "dy": -35,
       "width": 56,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 14,
       "originY": 51
     },
@@ -179103,7 +179487,7 @@
       "dy": -36,
       "width": 52,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 23,
       "originY": 52
     },
@@ -179115,7 +179499,7 @@
       "dy": -38,
       "width": 52,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 26,
       "originY": 54
     },
@@ -179149,7 +179533,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "f8184fc9475284c87e547425c4c9ce8988f85ef8cac85ec79c3656a2373ef374",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 17,
       "originY": 53
     },
@@ -179183,7 +179567,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "d15a5c9c1c9de2b7f8ed1ec36de13e92b889c0ca7c7851af215eb6f7ffacb7f1",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 22,
       "originY": 56
     },
@@ -179217,7 +179601,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "f3dc97ba009e7dcecb1c418064a464575ba720d6655fc8c948369a9e31dd8018",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 24,
       "originY": 55
     },
@@ -179251,7 +179635,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "1cced702fa68177227624274490e18df588678f49fe8de5b6e11d5f90e306f80",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 22,
       "originY": 57
     },
@@ -179285,7 +179669,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "9d08b26b2bee72d1a516f08c0e477774c859f4c43342ce44d944ac296807d6ca",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 21,
       "originY": 58
     },
@@ -179319,7 +179703,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "f431101073ac619f69587132986415b840369aeb62eddf72fef916ff7c88eb32",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 20,
       "originY": 62
     },
@@ -179353,7 +179737,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "5b11bccfa8279dd4a652fe82e20dde26f4436058babdfeb182c52ce30135a1ee",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 48,
       "originY": 34
     },
@@ -179387,7 +179771,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "a90a73b8371c8ba2698dea9760633065b671512815cfc885a2cdb82eff33c474",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 24,
       "originY": 62
     },
@@ -179421,7 +179805,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "2fe77f835ea8596b522660a3bea9aaf8f61116166932c27a1e248087656625cf",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 48,
       "originY": 43
     },
@@ -179455,7 +179839,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "849b1a704fa1cdf01d89a171074315a92de7abca360bfa23e1d11361ec7dfebc",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 23,
       "originY": 57
     },
@@ -179489,7 +179873,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "4678e6462f4e9dbc6821c43bab5e5a82bb30f6037df5d8d489a13c4fbb708beb",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 27,
       "originY": 42
     },
@@ -179523,7 +179907,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "1438ce9553f1bd5409c86625678a56e1e80d72c68a7e5a32bb19465cc7a38bf6",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 22,
       "originY": 55
     },
@@ -179557,7 +179941,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "aeec53bb1f9028070dc47c650d956bffbcaefc433014750f9add3c51fa0ae74f",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 21,
       "originY": 59
     },
@@ -179591,7 +179975,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "e4090217dc6bd302100aa5d9845e5d15c56becff1398de19ef3df7f27ac9b079",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 16,
       "originY": 57
     },
@@ -179625,7 +180009,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "a139f7a9aaffbe699731c3d277a808709cdea6999ae102bdb3a0003dd67e42cb",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 15,
       "originY": 61
     },
@@ -179659,7 +180043,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "a94b3c79463f4505a20b3c517b88929b6803389f7ea7aa0ca3dc420d164dfca3",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 15,
       "originY": 61
     },
@@ -179693,7 +180077,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "bfb66259b02d460f0a93def45d4b1c8271ce76dac887a1cc3be33f74c1e073f0",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 15,
       "originY": 61
     },
@@ -179727,7 +180111,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "78de6ba7604dae1e500875e82979194e301e629d3af506b14aab8e0087c8dfbd",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 15,
       "originY": 61
     },
@@ -179761,7 +180145,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "9c4475c50c05cee7d974018befa18ec64c270dc69ae3aca92973d645e33fd1ba",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 12,
       "originY": 61
     },
@@ -179795,7 +180179,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "d3ed865d8210be6b70f0ee0813b5faf5a607f0ee1b37c45d43eb063511928ae5",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 12,
       "originY": 61
     },
@@ -179829,7 +180213,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "6db199be3c6ead7ae14cbde9115cb82482deaa7c5a61c0a93d658210804652a8",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 12,
       "originY": 61
     },
@@ -179863,7 +180247,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "d9d6ae6b5a5163a98b1f046f51c5f169775c1a073e85c5e204244329c1022dec",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 12,
       "originY": 61
     },
@@ -179897,7 +180281,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "684a149847e1295b21fd78d576f38db526613afdcfc1f7ddc8d8f0c252a87d68",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 20,
       "originY": 61
     },
@@ -179931,7 +180315,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "cfbff8de50e9fd8788739874d7fa0f4a2fe7f87be04e71aba8632a0698330234",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 22,
       "originY": 62
     },
@@ -179965,7 +180349,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "51e3b2c62c5d352b09e1575998bb4fad9d00bcda51ff1fed988f6148b6aacedc",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 25,
       "originY": 62
     },
@@ -179999,7 +180383,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "2102738189325775e568c22f63b4433273a6e1ae8631ad25745a20cd6f7804c4",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 26,
       "originY": 62
     },
@@ -180033,7 +180417,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "c65c79315c3b9fa4635fcdebe13db17d0539ed9a05a88d388218b4e3c4734dfb",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 18,
       "originY": 62
     },
@@ -180067,7 +180451,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "a4a224edbb3699ce3a5af5f9d3e227fbce9c27d1cf494ba178181ab96e2dd759",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 22,
       "originY": 62
     },
@@ -180101,7 +180485,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "935fc5eaabb7135b9c4249cc0f357aaf418d6a2b9626948a59094f9edbd53c40",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 18,
       "originY": 62
     },
@@ -180135,7 +180519,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "ad4b3f4fe1891625dd1991d3814b7e03de3c631391af77c1bd8ea6a9c52e06c3",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 12,
       "originY": 62
     },
@@ -180169,7 +180553,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "ae1fff7c25abff4aa8bb9dc52eb9aa12d93d03c3772f2bf104d0732b235dafb4",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 21,
       "originY": 61
     },
@@ -180203,7 +180587,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "af119e3e4955be8a8e38d732c3a3a0a5a1ad51291d2acff87b52ff75bb56a9b8",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 16,
       "originY": 53
     },
@@ -180237,7 +180621,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "f460a316b67ec307d82e3830897c7e031dc5791a496d8f133e6ea012ae6f2944",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 20,
       "originY": 56
     },
@@ -180271,7 +180655,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "dfe0590778e86fd55b46f6ef83ec8559b2ea545f45189e9a3f587b156bde621d",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 21,
       "originY": 55
     },
@@ -180305,7 +180689,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "78bc6d713aff5a776ad0f7a8053867b824e186d799ceae57422f87c12ba574f2",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 22,
       "originY": 54
     },
@@ -180339,7 +180723,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "683ea70a17214b2a3ac6872dbec1c145092c26b3b540c340822c0f3522991839",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 20,
       "originY": 62
     },
@@ -180373,7 +180757,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "0cddf212b6baa7bece9346dacaa4bddecb19db78a692d270df6d53ec9aecd0ac",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 28,
       "originY": 45
     },
@@ -180407,7 +180791,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "6b8bea9a1734c9c686c621704e5f9d29d1649d1440c09ca424cfd67f475bb605",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 45,
       "originY": 38
     },
@@ -180441,7 +180825,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "8365e6c634da1571f57144f86bcf94c1aaf985a26409af0ad4f3b8a30ef08e60",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 48,
       "originY": 43
     },
@@ -180475,7 +180859,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "c183d3aad11778c9bbaab8ddde3474be44cf08922c15690b23f76b8a3f4dc611",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 24,
       "originY": 57
     },
@@ -180509,7 +180893,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "3e01451e03c8cb15b4f4b8f308f13ea8a28a0ccc31d5d18f16fdc322bbd187e6",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 19,
       "originY": 42
     },
@@ -180543,7 +180927,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "437d3f4a4cef89fe950f94ccfb0972e31032cd260b7d364797f5056d4a1d96f8",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 15,
       "originY": 61
     },
@@ -180577,7 +180961,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "c2fa4bf41aafd97e31eda9044725993aed021a06389e97b6656deeefaf545b9f",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 15,
       "originY": 61
     },
@@ -180611,7 +180995,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "f33d4befda56db63b8246ada879da45be3519d4185dd723a722b870a34165f2d",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 15,
       "originY": 61
     },
@@ -180645,7 +181029,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "e3b128ee83ed784c1648c25e082c9ec19ecc7d5fdb105916041092b4e1fabd7c",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 15,
       "originY": 61
     },
@@ -180679,7 +181063,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "7f7b0e5d02254b8708797724de60987d057361dd59b59d49e94e04dbd68e8b5a",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 13,
       "originY": 61
     },
@@ -180713,7 +181097,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "5515820a5e8781a35ac80a14db76173543b27157e4f3e6632ed04c7c17bf76c3",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 13,
       "originY": 61
     },
@@ -180747,7 +181131,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "6fb3ff3269e0ed4a7bec104e8e001f1a1d4da0a59690b91dbbbd0d5ccb3ef5b6",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 13,
       "originY": 61
     },
@@ -180781,7 +181165,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "3095b8d63717ecfb8a2c8d9d052b7d263256ed70f86df8175136c40cde37bc2c",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 13,
       "originY": 61
     },
@@ -180815,7 +181199,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "088c122a6c845d5627579a813230fc8026d670c69f1a1670f3fa2910992c13cd",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 15,
       "originY": 62
     },
@@ -180849,7 +181233,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "6f319fd5fa7e9a38c19c2268cc474dbea885da580ca1b8534be963e7cb5be6b9",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 16,
       "originY": 62
     },
@@ -180883,7 +181267,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "c72e8a24af7ef4bbc36c55f246e5df0a49850862cfd7008be756d166c3477e83",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 18,
       "originY": 62
     },
@@ -180917,7 +181301,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "1105dbd82b3df2af7a43d38092d70ca237d12b59bac326983ccfa58aaeffaeb5",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 15,
       "originY": 61
     },
@@ -180951,7 +181335,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "2d3725905b4c9f42e933ccef363fa6464e094fbd2c3f134c2d46505f35d881cd",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 20,
       "originY": 61
     },
@@ -180985,7 +181369,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "a8804a2174156b45bc2002e00612f2f553b98efe756d164c27e31787035f8381",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 20,
       "originY": 62
     },
@@ -181019,7 +181403,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "bb78391ba747804f9e6111932bef1bc729cd725f8963c121d9701b9515e77420",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 16,
       "originY": 62
     },
@@ -181053,7 +181437,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "ced3c7c26a9b94d837c3ed33cc6ac40e2746690db61e08922603540aaaa2c7b3",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 12,
       "originY": 62
     },
@@ -181087,7 +181471,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "ef7f637c86a1b31b5ec56680317db7de63fcc8ddbef8e0b5ccdd1eb27e74da6f",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 15,
       "originY": 62
     },
@@ -181121,7 +181505,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "88b4cc64dd0113fde32856660e927bd204edba2f019d082bc7b83cc05edaf694",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 12,
       "originY": 62
     },
@@ -181155,7 +181539,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "bbb48d4b9c200ed9425ed6c5292460b61a096e473ba67e069cc55e8b3d69316a",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 22,
       "originY": 62
     },
@@ -181189,7 +181573,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "4181898046d0d5f324ae6fb8690cf3f10784c2f10ae45b33761936a80f3238ae",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 12,
       "originY": 62
     },
@@ -181223,7 +181607,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "20c01af00e40400896a2ddce5abd8dd7143a0469806aa424c9ff89a8fd80d06b",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 14,
       "originY": 62
     },
@@ -181257,7 +181641,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "02c2a3e08907e3f6804879502d8b14131bb7c81b52609d3272efbc5bba381891",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 22,
       "originY": 61
     },
@@ -181291,7 +181675,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "1ced9963c0f640b1b26f4b5078ed3d0ac6696e7b8b660dfe2d0a3b2db9699a25",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 19,
       "originY": 62
     },
@@ -181325,7 +181709,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "7bdb83de928f8bbb19d7a28b0eb76aa28aa26887d2a72f19d54da3ee273d87bd",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 12,
       "originY": 62
     },
@@ -181359,7 +181743,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "8b4fcaff21f56ce9a9f73e6088db92723e96a9ae956c254d8c4b42152ae19755",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 21,
       "originY": 53
     },
@@ -181393,7 +181777,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "0ea156fc25a7ee642c45a766779949d59164f37bd3c6d0cdb9e3674245d59235",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 19,
       "originY": 56
     },
@@ -181427,7 +181811,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "a6732edc4a43af4a2281a39f3903c7ce390809fe7edd74398ef7240240c94d13",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 23,
       "originY": 56
     },
@@ -181461,7 +181845,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "7938a3c2886b1acea8a5b7e2e6a2bc729565fbec57506966703738e10ee0589a",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 24,
       "originY": 55
     },
@@ -181495,7 +181879,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "80545e4a37e2777fb48817d8d757447e7c4d541b6adcb065f7186e5c18c43839",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 26,
       "originY": 58
     },
@@ -181529,7 +181913,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "bbc2962433a2e5a9477ccde99a97d9dc4da0373776e76887e9a8502f90ab4007",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 25,
       "originY": 49
     },
@@ -181563,7 +181947,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "ca28254869af29d695c28265b1ba2df729e5786b8067047146ef8b80aec5f05b",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 48,
       "originY": 34
     },
@@ -181597,7 +181981,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "2981c188aa7ec012a5fce73b7ef7efea9c73e7e9c7c1d478b2aea94cf971f45e",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 25,
       "originY": 63
     },
@@ -181631,7 +182015,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "abb1f1a6669b7eef43b7cc5210671bf5b6ab22cfed6588185154fc379ee1f5a3",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 48,
       "originY": 43
     },
@@ -181665,7 +182049,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "24e4d5fd7472ff74617f8366a5dd4c49f19bfd8d47698b9a1dfe734857588866",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 23,
       "originY": 50
     },
@@ -181699,7 +182083,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "e5cc26c0e2e28841cc339f0bdfee595afb4408c499321ffb29679887b6c132a7",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 17,
       "originY": 58
     },
@@ -181733,7 +182117,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "57dc56279d6344466c28253bad9d3a58a80dc14e791af669338fac3088fe784d",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 21,
       "originY": 57
     },
@@ -181767,7 +182151,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "4bfb4f30db16ffd6edd1f03e61abcf55df06a9909da70479ad38a578aa60af5e",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 27,
       "originY": 61
     },
@@ -181801,7 +182185,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "8e30bd008a51e1aa9acf5522249ef01944b3085e1a4a2a0d08de0e8b1a2b509f",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 27,
       "originY": 62
     },
@@ -181835,7 +182219,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "9f67a636f123d43256f016557bab47f4d4fb10a2a123634f31afa567b194f853",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 27,
       "originY": 62
     },
@@ -181869,7 +182253,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "76d23f0bc0b2065822621ef5b01a64832f55a5d318299a48fd629bf9777067bb",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 27,
       "originY": 62
     },
@@ -181903,7 +182287,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "ba460d0cdea8b6516ea0c49205888aa4c4cd447c84b6ccc6460ce9d3ec00e5a1",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 17,
       "originY": 62
     },
@@ -181937,7 +182321,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "56811511f38ed321bd10bc0b4910fc44355b7d54cb15caf2576b8900829d1e0f",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 19,
       "originY": 62
     },
@@ -181971,7 +182355,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "6cae1a97b16e42221871607b27a2976d80817b4c043b93142fabe36c7e7ed4fe",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 21,
       "originY": 62
     },
@@ -182005,7 +182389,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "32424c54ef748d1286bd55d239f21c39f9bbce30b094c42d5152691698c3802f",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 18,
       "originY": 62
     },
@@ -182039,7 +182423,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "9f41ffc424af211cdc52847b7bc8622f77daf306e4d36c02e00eabf71b1bb00a",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 12,
       "originY": 62
     },
@@ -182073,7 +182457,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "a6d8a52068f7fbff530f32cc538128ca0d3437777faca8dd1c4f1b4e42221638",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 21,
       "originY": 62
     },
@@ -182107,7 +182491,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "bfd0234496bda1653db6d934a50e28ec102ee1b94eb3b11cb53101d01c07dc00",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 11,
       "originY": 62
     },
@@ -182141,7 +182525,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "a29f6f15ae108f27e24b8b9b80f19232b677c25d9f4583e5df4f97efc001b61c",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 13,
       "originY": 62
     },
@@ -182175,7 +182559,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "984f47a5ae68e60fc0f97b47f1fb91ad392bda362f5ee3d379e9e1501adf2248",
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 21,
       "originY": 61
     },
@@ -182187,7 +182571,7 @@
       "dy": -45,
       "width": 56,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 25,
       "originY": 61
     },
@@ -182199,7 +182583,7 @@
       "dy": -44,
       "width": 48,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 19,
       "originY": 60
     },
@@ -182211,7 +182595,7 @@
       "dy": -75,
       "width": 68,
       "height": 66,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 33,
       "originY": 91
     },
@@ -182223,7 +182607,7 @@
       "dy": -43,
       "width": 144,
       "height": 65,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 46,
       "originY": 59
     },
@@ -182235,7 +182619,7 @@
       "dy": -26,
       "width": 160,
       "height": 65,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 82,
       "originY": 42
     },
@@ -182247,7 +182631,7 @@
       "dy": -45,
       "width": 256,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 2,
       "originY": 61
     },
@@ -182259,7 +182643,7 @@
       "dy": -47,
       "width": 256,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 162,
       "originY": 63
     },
@@ -182271,7 +182655,7 @@
       "dy": -21,
       "width": 96,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 13,
       "originY": 37
     },
@@ -182283,7 +182667,7 @@
       "dy": -23,
       "width": 84,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 16,
       "originY": 39
     },
@@ -182295,7 +182679,7 @@
       "dy": -27,
       "width": 112,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 29,
       "originY": 43
     },
@@ -182307,7 +182691,7 @@
       "dy": -21,
       "width": 72,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 18,
       "originY": 37
     },
@@ -182319,7 +182703,7 @@
       "dy": -34,
       "width": 96,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 32,
       "originY": 50
     },
@@ -182331,7 +182715,7 @@
       "dy": -34,
       "width": 88,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 18,
       "originY": 50
     },
@@ -182343,7 +182727,7 @@
       "dy": -28,
       "width": 88,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 13,
       "originY": 44
     },
@@ -182355,7 +182739,7 @@
       "dy": -16,
       "width": 48,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 24,
       "originY": 32
     },
@@ -182367,7 +182751,7 @@
       "dy": -60,
       "width": 128,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 85,
       "originY": 76
     },
@@ -182379,7 +182763,7 @@
       "dy": -32,
       "width": 123,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 28,
       "originY": 48
     },
@@ -182391,7 +182775,7 @@
       "dy": -23,
       "width": 147,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 81,
       "originY": 39
     },
@@ -182403,7 +182787,7 @@
       "dy": -40,
       "width": 151,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 74,
       "originY": 56
     },
@@ -182415,7 +182799,7 @@
       "dy": -26,
       "width": 163,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 40,
       "originY": 42
     },
@@ -182427,7 +182811,7 @@
       "dy": -36,
       "width": 148,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 64,
       "originY": 52
     },
@@ -182439,7 +182823,7 @@
       "dy": -51,
       "width": 48,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 14,
       "originY": 67
     },
@@ -182451,7 +182835,7 @@
       "dy": -47,
       "width": 40,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 8,
       "originY": 63
     },
@@ -182463,7 +182847,7 @@
       "dy": -52,
       "width": 52,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 22,
       "originY": 68
     },
@@ -182475,7 +182859,7 @@
       "dy": -42,
       "width": 60,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 20,
       "originY": 58
     },
@@ -182487,7 +182871,7 @@
       "dy": -32,
       "width": 52,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 42,
       "originY": 48
     },
@@ -182499,7 +182883,7 @@
       "dy": -48,
       "width": 64,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 39,
       "originY": 64
     },
@@ -182511,7 +182895,7 @@
       "dy": -43,
       "width": 60,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 20,
       "originY": 59
     },
@@ -182523,7 +182907,7 @@
       "dy": -60,
       "width": 76,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 40,
       "originY": 76
     },
@@ -182535,7 +182919,7 @@
       "dy": -51,
       "width": 76,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 44,
       "originY": 67
     },
@@ -182547,7 +182931,7 @@
       "dy": -30,
       "width": 40,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 14,
       "originY": 46
     },
@@ -182559,7 +182943,7 @@
       "dy": -25,
       "width": 44,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 20,
       "originY": 41
     },
@@ -182571,7 +182955,7 @@
       "dy": -25,
       "width": 40,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 18,
       "originY": 41
     },
@@ -182583,7 +182967,7 @@
       "dy": -26,
       "width": 40,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 14,
       "originY": 42
     },
@@ -182595,7 +182979,7 @@
       "dy": -37,
       "width": 128,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 30,
       "originY": 53
     },
@@ -182607,7 +182991,7 @@
       "dy": -44,
       "width": 256,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 51,
       "originY": 60
     },
@@ -182619,7 +183003,7 @@
       "dy": -67,
       "width": 256,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 89,
       "originY": 83
     },
@@ -182631,7 +183015,7 @@
       "dy": -63,
       "width": 256,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 94,
       "originY": 79
     },
@@ -182643,7 +183027,7 @@
       "dy": -82,
       "width": 128,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 79,
       "originY": 98
     },
@@ -182655,7 +183039,7 @@
       "dy": -56,
       "width": 128,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 32,
       "originY": 72
     },
@@ -182667,7 +183051,7 @@
       "dy": -53,
       "width": 128,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 45,
       "originY": 69
     },
@@ -182679,7 +183063,7 @@
       "dy": -55,
       "width": 128,
       "height": 64,
-      "texture": "mir-7",
+      "texture": "mir-8",
       "originX": 20,
       "originY": 71
     },
@@ -200341,6 +200725,30 @@
       "originX": 33,
       "originY": 46
     },
+    "package/匕首": {
+      "sourcePath": "texture/item/01000415.PNG",
+      "sha1": "3a923ecf506852c5f8f4ea7a2871c3b9d7d9b5f3",
+      "sha256": "7e7430344344239b820b0a692d1a0dcd61cccceae3738ee8ee5f7ba8c96adcb5",
+      "dx": 0,
+      "dy": 0,
+      "width": 16,
+      "height": 56,
+      "texture": "mir-8",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/破魂": {
+      "sourcePath": "texture/item/01000415.PNG",
+      "sha1": "3a923ecf506852c5f8f4ea7a2871c3b9d7d9b5f3",
+      "sha256": "7e7430344344239b820b0a692d1a0dcd61cccceae3738ee8ee5f7ba8c96adcb5",
+      "dx": 0,
+      "dy": 0,
+      "width": 16,
+      "height": 56,
+      "texture": "mir-8",
+      "originX": 24,
+      "originY": 16
+    },
     "rakecat/attack/0/1": {
       "sourcePath": "texture/monster/0002720110000B001E.PNG",
       "sha1": "9b189235b1baec106bea3f1c73487bc62a5709b9",
@@ -207637,7 +208045,7 @@
       "dy": -29,
       "width": 110,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 29,
       "originY": 45
     },
@@ -207649,7 +208057,7 @@
       "dy": -25,
       "width": 134,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 57,
       "originY": 41
     },
@@ -207661,7 +208069,7 @@
       "dy": -21,
       "width": 118,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 34,
       "originY": 37
     },
@@ -207673,7 +208081,7 @@
       "dy": -24,
       "width": 186,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 57,
       "originY": 40
     },
@@ -207685,7 +208093,7 @@
       "dy": -29,
       "width": 166,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 75,
       "originY": 45
     },
@@ -207697,7 +208105,7 @@
       "dy": -21,
       "width": 122,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 31,
       "originY": 37
     },
@@ -207709,7 +208117,7 @@
       "dy": -21,
       "width": 122,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 50,
       "originY": 37
     },
@@ -207721,7 +208129,7 @@
       "dy": -23,
       "width": 110,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 39,
       "originY": 39
     },
@@ -207733,7 +208141,7 @@
       "dy": -23,
       "width": 110,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 34,
       "originY": 39
     },
@@ -207745,7 +208153,7 @@
       "dy": -27,
       "width": 146,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 66,
       "originY": 43
     },
@@ -207757,7 +208165,7 @@
       "dy": -22,
       "width": 190,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 61,
       "originY": 38
     },
@@ -207769,7 +208177,7 @@
       "dy": -19,
       "width": 122,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 24,
       "originY": 35
     },
@@ -207781,7 +208189,7 @@
       "dy": -13,
       "width": 158,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 52,
       "originY": 29
     },
@@ -207793,7 +208201,7 @@
       "dy": -15,
       "width": 186,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 72,
       "originY": 31
     },
@@ -207805,7 +208213,7 @@
       "dy": -17,
       "width": 186,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 72,
       "originY": 33
     },
@@ -207817,7 +208225,7 @@
       "dy": -15,
       "width": 158,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 53,
       "originY": 31
     },
@@ -207829,7 +208237,7 @@
       "dy": -21,
       "width": 170,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 66,
       "originY": 37
     },
@@ -207841,7 +208249,7 @@
       "dy": 8,
       "width": 170,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 48,
       "originY": 8
     },
@@ -207853,7 +208261,7 @@
       "dy": -16,
       "width": 166,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 113,
       "originY": 32
     },
@@ -207865,7 +208273,7 @@
       "dy": -16,
       "width": 186,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 72,
       "originY": 32
     },
@@ -207877,7 +208285,7 @@
       "dy": -15,
       "width": 158,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 53,
       "originY": 31
     },
@@ -207889,7 +208297,7 @@
       "dy": -68,
       "width": 170,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 72,
       "originY": 84
     },
@@ -207901,7 +208309,7 @@
       "dy": -66,
       "width": 170,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 71,
       "originY": 82
     },
@@ -207913,7 +208321,7 @@
       "dy": -32,
       "width": 162,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 41,
       "originY": 48
     },
@@ -207925,7 +208333,7 @@
       "dy": -16,
       "width": 190,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 69,
       "originY": 32
     },
@@ -207937,7 +208345,7 @@
       "dy": -16,
       "width": 190,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 69,
       "originY": 32
     },
@@ -207949,7 +208357,7 @@
       "dy": -16,
       "width": 190,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 69,
       "originY": 32
     },
@@ -207961,7 +208369,7 @@
       "dy": -16,
       "width": 190,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 69,
       "originY": 32
     },
@@ -207973,7 +208381,7 @@
       "dy": -15,
       "width": 162,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 55,
       "originY": 31
     },
@@ -207985,7 +208393,7 @@
       "dy": -15,
       "width": 162,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 55,
       "originY": 31
     },
@@ -207997,7 +208405,7 @@
       "dy": -15,
       "width": 162,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 55,
       "originY": 31
     },
@@ -208009,7 +208417,7 @@
       "dy": -15,
       "width": 162,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 55,
       "originY": 31
     },
@@ -208021,7 +208429,7 @@
       "dy": -17,
       "width": 174,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 68,
       "originY": 33
     },
@@ -208033,7 +208441,7 @@
       "dy": -17,
       "width": 174,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 68,
       "originY": 33
     },
@@ -208045,7 +208453,7 @@
       "dy": -17,
       "width": 170,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 68,
       "originY": 33
     },
@@ -208057,7 +208465,7 @@
       "dy": -17,
       "width": 170,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 68,
       "originY": 33
     },
@@ -208069,7 +208477,7 @@
       "dy": -22,
       "width": 162,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 56,
       "originY": 38
     },
@@ -208081,7 +208489,7 @@
       "dy": -15,
       "width": 190,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 72,
       "originY": 31
     },
@@ -208093,7 +208501,7 @@
       "dy": -21,
       "width": 186,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 66,
       "originY": 37
     },
@@ -208105,7 +208513,7 @@
       "dy": -15,
       "width": 158,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 53,
       "originY": 31
     },
@@ -208117,7 +208525,7 @@
       "dy": -20,
       "width": 162,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 55,
       "originY": 36
     },
@@ -208129,7 +208537,7 @@
       "dy": -18,
       "width": 174,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 68,
       "originY": 34
     },
@@ -208141,7 +208549,7 @@
       "dy": -25,
       "width": 174,
       "height": 51,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 60,
       "originY": 41
     },
@@ -208153,7 +208561,7 @@
       "dy": -12,
       "width": 100,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 21,
       "originY": 28
     },
@@ -208165,7 +208573,7 @@
       "dy": -11,
       "width": 136,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 38,
       "originY": 27
     },
@@ -208177,7 +208585,7 @@
       "dy": -13,
       "width": 124,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 41,
       "originY": 29
     },
@@ -208189,7 +208597,7 @@
       "dy": -3,
       "width": 104,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 32,
       "originY": 19
     },
@@ -208201,7 +208609,7 @@
       "dy": -22,
       "width": 112,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 28,
       "originY": 38
     },
@@ -208213,7 +208621,7 @@
       "dy": -16,
       "width": 88,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 14,
       "originY": 32
     },
@@ -208225,7 +208633,7 @@
       "dy": -17,
       "width": 96,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 19,
       "originY": 33
     },
@@ -208237,7 +208645,7 @@
       "dy": -16,
       "width": 92,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 24,
       "originY": 32
     },
@@ -208249,7 +208657,7 @@
       "dy": -17,
       "width": 92,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 25,
       "originY": 33
     },
@@ -208261,7 +208669,7 @@
       "dy": -17,
       "width": 88,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 25,
       "originY": 33
     },
@@ -208273,7 +208681,7 @@
       "dy": -22,
       "width": 84,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 23,
       "originY": 38
     },
@@ -208285,7 +208693,7 @@
       "dy": -59,
       "width": 72,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": -36,
       "originY": 75
     },
@@ -208297,7 +208705,7 @@
       "dy": -62,
       "width": 72,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 104,
       "originY": 78
     },
@@ -208309,7 +208717,7 @@
       "dy": -22,
       "width": 133,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 18,
       "originY": 38
     },
@@ -208321,7 +208729,7 @@
       "dy": -24,
       "width": 157,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 38,
       "originY": 40
     },
@@ -208333,7 +208741,7 @@
       "dy": -29,
       "width": 153,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 54,
       "originY": 45
     },
@@ -208345,7 +208753,7 @@
       "dy": -14,
       "width": 109,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 51,
       "originY": 30
     },
@@ -208357,7 +208765,7 @@
       "dy": -27,
       "width": 157,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 85,
       "originY": 43
     },
@@ -208369,7 +208777,7 @@
       "dy": -29,
       "width": 145,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 60,
       "originY": 45
     },
@@ -208381,7 +208789,7 @@
       "dy": -32,
       "width": 129,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 53,
       "originY": 48
     },
@@ -208393,7 +208801,7 @@
       "dy": -15,
       "width": 145,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 84,
       "originY": 31
     },
@@ -208405,7 +208813,7 @@
       "dy": -33,
       "width": 141,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 46,
       "originY": 49
     },
@@ -208417,7 +208825,7 @@
       "dy": -26,
       "width": 133,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 54,
       "originY": 42
     },
@@ -208429,7 +208837,7 @@
       "dy": -26,
       "width": 109,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 32,
       "originY": 42
     },
@@ -208441,7 +208849,7 @@
       "dy": -26,
       "width": 149,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 42,
       "originY": 42
     },
@@ -208453,7 +208861,7 @@
       "dy": -22,
       "width": 89,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 30,
       "originY": 38
     },
@@ -208465,7 +208873,7 @@
       "dy": -41,
       "width": 52,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 29,
       "originY": 57
     },
@@ -208477,7 +208885,7 @@
       "dy": -35,
       "width": 60,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 40,
       "originY": 51
     },
@@ -208489,7 +208897,7 @@
       "dy": -18,
       "width": 92,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 48,
       "originY": 34
     },
@@ -208501,7 +208909,7 @@
       "dy": -29,
       "width": 68,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 14,
       "originY": 45
     },
@@ -208513,7 +208921,7 @@
       "dy": -21,
       "width": 60,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 33,
       "originY": 37
     },
@@ -208525,7 +208933,7 @@
       "dy": -20,
       "width": 48,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 29,
       "originY": 36
     },
@@ -208537,7 +208945,7 @@
       "dy": -27,
       "width": 52,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 36,
       "originY": 43
     },
@@ -208549,7 +208957,7 @@
       "dy": -25,
       "width": 64,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 43,
       "originY": 41
     },
@@ -208561,7 +208969,7 @@
       "dy": -30,
       "width": 40,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 23,
       "originY": 46
     },
@@ -208595,7 +209003,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "47492702b5c43930ba453cfd64862277f95bd545ae9229cab9d4ae984f2a7a7c",
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 17,
       "originY": 46
     },
@@ -208629,7 +209037,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "07b118dee59b49dae8d2601ab932d2c3d2485ac246a274bcab7a698d7ebf5b13",
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 21,
       "originY": 58
     },
@@ -208663,7 +209071,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "4fa87f13e2ce50defe2d6c36a39419b68376106515ac3dcf0639471784909e7c",
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 44,
       "originY": 30
     },
@@ -208697,7 +209105,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "07242c36b3fa6687c4569c545b1d839899d6918a10b88b2c22d8f8f8852f97c2",
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 44,
       "originY": 27
     },
@@ -208731,7 +209139,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "4948ffa9f1a6e53d1b8467094c8cf85171d8259257a8cc053b75e3a798c00cd5",
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 28,
       "originY": 33
     },
@@ -208765,7 +209173,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "950086bae8d946879e402e82d16ec8fdececc9815bc8943cc04465c6a2fef76d",
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 24,
       "originY": 48
     },
@@ -208799,7 +209207,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "33d32a585e7eb742cbad124e682c97bd7a78cfb7bd73027b488ef19a07eb7c20",
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 17,
       "originY": 40
     },
@@ -208811,7 +209219,7 @@
       "dy": -26,
       "width": 97,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 29,
       "originY": 42
     },
@@ -208823,7 +209231,7 @@
       "dy": -25,
       "width": 121,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 31,
       "originY": 41
     },
@@ -208835,7 +209243,7 @@
       "dy": -25,
       "width": 117,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 35,
       "originY": 41
     },
@@ -208847,7 +209255,7 @@
       "dy": -16,
       "width": 153,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 75,
       "originY": 32
     },
@@ -208859,7 +209267,7 @@
       "dy": -28,
       "width": 133,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 49,
       "originY": 44
     },
@@ -208871,7 +209279,7 @@
       "dy": -16,
       "width": 141,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 68,
       "originY": 32
     },
@@ -208883,7 +209291,7 @@
       "dy": -20,
       "width": 137,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 55,
       "originY": 36
     },
@@ -208895,7 +209303,7 @@
       "dy": -14,
       "width": 125,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 30,
       "originY": 30
     },
@@ -208907,7 +209315,7 @@
       "dy": -26,
       "width": 121,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 46,
       "originY": 42
     },
@@ -208919,7 +209327,7 @@
       "dy": -27,
       "width": 121,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 43,
       "originY": 43
     },
@@ -208931,7 +209339,7 @@
       "dy": -26,
       "width": 129,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 53,
       "originY": 42
     },
@@ -208943,7 +209351,7 @@
       "dy": -32,
       "width": 165,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 81,
       "originY": 48
     },
@@ -208955,7 +209363,7 @@
       "dy": -20,
       "width": 149,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 59,
       "originY": 36
     },
@@ -208967,7 +209375,7 @@
       "dy": -24,
       "width": 149,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 61,
       "originY": 40
     },
@@ -208979,7 +209387,7 @@
       "dy": -26,
       "width": 105,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 41,
       "originY": 42
     },
@@ -208991,7 +209399,7 @@
       "dy": -26,
       "width": 80,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 59,
       "originY": 42
     },
@@ -209003,7 +209411,7 @@
       "dy": -33,
       "width": 88,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 31,
       "originY": 49
     },
@@ -209015,7 +209423,7 @@
       "dy": -23,
       "width": 80,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 59,
       "originY": 39
     },
@@ -209027,7 +209435,7 @@
       "dy": -27,
       "width": 81,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 20,
       "originY": 43
     },
@@ -209039,7 +209447,7 @@
       "dy": -29,
       "width": 89,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 33,
       "originY": 45
     },
@@ -209051,7 +209459,7 @@
       "dy": -13,
       "width": 80,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 17,
       "originY": 29
     },
@@ -209063,7 +209471,7 @@
       "dy": -26,
       "width": 105,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 39,
       "originY": 42
     },
@@ -209075,7 +209483,7 @@
       "dy": -32,
       "width": 105,
       "height": 50,
-      "texture": "mir-8",
+      "texture": "mir-9",
       "originX": 19,
       "originY": 48
     },
@@ -229425,7 +229833,7 @@
       "dy": -14,
       "width": 100,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 23,
       "originY": 30
     },
@@ -229437,7 +229845,7 @@
       "dy": -18,
       "width": 100,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 23,
       "originY": 34
     },
@@ -229449,7 +229857,7 @@
       "dy": -16,
       "width": 92,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 41,
       "originY": 32
     },
@@ -229461,7 +229869,7 @@
       "dy": -15,
       "width": 92,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 32,
       "originY": 31
     },
@@ -229473,7 +229881,7 @@
       "dy": -20,
       "width": 96,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 33,
       "originY": 36
     },
@@ -229485,7 +229893,7 @@
       "dy": -17,
       "width": 104,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 25,
       "originY": 33
     },
@@ -229497,7 +229905,7 @@
       "dy": -15,
       "width": 76,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 17,
       "originY": 31
     },
@@ -229509,7 +229917,7 @@
       "dy": -17,
       "width": 96,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 27,
       "originY": 33
     },
@@ -229521,7 +229929,7 @@
       "dy": -18,
       "width": 92,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 33,
       "originY": 34
     },
@@ -229533,7 +229941,7 @@
       "dy": -17,
       "width": 84,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 34,
       "originY": 33
     },
@@ -229545,7 +229953,7 @@
       "dy": -15,
       "width": 96,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 21,
       "originY": 31
     },
@@ -229557,7 +229965,7 @@
       "dy": -15,
       "width": 96,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 22,
       "originY": 31
     },
@@ -229569,7 +229977,7 @@
       "dy": -14,
       "width": 92,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 22,
       "originY": 30
     },
@@ -229581,7 +229989,7 @@
       "dy": -15,
       "width": 92,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 22,
       "originY": 31
     },
@@ -229593,7 +230001,7 @@
       "dy": -15,
       "width": 88,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 20,
       "originY": 31
     },
@@ -229605,7 +230013,7 @@
       "dy": -15,
       "width": 88,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 38,
       "originY": 31
     },
@@ -229617,7 +230025,7 @@
       "dy": -6,
       "width": 100,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 23,
       "originY": 22
     },
@@ -229629,7 +230037,7 @@
       "dy": -6,
       "width": 124,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 23,
       "originY": 22
     },
@@ -229641,7 +230049,7 @@
       "dy": -6,
       "width": 96,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 47,
       "originY": 22
     },
@@ -229653,7 +230061,7 @@
       "dy": -11,
       "width": 104,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 29,
       "originY": 27
     },
@@ -229665,7 +230073,7 @@
       "dy": -15,
       "width": 104,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 36,
       "originY": 31
     },
@@ -229677,7 +230085,7 @@
       "dy": -15,
       "width": 92,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 34,
       "originY": 31
     },
@@ -229689,7 +230097,7 @@
       "dy": -18,
       "width": 92,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 25,
       "originY": 34
     },
@@ -229701,7 +230109,7 @@
       "dy": -7,
       "width": 84,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 16,
       "originY": 23
     },
@@ -229713,7 +230121,7 @@
       "dy": -7,
       "width": 84,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 16,
       "originY": 23
     },
@@ -229725,7 +230133,7 @@
       "dy": -7,
       "width": 100,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 49,
       "originY": 23
     },
@@ -229737,7 +230145,7 @@
       "dy": -7,
       "width": 100,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 49,
       "originY": 23
     },
@@ -229749,7 +230157,7 @@
       "dy": -12,
       "width": 104,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 22,
       "originY": 28
     },
@@ -229761,7 +230169,7 @@
       "dy": -10,
       "width": 92,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 18,
       "originY": 26
     },
@@ -229773,7 +230181,7 @@
       "dy": -10,
       "width": 100,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 17,
       "originY": 26
     },
@@ -229785,7 +230193,7 @@
       "dy": -9,
       "width": 80,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 19,
       "originY": 25
     },
@@ -229797,7 +230205,7 @@
       "dy": -8,
       "width": 88,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 24,
       "originY": 24
     },
@@ -229809,7 +230217,7 @@
       "dy": -8,
       "width": 88,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 26,
       "originY": 24
     },
@@ -229821,7 +230229,7 @@
       "dy": -8,
       "width": 104,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 42,
       "originY": 24
     },
@@ -229833,7 +230241,7 @@
       "dy": -9,
       "width": 96,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 43,
       "originY": 25
     },
@@ -229845,7 +230253,7 @@
       "dy": -10,
       "width": 96,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 39,
       "originY": 26
     },
@@ -229857,7 +230265,7 @@
       "dy": -10,
       "width": 108,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 50,
       "originY": 26
     },
@@ -229869,7 +230277,7 @@
       "dy": -12,
       "width": 92,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 30,
       "originY": 28
     },
@@ -229881,7 +230289,7 @@
       "dy": -3,
       "width": 148,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 12,
       "originY": 19
     },
@@ -229893,7 +230301,7 @@
       "dy": -17,
       "width": 84,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 23,
       "originY": 33
     },
@@ -229905,7 +230313,7 @@
       "dy": -14,
       "width": 80,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 16,
       "originY": 30
     },
@@ -229917,7 +230325,7 @@
       "dy": -17,
       "width": 100,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 33,
       "originY": 33
     },
@@ -229929,7 +230337,7 @@
       "dy": -37,
       "width": 132,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 43,
       "originY": 53
     },
@@ -229941,7 +230349,7 @@
       "dy": -7,
       "width": 68,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 18,
       "originY": 23
     },
@@ -229953,7 +230361,7 @@
       "dy": -16,
       "width": 72,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 14,
       "originY": 32
     },
@@ -229965,7 +230373,7 @@
       "dy": -16,
       "width": 80,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 19,
       "originY": 32
     },
@@ -229977,7 +230385,7 @@
       "dy": -16,
       "width": 76,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 16,
       "originY": 32
     },
@@ -229989,7 +230397,7 @@
       "dy": -16,
       "width": 76,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 18,
       "originY": 32
     },
@@ -230001,7 +230409,7 @@
       "dy": -16,
       "width": 80,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 23,
       "originY": 32
     },
@@ -230013,7 +230421,7 @@
       "dy": -16,
       "width": 84,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 20,
       "originY": 32
     },
@@ -230025,7 +230433,7 @@
       "dy": -16,
       "width": 76,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 16,
       "originY": 32
     },
@@ -230037,7 +230445,7 @@
       "dy": -15,
       "width": 68,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 13,
       "originY": 31
     },
@@ -230049,7 +230457,7 @@
       "dy": -15,
       "width": 76,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 16,
       "originY": 31
     },
@@ -230061,7 +230469,7 @@
       "dy": -15,
       "width": 76,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 15,
       "originY": 31
     },
@@ -230073,7 +230481,7 @@
       "dy": -16,
       "width": 80,
       "height": 37,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 21,
       "originY": 32
     },
@@ -230085,7 +230493,7 @@
       "dy": -10,
       "width": 112,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 39,
       "originY": 26
     },
@@ -230097,7 +230505,7 @@
       "dy": 2,
       "width": 123,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 56,
       "originY": 14
     },
@@ -230109,7 +230517,7 @@
       "dy": -9,
       "width": 111,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 40,
       "originY": 25
     },
@@ -230121,7 +230529,7 @@
       "dy": -8,
       "width": 107,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 42,
       "originY": 24
     },
@@ -230133,7 +230541,7 @@
       "dy": -14,
       "width": 83,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 22,
       "originY": 30
     },
@@ -230145,7 +230553,7 @@
       "dy": -14,
       "width": 71,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 15,
       "originY": 30
     },
@@ -230157,7 +230565,7 @@
       "dy": -15,
       "width": 75,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 20,
       "originY": 31
     },
@@ -230169,7 +230577,7 @@
       "dy": -14,
       "width": 71,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 17,
       "originY": 30
     },
@@ -230181,7 +230589,7 @@
       "dy": -14,
       "width": 63,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 14,
       "originY": 30
     },
@@ -230193,7 +230601,7 @@
       "dy": -14,
       "width": 79,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 11,
       "originY": 30
     },
@@ -230205,7 +230613,7 @@
       "dy": -14,
       "width": 71,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 15,
       "originY": 30
     },
@@ -230217,7 +230625,7 @@
       "dy": -17,
       "width": 71,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 17,
       "originY": 33
     },
@@ -230229,7 +230637,7 @@
       "dy": -18,
       "width": 87,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 33,
       "originY": 34
     },
@@ -230241,7 +230649,7 @@
       "dy": -14,
       "width": 83,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 23,
       "originY": 30
     },
@@ -230253,7 +230661,7 @@
       "dy": -14,
       "width": 71,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 13,
       "originY": 30
     },
@@ -230265,7 +230673,7 @@
       "dy": -16,
       "width": 67,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 15,
       "originY": 32
     },
@@ -230277,7 +230685,7 @@
       "dy": -16,
       "width": 67,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 15,
       "originY": 32
     },
@@ -230289,7 +230697,7 @@
       "dy": -16,
       "width": 67,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 15,
       "originY": 32
     },
@@ -230301,7 +230709,7 @@
       "dy": -16,
       "width": 67,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 15,
       "originY": 32
     },
@@ -230313,7 +230721,7 @@
       "dy": -15,
       "width": 63,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 13,
       "originY": 31
     },
@@ -230325,7 +230733,7 @@
       "dy": -15,
       "width": 63,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 14,
       "originY": 31
     },
@@ -230337,7 +230745,7 @@
       "dy": -15,
       "width": 67,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 17,
       "originY": 31
     },
@@ -230349,7 +230757,7 @@
       "dy": -15,
       "width": 63,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 15,
       "originY": 31
     },
@@ -230361,7 +230769,7 @@
       "dy": -15,
       "width": 63,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 15,
       "originY": 31
     },
@@ -230373,7 +230781,7 @@
       "dy": -16,
       "width": 63,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 14,
       "originY": 32
     },
@@ -230385,7 +230793,7 @@
       "dy": -15,
       "width": 63,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 12,
       "originY": 31
     },
@@ -230397,7 +230805,7 @@
       "dy": -15,
       "width": 63,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 11,
       "originY": 31
     },
@@ -230409,7 +230817,7 @@
       "dy": -15,
       "width": 67,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 14,
       "originY": 31
     },
@@ -230443,7 +230851,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "5bcc8cebcb17f19945bae55949192747a574f4befaeaf20dfbee8484b2d1c1a8",
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 21,
       "originY": 40
     },
@@ -230477,7 +230885,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "4fcffbe553a777371fefe50f5ecbe5f0589b2e3fc7f2da86ccc23db96127c988",
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 30,
       "originY": 41
     },
@@ -230489,7 +230897,7 @@
       "dy": -14,
       "width": 95,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 29,
       "originY": 30
     },
@@ -230501,7 +230909,7 @@
       "dy": -12,
       "width": 107,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 21,
       "originY": 28
     },
@@ -230513,7 +230921,7 @@
       "dy": -8,
       "width": 107,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 28,
       "originY": 24
     },
@@ -230525,7 +230933,7 @@
       "dy": -4,
       "width": 155,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 71,
       "originY": 20
     },
@@ -230537,7 +230945,7 @@
       "dy": -15,
       "width": 87,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 26,
       "originY": 31
     },
@@ -230549,7 +230957,7 @@
       "dy": -43,
       "width": 171,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 56,
       "originY": 59
     },
@@ -230561,7 +230969,7 @@
       "dy": -17,
       "width": 115,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 26,
       "originY": 33
     },
@@ -230573,7 +230981,7 @@
       "dy": -14,
       "width": 119,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 33,
       "originY": 30
     },
@@ -230585,7 +230993,7 @@
       "dy": -15,
       "width": 135,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 47,
       "originY": 31
     },
@@ -230597,7 +231005,7 @@
       "dy": -12,
       "width": 123,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 27,
       "originY": 28
     },
@@ -230609,7 +231017,7 @@
       "dy": -3,
       "width": 131,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 44,
       "originY": 19
     },
@@ -230621,9 +231029,45 @@
       "dy": -11,
       "width": 111,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 37,
       "originY": 27
+    },
+    "package/青铜头盔": {
+      "sourcePath": "texture/item/01000172.PNG",
+      "sha1": "329faa2461389e76ad09d9ca2afb5f2301bf175b",
+      "sha256": "41fa72954cb772fa7b9629028bffaa3ef9dbb26ac488c83eab640ea17d38854e",
+      "dx": 0,
+      "dy": 0,
+      "width": 20,
+      "height": 36,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/骷髅头盔": {
+      "sourcePath": "texture/item/01000175.PNG",
+      "sha1": "5f330aef9f59d4fee1833630642c1f67b05b3a6e",
+      "sha256": "440d3918a2964508ae80c3c714ac1915f4866a6d2b4ae96d6314d3812801015b",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 36,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/魔法头盔": {
+      "sourcePath": "texture/item/01000172.PNG",
+      "sha1": "329faa2461389e76ad09d9ca2afb5f2301bf175b",
+      "sha256": "41fa72954cb772fa7b9629028bffaa3ef9dbb26ac488c83eab640ea17d38854e",
+      "dx": 0,
+      "dy": 0,
+      "width": 20,
+      "height": 36,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
     },
     "rakecat-shadow/attack/3/5": {
       "sourcePath": "texture/monster/008272651000030006.PNG",
@@ -230633,7 +231077,7 @@
       "dy": -6,
       "width": 95,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 21,
       "originY": 22
     },
@@ -230645,7 +231089,7 @@
       "dy": -9,
       "width": 111,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 63,
       "originY": 25
     },
@@ -230657,7 +231101,7 @@
       "dy": -2,
       "width": 115,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 33,
       "originY": 18
     },
@@ -230669,7 +231113,7 @@
       "dy": -18,
       "width": 131,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 40,
       "originY": 34
     },
@@ -230681,7 +231125,7 @@
       "dy": 0,
       "width": 127,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 35,
       "originY": 16
     },
@@ -230693,7 +231137,7 @@
       "dy": 2,
       "width": 131,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 72,
       "originY": 14
     },
@@ -230705,7 +231149,7 @@
       "dy": -2,
       "width": 107,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 53,
       "originY": 18
     },
@@ -230717,7 +231161,7 @@
       "dy": -7,
       "width": 111,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 54,
       "originY": 23
     },
@@ -230729,7 +231173,7 @@
       "dy": -4,
       "width": 99,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 15,
       "originY": 20
     },
@@ -230741,7 +231185,7 @@
       "dy": -22,
       "width": 135,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 25,
       "originY": 38
     },
@@ -230753,7 +231197,7 @@
       "dy": -6,
       "width": 83,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 17,
       "originY": 22
     },
@@ -230765,7 +231209,7 @@
       "dy": -13,
       "width": 103,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 51,
       "originY": 29
     },
@@ -230777,7 +231221,7 @@
       "dy": -12,
       "width": 107,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 55,
       "originY": 28
     },
@@ -230789,7 +231233,7 @@
       "dy": -15,
       "width": 111,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 31,
       "originY": 31
     },
@@ -230801,7 +231245,7 @@
       "dy": -18,
       "width": 67,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 16,
       "originY": 34
     },
@@ -230813,7 +231257,7 @@
       "dy": -17,
       "width": 99,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 42,
       "originY": 33
     },
@@ -230825,7 +231269,7 @@
       "dy": -14,
       "width": 95,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 20,
       "originY": 30
     },
@@ -230837,7 +231281,7 @@
       "dy": -11,
       "width": 99,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 25,
       "originY": 27
     },
@@ -230849,7 +231293,7 @@
       "dy": -13,
       "width": 75,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 21,
       "originY": 29
     },
@@ -230861,7 +231305,7 @@
       "dy": -16,
       "width": 99,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 41,
       "originY": 32
     },
@@ -230873,7 +231317,7 @@
       "dy": -16,
       "width": 99,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 29,
       "originY": 32
     },
@@ -230885,7 +231329,7 @@
       "dy": -14,
       "width": 95,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 28,
       "originY": 30
     },
@@ -230897,7 +231341,7 @@
       "dy": -12,
       "width": 103,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 33,
       "originY": 28
     },
@@ -230909,7 +231353,7 @@
       "dy": -13,
       "width": 103,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 72,
       "originY": 29
     },
@@ -230921,7 +231365,7 @@
       "dy": -2,
       "width": 64,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": -3,
       "originY": 18
     },
@@ -230933,7 +231377,7 @@
       "dy": -16,
       "width": 99,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 29,
       "originY": 32
     },
@@ -230945,7 +231389,7 @@
       "dy": -15,
       "width": 75,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 27,
       "originY": 31
     },
@@ -230957,7 +231401,7 @@
       "dy": -14,
       "width": 91,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 21,
       "originY": 30
     },
@@ -230969,7 +231413,7 @@
       "dy": -14,
       "width": 91,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 21,
       "originY": 30
     },
@@ -230981,7 +231425,7 @@
       "dy": -15,
       "width": 87,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 40,
       "originY": 31
     },
@@ -230993,7 +231437,7 @@
       "dy": -15,
       "width": 91,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 41,
       "originY": 31
     },
@@ -231005,7 +231449,7 @@
       "dy": -15,
       "width": 87,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 39,
       "originY": 31
     },
@@ -231017,7 +231461,7 @@
       "dy": -15,
       "width": 87,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 39,
       "originY": 31
     },
@@ -231029,7 +231473,7 @@
       "dy": -14,
       "width": 79,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 28,
       "originY": 30
     },
@@ -231041,7 +231485,7 @@
       "dy": -14,
       "width": 83,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 23,
       "originY": 30
     },
@@ -231053,7 +231497,7 @@
       "dy": -14,
       "width": 83,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 26,
       "originY": 30
     },
@@ -231065,7 +231509,7 @@
       "dy": -4,
       "width": 64,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 0,
       "originY": 20
     },
@@ -231077,7 +231521,7 @@
       "dy": -10,
       "width": 95,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 18,
       "originY": 26
     },
@@ -231089,7 +231533,7 @@
       "dy": -13,
       "width": 95,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 30,
       "originY": 29
     },
@@ -231101,7 +231545,7 @@
       "dy": -12,
       "width": 111,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 31,
       "originY": 28
     },
@@ -231113,7 +231557,7 @@
       "dy": -10,
       "width": 99,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 20,
       "originY": 26
     },
@@ -231125,7 +231569,7 @@
       "dy": -9,
       "width": 103,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 26,
       "originY": 25
     },
@@ -231137,7 +231581,7 @@
       "dy": -6,
       "width": 83,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 16,
       "originY": 22
     },
@@ -231149,7 +231593,7 @@
       "dy": -6,
       "width": 83,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 16,
       "originY": 22
     },
@@ -231161,7 +231605,7 @@
       "dy": -6,
       "width": 99,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 50,
       "originY": 22
     },
@@ -231173,7 +231617,7 @@
       "dy": -6,
       "width": 99,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 50,
       "originY": 22
     },
@@ -231185,7 +231629,7 @@
       "dy": -8,
       "width": 83,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 20,
       "originY": 24
     },
@@ -231197,7 +231641,7 @@
       "dy": -8,
       "width": 91,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 32,
       "originY": 24
     },
@@ -231209,7 +231653,7 @@
       "dy": -7,
       "width": 87,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 27,
       "originY": 23
     },
@@ -231221,7 +231665,7 @@
       "dy": -8,
       "width": 87,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 24,
       "originY": 24
     },
@@ -231233,7 +231677,7 @@
       "dy": -7,
       "width": 87,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 23,
       "originY": 23
     },
@@ -231245,7 +231689,7 @@
       "dy": 0,
       "width": 52,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 24,
       "originY": 16
     },
@@ -231257,7 +231701,7 @@
       "dy": -6,
       "width": 116,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 28,
       "originY": 22
     },
@@ -231269,7 +231713,7 @@
       "dy": -2,
       "width": 84,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 53,
       "originY": 18
     },
@@ -231281,7 +231725,7 @@
       "dy": 1,
       "width": 52,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 17,
       "originY": 15
     },
@@ -231293,7 +231737,7 @@
       "dy": -11,
       "width": 80,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 50,
       "originY": 27
     },
@@ -231305,7 +231749,7 @@
       "dy": -10,
       "width": 52,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 20,
       "originY": 26
     },
@@ -231317,7 +231761,7 @@
       "dy": -6,
       "width": 48,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 10,
       "originY": 22
     },
@@ -231329,7 +231773,7 @@
       "dy": -1,
       "width": 56,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 16,
       "originY": 17
     },
@@ -231341,7 +231785,7 @@
       "dy": 7,
       "width": 80,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 20,
       "originY": 9
     },
@@ -231353,7 +231797,7 @@
       "dy": -7,
       "width": 68,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 29,
       "originY": 23
     },
@@ -231365,7 +231809,7 @@
       "dy": -12,
       "width": 80,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 17,
       "originY": 28
     },
@@ -231377,7 +231821,7 @@
       "dy": -3,
       "width": 52,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 11,
       "originY": 19
     },
@@ -231389,7 +231833,7 @@
       "dy": -6,
       "width": 72,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 9,
       "originY": 22
     },
@@ -231401,7 +231845,7 @@
       "dy": -5,
       "width": 64,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 19,
       "originY": 21
     },
@@ -231413,7 +231857,7 @@
       "dy": -5,
       "width": 56,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 9,
       "originY": 21
     },
@@ -231425,7 +231869,7 @@
       "dy": -1,
       "width": 52,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 9,
       "originY": 17
     },
@@ -231437,7 +231881,7 @@
       "dy": -3,
       "width": 52,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 9,
       "originY": 19
     },
@@ -231449,7 +231893,7 @@
       "dy": -6,
       "width": 76,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 55,
       "originY": 22
     },
@@ -231461,7 +231905,7 @@
       "dy": -6,
       "width": 80,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 59,
       "originY": 22
     },
@@ -231473,7 +231917,7 @@
       "dy": -5,
       "width": 80,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 59,
       "originY": 21
     },
@@ -231485,7 +231929,7 @@
       "dy": -6,
       "width": 68,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 16,
       "originY": 22
     },
@@ -231497,7 +231941,7 @@
       "dy": -3,
       "width": 76,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 17,
       "originY": 19
     },
@@ -231531,7 +231975,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "75e85ffd01c94c4196fd820feca8ded5947a58fe7b288fe67682b13d10fd8350",
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 30,
       "originY": 41
     },
@@ -231565,7 +232009,7 @@
       ],
       "assembly": "Original layer0 + layer1, unmodified source pixels, same source offsets",
       "assembledPixelSha256": "fb1659ffed9212e83df9cac0f1426dd11dfb16b8590e4587fb539e3d03613472",
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 25,
       "originY": 37
     },
@@ -231577,7 +232021,7 @@
       "dy": -65,
       "width": 36,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 24,
       "originY": 81
     },
@@ -231589,7 +232033,7 @@
       "dy": -78,
       "width": 20,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 10,
       "originY": 94
     },
@@ -231601,7 +232045,7 @@
       "dy": -62,
       "width": 20,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 24,
       "originY": 78
     },
@@ -231613,7 +232057,7 @@
       "dy": 17,
       "width": 24,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": -6,
       "originY": -1
     },
@@ -231625,7 +232069,7 @@
       "dy": -55,
       "width": 16,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 22,
       "originY": 71
     },
@@ -231637,7 +232081,7 @@
       "dy": 8,
       "width": 16,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": -40,
       "originY": 8
     },
@@ -231649,7 +232093,7 @@
       "dy": -58,
       "width": 32,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 8,
       "originY": 74
     },
@@ -231661,7 +232105,7 @@
       "dy": -28,
       "width": 32,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 31,
       "originY": 44
     },
@@ -231673,7 +232117,7 @@
       "dy": -19,
       "width": 32,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 15,
       "originY": 35
     },
@@ -231685,7 +232129,7 @@
       "dy": -21,
       "width": 8,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 13,
       "originY": 37
     },
@@ -231697,7 +232141,7 @@
       "dy": -14,
       "width": 95,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 34,
       "originY": 30
     },
@@ -231709,7 +232153,7 @@
       "dy": -15,
       "width": 87,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 13,
       "originY": 31
     },
@@ -231721,7 +232165,7 @@
       "dy": -18,
       "width": 87,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 19,
       "originY": 34
     },
@@ -231733,7 +232177,7 @@
       "dy": -17,
       "width": 83,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 22,
       "originY": 33
     },
@@ -231745,7 +232189,7 @@
       "dy": -34,
       "width": 119,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 38,
       "originY": 50
     },
@@ -231757,7 +232201,7 @@
       "dy": -19,
       "width": 115,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 36,
       "originY": 35
     },
@@ -231769,7 +232213,7 @@
       "dy": -17,
       "width": 87,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 21,
       "originY": 33
     },
@@ -231781,7 +232225,7 @@
       "dy": -16,
       "width": 75,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 16,
       "originY": 32
     },
@@ -231793,7 +232237,7 @@
       "dy": -16,
       "width": 75,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 19,
       "originY": 32
     },
@@ -231805,7 +232249,7 @@
       "dy": -17,
       "width": 67,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 12,
       "originY": 33
     },
@@ -231817,7 +232261,7 @@
       "dy": -16,
       "width": 75,
       "height": 36,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 19,
       "originY": 32
     },
@@ -231829,7 +232273,7 @@
       "dy": -21,
       "width": 154,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 42,
       "originY": 37
     },
@@ -231841,7 +232285,7 @@
       "dy": -12,
       "width": 90,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 12,
       "originY": 28
     },
@@ -231853,7 +232297,7 @@
       "dy": -13,
       "width": 82,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 21,
       "originY": 29
     },
@@ -231865,7 +232309,7 @@
       "dy": -13,
       "width": 102,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 25,
       "originY": 29
     },
@@ -231877,7 +232321,7 @@
       "dy": -14,
       "width": 110,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 36,
       "originY": 30
     },
@@ -231889,7 +232333,7 @@
       "dy": -9,
       "width": 118,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 39,
       "originY": 25
     },
@@ -231901,7 +232345,7 @@
       "dy": -30,
       "width": 110,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 36,
       "originY": 46
     },
@@ -231913,7 +232357,7 @@
       "dy": -13,
       "width": 98,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 41,
       "originY": 29
     },
@@ -231925,7 +232369,7 @@
       "dy": -13,
       "width": 70,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 10,
       "originY": 29
     },
@@ -231937,7 +232381,7 @@
       "dy": -13,
       "width": 62,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 10,
       "originY": 29
     },
@@ -231949,7 +232393,7 @@
       "dy": -13,
       "width": 70,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 18,
       "originY": 29
     },
@@ -231961,7 +232405,7 @@
       "dy": -14,
       "width": 70,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 18,
       "originY": 30
     },
@@ -231973,7 +232417,7 @@
       "dy": -8,
       "width": 94,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 39,
       "originY": 24
     },
@@ -231985,7 +232429,7 @@
       "dy": -2,
       "width": 122,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 48,
       "originY": 18
     },
@@ -231997,7 +232441,7 @@
       "dy": -14,
       "width": 74,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 15,
       "originY": 30
     },
@@ -232009,7 +232453,7 @@
       "dy": -12,
       "width": 70,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 21,
       "originY": 28
     },
@@ -232021,7 +232465,7 @@
       "dy": -16,
       "width": 82,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 31,
       "originY": 32
     },
@@ -232033,7 +232477,7 @@
       "dy": -15,
       "width": 58,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 14,
       "originY": 31
     },
@@ -232045,7 +232489,7 @@
       "dy": -15,
       "width": 58,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 14,
       "originY": 31
     },
@@ -232057,7 +232501,7 @@
       "dy": -15,
       "width": 58,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 14,
       "originY": 31
     },
@@ -232069,7 +232513,7 @@
       "dy": -15,
       "width": 58,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 14,
       "originY": 31
     },
@@ -232081,7 +232525,7 @@
       "dy": -15,
       "width": 54,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 10,
       "originY": 31
     },
@@ -232093,7 +232537,7 @@
       "dy": -15,
       "width": 54,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 10,
       "originY": 31
     },
@@ -232105,7 +232549,7 @@
       "dy": -15,
       "width": 54,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 10,
       "originY": 31
     },
@@ -232117,7 +232561,7 @@
       "dy": -15,
       "width": 54,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 10,
       "originY": 31
     },
@@ -232129,7 +232573,7 @@
       "dy": -15,
       "width": 62,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 16,
       "originY": 31
     },
@@ -232141,7 +232585,7 @@
       "dy": -15,
       "width": 62,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 16,
       "originY": 31
     },
@@ -232153,7 +232597,7 @@
       "dy": -15,
       "width": 62,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 16,
       "originY": 31
     },
@@ -232165,7 +232609,7 @@
       "dy": -15,
       "width": 62,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 16,
       "originY": 31
     },
@@ -232177,7 +232621,7 @@
       "dy": -15,
       "width": 54,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 10,
       "originY": 31
     },
@@ -232189,7 +232633,7 @@
       "dy": -15,
       "width": 54,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 10,
       "originY": 31
     },
@@ -232201,7 +232645,7 @@
       "dy": -15,
       "width": 54,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 10,
       "originY": 31
     },
@@ -232213,7 +232657,7 @@
       "dy": -15,
       "width": 54,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 10,
       "originY": 31
     },
@@ -232225,7 +232669,7 @@
       "dy": -15,
       "width": 62,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 13,
       "originY": 31
     },
@@ -232237,7 +232681,7 @@
       "dy": -15,
       "width": 62,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 14,
       "originY": 31
     },
@@ -232249,7 +232693,7 @@
       "dy": -15,
       "width": 62,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 14,
       "originY": 31
     },
@@ -232261,7 +232705,7 @@
       "dy": -15,
       "width": 62,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 15,
       "originY": 31
     },
@@ -232273,7 +232717,7 @@
       "dy": -15,
       "width": 62,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 15,
       "originY": 31
     },
@@ -232285,7 +232729,7 @@
       "dy": -15,
       "width": 58,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 9,
       "originY": 31
     },
@@ -232297,7 +232741,7 @@
       "dy": -15,
       "width": 62,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 14,
       "originY": 31
     },
@@ -232309,7 +232753,7 @@
       "dy": -15,
       "width": 62,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 14,
       "originY": 31
     },
@@ -232321,7 +232765,7 @@
       "dy": -15,
       "width": 62,
       "height": 35,
-      "texture": "mir-9",
+      "texture": "mir-10",
       "originX": 13,
       "originY": 31
     },
@@ -237671,6 +238115,30 @@
       "originX": 77,
       "originY": 18
     },
+    "package/蛇眼戒指": {
+      "sourcePath": "texture/item/010001FF.PNG",
+      "sha1": "efebaf7d8b16a248a435096e6f8e6b5e4d1d1c2f",
+      "sha256": "faed96c7ac259d8b85ad2227639cccf927f3b831b038e19c2ded7b095cdd0833",
+      "dx": 0,
+      "dy": 0,
+      "width": 28,
+      "height": 32,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/魅力戒指": {
+      "sourcePath": "texture/item/01000200.PNG",
+      "sha1": "35909221e7cae81d42d163af4165f8e38bb661af",
+      "sha256": "4b0786f03e2d559428b8660954a8eafcd7adb59e11b17deccf5b9c7f4d190a6f",
+      "dx": 0,
+      "dy": 0,
+      "width": 28,
+      "height": 32,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
     "rakecat-shadow/attack/1/0": {
       "sourcePath": "texture/monster/0082722010000E0006.PNG",
       "sha1": "8932f0939268ad3d19a57235b6cfbaf7c5a6130b",
@@ -239999,6 +240467,18 @@
       "originX": 24,
       "originY": 16
     },
+    "item/金币（超）": {
+      "sourcePath": "texture/item/0000007C.PNG",
+      "sha1": "c9053c8a0f3dcbf79b99b303ac1a1901e46179e9",
+      "sha256": "cafeac309a41d99d475d7109d64dce9eec2141812479d40b2b399f5d5412216e",
+      "dx": 0,
+      "dy": 0,
+      "width": 36,
+      "height": 30,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
     "item/银蛇": {
       "sourcePath": "texture/item/0000044E.PNG",
       "sha1": "6dd2a47e66d1fa79e67881352bc1d7894ff677e0",
@@ -242241,6 +242721,30 @@
       "originX": 24,
       "originY": 16
     },
+    "package/放大镜": {
+      "sourcePath": "texture/item/01000355.PNG",
+      "sha1": "96fa1c42384e7f7523ff51b2662d8aa840b05abb",
+      "sha256": "f8e39a83eaa481acb97d1a0a84b1f7db41e8b976b39ee0775bd10436146b2012",
+      "dx": 0,
+      "dy": 0,
+      "width": 28,
+      "height": 28,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/生命项链": {
+      "sourcePath": "texture/item/01000356.PNG",
+      "sha1": "d726316174297a353ea3380f9367e0b44af94582",
+      "sha256": "c8eafadfd792452836a0ba3a66ddd67ea057865fc4400833f5aaff315b998920",
+      "dx": 0,
+      "dy": 0,
+      "width": 28,
+      "height": 28,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
     "rakecat-shadow/attack/7/4": {
       "sourcePath": "texture/monster/008272E40000120008.PNG",
       "sha1": "9a9f4ecc882980513f551141d97763220377822a",
@@ -243177,6 +243681,18 @@
       "originX": 17,
       "originY": 20
     },
+    "package/金项链": {
+      "sourcePath": "texture/item/01000366.PNG",
+      "sha1": "b9197fc6666cea680df2beb702428a9da0f20e1c",
+      "sha256": "dfb82d1b3effa11f6eff977b39b0cd62fa8b4590e8d88efab0e65b9c65e22e46",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 26,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
     "rakecat-shadow/attack/3/1": {
       "sourcePath": "texture/monster/008272610000230004.PNG",
       "sha1": "8430708c44b7b100574fe2f7bb174a8c4db92a03",
@@ -243585,6 +244101,246 @@
       "originX": 29,
       "originY": 20
     },
+    "package/刺杀剑术": {
+      "sourcePath": "texture/item/01000130.PNG",
+      "sha1": "5fccb11c1a5ab3b2b4a30344bdaf1e822381e7fa",
+      "sha256": "9c16e6c4c362c3081c61742c9dd6b76fa797597a2e7242f79a9a5b6fbf3791bf",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/半月弯刀": {
+      "sourcePath": "texture/item/01000130.PNG",
+      "sha1": "5fccb11c1a5ab3b2b4a30344bdaf1e822381e7fa",
+      "sha256": "9c16e6c4c362c3081c61742c9dd6b76fa797597a2e7242f79a9a5b6fbf3791bf",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/召唤神兽": {
+      "sourcePath": "texture/item/01000130.PNG",
+      "sha1": "5fccb11c1a5ab3b2b4a30344bdaf1e822381e7fa",
+      "sha256": "9c16e6c4c362c3081c61742c9dd6b76fa797597a2e7242f79a9a5b6fbf3791bf",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/召唤骷髅": {
+      "sourcePath": "texture/item/01000130.PNG",
+      "sha1": "5fccb11c1a5ab3b2b4a30344bdaf1e822381e7fa",
+      "sha256": "9c16e6c4c362c3081c61742c9dd6b76fa797597a2e7242f79a9a5b6fbf3791bf",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/困魔咒": {
+      "sourcePath": "texture/item/01000130.PNG",
+      "sha1": "5fccb11c1a5ab3b2b4a30344bdaf1e822381e7fa",
+      "sha256": "9c16e6c4c362c3081c61742c9dd6b76fa797597a2e7242f79a9a5b6fbf3791bf",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/基本剑术": {
+      "sourcePath": "texture/item/01000130.PNG",
+      "sha1": "5fccb11c1a5ab3b2b4a30344bdaf1e822381e7fa",
+      "sha256": "9c16e6c4c362c3081c61742c9dd6b76fa797597a2e7242f79a9a5b6fbf3791bf",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/幽灵盾": {
+      "sourcePath": "texture/item/01000130.PNG",
+      "sha1": "5fccb11c1a5ab3b2b4a30344bdaf1e822381e7fa",
+      "sha256": "9c16e6c4c362c3081c61742c9dd6b76fa797597a2e7242f79a9a5b6fbf3791bf",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/攻杀剑术": {
+      "sourcePath": "texture/item/01000130.PNG",
+      "sha1": "5fccb11c1a5ab3b2b4a30344bdaf1e822381e7fa",
+      "sha256": "9c16e6c4c362c3081c61742c9dd6b76fa797597a2e7242f79a9a5b6fbf3791bf",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/施毒术": {
+      "sourcePath": "texture/item/01000130.PNG",
+      "sha1": "5fccb11c1a5ab3b2b4a30344bdaf1e822381e7fa",
+      "sha256": "9c16e6c4c362c3081c61742c9dd6b76fa797597a2e7242f79a9a5b6fbf3791bf",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/治愈术": {
+      "sourcePath": "texture/item/01000130.PNG",
+      "sha1": "5fccb11c1a5ab3b2b4a30344bdaf1e822381e7fa",
+      "sha256": "9c16e6c4c362c3081c61742c9dd6b76fa797597a2e7242f79a9a5b6fbf3791bf",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/灵魂火符": {
+      "sourcePath": "texture/item/01000130.PNG",
+      "sha1": "5fccb11c1a5ab3b2b4a30344bdaf1e822381e7fa",
+      "sha256": "9c16e6c4c362c3081c61742c9dd6b76fa797597a2e7242f79a9a5b6fbf3791bf",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/烈火剑法": {
+      "sourcePath": "texture/item/01000130.PNG",
+      "sha1": "5fccb11c1a5ab3b2b4a30344bdaf1e822381e7fa",
+      "sha256": "9c16e6c4c362c3081c61742c9dd6b76fa797597a2e7242f79a9a5b6fbf3791bf",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/神圣战甲术": {
+      "sourcePath": "texture/item/01000130.PNG",
+      "sha1": "5fccb11c1a5ab3b2b4a30344bdaf1e822381e7fa",
+      "sha256": "9c16e6c4c362c3081c61742c9dd6b76fa797597a2e7242f79a9a5b6fbf3791bf",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/精神力战法": {
+      "sourcePath": "texture/item/01000130.PNG",
+      "sha1": "5fccb11c1a5ab3b2b4a30344bdaf1e822381e7fa",
+      "sha256": "9c16e6c4c362c3081c61742c9dd6b76fa797597a2e7242f79a9a5b6fbf3791bf",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/紫碧螺": {
+      "sourcePath": "texture/item/01000202.PNG",
+      "sha1": "cb7048d385c32e97303f6fe8ea53a9cf17e98745",
+      "sha256": "3ea1f8367bbb2783190d8c68442845ed11c43132752638ea6dfee6be0f6c6c93",
+      "dx": 0,
+      "dy": 0,
+      "width": 24,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/群体治愈术": {
+      "sourcePath": "texture/item/01000130.PNG",
+      "sha1": "5fccb11c1a5ab3b2b4a30344bdaf1e822381e7fa",
+      "sha256": "9c16e6c4c362c3081c61742c9dd6b76fa797597a2e7242f79a9a5b6fbf3791bf",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/野蛮冲撞": {
+      "sourcePath": "texture/item/01000130.PNG",
+      "sha1": "5fccb11c1a5ab3b2b4a30344bdaf1e822381e7fa",
+      "sha256": "9c16e6c4c362c3081c61742c9dd6b76fa797597a2e7242f79a9a5b6fbf3791bf",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/铁手镯": {
+      "sourcePath": "texture/item/01000286.PNG",
+      "sha1": "ad7525e897d317392f88a1cfbc2a31d2928e762e",
+      "sha256": "0eb7a4251d9468db46793426fd861de8f3374232951dcf878b00a84ee8122dd0",
+      "dx": 0,
+      "dy": 0,
+      "width": 28,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/隐身术": {
+      "sourcePath": "texture/item/01000130.PNG",
+      "sha1": "5fccb11c1a5ab3b2b4a30344bdaf1e822381e7fa",
+      "sha256": "9c16e6c4c362c3081c61742c9dd6b76fa797597a2e7242f79a9a5b6fbf3791bf",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/集体隐身术": {
+      "sourcePath": "texture/item/01000130.PNG",
+      "sha1": "5fccb11c1a5ab3b2b4a30344bdaf1e822381e7fa",
+      "sha256": "9c16e6c4c362c3081c61742c9dd6b76fa797597a2e7242f79a9a5b6fbf3791bf",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 24,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
     "rakecat-shadow/idle/4/0": {
       "sourcePath": "texture/monster/0082708000001B0001.PNG",
       "sha1": "f9a61c8fcf8e3b313594694a5ec0428450871d0a",
@@ -243836,6 +244592,18 @@
       "texture": "mir-10",
       "originX": 36,
       "originY": 13
+    },
+    "package/白金项链": {
+      "sourcePath": "texture/item/01000353.PNG",
+      "sha1": "35bc89eb4090524837edd7376bd3ea251ea9099e",
+      "sha256": "ecf7ea93bb0416815fd06ebb3331ab632f518d9155bd6ef95d7bf5c506cac07e",
+      "dx": 0,
+      "dy": 0,
+      "width": 28,
+      "height": 22,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
     },
     "rakecat-shadow/attack/3/3": {
       "sourcePath": "texture/monster/008272631000030000.PNG",
@@ -244108,6 +244876,30 @@
       "dx": 0,
       "dy": 0,
       "width": 20,
+      "height": 20,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "item/金币（特）": {
+      "sourcePath": "texture/item/0000007B.PNG",
+      "sha1": "37b96e05004d548473fafb88d58fbcd6e82d1a78",
+      "sha256": "8aca67679152f5fffd90e98c167b69249c9d56a5345aac958016a2a07b732fe8",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
+      "height": 20,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/黑檀手镯": {
+      "sourcePath": "texture/item/010002BC.PNG",
+      "sha1": "a4b727bdfcec4d18e3fbc88875f2dbb1d9644094",
+      "sha256": "b41e8e71df0fc125d7bfda10a4111c3017fdd5ec586d60e297fce1457b56167f",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
       "height": 20,
       "texture": "mir-10",
       "originX": 24,
@@ -244471,6 +245263,18 @@
       "height": 16,
       "texture": "mir-10",
       "originX": 77,
+      "originY": 16
+    },
+    "item/金币（大）": {
+      "sourcePath": "texture/item/0000007A.PNG",
+      "sha1": "cc9486c27ff956324ceb014764c0a9cfb069be9d",
+      "sha256": "6105f0e505274c8e1c9b94105e7355ea5136cadd1ff5ae5bf56da97255b411e2",
+      "dx": 0,
+      "dy": 0,
+      "width": 24,
+      "height": 16,
+      "texture": "mir-10",
+      "originX": 24,
       "originY": 16
     },
     "item/青铜头盔": {
@@ -244989,6 +245793,18 @@
       "originX": 28,
       "originY": 16
     },
+    "item/金币（中）": {
+      "sourcePath": "texture/item/00000079.PNG",
+      "sha1": "285498eaf1d8a162c45b54bca1d7b9b002b3dc04",
+      "sha256": "acce9fc13c789fdfa14d5d5c545685ae5141b8d6887aa2a276b9b3000ffd487d",
+      "dx": 0,
+      "dy": 0,
+      "width": 20,
+      "height": 14,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
     "item/骷髅头盔": {
       "sourcePath": "texture/item/00000175.PNG",
       "sha1": "5d3587de6cd7cf6fcfd8d8c5934d597abc3da3d7",
@@ -244996,6 +245812,18 @@
       "dx": 0,
       "dy": 0,
       "width": 16,
+      "height": 14,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "package/思贝儿手镯": {
+      "sourcePath": "texture/item/010002BD.PNG",
+      "sha1": "519989b64b5844b085df6ce26a948bcfa675090f",
+      "sha256": "6450aa93e14e11550865c0e0b38c97a8ec5f99ab5be0a088e25911ecc621858d",
+      "dx": 0,
+      "dy": 0,
+      "width": 32,
       "height": 14,
       "texture": "mir-10",
       "originX": 24,
@@ -245476,6 +246304,18 @@
       "dx": 0,
       "dy": 0,
       "width": 20,
+      "height": 12,
+      "texture": "mir-10",
+      "originX": 24,
+      "originY": 16
+    },
+    "item/金创药（中）": {
+      "sourcePath": "texture/item/00000006.PNG",
+      "sha1": "c5789f877f51447cc40e8cd6e803ec2a406269f9",
+      "sha256": "bc37f8affbf27a3a7b9401b69d9d1d08f7bb540a5cb73f1a049ae9fb6f7a6288",
+      "dx": 0,
+      "dy": 0,
+      "width": 12,
       "height": 12,
       "texture": "mir-10",
       "originX": 24,

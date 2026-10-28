@@ -36,7 +36,7 @@ def sound(name,seen=None):
   if found:return found
  return None
 mapping={k:v for k,n in names.items() if (v:=sound(n))}
-mapping.update(step='01000001.WAV',attack='01010034.WAV',unarmed='01010039.WAV',hurt='0103008A.WAV')
+mapping.update(step='01000001.WAV',attack='01010034.WAV',unarmed='01010039.WAV',hurt='0103008A.WAV',death='01030090.WAV')
 def load(filename):
  entry=catalog[filename];path=out/filename
  b=read_source(path,f'https://raw.githubusercontent.com/etorth/mir2x_res/{ref}/sound/seff/{filename}',entry['sha'],request)
@@ -44,7 +44,7 @@ def load(filename):
  assert b[:4]==b'RIFF' and b[8:12]==b'WAVE',filename+' not WAV'
  return filename,{'sourcePath':'sound/seff/'+filename,'sha1':sha,'sha256':hashlib.sha256(b).hexdigest(),'bytes':len(b),'permissionStatus':'permission_pending'}
 files=dict(ThreadPoolExecutor(12).map(load,sorted(set(mapping.values()))))
-manifest={'ref':ref,'repository':'https://github.com/etorth/mir2x_res','rightsStatus':'UNVERIFIED_THIRD_PARTY_ART','releaseStatus':'BLOCKED_BY_ASSET_RIGHTS','mappingReference':{'ref':source_ref,'sourcePath':'common/src/magicrecord.inc','sha256':hashlib.sha256(srcfile.read_bytes()).hexdigest(),'soundFormula':'0x04000000 + seffBase * 16 + stage; references resolved; first existing stage retained'},'mapping':mapping,'files':files,'missing':[k for k in names if k not in mapping]}
+manifest={'ref':ref,'repository':'https://github.com/etorth/mir2x_res','rightsStatus':'UNVERIFIED_THIRD_PARTY_ART','releaseStatus':'BLOCKED_BY_ASSET_RIGHTS','mappingReference':{'ref':source_ref,'sourcePath':'common/src/magicrecord.inc','sha256':hashlib.sha256(srcfile.read_bytes()).hexdigest(),'soundFormula':'0x04000000 + seffBase * 16 + stage; references resolved; first existing stage retained'},'heroSoundReference':{'ref':source_ref,'sourcePath':'client/src/soundeffectdb.cpp','sha256':'c531cfce810fe6f36eb1c59d56a53a35fb65b23646b7a5513e36c31dc721357c','note':'s_man_struck = 138.wav; s_man_die = 144.wav; 0x01030000 + source sound number. Current source actors are male.'},'mapping':mapping,'files':files,'missing':[k for k in names if k not in mapping]}
 authorize(manifest, ['audio'])
 text=json.dumps(manifest,ensure_ascii=False,indent=2);(out/'manifest.json').write_text(text);(root/'docs/audio-manifest.json').write_text(text)
 print('Original audio:',len(files),'WAV files;',len(mapping),'mappings; missing:',manifest['missing'])

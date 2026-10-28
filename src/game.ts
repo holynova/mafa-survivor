@@ -21,6 +21,7 @@ import {
 } from "./content";
 import {updateRangedEnemy} from "./enemy-ai";
 import {updateExpansionEnemy} from "./expansion-enemies";
+import {appendLoot,collectLoot,healthDrop} from "./loot";
 import {ATTACK_CADENCE,cooldownScale,outputScale} from "./cadence";
 import {newCombatRecovery,recoverHit,type DamageOrigin,type CombatHealing} from "./combat-recovery";
 import {newDamageTaken,recordDamageTaken,type DamageTaken} from "./damage-taken";
@@ -165,6 +166,9 @@ export type Drop = Entity & {
   gold: number;
   born: number;
   itemId?: string;
+  heal?:number;
+  level?:number;
+  count?:number;
 };
 export type Fx = Entity & {
   kind: SkillId | "hit" | "cast" | "beastflame" | "talismanHit" | "womaShock" | "overlordBlade" | "overlordDeath";
@@ -340,7 +344,11 @@ export class Game {
     return MAP_SCENERY[this.mapId];
   }
   sound(key: string) {
-    if (this.audioEvents.length < 24) this.audioEvents.push(key);
+    if(key==="hurt" && this.audioEvents.includes("death"))return;
+    if(key==="death")this.audioEvents=this.audioEvents.filter(event=>event!=="hurt");
+    if(key==="hurt" || key==="death") {
+      this.audioEvents.unshift(key);this.audioEvents.length=Math.min(24,this.audioEvents.length);
+    }else if (this.audioEvents.length < 24) this.audioEvents.push(key);
   }
   nextEntityId() {
     return ++this.id;
@@ -995,38 +1003,13 @@ export class Game {
         dx = this.player.x - d.x,
         dy = this.player.y - d.y,
         l = Math.hypot(dx, dy);
+      if(d.heal && this.player.hp>=this.maxHP && !d.exp && !d.gold)continue;
       if (l < this.pickupRadius + 12) {
         const speed = 480 * dt;
         d.x += (dx / Math.max(1, l)) * speed;
         d.y += (dy / Math.max(1, l)) * speed;
         if (l < speed + 12) {
-          this.gold += d.gold;
-          this.waveGold += d.gold;
-          this.totalGold += d.gold;
-          this.exp += d.exp;
-          if (d.itemId) {
-            const item = getItem(d.itemId);
-            const slot = SLOT_KEYS.find(
-              (s) =>
-                (s === item.slot ||
-                  s.startsWith(
-                    item.slot === "bracelet"
-                      ? "bracelet"
-                      : item.slot === "ring"
-                        ? "ring"
-                        : "~",
-                  )) &&
-                !this.equipment[s],
-            );
-            if (slot) {
-              this.equipment[slot] = { itemId: item.id, paid: 0 };
-              this.recompute();
-            } else {
-              // no empty slot: sell for gold
-              this.gold += sellPrice(0, item.price);
-            }
-          }
-          this.drops.splice(i, 1);
+          if(collectLoot(this,d))this.drops.splice(i, 1);
         }
       }
     }
@@ -2044,11 +2027,7 @@ export class Game {
         );
         if (candidates.length) itemId = this.rng.pick(candidates).id;
       }
-      if (this.drops.length >= 300) {
-        this.drops[0].exp += exp;
-        this.drops[0].gold += gold;
-      } else
-        this.drops.push({
+      appendLoot(this.drops,{
           id: ++this.id,
           x: e.x,
           y: e.y,
@@ -2056,7 +2035,10 @@ export class Game {
           gold,
           born: this.clock,
           itemId,
+          level:e.level??this.wave,
         });
+      const heal=healthDrop(e,()=>this.rng.next());
+      if(heal){const point=this.canStand(e.x+18,e.y+8) ? {x:e.x+18,y:e.y+8} : {x:e.x,y:e.y};appendLoot(this.drops,{id:++this.id,...point,exp:0,gold:0,born:this.clock,heal,level:e.level??this.wave});}
     }
   }
   hurt(raw: number, kind: "physical" | "magic" = "physical", force = false, source = "unknown") {
@@ -2098,14 +2080,15 @@ export class Game {
     );
     const before = this.player.hp;
     this.player.hp = Math.max(0, this.player.hp - damage);
-    recordDamageTaken(this.damageTaken,kind,source,before-this.player.hp);
+    const actual=before-this.player.hp;
+    recordDamageTaken(this.damageTaken,kind,source,actual);
     this.player.hitUntil = this.clock + 0.45;
-    this.sound("hurt");
+    this.sound(this.player.hp===0 ? "death" : "hurt");
     this.floating.push({
       id: ++this.id,
       x: this.player.x,
       y: this.player.y - 60,
-      text: "−" + damage,
+      text: "−" + Math.ceil(actual),
       color: "#f18779",
       life: 0.9,
     });
@@ -2299,6 +2282,7 @@ export class Game {
     for (const d of this.drops) {
       exp += d.exp;
       gold += d.gold;
+      if(d.itemId || d.heal)collectLoot(this,{...d,exp:0,gold:0});
     }
     this.exp += exp;
     const reclaim = Math.floor(gold * 0.5);

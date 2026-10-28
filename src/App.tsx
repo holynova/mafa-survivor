@@ -98,6 +98,7 @@ function atlasPosition(frame: string) {
   return framePositions[frame] ?? { x: 0, y: 0 };
 }
 function Icon({ frame }: { frame?: string }) {
+  if(frame?.startsWith("item/") && assets?.frames[frame.replace("item/","package/")])frame=frame.replace("item/","package/");
   const f = frame && assets?.frames[frame],
     position = frame && framePositions[frame];
   const page = f && assets.pages.find((p) => p.key === f.texture);
@@ -142,10 +143,17 @@ export function App() {
   const [progressBusy, setProgressBusy] = useState(true);
   const [chapterError, setChapterError] = useState("");
   const [savedRun, setSavedRun] = useState<RunCheckpoint | null>(null);
+  const [settledRun,setSettledRun]=useState("");
   const inventoryResumes = useRef(false);
   const checkpointKey = useRef("");
   useEffect(() => { document.title = `玛法幸存者 · ${game.mapId === "biche" ? "比奇荒野" : MAPS[game.mapId].name}`; }, [game.mapId]);
   useEffect(() => game.subscribe(refresh), []);
+  useEffect(()=>{
+    if(game.phase!=="dead" || game.player.hp>0 || !game.result)return;
+    const runId=game.runId;
+    const timer=window.setTimeout(()=>setSettledRun(runId),1200);
+    return ()=>window.clearTimeout(timer);
+  },[game.phase,game.runId]);
   // Autosave only at stable wave boundaries; a mid-wave refresh replays this wave.
   useEffect(() => game.subscribe(() => {
     if (game.mode === "test") return;
@@ -262,8 +270,10 @@ export function App() {
       "--mir-panel":`url("${assetUrl("ui/panel.png")}")`,
     } as CSSProperties}>
       <div className="vignette" />
+      {game.player.hitUntil>game.clock && game.phase!=="lobby" && <div key={game.runId+game.player.hitUntil} className="damage-flash" aria-hidden="true" />}
+      {game.phase==="dead" && game.player.hp<=0 && settledRun!==game.runId && <div className="death-cue" role="status">魂归玛法</div>}
       <TestTools />
-      {game.mode !== "test" && (appearanceStatus.loading || appearanceStatus.error) && (
+      {(appearanceStatus.loading || appearanceStatus.error) && (
         <div className="appearance-notice" role="status">
           {appearanceStatus.error || "正在载入原版素材…"}
           {appearanceStatus.error && <button onClick={() => document.dispatchEvent(new Event("retry-appearance"))}>重试</button>}
@@ -733,7 +743,7 @@ export function App() {
           </div>
           <div className="controls-hint">
             <span>
-              WASD 移动 · 自动施法{" "}
+              WASD 移动 · 自动施法 · Alt 物品名{" "}
               <button
                 className="audio-toggle"
                 disabled={isGraybox}
@@ -1117,7 +1127,7 @@ export function App() {
           </section>
         </div>
       )}
-      {(game.phase === "won" || game.phase === "dead") && game.result && (
+      {(game.phase === "won" || game.phase === "dead") && game.result && (game.phase!=="dead" || game.player.hp>0 || settledRun===game.runId) && (
         <div className="modal-backdrop settlement-backdrop">
           <section
             className="settlement modal"
@@ -1129,7 +1139,7 @@ export function App() {
               {game.mode === "trial" ? "短局试玩结束" : "本次征途已结束"}
             </div>
             <h2 id="result-title">
-              {game.phase === "won" ? game.mapId === "biche" ? "荒野生还" : game.mapId === "mine" ? "矿洞生还" : "神殿生还" : "魂归玛法"}
+              {game.phase === "won" ? game.mapId === "biche" ? "荒野生还" : game.mapId === "mine" ? "矿洞生还" : "神殿生还" : game.player.hp<=0 ? "魂归玛法" : "远征止步"}
             </h2>
             <p>
               {game.phase === "won"
@@ -1139,6 +1149,7 @@ export function App() {
                   : `本局结束，${bossName}仍未被击败。`}
             </p>
             <div className="result-stats">
+              {(game.result.healing?.bloodPotion??0)>0 && <div><b>{Math.round(game.result.healing!.bloodPotion)}</b><span>血瓶实际回复</span></div>}
               <div>
                 <b>{game.kills}</b>
                 <span>击败怪物</span>

@@ -18,7 +18,7 @@ function kill(g: Game, kind: string, elite = false, hp = 1) {
   e.y = g.player.y;
   e.hp = hp;
   g.hit(e, 9999, "fireball");
-  return g.drops.at(-1)!;
+  return g.drops.find(d=>d.exp>0)!; // Currency/equipment drop; a potion may follow it.
 }
 
 describe("equipment drops (GDD §10.4)", () => {

@@ -12,5 +12,7 @@ for name,f in m['files'].items():
   if not samples or max(abs(x) for x in samples)==0:errors.append(name+': silent or empty source')
 for key,file in m['mapping'].items():
  if file not in m['files']:errors.append(key+': missing WAV')
+for key,source in {'hurt':'0103008A.WAV','death':'01030090.WAV'}.items():
+ if m['mapping'].get(key)!=source:errors.append(key+': missing verified male player feedback source')
 print(json.dumps({'originalWavFiles':len(m['files']),'mappedEvents':len(m['mapping']),'unverifiedMappingsNotSubstituted':m['missing'],'failures':errors},indent=2))
 sys.exit(bool(errors))

@@ -46,7 +46,7 @@ it("uses the same visible-facing pose through pause, expiration, death and manua
   expect(heroPose(g,123)).toMatchObject({motion:"attack",dir:2});
   g.clock=g.player.attackUntil;
   expect(heroPose(g,123)).toMatchObject({motion:"idle",dir:6});
-  g.phase="dead";
+  g.phase="dead";g.player.hp=0;
   expect(heroPose(g,123)).toMatchObject({motion:"death",dir:6});
   g.test.pose="attack";g.test.direction=7;
   expect(heroPose(g,123)).toEqual({motion:"attack",dir:7,time:123});

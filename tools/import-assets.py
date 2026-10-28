@@ -124,8 +124,11 @@ for proposal in json.loads((ROOT/'docs/design-data-V0.9.json').read_text())['equ
  if proposal['class']=='道士':names.append(proposal['name']+('（男）' if proposal['slot']=='衣服' else ''))
 for n in names:
  if n in itemmap and itemmap[n] in items:select('item',items[itemmap[n]],'item/'+n)
+ # The client uses pkgGfxID on the ground and pkgGfxID | 0x01000000
+ # in its inventory. Keep these as separate source-backed representations.
+ if n in itemmap and itemmap[n]|0x01000000 in items:select('item',items[itemmap[n]|0x01000000],'package/'+n)
 # Gold is a normal, source-backed item icon.
-for n in ['金币（小）','金创药（小）','魔法药（小）']:
+for n in ['金币（小）','金币（中）','金币（大）','金币（特）','金币（超）','金创药（小）','金创药（中）','魔法药（小）']:
  if n in itemmap and itemmap[n] in items:select('item',items[itemmap[n]],'item/'+n)
 
 # Classic client control board and windows, with exact source PNGs for DOM UI.

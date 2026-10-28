@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import {alignCameraScroll} from "./camera-grid";
 import {heroPose} from "./hero-pose";
 import {effectSprites,poisonTint} from "./effect-visual";
+import {dropVisuals,lootName} from "./loot-visual";
 import {simulationInput} from "./simulation";
 import { mapObjectAlpha, mapObjectDepth, coversActor, type Occluder } from "./map-render";
 import { assetUrl, isGraybox } from "./release";
@@ -54,6 +55,9 @@ class BattleScene extends Phaser.Scene {
   private bodies = new Map<string, Phaser.GameObjects.Image>();
   private pool: Phaser.GameObjects.Image[] = [];
   private labels = new Map<number, Phaser.GameObjects.Text>();
+  private seenLabels=new Set<number>();
+  private showLootNames=false;
+  private deathStartedAt:number|null=null;
   private bars!: Phaser.GameObjects.Graphics;
   private movementInput!: MovementInput;
   private accumulator = 0;
@@ -138,10 +142,13 @@ class BattleScene extends Phaser.Scene {
       "LEFT",
       "RIGHT",
       "SPACE",
+      "ALT",
     ]);
     this.input.keyboard!.on("keydown-ESC", () => game.pause());
     this.input.keyboard!.on("keydown-P", () => game.pause());
     this.input.keyboard!.on("keydown-SPACE", () => game.useManualSkill());
+    this.input.keyboard!.on("keydown-ALT",()=>{this.showLootNames=true;});
+    this.input.keyboard!.on("keyup-ALT",()=>{this.showLootNames=false;});
     this.input.keyboard!.on("keydown", (e: KeyboardEvent) => {
       if (game.phase === "upgrade" && ["1", "2", "3"].includes(e.key)) {
         const c = game.choices[Number(e.key) - 1];
@@ -189,6 +196,7 @@ class BattleScene extends Phaser.Scene {
     return this.scale.width < 700 ? 1.15 : 1.5;
   }
   private clearInput() {
+    this.showLootNames=false;
     this.drag = null;
     game.input = { x: 0, y: 0 };
     this.input.keyboard?.resetKeys();
@@ -362,7 +370,8 @@ class BattleScene extends Phaser.Scene {
     if (this.requireModels(needed)) this.heroLook = desired;
     const body = assets.animations[`${this.heroLook.body}/${motion}/${dir}`];
     if (!body?.length) return;
-    const frame = body[Math.floor(time * 9) % body.length];
+    const terminalDeath=motion==="death" && !(game.mode==="test" && game.test.pose==="death");
+    const frame = body[terminalDeath ? Math.min(body.length-1,Math.floor(time*9)) : Math.floor(time * 9) % body.length];
     const index = Number(frame.split("/").at(-1));
     const matching = (name: string) => assets.animations[`${name}/${motion}/${dir}`]?.find((f) => Number(f.split("/").at(-1)) === index);
     const shadow = matching(this.heroLook.body + "-shadow");
@@ -468,6 +477,13 @@ class BattleScene extends Phaser.Scene {
         scale,
       );
   }
+  private label(id:number,text:string,x:number,y:number,color:string,alpha=1,size=12) {
+    this.seenLabels.add(id);
+    let label=this.labels.get(id);
+    if(!label){label=this.add.text(0,0,"",{fontFamily:"SimSun, Songti SC, serif",fontSize:`${size}px`,stroke:"#16130b",strokeThickness:3}).setOrigin(.5).setDepth(6000);this.labels.set(id,label);}
+    label.setPosition(x,y).setText(text).setColor(color).setAlpha(alpha).setFontSize(size);
+    return label;
+  }
   update(_time: number, delta: number) {
     if (!rendererReady) return;
     if (!isGraybox) {
@@ -530,14 +546,19 @@ class BattleScene extends Phaser.Scene {
       this.accumulator = 0;
       this.drag = null;
     }
-    if (game.phase === "battle") {
-      for (const key of game.audioEvents.splice(0)) sounds.play(key);
+    if (game.phase !== "lobby") {
+      const audio=game.audioEvents.splice(0);
+      for (const key of audio) sounds.play(key);
+      if(game.mode==="test" && audio.some(key=>key==="hurt" || key==="death"))game.emit();
+      if(game.phase==="battle"){
       if (game.player.moving && game.clock >= this.nextFootstep) {
         sounds.play("step");
         this.nextFootstep = game.clock + 0.34;
       }
+      }
     } else game.audioEvents = [];
     this.seen.clear();
+    this.seenLabels.clear();
     this.bars.clear();
     const t = game.clock;
     if (game.phase === "lobby") {
@@ -688,19 +709,23 @@ class BattleScene extends Phaser.Scene {
           .fillStyle(0x8bbd79, 1)
           .fillRect(p.x - 18, p.y - 54, (36 * p.hp) / p.maxHp, 3);
       }
+      const mouse=this.cameras.main.getWorldPoint(this.input.activePointer.x,this.input.activePointer.y);
+      const lootLabels:Phaser.Geom.Rectangle[]=[];
       for (const d of game.drops) {
-        if (d.gold > 0)
-          this.draw(
-            "drop-" + d.id,
-            "item/金币（小）",
-            d.x,
-            d.y,
-            10,
-            1,
-            0.75,
-            false,
-          );
-        else this.bars.fillStyle(0x8bc2c5, 0.9).fillCircle(d.x, d.y, 3);
+        for(const [i,part] of dropVisuals(d).entries()) {
+          const key=`drop-${d.id}-${i}`;
+          this.draw(key+"-shadow",part.frame,d.x+part.dx+1,d.y+part.dy-1,-31,.45,1,false);
+          this.bodies.get(key+"-shadow")?.setTintFill(0);
+          this.draw(key,part.frame,d.x+part.dx,d.y+part.dy,-30,1,1,false);
+        }
+        if(this.showLootNames || game.mode==="test" && game.test.lootLabels || d.itemId || d.heal || Math.hypot(mouse.x-d.x,mouse.y-d.y)<24) {
+          const label=this.label(-d.id,lootName(d),d.x,d.y-23,d.heal ? "#f0a78c" : "#f5db79");
+          let bounds=label.getBounds();
+          for(let shift=0;shift<9 && lootLabels.some(old=>Phaser.Geom.Intersects.RectangleToRectangle(old,bounds));shift++) {
+            label.y-=19;bounds=label.getBounds();
+          }
+          lootLabels.push(bounds);
+        }
       }
       for (const p of game.projectiles)
         this.fx(
@@ -747,7 +772,9 @@ class BattleScene extends Phaser.Scene {
           ));
         }
       }
-      const hero=heroPose(game,_time/1000);
+      if(game.phase==="dead" && game.player.hp<=0)this.deathStartedAt ??= _time;
+      else this.deathStartedAt=null;
+      const hero=heroPose(game,_time/1000,this.deathStartedAt===null ? 0 : (_time-this.deathStartedAt)/1000);
       if(game.mode==="test" && game.test.showDetection)this.bars.lineStyle(2,0x71c9e8,.55).strokeCircle(game.player.x,game.player.y,game.detectionRange);
       this.actor(
         "hero",
@@ -758,9 +785,11 @@ class BattleScene extends Phaser.Scene {
         game.player.y,
         hero.time,
         game.player.y + 0.5,
-        t < game.player.hitUntil ? 0.65 : 1,
+        1,
       );
-      if (t < game.player.shieldUntil)
+      if(hero.motion==="hurt" && t-(game.player.hitUntil-.45)<.09)
+        for(const key of ["hero","hero-weapon","hero-cover","weapon-cover"])this.bodies.get(key)?.setTint(0xff9890);
+      if (hero.motion!=="death" && t < game.player.shieldUntil)
         this.fx(
           "shield",
           "shield",
@@ -770,33 +799,13 @@ class BattleScene extends Phaser.Scene {
           game.player.y + 1,
           1,
         );
-      this.bars
+      if(hero.motion!=="death")this.bars
         .lineStyle(1, 0xe4cc83, 0.65)
         .strokeEllipse(game.player.x, game.player.y + 3, 30, 15);
-      for (const f of game.floating) {
-        let label = this.labels.get(f.id);
-        if (!label) {
-          label = this.add
-            .text(0, 0, "", {
-              fontFamily: "Georgia, serif",
-              fontSize: "15px",
-              fontStyle: "bold",
-              stroke: "#16130b",
-              strokeThickness: 3,
-            })
-            .setOrigin(0.5)
-            .setDepth(6000);
-          this.labels.set(f.id, label);
-        }
-        label
-          .setPosition(f.x, f.y)
-          .setText(f.text)
-          .setColor(f.color)
-          .setAlpha(Math.min(1, f.life * 2));
-      }
+      for (const f of game.floating)this.label(f.id,f.text,f.x,f.y,f.color,Math.min(1,f.life*2),15);
     }
     for (const [id, label] of this.labels)
-      if (!game.floating.some((f) => f.id === id)) {
+      if (!this.seenLabels.has(id)) {
         label.destroy();
         this.labels.delete(id);
       }

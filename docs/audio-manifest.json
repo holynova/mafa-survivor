@@ -9,6 +9,12 @@
     "sha256": "0002588851cf2f9288261713df8735ed0ed3b645c7139680ae25b107a41dab70",
     "soundFormula": "0x04000000 + seffBase * 16 + stage; references resolved; first existing stage retained"
   },
+  "heroSoundReference": {
+    "ref": "bb6a22287abcd9f248d2aba755074c254c68787a",
+    "sourcePath": "client/src/soundeffectdb.cpp",
+    "sha256": "c531cfce810fe6f36eb1c59d56a53a35fb65b23646b7a5513e36c31dc721357c",
+    "note": "s_man_struck = 138.wav; s_man_die = 144.wav; 0x01030000 + source sound number. Current source actors are male."
+  },
   "mapping": {
     "fireball": "04000010.WAV",
     "lightning": "040000B0.WAV",
@@ -38,7 +44,8 @@
     "step": "01000001.WAV",
     "attack": "01010034.WAV",
     "unarmed": "01010039.WAV",
-    "hurt": "0103008A.WAV"
+    "hurt": "0103008A.WAV",
+    "death": "01030090.WAV"
   },
   "files": {
     "01000001.WAV": {
@@ -67,6 +74,13 @@
       "sha1": "5ae9c1cb3cd3a204f1a4fc10d466be89c8f65ed0",
       "sha256": "2f743e5fab9ec78ff5a9b873229754b0e4536dc6db505a7497b32b1a543c8656",
       "bytes": 32684,
+      "permissionStatus": "project_owner_authorized"
+    },
+    "01030090.WAV": {
+      "sourcePath": "sound/seff/01030090.WAV",
+      "sha1": "2fabe08ce28775246a17d8c1274240cb94f58e5e",
+      "sha256": "8b1b46d24f9418ff73a24bf21fc88881a119b77386295d15f761908e4e04c8f8",
+      "bytes": 74218,
       "permissionStatus": "project_owner_authorized"
     },
     "04000010.WAV": {

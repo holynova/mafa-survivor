@@ -5,6 +5,7 @@ import { clearTaoSkill } from "./taoist";
 import type { Game } from "./game";
 import type { SkillId } from "./spells";
 import { canStand } from "./world";
+import {appendLoot} from "./loot";
 export const newTestSettings = () => ({
   god: true,
   autowalk: false,
@@ -16,6 +17,7 @@ export const newTestSettings = () => ({
   recoverySample:false,
   incomingWallSample:false,
   showDetection:false,
+  lootLabels:false,
 });
 export function testSpawn(g: Game, kind: string, count: number) {
   if (g.mode !== "test" || !["battle", "paused"].includes(g.phase)) return;
@@ -113,6 +115,37 @@ export function testChapterVisual(g:Game) {
     g.floating.push({id:-e.id,x:e.x,y:e.y-(isBossKind(e.kind) ? 100 : 65),life:100,text:MONSTERS.find(m=>m.id===e.kind)!.name+(e.elite ? " · 精英" : ""),color:isBossKind(e.kind) ? "#ffdd8a" : e.elite ? "#ffa971" : "#e4e3cb"});
   }
   g.pause();g.emit();return g.enemies.length===kinds.length;
+}
+function lootArena(g:Game) {
+  if(g.mode!=="test")return false;
+  g.start("test",176,g.classId,false,"woma");
+  g.test.spawning=false;g.skills=[];g.basicCD=Infinity;return true;
+}
+export function testLootVisual(g:Game) {
+  if(!lootArena(g))return false;
+  g.test.lootLabels=true;g.player.hp=g.maxHP-7;
+  const points=g.navigation?.reachablePoints(g.player,75,260).filter(p=>g.attackLineClear(g.player,p));
+  const add=(dx:number,dy:number,extra:Partial<typeof g.drops[number]>)=>{
+    const desired={x:g.player.x+dx,y:g.player.y+dy};
+    const p=points?.filter(p=>g.drops.every(d=>Math.hypot(d.x-p.x,d.y-p.y)>35)).reduce<{x:number;y:number}|null>((best,p)=>!best || Math.hypot(p.x-desired.x,p.y-desired.y)<Math.hypot(best.x-desired.x,best.y-desired.y) ? p : best,null) ?? desired;
+    appendLoot(g.drops,{id:g.nextEntityId(),...p,born:g.clock,exp:0,gold:0,...extra});
+  };
+  [1,4,7,10,12].forEach((level,i)=>add(-160+i*80,80,{level,exp:[2,5,10,20,100][i],gold:[0,5,10,20,50][i]}));
+  const names=g.classId==="wizard" ? ["骨玉权杖","魔法长袍"] : g.classId==="warrior" ? ["裁决之杖","战神盔甲"] : ["龙纹剑","灵魂战衣"];
+  names.forEach((name,i)=>{const item=ITEMS.find(it=>it.name===name && hasWorldAppearance(it));if(item)add(i ? 110 : -110,-80,{itemId:item.id});});
+  add(-185,0,{heal:20});add(185,0,{heal:35});
+  g.pause();g.emit();return true;
+}
+export function testPotionPickup(g:Game) {
+  if(!lootArena(g))return false;
+  g.player.hp=g.maxHP-7;
+  for(let i=0;i<3;i++)appendLoot(g.drops,{id:g.nextEntityId(),x:g.player.x+i*10,y:g.player.y,born:0,exp:0,gold:0,heal:20});
+  g.step(1/60);g.pause();g.emit();return true;
+}
+export function testPlayerFeedback(g:Game,lethal=false) {
+  if(!lootArena(g))return false;
+  g.test.god=false;g.hurt(lethal ? 1e6 : 20,"physical",true,"test:feedback");
+  if(!lethal)g.pause();g.emit();return true;
 }
 /** Isolated, source-map wall probe. No ordinary run can load this scenario. */
 export function testMeleeWall(g: Game) {

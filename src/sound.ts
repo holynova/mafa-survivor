@@ -3,13 +3,15 @@ type AudioManifest = {
   mapping: Record<string, string>;
   files: Record<string, unknown>;
 };
-class OriginalSounds {
+export class OriginalSounds {
   private context: AudioContext | null = null;
   private gain: GainNode | null = null;
   private buffers = new Map<string, AudioBuffer>();
   private manifest: AudioManifest | null = null;
   private loading: Promise<void> | null = null;
   private voices = 0;
+  private feedback:AudioBufferSourceNode|null=null;
+  playedByKey:Record<string,number>={};
   muted = false;
   volume = 0.35;
   played = 0;
@@ -60,11 +62,12 @@ class OriginalSounds {
     if (this.gain) this.gain.gain.value = value ? 0 : this.volume;
   }
   play(key: string) {
+    const critical=key==="hurt" || key==="death";
     if (
       !this.context ||
       this.context.state !== "running" ||
       this.muted ||
-      this.voices >= 8
+      (!critical && this.voices >= 8)
     )
       return;
     const file = this.manifest?.mapping[key],
@@ -73,13 +76,17 @@ class OriginalSounds {
     const now = this.context.currentTime;
     if (now - (this.last.get(key) ?? -10) < 0.09) return;
     this.last.set(key, now);
+    if(critical)this.feedback?.stop();
     const source = this.context.createBufferSource();
     source.buffer = buffer;
     source.connect(this.gain!);
     this.voices++;
     this.played++;
+    this.playedByKey[key]=(this.playedByKey[key]??0)+1;
+    if(critical)this.feedback=source;
     source.onended = () => {
       this.voices--;
+      if(this.feedback===source)this.feedback=null;
       source.disconnect();
     };
     source.start();

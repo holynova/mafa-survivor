@@ -9,7 +9,7 @@ import { inputDiagnostics } from "./input";
 import { hasWorldAppearance } from "./appearance";
 import { appearanceStatus } from "./renderer";
 import { ITEMS, getItem } from "./content";
-import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual,testChapterVisual } from "./test-mode";
+import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual,testChapterVisual,testLootVisual,testPotionPickup,testPlayerFeedback } from "./test-mode";
 import {damageSourceName} from "./damage-taken";
 export function TestTools() {
   const [open, setOpen] = useState(true),
@@ -28,7 +28,7 @@ export function TestTools() {
   }, [game.phase]);
   if (game.mode !== "test" || game.phase === "lobby") return null;
   const pose=heroPose(game,game.clock);
-  const motionNames:Record<string,string>={idle:"站立",walk:"行走",attack:"挥砍",cast:"施法",hit:"受击",death:"死亡"};
+  const motionNames:Record<string,string>={idle:"站立",walk:"行走",attack:"挥砍",cast:"施法",hurt:"受击",death:"死亡"};
   const directions=["上","右上","右","右下","下","左下","左","左上"];
   return (
     <aside className="test-tools">
@@ -68,6 +68,13 @@ export function TestTools() {
             <button onClick={()=>testSpellVisual(game,"poison")}>红蓝中毒定格样例</button>
           </div>
           <button onClick={()=>testChapterVisual(game)}>重置本章并展陈怪物（暂停）</button>
+          <div className="test-row">
+            <button onClick={()=>testLootVisual(game)}>原版掉落展陈（沃玛）</button>
+            <button onClick={()=>testPotionPickup(game)}>验证血瓶拾取</button>
+            <button onClick={async()=>{await sounds.unlock();testPlayerFeedback(game);}}>真实受伤后定格</button>
+            <button onClick={async()=>{await sounds.unlock();testPlayerFeedback(game,true);}}>真实死亡演示</button>
+          </div>
+          {game.test.lootLabels && <p>五档原版金币堆表示经验／金币，装备与血瓶使用独立落地图。靠近拾取；满血保留血瓶，空槽穿戴装备，否则出售。测试不保存战绩。</p>}
           {game.mapId==="mine" && <>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testIncomingWall(game)}>重置并载入敌伤隔墙样例</button>
             {game.test.incomingWallSample && <>
@@ -82,6 +89,7 @@ export function TestTools() {
           <p>
             {sounds.status} · 已播放 {sounds.played} 次
           </p>
+          <output aria-label="受伤与死亡音效诊断">受伤音效 {sounds.playedByKey.hurt??0} · 阵亡音效 {sounds.playedByKey.death??0}<br />血瓶实际回复 {(game.tao.healing.bloodPotion??0).toFixed(1)}</output>
           <button
             disabled={isGraybox}
             onClick={async () => {
