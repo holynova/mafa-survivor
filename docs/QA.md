@@ -489,3 +489,5 @@ alpha.20已公开发布：标签`1e76796b5c5964e5dfef9e15c74cd81ddc8b84ef`，Sta
 alpha.21最终冻结72局：源码`32bbb57ef28d18a981f8f43831f633031c0cbe88`、sourceDirty=false，V7 SHA如上；全部终结，0异常。对照alpha.20干净V6：法师通关3→4（比奇176／17／991、矿洞176），战士通关仍0、推进波次中位数7→8.5、总击杀2018→3949；道士通关仍0、HP耗尽13→18、总击杀4331→3799。控制器差异不冒作数值平衡收益；道士回退如实保留。alpha21-comparison.json记录变动的四个src文件，普通战斗规则未改。完整职业／章节平衡未达标。
 
 自动走位开启时D600ms：1104→1217.7，KeyD/d；松开后自动输入恢复向左，暂停时1177.3。alpha21-input-diagnostics.txt与forest.jpg已查看，原树冠条带、完整遮挡轮廓与无细线通过，未操作用户现有页面。390×844真实iframe加载新赤月样例，三个新入口和距离／输出／承伤可滚动查看，alpha21-mobile.jpg及mobile-diagnostics.jpg已保存查看；测试HTML仅在忽略的dist。浏览器warn/error为空。
+
+alpha.21已公开发布：标签`115fa12458b7e1a97a3d733571d2d942661b0a04`，Stage release and Pages **40793782936**的build／deploy／release成功，Source checks **40793778301**成功。公网version.json为original／v0.1.0-alpha.21／115fa12。独立后台IAB28实操固定足部前景样例，完整下半身／武器轮廓可见；原赤月关闭无敌从432px进入300px侦测，26秒581输出／0承伤；沃玛隔离近战关闭无敌，46秒483输出／0承伤、HP185。alpha21-online-feet.jpg、online-boss.jpg与online-melee.jpg逐张保存查看，两个实战诊断文本已记录。赤月首领靠近画面上缘时部分模型在相机外，这是取景边界，不冒作全模型展陈截图。浏览器warn/error为空。所有截图、红灯日志、V6／V7矩阵及比较JSON附Release；用户现有5182页面与前台Chrome未操作。

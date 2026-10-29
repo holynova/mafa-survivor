@@ -119,3 +119,8 @@ Pages 测试地址：https://holynova.github.io/mafa-survivor/
 ## alpha.20 召唤物隔墙与自动寻药
 
 [v0.1.0-alpha.20](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.20)发布提交`1e76796b5c5964e5dfef9e15c74cd81ddc8b84ef`；[Pages与Release](https://github.com/holynova/mafa-survivor/actions/runs/40761322771)及[Source checks](https://github.com/holynova/mafa-survivor/actions/runs/40761318154)成功。438项游戏测试、7项Python、资源原图／WAV／生产构建通过，干净22afd57同V6控制器72局0异常／3通关，旧引擎同V6也是3通关，整体平衡仍未达标。真实公网后台样例验证神兽同锥形内可见16／墙后0，自动走位75→135实际回血60；版本original／alpha.20／1e76796匹配，截图、诊断与完整对照附Release。用户现有页面保留。
+
+
+## alpha.21 自动接敌校准与完整前景轮廓
+
+[v0.1.0-alpha.21](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.21)发布提交`115fa12458b7e1a97a3d733571d2d942661b0a04`；[Pages与Release](https://github.com/holynova/mafa-survivor/actions/runs/40793782936)及[Source checks](https://github.com/holynova/mafa-survivor/actions/runs/40793778301)成功。451项游戏测试／7项Python／原图原WAV／构建通过，32bbb57干净V7的72局0异常。普通战斗规则未变；策略对照法师3→4通关、战士推进中位数7→8.5、道士HP耗尽13→18，不能称作游戏平衡改善。原赤月前景只遮脚时的完整轮廓已公网截图；关闭无敌的赤月26秒581伤害／0承伤，沃玛隔离近战46秒483伤害／0承伤。公网版本original／alpha.21／115fa12匹配，截图、诊断与原始策略对照附Release；整体平衡未达标。
