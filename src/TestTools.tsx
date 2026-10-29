@@ -11,6 +11,7 @@ import { appearanceStatus } from "./renderer";
 import { ITEMS, getItem } from "./content";
 import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual,testChapterVisual,testLootVisual,testPotionPickup,testPlayerFeedback,testSummonWall,testHealthWalk,testBossEngagement,testMeleeDodge,testFootOcclusion,testRoleCadence } from "./test-mode";
 import {damageSourceName} from "./damage-taken";
+import {TEST_BUILDS,testBossBuild} from "./test-builds";
 export function TestTools() {
   const [open, setOpen] = useState(true),
     [kind, setKind] = useState("orc"),
@@ -20,6 +21,8 @@ export function TestTools() {
     ),
     [slot, setSlot] = useState(0);
   const [scenarioNotice,setScenarioNotice]=useState("");
+  const [buildId,setBuildId]=useState(TEST_BUILDS[0].id);
+  const [buildNotice,setBuildNotice]=useState("");
   useEffect(()=>setScenarioNotice(""),[game.runId]);
   useEffect(() => {
     if (["upgrade", "replace", "shop", "won", "dead"].includes(game.phase)) {
@@ -75,6 +78,14 @@ export function TestTools() {
           {game.test.cadenceSample && <>
             <output aria-label="技能节奏诊断">样例时间 {game.clock.toFixed(2)}秒<br />{game.skills.map(s=><span key={s.id}>{getSkill(s.id).name}：基础冷却 {getSkill(s.id).cooldown.toFixed(2)}秒 · 当前 {s.cd.toFixed(2)}秒 · 实际伤害 {Math.round(game.damageDealt[s.id]??0)}<br /></span>)}绿毒覆盖 {game.enemies.filter(e=>(e.greenPoison?.until??0)>game.clock).length} / {game.enemies.length} · 红毒覆盖 {game.enemies.filter(e=>(e.redPoison?.until??0)>game.clock).length} / {game.enemies.length}</output>
             <p>无敌、固定高血量靶怪、关闭普攻和刷怪，仅观察真实技能冷却与命中。点击「继续」；道士约4秒后覆盖第二只，点击施毒术可切换红毒。此样例不用于评估生存平衡。</p>
+          </>}
+          <label>首领挑战构筑 <select aria-label="首领挑战构筑" value={buildId} onChange={e=>setBuildId(e.target.value)}>{TEST_BUILDS.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</select></label>
+          <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>setBuildNotice(testBossBuild(game,buildId) ? "" : "当前地图未找到可见的合法首领位置，请换图后重试。")}>载入本章首领挑战</button>
+          {buildNotice && <p role="status">{buildNotice}</p>}
+          {game.test.bossBuild && <>
+            <output aria-label="首领构筑挑战诊断">{game.test.bossBuild.name} · {game.clock.toFixed(1)}秒 / {game.duration}秒<br />首领生命 {Math.max(0,Math.ceil(game.test.bossBuild.boss.hp))} / {Math.ceil(game.test.bossBuild.boss.maxHp)}<br />对首领实际伤害 {Math.round(Math.min(game.test.bossBuild.boss.maxHp,game.test.bossBuild.boss.maxHp-game.test.bossBuild.boss.hp))} · 承伤 {Math.round(game.damageTaken.physical+game.damageTaken.magic)}<br />{game.test.bossBuild.equipment.join(" · ")}</output>
+            <p>直接授予预设装备和六项Lv.3技能，已切换职业。无敌关闭，自动走位开启；保留第12波首领完整AI和召唤援军，关闭普通波次刷怪。此挑战不代表完整成长／经济或通关平衡，测试不保存战绩。点击「继续」开始，可手动接管。</p>
+            <details><summary>查看预设技能分支</summary>{game.test.bossBuild.branches.map(line=><p key={line}>{line}</p>)}</details>
           </>}
           {game.test.footOcclusionSample && <p>固定在原赤月源图前景边缘；脚部被挡时仍显示完整人物／武器轮廓，地图条带保持原图。</p>}
           {(game.test.engagementSample || game.test.meleeDodgeSample) && <>

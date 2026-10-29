@@ -2,7 +2,7 @@ import { getSkill } from "./spells";
 import { ITEMS,MAPS,MONSTERS,isBossKind } from "./content";
 import { hasWorldAppearance } from "./appearance";
 import { clearTaoSkill } from "./taoist";
-import type { Game } from "./game";
+import type { Enemy, Game } from "./game";
 import type { SkillId } from "./spells";
 import { canStand } from "./world";
 import {appendLoot} from "./loot";
@@ -21,6 +21,7 @@ export const newTestSettings = () => ({
   meleeDodgeSample:false,
   footOcclusionSample:false,
   cadenceSample:false,
+  bossBuild:null as {name:string;boss:Enemy;branches:string[];equipment:string[]} | null,
   incomingWallSample:false,
   showDetection:false,
   lootLabels:false,
