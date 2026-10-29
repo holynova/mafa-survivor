@@ -22,6 +22,7 @@ import {
 import {updateRangedEnemy} from "./enemy-ai";
 import {updateExpansionEnemy} from "./expansion-enemies";
 import {appendLoot,collectLoot,healthDrop} from "./loot";
+import {newPotionState,useBloodPotion,canCollectPotion} from "./potions";
 import {ATTACK_CADENCE,cooldownScale,outputScale} from "./cadence";
 import {newCombatRecovery,recoverHit,type DamageOrigin,type CombatHealing} from "./combat-recovery";
 import {newDamageTaken,recordDamageTaken,type DamageTaken} from "./damage-taken";
@@ -253,6 +254,7 @@ export class Game {
   unlockedMaps: Set<MapId> = new Set(["biche"]);
   crystals = 0;
   tao = createTaoState();
+  potions=newPotionState();
   test = newTestSettings();
   audioEvents: string[] = [];
   phase: Phase = "lobby";
@@ -484,6 +486,7 @@ export class Game {
     this.basicCD = 0;
     this.charges = {};
     this.tao = createTaoState();
+    this.potions=newPotionState();
     this.pets = [];
     this.pendingSkill = null;
     this.enemies = [];
@@ -581,6 +584,7 @@ export class Game {
       lastWaveKills: this.lastWaveKills,
       damageDealt: { ...this.damageDealt },
       purchases: { ...this.purchases },
+      potions:{reserve:[...this.potions.reserve],cd:this.potions.cd},
       combatRecovery: {
         healing: { ...this.combatRecovery.healing },
         killReadyAt: this.combatRecovery.killReadyAt,
@@ -658,6 +662,7 @@ export class Game {
     this.tao.poisonMode = cp.tao.poisonMode;
     this.tao.healPriority = cp.tao.healPriority;
     this.tao.healing = { ...cp.tao.healing };
+    this.potions={reserve:[...cp.potions.reserve],cd:cp.potions.cd};
     this.tao.buffs = {};
     this.enemies = [];
     this.projectiles = [];
@@ -687,10 +692,13 @@ export class Game {
       this.emit();
     }
   }
+  useBloodPotion() {const used=useBloodPotion(this);if(used)this.emit();return used;}
   step(dt: number) {
     if (this.phase !== "battle") return;
     this.clock += dt;
     this.waveTime += dt;
+    this.potions.cd=Math.max(0,this.potions.cd-dt);
+    if(this.player.hp/this.maxHP<=.5)useBloodPotion(this);
     this.player.hp = Math.min(
       this.maxHP,
       this.player.hp + (this.stats.hp_regen ?? 0) * dt,
@@ -1003,7 +1011,7 @@ export class Game {
         dx = this.player.x - d.x,
         dy = this.player.y - d.y,
         l = Math.hypot(dx, dy);
-      if(d.heal && this.player.hp>=this.maxHP && !d.exp && !d.gold)continue;
+      if(d.heal && !canCollectPotion(this,d) && !d.exp && !d.gold)continue;
       if (l < this.pickupRadius + 12) {
         const speed = 480 * dt;
         d.x += (dx / Math.max(1, l)) * speed;

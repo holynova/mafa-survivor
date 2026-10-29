@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CLASS_IDS, type ClassId } from "./classes";
+import {POTION_CAPACITY,POTION_COOLDOWN} from "./potions";
 import {
   ITEMS,
   MAP_IDS,
@@ -130,6 +131,7 @@ export const checkpointSchema = z.object({
   lastWaveKills: int(Number.MAX_SAFE_INTEGER),
   damageDealt: z.record(z.string().max(100), finite),
   purchases: z.record(z.string().max(100), int(99)).default({}),
+  potions:z.object({reserve:z.array(z.union([z.literal(20),z.literal(35)])).max(POTION_CAPACITY),cd:finite.min(0).max(POTION_COOLDOWN)}).strict().default(()=>({reserve:[],cd:0})),
   combatRecovery: z.object({
     healing: z.object({ onKill: finite, lifeSteal: finite }).strict(),
     killReadyAt: finite,

@@ -451,6 +451,7 @@ export function App() {
             )}
             {tab === "guide" && (
               <div className="guide">
+                <p>血瓶优先恢复当前生命，满血时最多储备3瓶。生命降至50%及以下会自动用药，也可按 <kbd>Q</kbd> 或点击血瓶提前使用，间隔2秒；新一局清空储备。</p>
                 <p>
                   <kbd>W A S D</kbd> / <kbd>方向键</kbd>{" "}
                   移动；触屏可在战场上拖动。
@@ -753,7 +754,7 @@ export function App() {
           </div>
           <div className="controls-hint">
             <span>
-              WASD 移动 · 自动施法 · Alt 物品名{" "}
+              WASD 移动 · Q 血瓶 · Alt 物品名{" "}
               <button
                 className="audio-toggle"
                 disabled={isGraybox}
@@ -787,6 +788,9 @@ export function App() {
               <span className="console-dc">{Math.round(game.stats.dc_max ?? 0)}</span>
               <span className="wallet">◈ {game.gold}</span>
               <span className="kills">击败 {game.kills}</span>
+              <button className="potion-use" aria-label="使用储备血瓶（Q）" disabled={game.phase!=="battle" || game.player.hp>=game.maxHP || !game.potions.reserve.length || game.potions.cd>0} title="最多储备3瓶；半血自动使用，Q可提前使用；间隔2秒" onClick={()=>game.useBloodPotion()}>
+                <Icon frame="item/金创药（小）"/><span>{game.potions.cd>0 ? game.potions.cd.toFixed(1)+"s" : `Q ${game.potions.reserve.length}/3`}</span>
+              </button>
               <button aria-label="查看装备与属性" onClick={toggleInventory}>
                 {!isGraybox && <img src={assetUrl("ui/character.png")} alt="" />}<span>装备</span>
               </button>
@@ -798,6 +802,7 @@ export function App() {
               </button>
             </div>
             <div className="console-mobile-actions">
+              <button aria-label="使用储备血瓶（Q）" disabled={game.phase!=="battle" || game.player.hp>=game.maxHP || !game.potions.reserve.length || game.potions.cd>0} onClick={()=>game.useBloodPotion()}>{game.potions.cd>0 ? game.potions.cd.toFixed(1)+"s" : `血瓶 ${game.potions.reserve.length}/3`}</button>
               <button aria-label="查看装备与属性" onClick={toggleInventory}>装备</button>
               <button aria-label={game.phase==="paused" ? "继续战斗" : "暂停战斗"} onClick={()=>game.pause()}>{game.phase==="paused" ? "继续" : "暂停"}</button>
             </div>

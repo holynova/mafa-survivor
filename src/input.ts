@@ -24,6 +24,7 @@ export class MovementInput {
   constructor(
     private target: EventTarget,
     private active: () => boolean,
+    private onPotion?:()=>void,
   ) {
     target.addEventListener("keydown", this.down, { capture: true });
     target.addEventListener("keyup", this.up, { capture: true });
@@ -32,7 +33,8 @@ export class MovementInput {
     const e = raw as KeyboardEvent;
     const code =
       e.code || codes[e.key?.length === 1 ? e.key.toLowerCase() : e.key];
-    if (!Object.values(codes).includes(code)) return;
+    const potion=code==="KeyQ" || e.key?.toLowerCase()==="q";
+    if (!Object.values(codes).includes(code) && !(potion && this.onPotion)) return;
     this.lastEvent = `${e.code || "无 code"} / ${e.key}`;
     const element = e.target as HTMLElement | null;
     if (
@@ -42,6 +44,7 @@ export class MovementInput {
       element?.closest?.("input, textarea, select, [contenteditable=true]")
     )
       return;
+    if(potion){if(!e.repeat)this.onPotion?.();e.preventDefault();return;}
     this.held.add(code);
     e.preventDefault();
   };

@@ -129,6 +129,7 @@ class BattleScene extends Phaser.Scene {
     this.movementInput = new MovementInput(
       window,
       () => game.phase === "battle",
+      ()=>game.useBloodPotion(),
     );
     this.game.canvas.tabIndex = 0;
     this.game.canvas.setAttribute("aria-label", "游戏战场");

@@ -2199,6 +2199,10 @@ body:has(.lobby) .vignette {
 .classic-console .hud-right button[aria-label="查看装备与属性"] { top:39px; left:74px; }
 .classic-console .hud-right button[aria-label="查看装备与属性"] img { display:block; width:32px; height:38px; object-fit:contain; image-rendering:pixelated; }
 .classic-console .hud-right button[aria-label="查看装备与属性"] span { position:absolute; left:-2px; bottom:-12px; width:42px; }
+.classic-console .hud-right .potion-use {top:40px;left:21px;}
+.classic-console .potion-use .icon-box {width:26px;height:36px;display:block;margin:auto;}
+.classic-console .potion-use>span:last-child {position:absolute;left:-4px;bottom:-12px;width:45px;white-space:nowrap;}
+.classic-console .potion-use:disabled {opacity:.65;}
 .classic-console .hud-right button[aria-label="暂停战斗"],.classic-console .hud-right button[aria-label="继续战斗"] { top:8px; left:73px; height:22px; width:43px; background:#1c1109d9; border:1px solid #a58b53; }
 .classic-console .console-ac,.classic-console .console-dc { position:absolute; bottom:13px; font:11px Georgia,serif; color:#f3d99e; }
 .classic-console .console-ac { left:54px; }.classic-console .console-dc { left:132px; }

@@ -23,8 +23,8 @@ it("drops a small potion on a successful roll, but summoned enemies give no loot
  expect(g.drops.some(d=>d.heal===20)).toBe(true);
  const other=arena();other.rng.next=()=>0;other.hit(other.spawnEnemy("orc",true),1e9,"test");expect(other.drops).toHaveLength(0);
 });
-it("leaves full-health potions on the floor, then heals and records only actual HP",()=>{
- const g=arena();g.drops=[{...coin(),x:g.player.x,y:g.player.y,exp:0,heal:20}];
+it("leaves excess full-health potions on the floor, then heals and records only actual HP",()=>{
+ const g=arena();g.potions.reserve=[20,20,20];g.drops=[{...coin(),x:g.player.x,y:g.player.y,exp:0,heal:20}];
  g.step(1/60);expect(g.drops).toHaveLength(1);g.player.hp=g.maxHP-7;g.step(1/60);
  expect(g.player.hp).toBe(g.maxHP);expect(g.tao.healing.bloodPotion).toBe(7);expect(g.drops).toHaveLength(0);
 });
@@ -60,7 +60,7 @@ it("critical feedback cannot be discarded by a full spell-sound queue",()=>{
 });
 it("runs visible loot, actual-pickup and injury/death scenarios without ordinary rewards",()=>{
  const g=arena();expect(testLootVisual(g)).toBe(true);expect(g.phase).toBe("paused");expect(g.drops).toHaveLength(9);
- expect(testPotionPickup(g)).toBe(true);expect(g.tao.healing.bloodPotion).toBe(7);expect(g.drops).toHaveLength(2);
+ expect(testPotionPickup(g)).toBe(true);expect(g.tao.healing.bloodPotion).toBe(7);expect(g.drops).toHaveLength(0);expect(g.potions.reserve).toEqual([20,20]);
  expect(testPlayerFeedback(g)).toBe(true);expect(g.player.hp).toBeLessThan(g.maxHP);expect(g.phase).toBe("paused");
  expect(testPlayerFeedback(g,true)).toBe(true);expect(g.player.hp).toBe(0);expect(g.result?.mode).toBe("test");expect(g.result?.crystals).toBe(0);
  const normal=new Game();normal.start("normal");const id=normal.runId;expect(testLootVisual(normal)).toBe(false);expect(testPlayerFeedback(normal,true)).toBe(false);expect(normal.runId).toBe(id);

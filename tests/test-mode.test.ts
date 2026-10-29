@@ -97,6 +97,19 @@ describe("real keyboard event adapter", () => {
       y: -1,
     });
   });
+  it("handles Q without cancelling held movement and ignores key repeat",()=>{
+    let uses=0;const target=new EventTarget(),input=new MovementInput(target,()=>true,()=>uses++);
+    target.dispatchEvent(key("keydown","KeyD","d"));target.dispatchEvent(key("keydown","KeyQ","q"));
+    target.dispatchEvent(Object.assign(key("keydown","KeyQ","q"),{repeat:true}));
+    expect(uses).toBe(1);expect(input.axes).toEqual({x:1,y:0});expect(input.held.has("KeyQ")).toBe(false);input.destroy();
+  });
+  it("does not drink when editing a field, using a browser shortcut, or outside battle",()=>{
+    let uses=0;const field=Object.assign(new EventTarget(),{closest:()=>({})}),input=new MovementInput(field,()=>true,()=>uses++);
+    field.dispatchEvent(key("keydown","KeyQ","q"));expect(uses).toBe(0);input.destroy();
+    const target=new EventTarget(),active=new MovementInput(target,()=>true,()=>uses++);
+    target.dispatchEvent(Object.assign(key("keydown","KeyQ","q"),{ctrlKey:true}));active.destroy();
+    const inactive=new MovementInput(target,()=>false,()=>uses++);target.dispatchEvent(key("keydown","KeyQ","q"));expect(uses).toBe(0);inactive.destroy();
+  });
 });
 
 describe("original map collision grid", () => {

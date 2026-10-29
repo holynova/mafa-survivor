@@ -1,6 +1,7 @@
 import {getItem,SLOT_KEYS,isBossKind} from "./content";
 import {sellPrice} from "./rules";
 import type {Drop,Enemy,Game} from "./game";
+import {collectPotion} from "./potions";
 
 /** Small, source-backed potions: rare ordinary drops and reliable Boss recovery. */
 export function healthDrop(enemy:Enemy,roll:()=>number) {
@@ -31,19 +32,11 @@ export function appendLoot(drops:Drop[],drop:Drop) {
   drops.push(drop);
 }
 function gold(g:Game,amount:number){g.gold+=amount;g.waveGold+=amount;g.totalGold+=amount;}
-/** Return false only when a full-health potion stack should stay on the floor. */
+/** Return false when part of a potion stack should remain on the floor. */
 export function collectLoot(g:Game,d:Drop) {
   gold(g,d.gold);g.exp+=d.exp;d.gold=0;d.exp=0;
   if(d.heal) {
-    if(g.player.hp>=g.maxHP)return false;
-    let count=d.count??1,actual=0;
-    while(count>0 && g.player.hp<g.maxHP){
-      const before=g.player.hp;g.player.hp=Math.min(g.maxHP,before+d.heal*(1+(g.stats.healing_received??0)/100));actual+=g.player.hp-before;count--;
-    }
-    g.tao.healing.bloodPotion=(g.tao.healing.bloodPotion??0)+actual;
-    g.floating.push({id:g.nextEntityId(),x:g.player.x,y:g.player.y-65,text:`+${Math.round(actual)} 血瓶`,color:"#96e6a4",life:1.1});
-    g.effect("heal",g.player.x,g.player.y,0,.7);
-    d.count=count;return count===0;
+    return collectPotion(g,d);
   }
   if(d.itemId) {
     const item=getItem(d.itemId),count=d.count??1;let sold=0,equipped=false;

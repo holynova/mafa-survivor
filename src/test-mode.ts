@@ -23,6 +23,7 @@ export const newTestSettings = () => ({
   cadenceSample:false,
   bossBuild:null as {name:string;boss:Enemy;branches:string[];equipment:string[]} | null,
   cameraEdgeSample:false,
+  potionReserveSample:false,
   incomingWallSample:false,
   showDetection:false,
   lootLabels:false,
@@ -180,7 +181,7 @@ export function testPotionPickup(g:Game) {
   if(!lootArena(g))return false;
   g.player.hp=g.maxHP-7;
   for(let i=0;i<3;i++)appendLoot(g.drops,{id:g.nextEntityId(),x:g.player.x+i*10,y:g.player.y,born:0,exp:0,gold:0,heal:20});
-  g.step(1/60);g.pause();g.emit();return true;
+  g.step(1/60);g.step(1/60);g.pause();g.emit();return true;
 }
 export function testHealthWalk(g:Game) {
   if(!lootArena(g))return false;
@@ -191,6 +192,18 @@ export function testHealthWalk(g:Game) {
   g.player.hp=g.maxHP-60;g.test.autowalk=true;g.test.healthWalkSample=true;g.test.lootLabels=true;
   appendLoot(g.drops,{id:g.nextEntityId(),...potion,exp:0,gold:0,heal:20,count:3,born:0});
   if(coin)appendLoot(g.drops,{id:g.nextEntityId(),...coin,exp:2,gold:4,born:0});
+  g.pause();g.emit();return true;
+}
+export function testPotionReserve(g:Game,automatic=false) {
+  if(!lootArena(g))return false;
+  appendLoot(g.drops,{id:g.nextEntityId(),x:g.player.x,y:g.player.y,born:0,exp:0,gold:0,heal:20,count:4});
+  g.step(1/60);
+  const point=g.navigation?.reachablePoints(g.player,130,200).find(p=>g.attackLineClear(g.player,p));
+  if(!point)return false;
+  for(const drop of g.drops)Object.assign(drop,point);
+  g.test.god=false;g.test.lootLabels=true;g.test.potionReserveSample=true;
+  g.hurt(g.maxHP*(automatic ? .7 : .25),"physical",true,"test:potion-reserve");
+  if(automatic)g.step(1/60);
   g.pause();g.emit();return true;
 }
 export function testBossEngagement(g:Game) {

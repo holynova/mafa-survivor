@@ -9,7 +9,7 @@ import { inputDiagnostics } from "./input";
 import { hasWorldAppearance } from "./appearance";
 import { appearanceStatus } from "./renderer";
 import { ITEMS, getItem } from "./content";
-import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual,testChapterVisual,testLootVisual,testPotionPickup,testPlayerFeedback,testSummonWall,testHealthWalk,testBossEngagement,testMeleeDodge,testFootOcclusion,testRoleCadence,testViewportEdge } from "./test-mode";
+import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual,testChapterVisual,testLootVisual,testPotionPickup,testPlayerFeedback,testSummonWall,testHealthWalk,testBossEngagement,testMeleeDodge,testFootOcclusion,testRoleCadence,testViewportEdge,testPotionReserve } from "./test-mode";
 import {damageSourceName} from "./damage-taken";
 import {TEST_BUILDS,testBossBuild} from "./test-builds";
 export function TestTools() {
@@ -99,12 +99,15 @@ export function TestTools() {
           <div className="test-row">
             <button onClick={()=>testLootVisual(game)}>原版掉落展陈（沃玛）</button>
             <button onClick={()=>testPotionPickup(game)}>验证血瓶拾取</button>
+            <button onClick={()=>testPotionReserve(game)}>储药与Q回血（沃玛）</button>
+            <button onClick={()=>testPotionReserve(game,true)}>半血自动用药（沃玛）</button>
             <button onClick={()=>testHealthWalk(game)}>自动寻药样例（沃玛）</button>
             <button onClick={async()=>{await sounds.unlock();testPlayerFeedback(game);}}>真实受伤后定格</button>
             <button onClick={async()=>{await sounds.unlock();testPlayerFeedback(game,true);}}>真实死亡演示</button>
           </div>
           {game.test.healthWalkSample && <p>已关闭刷怪，开局缺血60点，自动走位已开启。点击「继续」观察角色自行绕行拾药；方向键和拖动可随时接管。</p>}
-          {game.test.lootLabels && !game.test.healthWalkSample && <p>五档原版金币堆表示经验／金币，装备与血瓶使用独立落地图。靠近拾取；满血保留血瓶，空槽穿戴装备，否则出售。测试不保存战绩。</p>}
+          {game.test.potionReserveSample && <p>真实拾取4瓶：储备3瓶、余下1瓶移到远处，随后实际受伤。点击「继续」后按Q或点血瓶；生命≤50%会自动用药，每2秒最多1瓶。测试不保存战绩。</p>}
+          {game.test.lootLabels && !game.test.healthWalkSample && <p>五档原版金币堆表示经验／金币，装备与血瓶使用独立落地图。靠近拾取；满血储药最多3瓶，额外留在地面；空槽穿戴装备，否则出售。测试不保存战绩。</p>}
           {game.mapId==="mine" && <>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testIncomingWall(game)}>重置并载入敌伤隔墙样例</button>
             {game.test.incomingWallSample && <>
@@ -120,6 +123,7 @@ export function TestTools() {
             {sounds.status} · 已播放 {sounds.played} 次
           </p>
           <output aria-label="受伤与死亡音效诊断">受伤音效 {sounds.playedByKey.hurt??0} · 阵亡音效 {sounds.playedByKey.death??0}<br />血瓶实际回复 {(game.tao.healing.bloodPotion??0).toFixed(1)}</output>
+          <output aria-label="储备血瓶诊断">储备 {game.potions.reserve.length} / 3 · 小瓶 {game.potions.reserve.filter(p=>p===20).length} · 中瓶 {game.potions.reserve.filter(p=>p===35).length}<br />用药冷却 {game.potions.cd.toFixed(2)}秒 · 生命≤50%自动使用<br />治疗音效 {sounds.playedByKey.heal??0}</output>
           <button
             disabled={isGraybox}
             onClick={async () => {
