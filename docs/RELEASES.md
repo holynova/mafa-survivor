@@ -138,3 +138,10 @@ Pages 测试地址：https://holynova.github.io/mafa-survivor/
 [v0.1.0-alpha.23](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.23)提交`33e7ef2721a8aadc65f170f1213973c8032bb4bc`；[Pages与Release](https://github.com/holynova/mafa-survivor/actions/runs/40823934397)及[Source checks](https://github.com/holynova/mafa-survivor/actions/runs/40823934569)成功。483测试／7Python／原图／29原WAV／构建通过；干净65e843a同V7普通72局与alpha.22逐字段相同，0异常／4法师通关。新增两套明确测试授予的六技能首领预设，16场仅道士比奇击杀；普通完整成长／职业平衡仍未通过。
 
 公网original／alpha.23／33e7ef2匹配；真实沃玛1080／1488下沿完整人物／脚影位于操作栏上方，道士比奇预设实战至75秒：实际首领伤害2204、0承伤、135HP、0结晶。公网截图、诊断、移动端回归、普通前后矩阵／预设结果、隔离诊断和镜头红绿测试附Release；用户现有页和前台Chrome保留。
+
+
+## alpha.24 储备血瓶与紧急用药
+
+[v0.1.0-alpha.24](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.24)提交`4a167cf88a0be015767441869c62dbdd89c8d01c`；[Pages与Release](https://github.com/holynova/mafa-survivor/actions/runs/40830912476)及[Source checks](https://github.com/holynova/mafa-survivor/actions/runs/40830912568)成功。502测试／7Python／原图／29原WAV／构建通过。干净17129a3同V7的72局0异常，法师4→5通关、三职业HP耗尽各减2，道士中位11→12；战士仍0通关且6局推进回退，完整平衡未达标。
+
+公网original／alpha.24／4a167cf匹配。真实输入框Q不耗药、战场Q75→95／库存3→2、按钮仅补剩余5点、半血30→50／库存2／CD2秒均通过，原治疗音效计数1／2／3与实际回血一致；两张公网图、诊断、手机点击／冷却、完整模型回归及原始前后对照附Release。波次检查点库存／CD与旧数据默认值由实际存取模块的隔离IndexedDB测试覆盖。用户现有页面与前台Chrome保留。
