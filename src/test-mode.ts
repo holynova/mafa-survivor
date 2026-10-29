@@ -114,10 +114,10 @@ export function testChapterVisual(g:Game) {
   g.test.spawning=false;g.skills=[];g.basicCD=Infinity;
   const kinds=[MAPS[g.mapId].boss,...MAPS[g.mapId].monsterPool];
   const nativeGallery=g.mapId==="bairimen" || g.mapId==="shimu";
-  const targets=nativeGallery ? [[185,35],[-185,35],[-120,80],[100,80],[-90,140],[95,140]] : g.mapId==="woma" || g.mapId==="zuma"
+  const targets=g.mapId==="shimu" ? [[180,30],[100,30],[220,100],[105,105],[190,165]] : nativeGallery ? [[185,35],[-185,35],[-120,80],[100,80],[-90,140],[95,140]] : g.mapId==="woma" || g.mapId==="zuma"
     ? [[220,70],[-220,70],[-75,60],[75,60]]
     : [[185,0],[-185,0],[-110,-105],[100,-105],[0,125],[-90,125],[130,120],[0,-140]];
-  const points=g.navigation?.reachablePoints(g.player,80,260).filter(p=>g.attackLineClear(g.player,p) && (!nativeGallery || p.y>=g.player.y+20 && p.y<=g.player.y+170));
+  const points=g.navigation?.reachablePoints(g.player,80,260).filter(p=>g.attackLineClear(g.player,p) && (!nativeGallery || p.y>=g.player.y+20 && p.y<=g.player.y+170) && (g.mapId!=="shimu" || p.x>=g.player.x+70));
   for(let i=0;i<kinds.length;i++) {
     const [dx,dy]=targets[i%targets.length],desired={x:g.player.x+dx,y:g.player.y+dy};
     const candidates=points?.filter(p=>g.enemies.every(e=>Math.hypot(e.x-p.x,e.y-p.y)>66));
