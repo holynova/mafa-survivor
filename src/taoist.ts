@@ -2,6 +2,7 @@ import type { Enemy, Game, Pet, Skill } from "./game";
 import type { SkillId } from "./spells";
 import { isBossKind } from "./content";
 import { clamp } from "./rules";
+import {skillExtras} from "./skill-growth";
 import {outputScale} from "./cadence";
 
 export type ActorBuffs = {
@@ -231,7 +232,7 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
         (1 + (g.stats.sc_bonus_pct ?? 0) / 100);
       for (const f of selected) heal(g, f.id, amount, s.id);
     } else {
-      if (injured.length < 2 && g.player.hp / g.maxHP >= 0.35) return false;
+      if (injured.length < 2 && g.player.hp / g.maxHP >= 0.35+(skillExtras(s).triggerHP??0)/100) return false;
       if (!injured.length) return false;
       const amount =
         (14 + g.rollStat("sc")) *
@@ -258,7 +259,7 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
   if (s.id === "invisible") {
     if (
       g.player.moving ||
-      g.player.hp / g.maxHP >= 0.6 ||
+      g.player.hp / g.maxHP >= 0.6+(skillExtras(s).triggerHP??0)/100 ||
       targets.filter((e) => distance(e, g.player) < 120).length < 2
     )
       return false;
@@ -293,7 +294,7 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
       const dx = e.x - g.player.x,
         dy = e.y - g.player.y,
         d = Math.max(1, Math.hypot(dx, dy));
-      const speed = 320 * (1 + (g.stats.projectile_speed ?? 0) / 100);
+      const speed = 320 * (1 + (g.stats.projectile_speed ?? 0) / 100)*(1+s.speed/100);
       g.projectiles.push({
         id: g.nextEntityId(),
         x: g.player.x,
@@ -330,7 +331,7 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
           damage: Math.max(
             1,
             Math.round(
-              (3 + g.rollStat("sc") * 0.5) *
+              (3 + g.rollStat("sc") * 0.5) * (1+(skillExtras(s).poisonPower??0)/100) *
                 (1 + (g.stats.sc_bonus_pct ?? 0) / 100) *
                 (1 + (g.stats.all_damage_pct ?? 0) / 100),
             ),
@@ -353,6 +354,7 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
     for (const e of chosen) {
       e.revealUntil = g.clock + duration(g, s, 6, 12);
       e.revealTags = s.power > 0;
+      e.revealDetails=!!skillExtras(s).revealDetails;
     }
     return true;
   }
@@ -377,7 +379,7 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
         e.x,
         e.y,
         range,
-        Math.min(4, e.trapUntil - g.clock),
+        e.trapUntil - g.clock,
       ).targetId = e.id;
     }
     return true;

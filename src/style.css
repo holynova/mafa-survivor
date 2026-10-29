@@ -2250,3 +2250,40 @@ body:has(.lobby) .vignette {
 .damage-flash {position:fixed;inset:0;z-index:9;pointer-events:none;box-shadow:inset 0 0 110px 22px #b716198c;animation:wound-feedback .36s ease-out forwards;}
 @keyframes wound-feedback {from{opacity:1;}to{opacity:0;}}
 .death-cue {position:fixed;inset:0;z-index:8;pointer-events:none;display:grid;place-items:end center;padding-bottom:16vh;color:#d8b276;font:32px SimSun,"Songti SC",serif;letter-spacing:8px;text-shadow:1px 2px #210808,0 0 12px #000;background:radial-gradient(ellipse at center,transparent 35%,#16050485);}
+
+/* Skill cultivation stays in paused panels so the playfield remains clear. */
+.skill-study { margin:18px 0; padding:14px; border:1px solid #816e42; background:#18130db8; }
+.skill-study h3 { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:0 0 10px; }
+.skill-study h3 small { font-size:12px; color:#b9ab88; font-weight:normal; }
+.skill-study label,.skill-book-shop label,.upgrade-focus { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin:10px 0; color:#d9c995; }
+.skill-study select,.skill-book-shop select,.upgrade-focus select { max-width:100%; min-height:36px; color:#e8d8aa; background:#241b10; border:1px solid #887343; padding:5px 9px; }
+.skill-steps { list-style:none; padding:0; margin:12px 0 0; display:grid; gap:5px; }
+.skill-steps li { display:flex; gap:12px; padding:8px; border:1px solid #615332; color:#b6aa8c; font-size:13px; line-height:1.6; }
+.skill-steps li b { min-width:32px; }
+.skill-steps .learned { color:#cfbf98; }
+.skill-steps .current { border-color:#d7b760; color:#f4df9d; background:#9c762327; }
+.skill-metrics,.next-skill { font-size:13px; line-height:1.7; color:#dec989; }
+.skill-book-shop { margin:16px 0; padding:15px; border:1px solid #957945; background:#241a10ad; }
+.skill-book-shop header { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; }
+.skill-book-shop h3 { margin:0; color:#e6c77d; }
+.skill-book-quote { display:flex; align-items:center; gap:14px; margin-top:14px; padding-top:14px; border-top:1px solid #6a5537; }
+.skill-book-quote>div { flex:1; min-width:0; }
+.skill-book-quote p { font-size:13px; line-height:1.6; margin:6px 0; }
+.skill-book-quote small { color:#c2b089; }
+.skill-book-quote button { flex-shrink:0; min-height:42px; }
+.shop-skill-guide { margin:14px 0; }
+.shop-skill-guide>summary { cursor:pointer; color:#ddc58f; padding:9px 0; }
+.upgrade-focus small { font-size:12px; color:#b9ab88; }
+@media(max-width:600px) {
+ .skill-study,.skill-book-shop { padding:10px; }
+ .skill-book-quote { flex-wrap:wrap; gap:10px; }
+ .skill-book-quote button { width:100%; }
+ .skill-steps li { gap:8px; font-size:12px; }
+ .skill-study label,.skill-book-shop label { align-items:flex-start; flex-direction:column; }
+ .skill-study select,.skill-book-shop select { width:100%; }
+}
+.training-reward { padding:9px 12px; border-left:3px solid #a4b57b; background:#53653726; color:#dce4b4; font-size:13px; line-height:1.6; }
+.classic-ui:has(.modal-backdrop) .test-tools { display:none; }
+@media(max-width:600px) {
+ .classic-ui:has(.modal-backdrop) .release-badge { top:4px; right:4px; left:auto; }
+}

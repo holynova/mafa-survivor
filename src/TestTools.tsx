@@ -9,8 +9,10 @@ import { inputDiagnostics } from "./input";
 import { hasWorldAppearance } from "./appearance";
 import { appearanceStatus } from "./renderer";
 import { ITEMS, getItem } from "./content";
-import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual,testChapterVisual,testLootVisual,testPotionPickup,testPlayerFeedback,testSummonWall,testHealthWalk,testBossEngagement,testMeleeDodge,testFootOcclusion,testRoleCadence,testViewportEdge,testPotionReserve } from "./test-mode";
+import { testSkillRank, testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual,testChapterVisual,testLootVisual,testPotionPickup,testPlayerFeedback,testSummonWall,testHealthWalk,testBossEngagement,testMeleeDodge,testFootOcclusion,testRoleCadence,testViewportEdge,testPotionReserve } from "./test-mode";
 import {damageSourceName} from "./damage-taken";
+import {skillMetrics} from "./skill-metrics";
+import {SKILL_GROWTH} from "./skill-growth";
 import {TEST_BUILDS,testBossBuild} from "./test-builds";
 export function TestTools() {
   const [open, setOpen] = useState(true),
@@ -20,10 +22,12 @@ export function TestTools() {
       game.classInfo.startingSkill,
     ),
     [slot, setSlot] = useState(0);
+  const [rank,setRank]=useState(1);
   const [scenarioNotice,setScenarioNotice]=useState("");
   const [buildId,setBuildId]=useState(TEST_BUILDS[0].id);
   const [buildNotice,setBuildNotice]=useState("");
   useEffect(()=>setScenarioNotice(""),[game.runId]);
+  useEffect(()=>setSelected(game.classInfo.startingSkill),[game.classId]);
   useEffect(() => {
     if (["upgrade", "replace", "shop", "won", "dead"].includes(game.phase)) {
       setOpen(false);
@@ -66,9 +70,9 @@ export function TestTools() {
           </output>
           <label><input type="checkbox" checked={game.test.showDetection} onChange={e=>{game.test.showDetection=e.target.checked;game.emit();}} />显示侦测圈 · {Math.round(game.detectionRange)}px</label>
           <div className="test-row">
-            <button onClick={()=>testSpellVisual(game,"hellfire")}>地狱火定格样例</button>
-            <button onClick={()=>testSpellVisual(game,"beast")}>神兽喷火定格样例</button>
-            <button onClick={()=>testSpellVisual(game,"poison")}>红蓝中毒定格样例</button>
+            <button onClick={()=>testSpellVisual(game,"hellfire",rank)}>地狱火定格样例</button>
+            <button onClick={()=>testSpellVisual(game,"beast",rank)}>神兽喷火定格样例</button>
+            <button onClick={()=>testSpellVisual(game,"poison",rank)}>红蓝中毒定格样例</button>
             <button onClick={()=>testSummonWall(game)}>神兽隔墙喷火对照（矿洞）</button>
             <button onClick={()=>testBossEngagement(game)}>Boss接敌与避险（赤月）</button>
             <button onClick={()=>testMeleeDodge(game)}>战士近战避险（沃玛）</button>
@@ -85,8 +89,8 @@ export function TestTools() {
           {buildNotice && <p role="status">{buildNotice}</p>}
           {game.test.bossBuild && <>
             <output aria-label="首领构筑挑战诊断">{game.test.bossBuild.name} · {game.clock.toFixed(1)}秒 / {game.duration}秒<br />首领生命 {Math.max(0,Math.ceil(game.test.bossBuild.boss.hp))} / {Math.ceil(game.test.bossBuild.boss.maxHp)}<br />对首领实际伤害 {Math.round(Math.min(game.test.bossBuild.boss.maxHp,game.test.bossBuild.boss.maxHp-game.test.bossBuild.boss.hp))} · 承伤 {Math.round(game.damageTaken.physical+game.damageTaken.magic)}<br />{game.test.bossBuild.equipment.join(" · ")}</output>
-            <p>直接授予预设装备和六项Lv.3技能，已切换职业。无敌关闭，自动走位开启；保留第12波首领完整AI和召唤援军，关闭普通波次刷怪。此挑战不代表完整成长／经济或通关平衡，测试不保存战绩。点击「继续」开始，可手动接管。</p>
-            <details><summary>查看预设技能分支</summary>{game.test.bossBuild.branches.map(line=><p key={line}>{line}</p>)}</details>
+            <p>直接授予预设装备和6／6／3／2／2／1级技能，已切换职业。无敌关闭，自动走位开启；保留第12波首领完整AI和召唤援军，关闭普通波次刷怪。此挑战不代表完整成长／经济或通关平衡，测试不保存战绩。点击「继续」开始，可手动接管。</p>
+            <details><summary>查看预设技能等级</summary>{game.test.bossBuild.branches.map(line=><p key={line}>{line}</p>)}</details>
           </>}
           {game.test.footOcclusionSample && <p>固定在原赤月源图前景边缘；脚部被挡时仍显示完整人物／武器轮廓，地图条带保持原图。</p>}
           {game.test.cameraEdgeSample && <p>固定在原沃玛地图最下方的合法地面，检查人物脚部与阴影完整显示在操作栏上方。窗口缩放时随实际操作栏高度调整。</p>}
@@ -361,6 +365,14 @@ export function TestTools() {
               ))}
             </select>
           </label>
+          <label>技能等级 <select aria-label="测试技能等级" value={rank} onChange={e=>setRank(Number(e.target.value))}>
+            {[1,2,3,4,5,6].map(level=><option key={level} value={level}>Lv.{level}</option>)}
+          </select></label>
+          <button onClick={()=>testSkillRank(game,selected,slot,rank)}>应用所选技能等级</button>
+          <output aria-label="技能等级诊断">{getSkill(selected).classId===game.classId && <>
+            {getSkill(selected).name} · Lv.{rank}：{SKILL_GROWTH[selected][rank-1].label}<br />
+            {skillMetrics(game,game.newSkill(selected,rank)).join(" · ")}
+          </>}</output>
           <div className="test-row">
             <button onClick={() => testEquip(game, selected, slot)}>
               装备所选技能

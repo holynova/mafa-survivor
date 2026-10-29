@@ -480,6 +480,7 @@ const definitions = [
 export const SKILLS = definitions.map((x) => ({
   ...skillSchema.parse(x),
   cooldown:Math.round(x.cooldown*cooldownScale(x.id)*1000)/1000,
+  // Historical 3-rank branch metadata; runtime uses SKILL_GROWTH in skill-growth.ts.
   branches: [...x.branches] as Branch[],
 }));
 export const getSkill = (id: SkillId) => {

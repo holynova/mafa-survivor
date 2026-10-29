@@ -21,9 +21,9 @@ afterEach(()=>setWorldLayouts({}));
 it.each(TEST_BUILDS.flatMap(build=>PLAYABLE_MAP_IDS.map(mapId=>({build,mapId}))))("$build.name fights the actual $mapId Boss on legal floor",({build,mapId})=>{
  setWorldLayouts(layouts);const g=new Game();g.start("test",17,"wizard",false,mapId);
  expect(testBossBuild(g,build.id)).toBe(true);expect(g.classId).toBe(build.classId);expect(g.phase).toBe("paused");
- expect(g.wave).toBe(12);expect(g.level).toBe(18);expect(g.bossSpawned).toBe(true);
+ expect(g.wave).toBe(12);expect(g.level).toBe(20);expect(g.bossSpawned).toBe(true);
  expect(g.test.god).toBe(false);expect(g.test.spawning).toBe(false);expect(g.test.autowalk).toBe(true);
- expect(g.skills).toHaveLength(6);expect(g.skills.every(s=>s.rank===3)).toBe(true);
+ expect(g.skills).toHaveLength(6);expect(g.skills.map(s=>s.rank)).toEqual([6,6,3,2,2,1]);
  expect(g.player.hp).toBe(g.maxHP);expect(Object.values(g.equipment).every(e=>hasWorldAppearance(getItem(e!.itemId)))).toBe(true);
  const boss=g.test.bossBuild!.boss;expect(boss.kind).toBe(MAPS[mapId].boss);expect(g.canStand(boss.x,boss.y)).toBe(true);expect(g.attackLineClear(g.player,boss)).toBe(true);
  g.pause();for(let tick=0;tick<4501 && g.phase==="battle";tick++){

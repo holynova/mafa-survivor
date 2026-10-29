@@ -37,7 +37,7 @@ describe("wave-boundary checkpoints", () => {
     g.start("normal", 176, "wizard");
     const cp = g.snapshotCheckpoint()!;
     expect(cp).toMatchObject({
-      version: 1, mode: "normal", classId: "wizard", mapId: "biche",
+      version: 2, mode: "normal", classId: "wizard", mapId: "biche",
       phase: "battle", wave: 1, clock: 0, gold: 0, level: 1,
     });
     g.step(1 / 60);

@@ -30,6 +30,9 @@ import {
   releaseCommit,
   repositoryUrl,
 } from "./release";
+import {SkillGuide} from "./SkillGuide";
+import {bookName,bookTier,SKILL_GROWTH} from "./skill-growth";
+import type {SkillId} from "./spells";
 import { TestTools } from "./TestTools";
 import { saveRun, history, loadProgress, unlockChapter, buyTalent, readCheckpoint, writeCheckpoint, clearCheckpoint } from "./save";
 import { SaveManager } from "./SaveManager";
@@ -423,7 +426,7 @@ export function App() {
                     <span>{game.classInfo.role}</span>
                     <small>
                       初始技能：{getSkill(game.classInfo.startingSkill).name} ·
-                      无限 MP
+                      技能最高6级 · 无限 MP
                     </small>
                   </div>
                   <span className="class-mark">已选</span>
@@ -538,7 +541,7 @@ export function App() {
                         </h3>
                         <p>{skill.description}</p>
                         <span>
-                          {skill.branches.map((b) => b.label).join(" / ")}
+                          <details><summary>查看1—6级成长</summary><ol className="skill-steps">{SKILL_GROWTH[skill.id].map((step,index)=><li key={index}><b>Lv.{index+1}</b><span>{step.label}</span></li>)}</ol></details>
                         </span>
                       </div>
                     </article>
@@ -724,7 +727,7 @@ export function App() {
                       <div>
                         <strong>{def.name}{s.id === "poison" ? ` · ${game.tao.poisonMode === "green" ? "绿毒" : "红毒"}` : ""}</strong>
                         <span>
-                          Lv.{s.rank}{" "}
+                          Lv.{s.rank}/6{" "}
                           <em>
                             {def.passive
                               ? "常驻"
@@ -821,7 +824,11 @@ export function App() {
             <h2 id="upgrade-title">
               修行精进 <small>Lv.{game.level}</small>
             </h2>
-            <p className="muted">选择一项强化，继续你的征途。</p>
+            <p className="muted">选择一项强化。技能最高6级，重点培养两个主力；6级终阶第6波开放。</p>
+            {game.training.waveExp>0 && <p className="training-reward">本波修炼获得 {game.training.waveExp}经验</p>}
+            <label className="upgrade-focus">关注技能 <select aria-label="升级关注技能" value={game.skillFocus??""} onChange={e=>game.setSkillFocus((e.target.value||null) as SkillId|null)}>
+              <option value="">不关注</option>{game.skills.filter(s=>s.rank<6).map(s=><option key={s.id} value={s.id}>{getSkill(s.id).name} Lv.{s.rank}</option>)}
+            </select><small>从下次升级开始影响候选</small></label>
             <div className="upgrade-grid">
               {game.choices.map((c, i) => (
                 <button
@@ -859,7 +866,7 @@ export function App() {
           >
             <div className="eyebrow">六槽取舍</div>
             <h2>习得{getSkill(game.pendingSkill).name}</h2>
-            <p className="muted">选择替换一项技能。保留的技能强化不受影响。</p>
+            <p className="muted">替换会失去旧技能的等级和强化。{game.pendingBook!==null ? `确认后支付${game.bookOffer?.price}金币；取消不扣钱。` : "保留的技能不受影响。"}</p>
             <div className="replacement-grid">
               {game.skills.map((skill, index) => (
                 <button key={skill.id} onClick={() => game.replaceSkill(index)}>
@@ -875,7 +882,7 @@ export function App() {
               className="secondary"
               onClick={() => game.replaceSkill(null)}
             >
-              放弃本次新技能
+              {game.pendingBook!==null ? "取消购买，返回商店" : "放弃本次新技能"}
             </button>
           </section>
         </div>
@@ -902,6 +909,7 @@ export function App() {
                 <strong>◈ {game.gold}</strong>
               </div>
             </header>
+            {game.training.waveExp>0 && <p className="training-reward" role="status">本波修炼 +{game.training.waveExp}经验 · 完成波次且击杀达标，补足本阶段成长</p>}
             <div className="shop-toolbar">
               <p>已锁定 {2-game.shopLocksRemaining}/2 件 · 可保留到下波攒钱购买；装备会自动穿戴。</p>
               <button
@@ -982,6 +990,24 @@ export function App() {
                 );
               })}
             </div>
+            <section className="skill-book-shop" aria-label="技能书商店">
+              <header><h3>技能书</h3><span>本局已购 {game.booksBought.length}/2 本</span></header>
+              <p className="muted">只学习1级新技能，升级仍靠修行。普通商品刷新不会更换本店技能书。</p>
+              <label>关注未学技能 <select aria-label="关注技能书" value={game.bookWish??""} onChange={e=>game.setBookWish((e.target.value||null) as SkillId|null)}>
+                <option value="">随机报价</option>{SKILLS.filter(s=>s.classId===game.classId && !game.skills.some(a=>a.id===s.id)).map(s=><option key={s.id} value={s.id}>{s.name}{bookTier(s.id)===3 ? " · 第3波起售" : ""}</option>)}
+              </select></label>
+              <small className="muted">第3／6／9波后的商店优先报价关注书；本店报价已固定。</small>
+              {game.bookOffer ? <article className="skill-book-quote">
+                <Icon frame="package/半月弯刀" />
+                <div><strong>{bookName(game.bookOffer.skill)}</strong><p>{getSkill(game.bookOffer.skill).description}</p>
+                <small>习得 Lv.1 · 占用一个技能槽{game.skills.length>=game.maxSkills ? " · 购买前选择替换" : ""}</small></div>
+                <button disabled={game.bookOffer.sold || game.gold<game.bookOffer.price || game.booksBought.length>=2 || game.skills.some(s=>s.id===game.bookOffer!.skill)} onClick={()=>game.buyBook(game.bookOffer!.id)}>
+                  {game.bookOffer.sold ? "已购买" : `购买技能书 ◈ ${game.bookOffer.price}`}
+                </button>
+              </article> : <p className="muted">{game.booksBought.length>=2 ? "本局技能书已达两本上限。" : game.skills.length>=game.maxSkills ? "技能槽已满。可关注替换技能，在后续商店查看报价。" : "暂无可售技能书。"}</p>}
+              {game.booksBought.length>0 && <p className="muted">已购：{game.booksBought.map(id=>getSkill(id).name).join("、")}</p>}
+            </section>
+            <details className="shop-skill-guide"><summary>查看技能成长与培养方向</summary><SkillGuide /></details>
             <Equipment sell />
             <div className="shop-bottom">
               <span>
@@ -1041,6 +1067,7 @@ export function App() {
               </button>
             </header>
             <Equipment sell={game.phase === "shop"} />
+            <SkillGuide />
             <div className="stat-grid">
               {[
                 ["最大生命", Math.ceil(game.maxHP)],
@@ -1182,6 +1209,7 @@ export function App() {
                 <span>修行等级</span>
               </div>
             </div>
+            {(game.result.trainingExp??0)>0 && <p>波次修炼经验：{game.result.trainingExp}</p>}
             <div className="damage-list">
               <p className="muted">
                 伤害构成 · 战斗 {game.clock.toFixed(1)} 秒
@@ -1200,6 +1228,7 @@ export function App() {
                 </div>
               ))}
             </div>
+            {!!game.result.skillBooks?.length && <p>本局技能书：{game.result.skillBooks.join("、")}</p>}
             {purchaseRows(game.purchases).length > 0 && (
               <div className="purchase-list" aria-label="本局商店购买">
                 <p className="muted">本局购买</p>

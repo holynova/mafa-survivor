@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import {alignCameraScroll,battleViewport} from "./camera-grid";
 import {heroPose} from "./hero-pose";
+import {enemyInsight} from "./enemy-insight";
 import {effectSprites,poisonTint} from "./effect-visual";
 import {dropVisuals,lootName} from "./loot-visual";
 import {simulationInput} from "./simulation";
@@ -351,6 +352,7 @@ class BattleScene extends Phaser.Scene {
       .setDepth(depth)
       .setAlpha(alpha)
       .setScale(scale)
+      .setRotation(0)
       .clearTint();
   }
   private requireModels(names: string[]) {
@@ -470,6 +472,7 @@ class BattleScene extends Phaser.Scene {
     depth: number,
     scale = 1,
     frameRate = 10,
+    rotation = 0,
   ) {
     if (isGraybox) {
       this.bars
@@ -478,7 +481,7 @@ class BattleScene extends Phaser.Scene {
       return;
     }
     const frames = assets.animations[name];
-    if (frames?.length)
+    if (frames?.length) {
       this.draw(
         key,
         frames[Math.floor(time * frameRate) % frames.length],
@@ -488,6 +491,11 @@ class BattleScene extends Phaser.Scene {
         1,
         scale,
       );
+      if(rotation) {
+        const frame=assets.frames[frames[Math.floor(time*frameRate)%frames.length]];
+        this.bodies.get(key)?.setOrigin(frame.originX/frame.width,frame.originY/frame.height).setPosition(x,y).setRotation(rotation);
+      }
+    }
   }
   private label(id:number,text:string,x:number,y:number,color:string,alpha=1,size=12) {
     this.seenLabels.add(id);
@@ -651,7 +659,9 @@ class BattleScene extends Phaser.Scene {
         );
         const tint=poisonTint(e,game.clock);
         if(tint!==undefined)this.bodies.get("enemy-"+e.id)?.setTint(tint);
-        if (e.elite || e.hp < e.maxHp) {
+        const insight=enemyInsight(game,e);
+        if(insight)this.label(-1000000-e.id,insight,e.x,e.y-90,"#e6dfaf",1,11);
+        if (e.elite || e.hp < e.maxHp || insight) {
           const w = isBossKind(e.kind) ? 64 : 32;
           this.bars
             .fillStyle(0x150c09, 0.85)
@@ -777,10 +787,10 @@ class BattleScene extends Phaser.Scene {
             sprite.y,
             sprite.time,
             sprite.depth,
-            ["explosion", "ice", "nova", "repulse"].includes(f.kind)
+            sprite.scale??(["explosion", "ice", "nova", "repulse"].includes(f.kind)
               ? Math.max(0.8, f.radius / 120)
-              : 1,
-            sprite.frameRate,
+              : 1),
+            sprite.frameRate,sprite.rotation,
           ));
         }
       }

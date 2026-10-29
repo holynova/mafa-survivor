@@ -1,3 +1,4 @@
+import {canonicalBonuses,MAX_SKILL_RANK} from "./skill-growth";
 import { getSkill } from "./spells";
 import { ITEMS,MAPS,MONSTERS,isBossKind } from "./content";
 import { hasWorldAppearance } from "./appearance";
@@ -70,6 +71,16 @@ export function testEquip(g: Game, id: SkillId, slot: number) {
   g.emit();
   return true;
 }
+/** Explicit rank controls never enter normal/trial progression. */
+export function testSkillRank(g:Game,id:SkillId,slot:number,rank:number) {
+  if(g.mode!=="test" || !["battle","paused"].includes(g.phase) || !Number.isInteger(rank) || rank<1 || rank>MAX_SKILL_RANK || getSkill(id).classId!==g.classId)return false;
+  if(!g.skills.some(s=>s.id===id) && !testEquip(g,id,slot))return false;
+  const skill=g.skills.find(s=>s.id===id)!;
+  clearTaoSkill(g,id);g.effects=g.effects.filter(f=>f.kind!==id);
+  if(id==="shield")g.player.shieldUntil=0;
+  Object.assign(skill,canonicalBonuses(id,rank),{rank,cd:0});
+  g.recompute();g.emit();return true;
+}
 export function testClear(g: Game) {
   if (g.mode !== "test") return;
   g.test.visualEpoch++;
@@ -81,7 +92,7 @@ export function testClear(g: Game) {
   g.emit();
 }
 /** Freeze actual casts for visual inspection; ordinary runs cannot load it. */
-export function testSpellVisual(g: Game, sample: "hellfire" | "beast" | "poison") {
+export function testSpellVisual(g: Game, sample: "hellfire" | "beast" | "poison",rank=1) {
   if (g.mode !== "test") return false;
   g.start("test", 176, sample === "hellfire" ? "wizard" : "taoist", false, "biche");
   g.test.spawning = false;
@@ -91,7 +102,7 @@ export function testSpellVisual(g: Game, sample: "hellfire" | "beast" | "poison"
     g.attackLineClear(g.player, p)) ?? {x:g.player.x+170,y:g.player.y};
   const enemy = g.spawnEnemy("orcWarrior");
   Object.assign(enemy, point, {hp:10000,maxHp:10000,speed:0,attackCD:Infinity});
-  const skill = g.newSkill(sample);
+  const skill = g.newSkill(sample,rank);
   skill.cd=0;g.skills=[skill];g.cast(skill);
   if (sample === "poison") {
     // The first enemy has green poison; give the second a higher target weight.

@@ -166,7 +166,7 @@ it("plays a normal taoist run through upgrades, shops and a terminal result dete
   expect(a.upgrades).toBeGreaterThan(0);
   expect(a.kills).toBeGreaterThan(0);
   expect(a.result?.classId).toBe("taoist");
-  expect(a.result?.skills).toContain("灵魂火符 Lv.1");
+  expect(a.result?.skills.some(s=>/^灵魂火符 Lv\.[1-6]$/.test(s))).toBe(true);
   expect(a.result?.skillDamage.talisman).toBeGreaterThan(0);
   console.log("taoist-176 balance probe", JSON.stringify({
     phase: a.phase, wave: a.wave, kills: a.kills, clock: Math.round(a.clock),

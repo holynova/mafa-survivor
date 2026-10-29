@@ -94,6 +94,10 @@ export async function readCheckpoint(): Promise<RunCheckpoint | null> {
     if (raw === undefined) return null;
     const checkpoint = sanitizeCheckpoint(raw);
     if (!checkpoint) await meta.delete("run-checkpoint");
+    else if(checkpoint.legacyGrowth) {
+      if(!await meta.get("run-checkpoint-before-six-levels"))await meta.put(raw,"run-checkpoint-before-six-levels");
+      await meta.put(checkpoint,"run-checkpoint");
+    }
     return checkpoint;
   });
 }

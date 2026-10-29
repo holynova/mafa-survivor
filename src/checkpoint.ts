@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CLASS_IDS, type ClassId } from "./classes";
+import {canonicalBonuses,bookAvailable,bookPrice,MAX_SKILL_RANK} from "./skill-growth";
 import {POTION_CAPACITY,POTION_COOLDOWN} from "./potions";
 import {
   ITEMS,
@@ -19,19 +20,19 @@ import {
  * enemies, projectiles and drops are never persisted, so a resumed run always
  * replays the current wave from its beginning.
  */
-export const RUN_CHECKPOINT_VERSION = 1;
+export const RUN_CHECKPOINT_VERSION = 2;
 
 const finite = z.number().finite();
 const bounded = (max: number) => finite.min(-max).max(max);
 const int = (max: number) => z.number().int().min(0).max(max);
 const skillIds = new Set(SKILLS.map((s) => s.id));
 const itemIds = new Set(ITEMS.map((i) => i.id));
-const petKinds = new Set(MONSTERS.map((m) => m.id));
+const petKinds = new Set([...MONSTERS.map((m) => m.id),"summonedSkeleton","beast"]);
 
 const skillSchema = z.object({
   id: z.string().max(40).refine((id) => skillIds.has(id as SkillId), "unknown skill"),
   focusTarget: z.number().int().optional(),
-  rank: z.number().int().min(1).max(3),
+  rank: z.number().int().min(1).max(MAX_SKILL_RANK),
   cd: bounded(120),
   retryAt: finite.optional(),
   power: bounded(10000),
@@ -107,7 +108,7 @@ const playerSchema = z.object({
 }).strict();
 
 export const checkpointSchema = z.object({
-  version: z.literal(RUN_CHECKPOINT_VERSION),
+  version: z.union([z.literal(1),z.literal(RUN_CHECKPOINT_VERSION)]),
   savedAt: int(Number.MAX_SAFE_INTEGER),
   mode: z.enum(["normal", "trial"]),
   classId: z.enum(CLASS_IDS),
@@ -151,6 +152,14 @@ export const checkpointSchema = z.object({
   offers: z.array(offerSchema).max(4),
   choices: z.array(upgradeSchema).max(3),
   pendingSkill: z.string().max(40).nullable(),
+  pendingBook:z.number().int().positive().nullable().default(null),
+  bookOffer:z.object({id:z.number().int().positive(),skill:z.string().max(40),price:int(1000000),wave:z.number().int().min(1).max(12),sold:z.boolean()}).strict().nullable().default(null),
+  booksBought:z.array(z.string().max(40)).max(2).default([]),
+  bookWish:z.string().max(40).nullable().default(null),
+  skillFocus:z.string().max(40).nullable().default(null),
+  focusMisses:int(2).default(0),
+  training:z.object({lastWave:int(12),total:int(1000000),waveExp:int(1000000)}).strict().default(()=>({lastWave:0,total:0,waveExp:0})),
+  legacyGrowth:z.object({skills:z.array(skillSchema).max(6),choices:z.array(upgradeSchema).max(3)}).strict().nullable().default(null),
   nextEntityId: z.number().int().min(1),
   tao: z.object({
     poisonMode: z.enum(["green", "red"]),
@@ -173,8 +182,36 @@ export function sanitizeCheckpoint(value: unknown): RunCheckpoint | null {
   const cp = parsed.data;
   const skills = cp.skills.filter((s) => classSkills.has(`${cp.classId}:${s.id}`));
   if (!skills.length) return null;
-  cp.skills = skills;
+  if(new Set(skills.map(s=>s.id)).size!==skills.length)return null;
+  const migrating=cp.version===1;
+  if(migrating) {
+    if(skills.some(s=>s.rank>3))return null;
+    cp.legacyGrowth={skills:skills.map(s=>({...s})),choices:cp.choices.map(c=>({...c}))};
+  }
+  cp.version=RUN_CHECKPOINT_VERSION;
+  cp.skills = skills.map(s=>({...s,...canonicalBonuses(s.id as SkillId,s.rank)}));
+  const validSkills=skillIdsFor(cp.classId);
+  if(cp.skillFocus && !cp.skills.some(s=>s.id===cp.skillFocus && s.rank<MAX_SKILL_RANK))cp.skillFocus=null;
+  if(cp.bookWish && (!validSkills.has(cp.bookWish) || cp.skills.some(s=>s.id===cp.bookWish)))cp.bookWish=null;
+  if(new Set(cp.booksBought).size!==cp.booksBought.length || cp.booksBought.some(id=>!validSkills.has(id)))return null;
+  const book=cp.bookOffer;
+  if(book && (!validSkills.has(book.skill) || book.wave!==cp.wave ||
+    !bookAvailable(book.skill as SkillId,cp.wave) || book.price!==bookPrice(book.skill as SkillId,cp.wave) ||
+    !book.sold && cp.skills.some(s=>s.id===book.skill)))cp.bookOffer=null;
+  if(cp.phase!=="shop" && !(cp.phase==="replace" && cp.pendingBook!==null))cp.bookOffer=null;
+  if(cp.pendingBook!==null && (cp.phase!=="replace" || !cp.bookOffer || cp.bookOffer.id!==cp.pendingBook ||
+      cp.bookOffer.sold || cp.pendingSkill!==cp.bookOffer.skill || cp.booksBought.length>=2))return null;
   cp.pets = cp.pets.filter((p) => petKinds.has(p.kind) && p.hp <= p.maxHp);
+  if(migrating) {
+    const kept:Record<string,number>={};let summons=0;
+    cp.pets=cp.pets.filter(p=>{
+      const source=p.source??"charm",skill=cp.skills.find(s=>s.id===source);
+      if(!skill)return false;
+      const cap=source==="skeleton" ? Math.min(2,1+skill.count) : source==="beast" ? 1 : Math.min(5,2+skill.count);
+      if((kept[source]??0)>=cap || source!=="charm" && summons>=3)return false;
+      kept[source]=(kept[source]??0)+1;if(source!=="charm")summons++;return true;
+    });
+  }
   cp.equipment = Object.fromEntries(
     Object.entries(cp.equipment).filter(
       ([slot, e]) => (SLOT_KEYS as readonly string[]).includes(slot) && itemIds.has(e.itemId),

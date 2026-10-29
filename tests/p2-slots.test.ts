@@ -142,29 +142,17 @@ describe("three classes same-table experience (GDD §6.3 / P3-11)", () => {
   );
 
   it.each(classes)(
-    "%s can learn its starting skill branches through Lv3",
+    "%s advances its fixed starting track through level six",
     (classId) => {
       const g = start(classId, false, 176);
       const skill = g.skills[0];
       const def = getSkill(skill.id);
-      // rank up twice to Lv3
-      for (const branch of def.branches.slice(0, 2)) {
-        g.choices = [
-          {
-            id: `${skill.id}-${branch.field}`,
-            kind: "skill",
-            skill: skill.id,
-            name: def.name,
-            description: "",
-            field: branch.field,
-            value: branch.value,
-          },
-        ];
-        g.phase = "upgrade";
-        g.choose(g.choices[0].id);
-        expect(g.phase).toBe("battle");
+      g.wave=6;
+      for(let rank=2;rank<=6;rank++) {
+        g.skillFocus=skill.id;g.focusMisses=2;g.choices=g.makeChoices();g.phase="upgrade";
+        g.choose(g.choices.find(c=>c.skill===skill.id)!.id);
+        expect(skill.rank).toBe(rank);expect(g.phase).toBe("battle");
       }
-      expect(skill.rank).toBe(3);
     },
   );
 });

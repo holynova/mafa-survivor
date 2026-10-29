@@ -23,11 +23,14 @@ import {updateRangedEnemy} from "./enemy-ai";
 import {updateExpansionEnemy} from "./expansion-enemies";
 import {appendLoot,collectLoot,healthDrop} from "./loot";
 import {newPotionState,useBloodPotion,canCollectPotion} from "./potions";
-import {ATTACK_CADENCE,cooldownScale,outputScale} from "./cadence";
+import {ATTACK_CADENCE,outputScale} from "./cadence";
 import {newCombatRecovery,recoverHit,type DamageOrigin,type CombatHealing} from "./combat-recovery";
 import {newDamageTaken,recordDamageTaken,type DamageTaken} from "./damage-taken";
 import { TEMPLE_RANGED, updateTempleEnemy } from "./temple";
 import type { SkillField } from "./spells";
+import {MAX_SKILL_RANK,FINAL_RANK_WAVE,canonicalBonuses,skillExtras,canAdvanceSkill,nextSkillLabel,bookAvailable,bookPrice,bookName} from "./skill-growth";
+import {newTraining,trainingReward} from "./training";
+import {skillCooldown} from "./skill-metrics";
 import {
   createTaoState,
   castTaoist,
@@ -100,6 +103,7 @@ export type Enemy = Entity & {
   trapUntil?: number;
   revealUntil?: number;
   revealTags?: boolean;
+  revealDetails?: boolean;
   lastSeen?: { id: number; x: number; y: number; until: number };
   /** Boss 当前阶段（1=普通，2=狂暴） */
   bossPhase?: number;
@@ -178,6 +182,9 @@ export type Fx = Entity & {
   total: number;
   radius: number;
   targetId?: number;
+  width?: number;
+  spread?: number;
+  aimAngle?: number;
 };
 export type Floating = Entity & { text: string; color: string; life: number };
 export type Skill = {
@@ -219,6 +226,7 @@ export type Offer = {
   locked: boolean;
   sold: boolean;
 };
+export type BookOffer = {id:number;skill:SkillId;price:number;wave:number;sold:boolean};
 export type Equipped = { itemId: string; paid: number };
 export type RunResult = {
   classId?: ClassId;
@@ -240,6 +248,8 @@ export type RunResult = {
   combatHealing?: CombatHealing;
   damageTaken?: DamageTaken;
   skills: string[];
+  skillBooks?: string[];
+  trainingExp?: number;
 };
 export class Game {
   private nav: WorldNavigation | null = null;
@@ -292,6 +302,14 @@ export class Game {
   skills: Skill[] = [];
   pets: Pet[] = [];
   pendingSkill: SkillId | null = null;
+  pendingBook: number | null = null;
+  bookOffer: BookOffer | null = null;
+  booksBought: SkillId[] = [];
+  bookWish: SkillId | null = null;
+  skillFocus: SkillId | null = null;
+  focusMisses = 0;
+  training=newTraining();
+  legacyGrowth: RunCheckpoint["legacyGrowth"] = null;
   automaticTeleport = false;
   automaticDash = true;
   warriorFourSlot = false;
@@ -419,26 +437,12 @@ export class Game {
     return 70 * (1 + (this.stats.pickup_radius ?? 0) / 100);
   }
   get detectionRange() { return 300*(1+(this.stats.detection_range??0)/100); }
-  newSkill(id: SkillId): Skill {
+  newSkill(id: SkillId, rank = 1): Skill {
     return {
       id,
-      rank: 1,
+      rank: clamp(Math.floor(rank),1,MAX_SKILL_RANK),
       cd: 0.3,
-      power: 0,
-      count: 0,
-      radius: 0,
-      duration: 0,
-      localCDR: 0,
-      shieldReduction: 0,
-      speed: 0,
-      range: 0,
-      knockback: 0,
-      chance: 0,
-      summonPower: 0,
-      accuracy: 0,
-      angle: 0,
-      hitFloor: 0,
-      summonHP: 0,
+      ...canonicalBonuses(id,rank),
     };
   }
   start(mode: Mode, seed = 176, classId: ClassId = this.classId, warriorFourSlot = false, mapId: MapId = this.mapId) {
@@ -489,6 +493,8 @@ export class Game {
     this.potions=newPotionState();
     this.pets = [];
     this.pendingSkill = null;
+    this.pendingBook=null;this.bookOffer=null;this.booksBought=[];this.bookWish=null;
+    this.skillFocus=null;this.focusMisses=0;this.legacyGrowth=null;this.training=newTraining();
     this.enemies = [];
     this.projectiles = [];
     this.drops = [];
@@ -606,6 +612,9 @@ export class Game {
       offers: this.offers.map((o) => ({ ...o })),
       choices: this.choices.map((c) => ({ ...c })),
       pendingSkill: this.pendingSkill,
+      pendingBook:this.pendingBook,bookOffer:this.bookOffer ? {...this.bookOffer} : null,
+      booksBought:[...this.booksBought],bookWish:this.bookWish,skillFocus:this.skillFocus,
+      focusMisses:this.focusMisses,legacyGrowth:this.legacyGrowth,training:{...this.training},
       nextEntityId: this.id + 1,
       tao: {
         poisonMode: this.tao.poisonMode,
@@ -658,6 +667,12 @@ export class Game {
     this.offers = cp.offers as Offer[];
     this.choices = cp.choices as Upgrade[];
     this.pendingSkill = cp.pendingSkill as SkillId | null;
+    this.pendingBook=cp.pendingBook;this.bookOffer=cp.bookOffer as BookOffer|null;
+    this.booksBought=cp.booksBought as SkillId[];this.bookWish=cp.bookWish as SkillId|null;
+    this.skillFocus=cp.skillFocus as SkillId|null;this.focusMisses=cp.focusMisses;
+    this.legacyGrowth=cp.legacyGrowth;this.training={...cp.training};
+    if(cp.phase==="upgrade" && (!this.choices.length || this.choices.some(c=>c.field)))this.choices=this.makeChoices();
+    if(cp.legacyGrowth)this.notice="旧技能已按等级迁移为六级成长；原强化已备份。";
     this.charges = cp.charges as Partial<Record<"powerstrike" | "firesword", boolean>>;
     this.tao.poisonMode = cp.tao.poisonMode;
     this.tao.healPriority = cp.tao.healPriority;
@@ -1285,7 +1300,8 @@ export class Game {
     const target = targets[0];
     if (!target) return false;
     this.meleeAim(targets);
-    this.basicCD = this.classInfo.interval*ATTACK_CADENCE;
+    const passiveHaste=this.skills.find(s=>s.id==="swordsmanship" || s.id==="spirit");
+    this.basicCD = this.classInfo.interval*ATTACK_CADENCE*(1-(passiveHaste ? skillExtras(passiveHaste).basicHaste??0 : 0)/100);
     this.sound(this.equipment.weapon ? "attack" : "unarmed");
     this.player.attackUntil = this.clock + 0.35;
     this.player.attackDir = this.player.dir;
@@ -1456,12 +1472,13 @@ export class Game {
     }
     if (this.clock < this.player.attackUntil) return false;
     const radius =
-      (s.id === "thrust" ? 96 + s.range : 70) *
+      (s.id === "thrust" ? 96 + s.range : 70*(1+s.radius/100)) *
       (1 + (this.stats.skill_radius ?? 0) / 100);
     const near = targets.filter(
       (e) => Math.hypot(e.x - this.player.x, e.y - this.player.y) <= radius && this.meleeReachable(e),
     );
-    if (near.length < 2) return false;
+    const minimum=s.id==="thrust" && skillExtras(s).solo ? 1 : 2;
+    if (near.length < minimum) return false;
     const aim = this.meleeAim(near);
     const hits = near.filter((e) => {
       const dx = e.x - this.player.x,
@@ -1471,14 +1488,14 @@ export class Game {
       if (s.id === "thrust")
         return (
           along > 0 &&
-          across <= 12 + along * Math.tan((s.angle * Math.PI) / 180)
+          across <= (12 + along * Math.tan((s.angle * Math.PI) / 180))*(1+(skillExtras(s).lineWidth??0)/100)
         );
       const angle = Math.acos(
         clamp(along / Math.max(1, Math.hypot(dx, dy)), -1, 1),
       );
       return angle <= (Math.min(230, 180 + s.angle) * Math.PI) / 360;
     });
-    if (hits.length < 2) return false;
+    if (hits.length < minimum) return false;
     for (const e of hits)
       if (this.physicalHit(e, s.accuracy))
         this.hit(
@@ -1533,7 +1550,7 @@ export class Game {
           Math.hypot(e.x - this.player.x, e.y - this.player.y) <= this.detectionRange &&
           (s.id !== "poison" || (this.tao.poisonMode === "green"
             ? e.greenPoison?.until ?? 0 : e.redPoison?.until ?? 0) <= this.clock + 1) &&
-          (!["fireball", "bigfireball", "talisman"].includes(s.id) || !this.navigation || this.navigation.lineClear(this.player, e, 0)),
+          (!this.navigation || this.navigation.lineClear(this.player, e, 0)),
       )
       .sort((a, b) => {
         const priority = (e: Enemy) =>
@@ -1719,14 +1736,16 @@ export class Game {
               e.hp > 0 &&
               length <= range && this.attackLineClear(p,e) &&
               (ex * dx + ey * dy) / Math.max(1, length * d) >=
-                Math.cos(Math.PI / 5)
+                Math.cos(Math.PI / 5*(1+(skill ? skillExtras(skill).flameAngle??0 : 0)/100))
             )
               this.hit(e, damage, source, "magic", "summon");
           }
           this.sound("beastflame");
-          this.effect("beastflame", p.x, p.y, range, 0.6, p.dir);
+          const flame=this.effect("beastflame", p.x, p.y, range, 0.6, p.dir);
+          flame.aimAngle=Math.atan2(dy,dx);
+          flame.spread=1+(skill ? skillExtras(skill).flameAngle??0 : 0)/100;
         } else this.hit(target, damage, source, "physical", "summon");
-        p.cd = (source === "beast" ? 1.6 : 1.1)*ATTACK_CADENCE;
+        p.cd = (source === "beast" ? 1.6 : 1.1)*ATTACK_CADENCE*(1-(skill ? skillExtras(skill).petHaste??0 : 0)/100);
         p.attackUntil = this.clock + 0.4;
       } else if (!clear || d > (target ? range * 0.75 : 80)) {
         const waypoint = this.navigation?.waypoint(p,destination) ?? destination;
@@ -1806,19 +1825,20 @@ export class Game {
         this.effect("lightning", e.x, e.y, 0, 0.5);
       }
     } else if (s.id === "firewall") {
-      const e = this.densest(targets, 100);
-      const existing = this.effects.filter(
-        (f) => f.kind === "firewall" && f.life > 0,
-      );
-      const cap = Math.min(4, 2 + s.count);
-      if (existing.length >= cap) existing[0].life = 0;
-      this.effect(
-        "firewall",
-        e.x + (this.player.x - e.x) * 0.2,
-        e.y + (this.player.y - e.y) * 0.2,
-        rad(64),
-        6 * (1 + s.duration / 100) * (1 + (this.stats.duration ?? 0) / 100),
-      );
+      const candidates=[...targets],placed:{x:number;y:number}[]=[];
+      for(let i=0;i<Math.min(3,1+s.count) && candidates.length;i++) {
+        const e=this.densest(candidates,100);
+        const point={x:e.x+(this.player.x-e.x)*0.2,y:e.y+(this.player.y-e.y)*0.2};
+        if(this.canStand(point.x,point.y,0) && this.attackLineClear(this.player,point) &&
+            placed.every(p=>Math.hypot(p.x-point.x,p.y-point.y)>=48)) {
+          const existing=this.effects.filter(f=>f.kind==="firewall" && f.life>0);
+          if(existing.length>=Math.min(4,2+s.count))existing[0].life=0;
+          this.effect("firewall",point.x,point.y,rad(64),6*(1+s.duration/100)*(1+(this.stats.duration??0)/100));
+          placed.push(point);
+        }
+        candidates.splice(0,candidates.length,...candidates.filter(n=>Math.hypot(n.x-e.x,n.y-e.y)>=60));
+      }
+      if(!placed.length)return;
     } else if (s.id === "repulse") {
       const nearby = targets.filter(
         (e) => Math.hypot(e.x - this.player.x, e.y - this.player.y) < rad(120),
@@ -1884,7 +1904,7 @@ export class Game {
         this.effect("holy", e.x, e.y, 0, 1.1);
       }
     } else if (s.id === "hellfire" || s.id === "beam") {
-      const length = (s.id === "hellfire" ? 240 : 520) + s.range,
+      const length = Math.min(this.detectionRange,(s.id === "hellfire" ? 240 : 520) + s.range),
         width = rad(s.id === "hellfire" ? 26 : 18),
         p = this.player;
       const count = (aim: Enemy) => {
@@ -1909,7 +1929,7 @@ export class Game {
       if (!hits.length) return;
       for (const e of hits)
         this.hit(e, this.magicDamage(s.id === "hellfire" ? 18 : 24, s), s.id);
-      this.effect(
+      const lineFx=this.effect(
         s.id,
         p.x,
         p.y,
@@ -1917,11 +1937,12 @@ export class Game {
         s.id==="hellfire" ? 1 : 0.55,
         this.direction(aim.x - p.x, aim.y - p.y),
       );
+      lineFx.width=width*2;lineFx.aimAngle=Math.atan2(aim.y-p.y,aim.x-p.x);
     } else if (s.id === "nova") {
       const nearby = targets.filter(
         (e) => Math.hypot(e.x - this.player.x, e.y - this.player.y) < rad(140),
       );
-      if (nearby.length <= 3) return;
+      if (nearby.length < 4-(skillExtras(s).triggerReduction??0)) return;
       for (const e of nearby) this.hit(e, this.magicDamage(20, s), s.id);
       this.effect("nova", this.player.x, this.player.y, rad(140));
     } else if (s.id === "explosion" || s.id === "ice") {
@@ -1933,21 +1954,9 @@ export class Game {
       this.effect(s.id, center.x, center.y, radius);
     }
     if (!didCast) return;
+    if(s.id==="charm")refreshSummons(this);
     this.sound(s.id);
-    s.cd = Math.max(
-      s.id === "shield"
-        ? 8
-        : ["ghost", "armor"].includes(s.id)
-          ? 14
-          : s.id === "invisible"
-            ? 12
-            : s.id === "groupInvisible"
-              ? 15
-              : 0.4*cooldownScale(s.id),
-      getSkill(s.id).cooldown *
-        (1 - (this.stats.cooldown_reduction ?? 0) / 100) *
-        (1 - Math.min(60, s.localCDR) / 100),
-    );
+    s.cd = skillCooldown(s,this.stats.cooldown_reduction??0);
     if (this.classId !== "warrior") this.player.castUntil = this.clock + 0.25;
     if (targets[0] && !this.player.moving && getSkill(s.id).classId !== "warrior")
       this.player.dir = this.direction(
@@ -2124,7 +2133,7 @@ export class Game {
     );
     const early = this.classId === "wizard" ? ["lightning","firewall","shield"] :
       this.classId === "warrior" ? ["cleave","thrust"] : ["skeleton","poison"];
-    const guaranteed = early.map(id=>unlearned.find(s=>s.id===id)).find(Boolean);
+    const guaranteed = this.level<=4 ? early.map(id=>unlearned.find(s=>s.id===id)).find(Boolean) : undefined;
     const newSkill =
       guaranteed ?? (unlearned.length ? this.rng.pick(unlearned) : undefined);
     const candidates: Upgrade[] = [];
@@ -2137,26 +2146,18 @@ export class Game {
         description: newSkill.description,
         value: 0,
       });
-    for (const s of this.skills.filter((s) => s.rank < 3)) {
-      const name = getSkill(s.id).name;
-      for (const option of getSkill(s.id).branches)
-        candidates.push({
-          id: s.id + "-" + option.field,
-          kind: "skill",
-          skill: s.id,
-          name: name + " · " + option.label,
-          description: `升至 Lv.${s.rank + 1}，保留已有强化。`,
-          field: option.field,
-          value: option.value,
-        });
-    }
-    const list: Upgrade[] = [];
-    if (newSkill) list.push(candidates.shift()!);
-    else if (candidates.length) list.push(this.rng.pick(candidates));
-    const more = this.rng.shuffle(
-      candidates.filter((c) => c.id !== list[0]?.id),
-    );
-    if (more.length) list.push(more[0]);
+    const advances:Upgrade[]=this.skills.filter(s=>canAdvanceSkill(s,this.wave,this.mode==="test")).map(s=>({
+      id:`advance-${s.id}-${s.rank+1}`,kind:"skill",skill:s.id,
+      name:getSkill(s.id).name+` · Lv.${s.rank} → ${s.rank+1}`,
+      description:nextSkillLabel(s),value:0,
+    }));
+    const list:Upgrade[]=[];
+    const focused=advances.find(c=>c.skill===this.skillFocus);
+    const first=focused && this.focusMisses>=2 ? focused : advances.length ? this.rng.pick(advances) : undefined;
+    if(first)list.push(first);
+    const second=newSkill ? candidates[0] : advances.find(c=>c.id!==first?.id);
+    if(second)list.push(second);
+    if(focused)this.focusMisses=list.some(c=>c.skill===this.skillFocus) ? 0 : this.focusMisses+1;
     const statOptions: Upgrade[] = (
       [
         {
@@ -2252,9 +2253,10 @@ export class Game {
         }
         this.skills.push(this.newSkill(c.skill!));
       } else {
-        if (s.rank >= 3 || !c.field) return;
+        if (!canAdvanceSkill(s,this.wave,this.mode==="test")) return;
         s.rank++;
-        s[c.field] += c.value;
+        Object.assign(s,canonicalBonuses(s.id,s.rank));
+        if(s.rank===MAX_SKILL_RANK && this.skillFocus===s.id){this.skillFocus=null;this.focusMisses=0;}
       }
     } else {
       this.upgrades[c.stat!] = (this.upgrades[c.stat!] ?? 0) + c.value;
@@ -2270,10 +2272,13 @@ export class Game {
   }
   replaceSkill(index: number | null) {
     if (this.phase !== "replace" || !this.pendingSkill) return false;
+    const fromBook=this.pendingBook!==null;
+    if(fromBook && index!==null && !this.validBookOffer(this.pendingBook!))return false;
     if (index !== null) {
       if (!Number.isInteger(index) || index < 0 || index >= this.skills.length)
         return false;
       const old = this.skills[index];
+      if(this.skillFocus===old.id){this.skillFocus=null;this.focusMisses=0;}
       if (old.id === "powerstrike" || old.id === "firesword")
         delete this.charges[old.id];
       clearTaoSkill(this, old.id);
@@ -2282,10 +2287,14 @@ export class Game {
       if (old.id === "shield") this.player.shieldUntil = 0;
       this.effects = this.effects.filter((f) => f.kind !== old.id);
       this.skills[index] = this.newSkill(this.pendingSkill);
+      if(fromBook)this.payBook();
     }
     this.pendingSkill = null;
+    this.pendingBook=null;
     this.choices = [];
-    this.phase = "battle";
+    this.recompute();
+    this.phase = fromBook ? "shop" : "battle";
+    if(fromBook){this.emit();return true;}
     if (this.exp >= expNeeded(this.level)) this.beginUpgrade();
     else this.emit();
     return true;
@@ -2300,6 +2309,13 @@ export class Game {
       if(d.itemId || d.heal)collectLoot(this,{...d,exp:0,gold:0});
     }
     this.exp += exp;
+    const reward=trainingReward({mode:this.mode,wave:this.wave,waveTime:this.waveTime,duration:this.duration,
+      waveKills:this.waveKills,spawnBudget:this.spawnBudget,level:this.level,exp:this.exp},this.training.lastWave);
+    if(this.mode==="normal" && this.waveTime>=this.duration && this.wave>this.training.lastWave) {
+      this.training.lastWave=this.wave;this.training.waveExp=reward;this.training.total+=reward;
+      this.exp+=reward;
+      if(reward)this.notice=`本波修炼 +${reward}经验（完成波次且击败至少10%计划怪物）`;
+    }
     const reclaim = Math.floor(gold * 0.5);
     this.gold += reclaim;
     this.totalGold += reclaim;
@@ -2321,8 +2337,46 @@ export class Game {
     this.phase = "shop";
     this.rerolls = 0;
     this.generateOffers(true);
+    this.generateBookOffer();
     this.input = { x: 0, y: 0 };
     this.emit();
+  }
+  setSkillFocus(id:SkillId|null) {
+    if(id && !this.skills.some(s=>s.id===id && s.rank<MAX_SKILL_RANK))return false;
+    if(this.skillFocus!==id){this.skillFocus=id;this.focusMisses=0;}
+    this.emit();return true;
+  }
+  setBookWish(id:SkillId|null) {
+    if(id && (getSkill(id).classId!==this.classId || this.skills.some(s=>s.id===id)))return false;
+    this.bookWish=id;this.emit();return true;
+  }
+  generateBookOffer() {
+    this.bookOffer=null;
+    if(this.booksBought.length>=2 || this.skills.length>=this.maxSkills && !this.bookWish)return;
+    const pool=SKILLS.filter(s=>s.classId===this.classId && !this.skills.some(a=>a.id===s.id) && bookAvailable(s.id,this.wave));
+    if(!pool.length)return;
+    const wish=[3,6,9].includes(this.wave) ? pool.find(s=>s.id===this.bookWish) : undefined;
+    const skill=wish??this.rng.pick(pool);
+    this.bookOffer={id:++this.id,skill:skill.id,price:bookPrice(skill.id,this.wave),wave:this.wave,sold:false};
+  }
+  private validBookOffer(id:number) {
+    const o=this.bookOffer;
+    return !!o && o.id===id && !o.sold && o.wave===this.wave && this.booksBought.length<2 &&
+      getSkill(o.skill).classId===this.classId && bookAvailable(o.skill,this.wave) &&
+      !this.skills.some(s=>s.id===o.skill) && this.gold>=o.price;
+  }
+  private payBook() {
+    const o=this.bookOffer!;
+    this.gold-=o.price;o.sold=true;this.booksBought.push(o.skill);
+    if(this.bookWish===o.skill)this.bookWish=null;
+  }
+  buyBook(id:number) {
+    if(this.phase!=="shop" || !this.validBookOffer(id))return false;
+    const o=this.bookOffer!;
+    if(this.skills.length>=this.maxSkills) {
+      this.pendingSkill=o.skill;this.pendingBook=id;this.phase="replace";
+    }else {this.payBook();this.skills.push(this.newSkill(o.skill));}
+    this.emit();return true;
   }
   validItem(item: Item) {
     if (!hasWorldAppearance(item)) return false;
@@ -2459,6 +2513,7 @@ export class Game {
   nextWave() {
     if (this.phase !== "shop") return;
     this.wave++;
+    this.training.waveExp=0;
     this.waveTime = 0;
     this.waveGold = 0;
     this.waveKills = 0;
@@ -2491,6 +2546,8 @@ export class Game {
       healing: { ...this.tao.healing },
       combatHealing:{...this.combatRecovery.healing},
       damageTaken:{...this.damageTaken,sources:{...this.damageTaken.sources}},
+      trainingExp:this.training.total,
+      skillBooks:this.booksBought.map(bookName),
       skills: this.skills.map((s) => `${getSkill(s.id).name} Lv.${s.rank}`),
     };
     this.input = { x: 0, y: 0 };
