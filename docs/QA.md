@@ -524,4 +524,4 @@ alpha.22已公开发布：标签`648bc43d06ac16a3a9c823b76f59017d91620c3c`，Sta
 
 最终冻结普通72局：源码`65e843aba9a778488ab3f855cb40e7d583a162b1`，sourceDirty=false，V7 SHA`3d642014dbb4eed066d407ae5d17504981409d1a2b340a9aad7f0f5093ae9302`。与alpha.22全部结果逐字段完全相同：0异常／4法师通关，战士道士仍0通关；本轮正常战斗／经济／掉落／策略没有调整。alpha23-comparison.json与前后完整JSON可复核，整体平衡仍未达标。
 
-公开发布与在线实操待部署后补充。
+alpha.23已公开发布：标签`33e7ef2721a8aadc65f170f1213973c8032bb4bc`，Stage release and Pages **40823934397**的build／deploy／release与Source checks **40823934569**成功。公网version.json为original／alpha.23／33e7ef2；后台IAB34先等章节素材完成，再在真实沃玛1080／1488截图确认身体／脚部／阴影完整位于底栏上方。原版沃玛场景截图alpha23-online-edge.jpg已保存查看，未把载入中的旧森林地面当作验收。公网道士比奇预设以4×真实步进至75秒结算，首领0／2204、对首领实际伤害2204、HP135／135、承伤0、获得0结晶；alpha23-online-build-result.jpg与诊断文本已保存查看。浏览器warn/error为空。原始普通对照、16场预设、隔离假设实验、修复前发现／移动端／公网截图及红绿用例日志附Release；用户现有5182页及前台Chrome未操作，独立测试页和自己的5184预览已清理。完整普通职业／章节平衡仍未通过。
