@@ -1233,8 +1233,8 @@ export class Game {
   attackLineClear(from: {x:number;y:number}, to: {x:number;y:number}) {
     return !this.navigation || this.navigation.lineClear(from,to,0);
   }
-  private meleeAim(targets: Enemy[]) {
-    if (this.player.moving || !targets.length) return this.facing();
+  private meleeAim(targets: Enemy[], turnWhileMoving = false) {
+    if ((this.player.moving && !turnWhileMoving) || !targets.length) return this.facing();
     const target = targets[0],
       dx = target.x - this.player.x,
       dy = target.y - this.player.y;
@@ -1286,7 +1286,7 @@ export class Game {
         e.hp > 0 &&
         Math.hypot(e.x - this.player.x, e.y - this.player.y) <= range &&
         this.meleeReachable(e) &&
-        (!this.player.moving ||
+        (this.classId === "warrior" || !this.player.moving ||
           (e.x - this.player.x) * front.x + (e.y - this.player.y) * front.y >=
             0),
     );
@@ -1299,7 +1299,9 @@ export class Game {
     );
     const target = targets[0];
     if (!target) return false;
-    this.meleeAim(targets);
+    // A warrior's automatic swing may face a close pursuer while input keeps
+    // moving away. Cone/line skills retain their directional aiming rules.
+    this.meleeAim(targets, this.classId === "warrior");
     const passiveHaste=this.skills.find(s=>s.id==="swordsmanship" || s.id==="spirit");
     this.basicCD = this.classInfo.interval*ATTACK_CADENCE*(1-(passiveHaste ? skillExtras(passiveHaste).basicHaste??0 : 0)/100);
     this.sound(this.equipment.weapon ? "attack" : "unarmed");
