@@ -13,6 +13,13 @@ def authorize(manifest, kinds):
              and {'public_github_pages', 'stage_releases'} <= set(record.get('scope', [])))
     if not valid:
         raise ValueError('Asset authorization does not cover this resource source and release scope')
+    for source in manifest.get('sources', []):
+        matching = next((s for s in record.get('additionalSources', [])
+                         if s.get('repository') == source.get('repository') and s.get('ref') == source.get('ref')), None)
+        if (not matching or not source.get('assetKinds')
+                or not set(source['assetKinds']) <= set(matching.get('assetKinds', []))
+                or not {'public_github_pages', 'stage_releases'} <= set(matching.get('scope', []))):
+            raise ValueError('Additional asset source is outside the recorded owner confirmation')
     manifest.update(rightsStatus='AUTHORIZED_BY_PROJECT_OWNER',
                     distribution='PUBLIC_PROJECT_DISTRIBUTION',
                     releaseStatus='AUTHORIZED_BY_PROJECT_OWNER',

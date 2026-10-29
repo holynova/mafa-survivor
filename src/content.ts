@@ -298,7 +298,7 @@ export const WAVE_BUDGET = [
 ];
 // Later chapters spend their threat budget on fewer, tougher enemies. Rewards
 // compensate for that lower count without changing the GDD monster HP/damage.
-export const CHAPTER_PRESSURE = { biche:1, mine:1.7, woma:2.8, zuma:3.8, mengzhong:3.2,centipede:3.5,stone:3.8,redmoon:4.2 };
+export const CHAPTER_PRESSURE = { biche:1, mine:1.7, woma:2.8, zuma:3.8, mengzhong:3.2,centipede:3.5,stone:3.8,redmoon:4.2,bairimen:3.5,shimu:4 };
 export const NATIVE_ELITES = ["orcBrave","womaBrave","giantBug","evilPincer","evilSnake","oneEyeSpider"];
 export function waveSpawnBudget(mapId:MapId,wave:number,trial=false) {
   return Math.max(1,Math.ceil(WAVE_BUDGET[wave-1]/CHAPTER_PRESSURE[mapId]*(trial ? 0.7 : 1)));
@@ -370,9 +370,9 @@ export const SCENERY = [
 // Chapter map data (GDD §11). Each chapter has its own scenery obstacle set
 // and monster pool; chapters are unlocked out-of-run with Mafa Crystals.
 // ---------------------------------------------------------------------------
-export type MapId = "biche" | "mine" | "woma" | "zuma" | "mengzhong" | "centipede" | "stone" | "redmoon";
+export type MapId = "biche" | "mine" | "woma" | "zuma" | "mengzhong" | "centipede" | "stone" | "redmoon" | "bairimen" | "shimu";
 
-export const MAP_IDS: MapId[] = ["biche", "mine", "woma", "zuma","mengzhong","centipede","stone","redmoon"];
+export const MAP_IDS: MapId[] = ["biche", "mine", "woma", "zuma","mengzhong","centipede","stone","redmoon","bairimen","shimu"];
 export const PLAYABLE_MAP_IDS: MapId[] = [...MAP_IDS];
 
 export const MAP_SCENERY: Record<MapId, typeof SCENERY> = {
@@ -405,7 +405,7 @@ export const MAP_SCENERY: Record<MapId, typeof SCENERY> = {
     { id: "pillar", x: 700, y: 500, r: 20 },
     { id: "pillar", x: 1500, y: 1000, r: 20 },
   ],
-  mengzhong:[],centipede:[],stone:[],redmoon:[],
+  mengzhong:[],centipede:[],stone:[],redmoon:[],bairimen:[],shimu:[],
 };
 
 export const MAPS: Record<MapId, { id: MapId; name: string; theme: string; monsterPool: string[]; boss: string; unlockCost: number }> = {
@@ -445,4 +445,6 @@ export const MAPS: Record<MapId, { id: MapId; name: string; theme: string; monst
   centipede:{id:"centipede",name:"蜈蚣洞",theme:"原版虫洞的曲折石壁与窄道；邪恶钳虫突进，触龙神驻地喷毒",monsterPool:["centipede","pincer","scorpionSnake","evilPincer"],boss:"chulong",unlockCost:15},
   stone:{id:"stone",name:"石阁地宫",theme:"原版石阁一层：砌石房间、甬道与台阶；红黑野猪与白野猪首领",monsterPool:["redBoar","blackBoar","scorpionSnake","evilSnake"],boss:"whiteBoar",unlockCost:18},
   redmoon:{id:"redmoon",name:"赤月山谷",theme:"原版赤月一层的岩窟、碎石与交错通道；月魔／天狼蜘蛛与赤月恶魔",monsterPool:["moonSpider","tianlangSpider","spider","oneEyeSpider"],boss:"redMoon",unlockCost:21},
+  bairimen:{id:"bairimen",name:"白日门",theme:"白日门原生地图的城墙、庭院与密林；半兽勇士与蛛群来袭，迎战赤月恶魔。怪潮与首领编排为幸存者玩法改编。",monsterPool:["orc","orcWarrior","spider","moonSpider","orcBrave"],boss:"redMoon",unlockCost:24},
+  shimu:{id:"shimu",name:"石墓一层",theme:"原生石墓一层的岩壁、石柱与交错古道；红黑野猪、蝎蛇与邪恶毒蛇，白野猪守住深处。",monsterPool:["redBoar","blackBoar","scorpionSnake","evilSnake"],boss:"whiteBoar",unlockCost:27},
 } as const;

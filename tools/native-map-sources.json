@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "images": {
+    "id": "classic-atlas",
+    "repository": "https://github.com/fluttergo/mir2-client-js",
+    "ref": "c2419cb7803cafe5dea2d366c1948480e944cb09",
+    "assetKinds": [
+      "images"
+    ],
+    "files": {
+      "Tiles.wil.json": {
+        "path": "res/map/Tiles.wil.json",
+        "sha1": "fd28ffc0b40de9241734eb7d210cc8d7a7a34ba6",
+        "sha256": "8a4584943a2afddf05d3b678e1b605bb3cb6ee1e41f9b8f7855e46910e2bd473",
+        "bytes": 763325
+      },
+      "Tiles.wil.png": {
+        "path": "res/map/Tiles.wil.png",
+        "sha1": "62463aa75670882fb6952b644854f648c1a3493c",
+        "sha256": "459189d88d0c4d0eed2551ea37f7923e3b53094d513a68d4354a05f1df37afa6",
+        "bytes": 47785054
+      },
+      "Objects.wil.json": {
+        "path": "res/map/Objects.wil.json",
+        "sha1": "b0e1fb56052e7d950bc8e85a6cde4f815c497a2c",
+        "sha256": "e8edd5d5e9bcd48312028f336e60a6b9acb4e01ed43505dc0e3225a67e5365b9",
+        "bytes": 365350
+      },
+      "Objects.wil.png": {
+        "path": "res/map/Objects.wil.png",
+        "sha1": "3016e266805cde25f7d8bf39372a89e49877a983",
+        "sha256": "fa4e6e077e47ed84d2b7f0010c0c10cbabc12ea27ffaaaf34775c217f010ff79",
+        "bytes": 47382615
+      },
+      "Objects5.json": {
+        "path": "res/map/Objects5.json",
+        "sha1": "24431fd871ada4d1650bc1c61f727485c678365b",
+        "sha256": "880c664cfedfaa1016014e6791f45ca1bf1ea42d747f8be20f0a438dc6639ac2",
+        "bytes": 375809
+      },
+      "Objects5.png": {
+        "path": "res/map/Objects5.png",
+        "sha1": "9a642bc87acb0d37d2389fb2278c896e9de846e9",
+        "sha256": "cba0030be5c158f6de41fe674a461e4f7c05919506bff6778c9579d764a8e75c",
+        "bytes": 17730744
+      },
+      "Objects7.json": {
+        "path": "res/map/Objects7.json",
+        "sha1": "696b0c5c01655b5174386b729a926abd60adb372",
+        "sha256": "01c5e11296f71e165482d7a584f726f092e72da213f5aebea9b6a6f02c9b6b04",
+        "bytes": 238141
+      },
+      "Objects7.png": {
+        "path": "res/map/Objects7.png",
+        "sha1": "8a900400c9a59f06b36848b93d2dc2e1d98d90a2",
+        "sha256": "6fd0753597e50d0d912727886ac21b808f467eab0110db56e52408626e14bb7a",
+        "bytes": 12082053
+      }
+    }
+  },
+  "maps": {
+    "id": "classic-maps",
+    "repository": "https://github.com/mirbeta/MirServer",
+    "ref": "f38deae64c521a28f8e0d86f2bf24d4ba7c9ea5c",
+    "assetKinds": [
+      "map"
+    ],
+    "files": {
+      "11.map": {
+        "path": "Mir200/Map/11.map",
+        "sha1": "6ff6b41cacd9640c6924b548849fc1b9f2b8a11d",
+        "sha256": "d8493009ad70fbca5eda276988c7c9c8027ccdfbc4cbba4c433e8ad7a627e354",
+        "bytes": 3000052
+      },
+      "d711.map": {
+        "path": "Mir200/Map/d711.map",
+        "sha1": "a392b3eb2ba69b5cc09950c964ff802bc3b24ea6",
+        "sha256": "3321518ad2f337cabe4db323303cd39e6827f7f54c13c86a8dc5fa5552f90fe6",
+        "bytes": 1920052
+      }
+    }
+  },
+  "regions": {
+    "bairimen": {
+      "file": "11.map",
+      "name": "白日门",
+      "x": 200,
+      "y": 280,
+      "width": 46,
+      "height": 48
+    },
+    "shimu": {
+      "file": "d711.map",
+      "name": "石墓一层",
+      "x": 150,
+      "y": 160,
+      "width": 46,
+      "height": 48
+    }
+  }
+}

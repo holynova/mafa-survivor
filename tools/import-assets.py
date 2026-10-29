@@ -164,6 +164,9 @@ def load(t):
    info['assembledPixelSha256']=hashlib.sha256(im.tobytes()).hexdigest()
  return key,im,info
 with ThreadPoolExecutor(max_workers=16) as ex:loaded=list(ex.map(load,selected))
+from native_map_region import load_native_regions
+native_worlds,native_frames,native_sources=load_native_regions(CACHE,request)
+world_layouts.update(native_worlds);loaded.extend(native_frames)
 # Separate optional equipment models into independently loadable atlas pages.
 # Packing order is deterministic; source pixels and anchors are unchanged.
 meta={};pages=[]
@@ -212,7 +215,7 @@ for name,entry in ui_catalog['frames'].items():
   x,y,w,h=entry['crop'];Image.open(io.BytesIO(data)).crop((x,y,x+w,y+h)).save(target)
  else:target.write_bytes(data)
  ui_files[name]={'file':'ui/'+name+'.png','sha256':hashlib.sha256(target.read_bytes()).hexdigest(),'sourceSha256':hashlib.sha256(data).hexdigest(),'frame':'ui/'+name,**({'crop':entry['crop']} if 'crop' in entry else {})}
-manifest={'schemaVersion':2,'repository':REPO,'ref':REF,'referenceVersion':'mir2x 1.45 reference; gameplay 1.76 candidate','rightsStatus':'UNVERIFIED_THIRD_PARTY_ART','distribution':'LOCAL_EVALUATION_ONLY','releaseStatus':'BLOCKED_BY_ASSET_RIGHTS','world':world_layout,'worlds':world_layouts,'pages':pages,'animations':animations,'frames':meta,'uiFiles':ui_files}
+manifest={'schemaVersion':2,'repository':REPO,'ref':REF,'sources':native_sources,'referenceVersion':'mir2x 1.45 reference; native Mir2 chapter candidates with separate provenance','rightsStatus':'UNVERIFIED_THIRD_PARTY_ART','distribution':'LOCAL_EVALUATION_ONLY','releaseStatus':'BLOCKED_BY_ASSET_RIGHTS','world':world_layout,'worlds':world_layouts,'pages':pages,'animations':animations,'frames':meta,'uiFiles':ui_files}
 authorize(manifest, ['images', 'map'])
 (OUT/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2))
 public_ledger={**manifest,'world':{k:v for k,v in manifest['world'].items() if k in ['sourcePath','sourceSha256','sourceRegion','width','height']}}
@@ -224,5 +227,8 @@ print('Packed',len(meta),'frames on',len(pages),'pages',flush=True)
 import runpy
 runpy.run_path(str(ROOT/"tools/write-asset-ledger.py"))
 (OUT/'SOURCE_LICENSE.txt').write_bytes(request(f'https://raw.githubusercontent.com/etorth/mir2x_res/{REF}/LICENSE'))
+(OUT/'SOURCE_NATIVE_MAPS.txt').write_text('Native map chapter sources (separately pinned):\n'+
+ '\n'.join(s['repository']+' @ '+s['ref'] for s in native_sources)+
+ '\nSource PNG/JSON rectangles and sparse indices retained in manifest.json. Public project distribution follows the recorded owner confirmation; not independent official-client or rights verification. No third-party client/server implementation is incorporated.\n')
 
 runpy.run_path(str(ROOT/"tools/import-audio.py"))

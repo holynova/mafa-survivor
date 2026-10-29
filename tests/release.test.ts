@@ -47,3 +47,15 @@ it("changes image and manifest URLs between releases so stale atlas coordinates 
   expect(assetUrl("atlas-0.png")).toContain("rev=new-stage");
   expect(assetUrl("audio/manifest.json")).toContain("rev=new-stage");
 });
+
+it("requires every additional source to retain its independently pinned kind, revision and scope",()=>{
+ const source={id:"native",repository:"https://github.com/test/native",ref:"fixed",assetKinds:["images"]};
+ const record={...confirmation,additionalSources:[{...source,scope:confirmation.scope}]};
+ const manifest={...resource,sources:[source],frames:{tile:{sourceId:"native",sourceRepository:source.repository,sourceRef:source.ref}}};
+ expect(validateAuthorization(record,manifest,["images","map"])).toBe(true);
+ expect(validateAuthorization(confirmation,manifest,["images","map"])).toBe(false);
+ expect(validateAuthorization(record,{...manifest,sources:[{...source,ref:"changed"}]},["images","map"])).toBe(false);
+ expect(validateAuthorization({...record,additionalSources:[{...source,scope:["local"]}]},manifest,["images"])).toBe(false);
+ expect(validateAuthorization(record,{...manifest,worlds:{map:manifest.frames.tile}},["images"])).toBe(false);
+ expect(validateAuthorization(record,{...manifest,frames:{tile:{...manifest.frames.tile,sourceRef:"unlisted"}}},["images"])).toBe(false);
+});

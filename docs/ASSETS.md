@@ -1,5 +1,13 @@
 # 原始素材台账
 
+## alpha.25 原生白日门与石墓一层
+
+新增两个独立源地图选区，各46×48格／2208×1536，白日门`Mir200/Map/11.map`取(200,280)，石墓一层`Mir200/Map/d711.map`取(150,160)。原生52／12字节格式按列读取，保留地图索引、物件整条、底部锚点和存储的通行／门状态；安全出生点位于裁剪后最大连通区的3×3空地。当前仅导入静态地貌，未实现原客户端动态门交互与完整环境动画。
+
+地图数据固定`mirbeta/MirServer@f38deae64c521a28f8e0d86f2bf24d4ba7c9ea5c`；导出图固定`fluttergo/mir2-client-js@c2419cb7803cafe5dea2d366c1948480e944cb09`的Tiles.wil、Objects.wil、Objects5、Objects7四个PNG／JSON库。1369帧仅裁剪，不改源像素；8个源文件126,723,091字节保留于导入缓存，浏览器只下载两张新增分章图集。每帧保存源库／稀疏索引／源PNG与JSON哈希／裁剪矩形，另登记地图源提交与SHA-256；门禁逐项核对额外固定源与类型／公开范围，不能用主源身份冒认。
+
+图集JSON数字键与同提交TSX显式图片编号对应；空编号与empty.png也已交叉核对。来源、哈希和版本限制见[研究记录](research/alpha25-original-maps.md)及`tools/native-map-sources.json`。未找到原WIL／转换器，故只能验证本项目与已发布PNG导出矩形的像素一致，不能声称与某官方1.76发行包逐字节／逐像素相同。分发沿用用户既有原版素材公开授权，未引入第三方实现代码或生成素材。
+
 ## 已接入
 
 源仓库：[etorth/mir2x_res](https://github.com/etorth/mir2x_res)，固定提交 `9e21ea6631317d06e064fbfa7e1ea43af6a2d3e6`。导入 4,173 帧，622 组动画，分成 8 张最大 2048×4096 的图集。图片本体仅无损合并为纹理图集，不重绘造型、颜色或动作。转换脚本 `tools/import-assets.py` 校验 Git blob SHA-1，并记录 SHA-256。

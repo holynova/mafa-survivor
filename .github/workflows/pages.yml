@@ -31,7 +31,7 @@ jobs:
           path: |
             .cache
             public/assets/mir
-          key: mir-9e21ea6631317d06-${{ hashFiles('tools/import-*.py', 'tools/source_cache.py', 'tools/map_region.py', 'tools/map-regions.json', 'tools/map-asset-catalog.json', 'tools/monster-models.json', 'tools/ui-assets.json', 'tools/equipment-appearance.json', 'tools/appearance-sources.json', 'tools/asset_authorization.py', 'docs/asset-authorization.json') }}
+          key: mir-9e21ea6631317d06-${{ hashFiles('tools/import-*.py', 'tools/source_cache.py', 'tools/map_region.py', 'tools/native_map*.py', 'tools/native-map-sources.json', 'tools/map-regions.json', 'tools/map-asset-catalog.json', 'tools/monster-models.json', 'tools/ui-assets.json', 'tools/equipment-appearance.json', 'tools/appearance-sources.json', 'tools/asset_authorization.py', 'docs/asset-authorization.json') }}
           restore-keys: mir-9e21ea6631317d06-
       - name: Import and verify pinned original media
         if: vars.PAGES_ASSET_MODE == 'original'

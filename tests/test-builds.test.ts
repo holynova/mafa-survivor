@@ -14,7 +14,9 @@ import mengzhong from "./fixtures/mengzhong-layout.json";
 import centipede from "./fixtures/centipede-layout.json";
 import stone from "./fixtures/stone-layout.json";
 import redmoon from "./fixtures/redmoon-layout.json";
-const layouts={biche,mine,woma,zuma,mengzhong,centipede,stone,redmoon};
+import bairimen from "./fixtures/bairimen-layout.json";
+import shimu from "./fixtures/shimu-layout.json";
+const layouts={biche,mine,woma,zuma,mengzhong,centipede,stone,redmoon,bairimen,shimu};
 afterEach(()=>setWorldLayouts({}));
 it.each(TEST_BUILDS.flatMap(build=>PLAYABLE_MAP_IDS.map(mapId=>({build,mapId}))))("$build.name fights the actual $mapId Boss on legal floor",({build,mapId})=>{
  setWorldLayouts(layouts);const g=new Game();g.start("test",17,"wizard",false,mapId);

@@ -358,7 +358,7 @@ export function App() {
                   </button>)}
                 </div>
                 <div className="chapter">
-                  <span>{["第一章","第二章","第三章","第四章","第五章","第六章","第七章","第八章"][MAP_IDS.indexOf(game.mapId)]} · 玛法结晶 {game.crystals}</span>
+                  <span>{["第一章","第二章","第三章","第四章","第五章","第六章","第七章","第八章","第九章","第十章"][MAP_IDS.indexOf(game.mapId)]} · 玛法结晶 {game.crystals}</span>
                   <h2>{game.mapId === "biche" ? "比奇荒野" : chapter.name}</h2>
                   <p>
                     {game.mapId === "biche" ? "稻草人游荡在旧路旁。在怪潮中收集经验，找回熟悉的力量。" : game.mapId === "mine" ? "沿旧矿道穿过坍塌岩壁，提防转角后的骷髅弓箭手，迎战召唤僵尸的尸王。" : chapter.theme}
@@ -403,7 +403,7 @@ export function App() {
                     disabled={!ready || assetError || progressBusy || !chapterUnlocked}
                     onClick={() => start("normal")}
                   >
-                    {ready ? chapterUnlocked ? game.mapId === "biche" ? "进入荒野" : game.mapId === "mine" ? "进入矿洞" : "进入神殿" : "正常远征尚未解锁" : "正在载入原版素材…"}
+                    {ready ? chapterUnlocked ? game.mapId === "biche" ? "进入荒野" : game.mapId === "mine" ? "进入矿洞" : "开始远征" : "正常远征尚未解锁" : "正在载入原版素材…"}
                     <span>12 波 · 每波 75 秒</span>
                   </button>
                   <button
@@ -607,7 +607,7 @@ export function App() {
             <span>
               {isGraybox
                 ? "灰盒测试：原版图片、地图与音效未公开"
-                : "原版素材来自 mir2x_res · 来源与版本已登记"}
+                : "原版素材 · 来源与版本已登记"}
             </span>
             <span>
               {isGraybox

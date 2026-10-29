@@ -26,7 +26,7 @@ it.each(Object.keys(layouts) as (keyof typeof layouts)[])("%s uses a different o
 it("retains distinct source identities and full chapter unlocks in backups",()=>{
  expect(new Set(Object.values(layouts).map(x=>x.sourceSha256)).size).toBe(4);
  expect(new Set([models.models.boss,models.models.corpseKing,models.models.womaLord,models.models.zumaLord,models.models.chulong,models.models.whiteBoar,models.models.redMoon,models.models.overlord]).size).toBe(8);
- expect(progressSchema.parse({schemaVersion:1,crystals:0,unlockedMaps:MAP_IDS}).unlockedMaps).toHaveLength(8);
+ expect(progressSchema.parse({schemaVersion:1,crystals:0,unlockedMaps:MAP_IDS}).unlockedMaps).toHaveLength(10);
 });
 it.each(["chulong","redMoon"])("%s stays planted and damages only after a warning",kind=>{
  const {g,e}=arena(kind),hp=g.player.hp,x=e.x,y=e.y;
