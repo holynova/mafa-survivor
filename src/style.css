@@ -2235,6 +2235,8 @@ body:has(.lobby) .vignette {
 }
 
 .console-mobile-actions {display:none;}
+.console-mobile-actions .potion-mobile {min-width:70px;white-space:nowrap;}
+.console-mobile-actions .potion-mobile:disabled {opacity:.8;color:#c4b48c;}
 @media(max-width:700px) {.console-mobile-actions {display:flex;position:fixed;right:7px;bottom:147px;gap:5px;pointer-events:auto;} .console-mobile-actions button {padding:7px 12px;font-size:11px;}}
 .classic-ui .lobby-footer {letter-spacing:0;font-size:10px;}
 

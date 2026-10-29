@@ -113,7 +113,9 @@ export function testChapterVisual(g:Game) {
   g.start("test",g.seed,g.classId,false,g.mapId);
   g.test.spawning=false;g.skills=[];g.basicCD=Infinity;
   const kinds=[MAPS[g.mapId].boss,...MAPS[g.mapId].monsterPool];
-  const targets=[[185,0],[-185,0],[-110,-105],[100,-105],[0,125],[-90,125],[130,120],[0,-140]];
+  const targets=g.mapId==="woma" || g.mapId==="zuma"
+    ? [[220,70],[-220,70],[-75,60],[75,60]]
+    : [[185,0],[-185,0],[-110,-105],[100,-105],[0,125],[-90,125],[130,120],[0,-140]];
   const points=g.navigation?.reachablePoints(g.player,80,260).filter(p=>g.attackLineClear(g.player,p));
   for(let i=0;i<kinds.length;i++) {
     const [dx,dy]=targets[i%targets.length],desired={x:g.player.x+dx,y:g.player.y+dy};

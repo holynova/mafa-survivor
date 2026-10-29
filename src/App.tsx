@@ -802,7 +802,7 @@ export function App() {
               </button>
             </div>
             <div className="console-mobile-actions">
-              <button aria-label="使用储备血瓶（Q）" disabled={game.phase!=="battle" || game.player.hp>=game.maxHP || !game.potions.reserve.length || game.potions.cd>0} onClick={()=>game.useBloodPotion()}>{game.potions.cd>0 ? game.potions.cd.toFixed(1)+"s" : `血瓶 ${game.potions.reserve.length}/3`}</button>
+              <button className="potion-mobile" aria-label="使用储备血瓶（Q）" disabled={game.phase!=="battle" || game.player.hp>=game.maxHP || !game.potions.reserve.length || game.potions.cd>0} onClick={()=>game.useBloodPotion()}>{game.potions.cd>0 ? `${game.potions.reserve.length}瓶 ${game.potions.cd.toFixed(1)}s` : `血瓶 ${game.potions.reserve.length}/3`}</button>
               <button aria-label="查看装备与属性" onClick={toggleInventory}>装备</button>
               <button aria-label={game.phase==="paused" ? "继续战斗" : "暂停战斗"} onClick={()=>game.pause()}>{game.phase==="paused" ? "继续" : "暂停"}</button>
             </div>

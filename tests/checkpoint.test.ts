@@ -170,6 +170,16 @@ describe("wave-boundary checkpoints", () => {
 });
 
 describe("checkpoint persistence", () => {
+  it("persists the actual potion reserve and recovery interval through IndexedDB",async()=>{
+    const g=newGame();g.start("normal",176,"wizard");g.potions={reserve:[20,35,20],cd:1.2};
+    expect(await writeCheckpoint(g.snapshotCheckpoint())).toBe(true);
+    const cp=await readCheckpoint(),other=newGame();expect(other.resumeCheckpoint(cp)).toBe(true);
+    expect(other.potions).toEqual({reserve:[20,35,20],cd:1.2});
+    other.player.hp=50;expect(other.useBloodPotion()).toBe(false);
+    for(let i=0;i<73;i++)other.step(1/60);
+    expect(other.player.hp).toBe(85);expect(other.potions.reserve).toEqual([20,20]);
+    expect((await readCheckpoint())?.potions.reserve).toEqual([20,35,20]);
+  });
   it("writes, reads and clears a checkpoint", async () => {
     const g = newGame();
     g.start("normal", 176, "wizard");
