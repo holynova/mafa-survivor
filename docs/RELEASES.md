@@ -1,5 +1,12 @@
 # GitHub 阶段发布
 
+## alpha.27 六级技能交付版
+
+[v0.1.0-alpha.27](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.27)标签b2dd319e15e8c72acd7bf145c3960223c4b0da78；[Source checks 40920798531](https://github.com/holynova/mafa-survivor/actions/runs/40920798531)与[Pages／Release 40920806165](https://github.com/holynova/mafa-survivor/actions/runs/40920806165)成功。597游戏／16Python／原版资源／29WAV／构建通过，修复技能重购恢复和暂停测试下一波。
+
+公网版本original／alpha.27／b2dd319一致，32,403帧与66图集清单、两个原生地图图集解码像素通过；实按D、六级实际属性、80金币书购买、390px无横溢出及人物／怪物／环境截图通过。八份补丁截图与JSON附件保留；完整六级玩法与108局冻结附件另见alpha.26。普通战斗与冻结a3bc6bf相同，不重复记作新模拟，完整职业／章节平衡仍未通过。
+
+
 ## alpha.26 六级成长阶段
 
 [v0.1.0-alpha.26](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.26)标签1b2452d6e05cc351b9f5899c45290c015b3c2bd4；[Source checks 40916228249](https://github.com/holynova/mafa-survivor/actions/runs/40916228249)和[Pages／Release 40916989193](https://github.com/holynova/mafa-survivor/actions/runs/40916989193)成功。594项游戏／16Python／原图／29WAV／构建、本地桌面与390px购买、在线版本和原生图集像素通过；19份初始验证附件已上传。冻结a3bc6bf的90局同V7与18局独立构筑均0异常，通关分别5和3，全部法师，平衡未过。交付复核发现重购存档和暂停快捷操作边界，另发alpha.27，不改写此历史标签。
