@@ -9,7 +9,7 @@ import { inputDiagnostics } from "./input";
 import { hasWorldAppearance } from "./appearance";
 import { appearanceStatus } from "./renderer";
 import { ITEMS, getItem } from "./content";
-import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual,testChapterVisual,testLootVisual,testPotionPickup,testPlayerFeedback,testSummonWall,testHealthWalk,testBossEngagement,testMeleeDodge,testFootOcclusion } from "./test-mode";
+import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual,testChapterVisual,testLootVisual,testPotionPickup,testPlayerFeedback,testSummonWall,testHealthWalk,testBossEngagement,testMeleeDodge,testFootOcclusion,testRoleCadence } from "./test-mode";
 import {damageSourceName} from "./damage-taken";
 export function TestTools() {
   const [open, setOpen] = useState(true),
@@ -70,7 +70,12 @@ export function TestTools() {
             <button onClick={()=>testBossEngagement(game)}>Boss接敌与避险（赤月）</button>
             <button onClick={()=>testMeleeDodge(game)}>战士近战避险（沃玛）</button>
             <button onClick={()=>testFootOcclusion(game)}>前景脚部遮挡（赤月）</button>
+            {game.classId!=="wizard" && <button onClick={()=>testRoleCadence(game)}>技能节奏与施毒（沃玛）</button>}
           </div>
+          {game.test.cadenceSample && <>
+            <output aria-label="技能节奏诊断">样例时间 {game.clock.toFixed(2)}秒<br />{game.skills.map(s=><span key={s.id}>{getSkill(s.id).name}：基础冷却 {getSkill(s.id).cooldown.toFixed(2)}秒 · 当前 {s.cd.toFixed(2)}秒 · 实际伤害 {Math.round(game.damageDealt[s.id]??0)}<br /></span>)}绿毒覆盖 {game.enemies.filter(e=>(e.greenPoison?.until??0)>game.clock).length} / {game.enemies.length} · 红毒覆盖 {game.enemies.filter(e=>(e.redPoison?.until??0)>game.clock).length} / {game.enemies.length}</output>
+            <p>无敌、固定高血量靶怪、关闭普攻和刷怪，仅观察真实技能冷却与命中。点击「继续」；道士约4秒后覆盖第二只，点击施毒术可切换红毒。此样例不用于评估生存平衡。</p>
+          </>}
           {game.test.footOcclusionSample && <p>固定在原赤月源图前景边缘；脚部被挡时仍显示完整人物／武器轮廓，地图条带保持原图。</p>}
           {(game.test.engagementSample || game.test.meleeDodgeSample) && <>
             <output aria-label="自动接敌实战诊断">距首领 {game.boss ? Math.round(Math.hypot(game.boss.x-game.player.x,game.boss.y-game.player.y)) : "—"}px · 侦测 {Math.round(game.detectionRange)}px<br />实际输出 {Math.round(Object.values(game.damageDealt).reduce((n,v)=>n+v,0))} · 实际承伤 {Math.round(game.damageTaken.physical+game.damageTaken.magic)}</output>

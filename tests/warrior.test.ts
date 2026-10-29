@@ -52,8 +52,8 @@ describe("warrior class and equipment", () => {
     ).toEqual({
       基本剑术: 0,
       攻杀剑术: 1.6,
-      刺杀剑术: 2.16,
-      半月弯刀: 2.4,
+      刺杀剑术: 1.68,
+      半月弯刀: 1.76,
       野蛮冲撞: 12,
       烈火剑法: 5.2,
     });
@@ -205,7 +205,7 @@ describe("directional melee and collision-safe dash", () => {
     expect(a.hp).toBeLessThan(10000);
     expect(b.hp).toBeLessThan(10000);
     for (const e of [side, rear, far]) expect(e.hp).toBe(10000);
-    expect(s.cd).toBe(2.16);
+    expect(s.cd).toBe(1.68);
     const single = setup();
     single.skills = [];
     const t = skill(single, "thrust");

@@ -20,6 +20,7 @@ export const newTestSettings = () => ({
   engagementSample:false,
   meleeDodgeSample:false,
   footOcclusionSample:false,
+  cadenceSample:false,
   incomingWallSample:false,
   showDetection:false,
   lootLabels:false,
@@ -221,6 +222,26 @@ export function testFootOcclusion(g:Game) {
   const point={x:696,y:880};if(!g.canStand(point.x,point.y))return false;
   Object.assign(g.player,point,{dir:0});g.skills=[];g.basicCD=Infinity;
   Object.assign(g.test,{spawning:false,footOcclusionSample:true,pose:"idle",direction:0});
+  g.pause();g.emit();return true;
+}
+/** Actual timed casts against stationary source monsters; no ordinary save rewards. */
+export function testRoleCadence(g:Game) {
+  if(g.mode!=="test" || g.classId==="wizard")return false;
+  g.start("test",176,g.classId,false,"woma");
+  const nav=g.navigation;if(!nav)return false;
+  const offsets=g.classId==="warrior" ? [40,62,145] : [90,145,200];
+  const home=[...nav.points].sort((a,b)=>Math.hypot(a.x-g.player.x,a.y-g.player.y)-Math.hypot(b.x-g.player.x,b.y-g.player.y)).find(p=>
+    offsets.every(dx=>g.canStand(p.x+dx,p.y) && g.attackLineClear(p,{x:p.x+dx,y:p.y})));
+  if(!home)return false;
+  Object.assign(g.player,home,{dir:2});
+  Object.assign(g.test,{spawning:false,autowalk:false,god:true,cadenceSample:true});
+  g.basicCD=Infinity;
+  g.skills=(g.classId==="warrior" ? ["cleave","thrust"] as const : ["talisman","poison"] as const).map(id=>{
+    const s=g.newSkill(id);s.cd=0;return s;
+  });
+  offsets.forEach((dx,i)=>Object.assign(g.spawnEnemy("orcWarrior"),{
+    x:home.x+dx,y:home.y,hp:10000,maxHp:10000,speed:0,attackCD:Infinity,elite:i===0,
+  }));
   g.pause();g.emit();return true;
 }
 export function testPlayerFeedback(g:Game,lethal=false) {

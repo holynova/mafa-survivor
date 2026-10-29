@@ -254,7 +254,7 @@ const definitions = [
     id: "thrust",
     classId: "warrior",
     name: "刺杀剑术",
-    cooldown: 2.7,
+    cooldown: 2.1,
     description:
       "前方两格直线内至少两个目标时发动穿透刺击，每个目标仅命中一次。",
     asset: "item/刺杀剑术",
@@ -268,7 +268,7 @@ const definitions = [
     id: "cleave",
     classId: "warrior",
     name: "半月弯刀",
-    cooldown: 3,
+    cooldown: 2.2,
     description: "近身前方至少两名敌人时挥出半月，只命中前方扇形。",
     asset: "item/半月弯刀",
     branches: [
@@ -339,7 +339,7 @@ const definitions = [
     name: "施毒术",
     cooldown: 5,
     description:
-      "点击技能切换绿毒持续伤害或红毒减防；优先高血量精英，同种毒刷新而不叠层。",
+      "点击技能切换绿毒持续伤害或红毒减防；覆盖未中毒目标或补充即将消退的毒，优先首领与精英，同种毒不叠层。",
     asset: "item/施毒术",
     branches: [
       branch("duration", 25, "持续时间 +25%"),
@@ -351,7 +351,7 @@ const definitions = [
     id: "talisman",
     classId: "taoist",
     name: "灵魂火符",
-    cooldown: 1.4,
+    cooldown: 1.1,
     description: "向高威胁目标发射单体护身符；追加火符分别瞄准不同目标。",
     asset: "item/灵魂火符",
     branches: [target, damage, cooldown],

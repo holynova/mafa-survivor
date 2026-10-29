@@ -1476,7 +1476,7 @@ export class Game {
         this.hit(
           e,
           incomingDamage(
-            this.physicalDamage(s.id === "thrust" ? 12 : 8, s.power),
+            this.physicalDamage(s.id === "thrust" ? 10 : 6, s.power),
             this.enemyDefense(e, "physical"),
             0,
           ),
@@ -1523,6 +1523,8 @@ export class Game {
         (e) =>
           e.hp > 0 &&
           Math.hypot(e.x - this.player.x, e.y - this.player.y) <= this.detectionRange &&
+          (s.id !== "poison" || (this.tao.poisonMode === "green"
+            ? e.greenPoison?.until ?? 0 : e.redPoison?.until ?? 0) <= this.clock + 1) &&
           (!["fireball", "bigfireball", "talisman"].includes(s.id) || !this.navigation || this.navigation.lineClear(this.player, e, 0)),
       )
       .sort((a, b) => {
@@ -1745,7 +1747,7 @@ export class Game {
     const targets = this.targetList(s),
       rad = (n: number) =>
         n * (1 + s.radius / 100) * (1 + (this.stats.skill_radius ?? 0) / 100);
-    if (["fireball", "bigfireball", "talisman"].includes(s.id) && !targets.length) {
+    if (["fireball", "bigfireball", "talisman", "poison"].includes(s.id) && !targets.length) {
       s.retryAt = this.clock + 0.15;
       return;
     }

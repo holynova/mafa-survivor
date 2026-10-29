@@ -301,7 +301,7 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
         height: 22,
         vx: (dx / d) * speed,
         vy: (dy / d) * speed,
-        damage: taoDamage(g, 10, s),
+        damage: taoDamage(g, 8, s),
         life: 3,
         dir:
           (((Math.round(Math.atan2(dy, dx) / (Math.PI / 8)) + 4) % 16) + 16) %
