@@ -17,7 +17,7 @@ export type Occluder = {
 /** Sample actual source alpha, rather than a rectangular tree-strip bound. */
 export function coversActor(part: Occluder, hero: { x: number; y: number }) {
   if (part.depth <= hero.y + 0.5) return false;
-  for (const [dx, dy] of [[0, -42], [0, -25], [-8, -25], [8, -25]]) {
+  for (const [dx, dy] of [[0, -42], [0, -25], [-8, -25], [8, -25], [0, -6], [-6, -10], [6, -10]]) {
     const x = Math.floor(hero.x + dx - part.x);
     const y = Math.floor(hero.y + dy - (part.y - part.height));
     if (x >= 0 && y >= 0 && x < part.width && y < part.height && part.mask[y * part.width + x] > 128) return true;

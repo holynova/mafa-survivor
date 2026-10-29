@@ -22,3 +22,10 @@ it("shows the cover silhouette only for opaque source pixels in front of the act
   expect(coversActor({ ...part, depth: 170 }, hero)).toBe(false);
   expect(coversActor(part, { x: 180, y: 180 })).toBe(false);
 });
+it("retains a complete cover silhouette when only the feet are behind a foreground ledge",()=>{
+  const part={x:100,y:200,width:48,height:120,depth:4000,mask:new Uint8Array(48*120)};
+  const hero={x:124,y:180};
+  part.mask[(180-6-80)*48+24]=255;
+  expect(coversActor(part,hero)).toBe(true);
+  expect(coversActor({...part,depth:170},hero)).toBe(false);
+});

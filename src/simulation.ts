@@ -1,7 +1,6 @@
-import { Game, WORLD, type Mode, type Upgrade, type Offer } from "./game";
-import { getItem, type Bonuses, type MapId, type SkillId } from "./content";
+import { Game, WORLD, type Mode, type Upgrade, type Offer, type Enemy } from "./game";
+import { getItem, isBossKind, type Bonuses, type MapId, type SkillId } from "./content";
 import type { ClassId } from "./classes";
-import { inShockLane } from "./temple";
 import {isPrimaryWeaponUpgrade,primaryRange} from "./equipment";
 
 export type SimulationOptions = { seed:number; classId:ClassId; mapId:MapId; mode:Exclude<Mode,"test">; warriorFourSlot?:boolean; traceShops?:boolean };
@@ -14,6 +13,30 @@ const priorities: Record<ClassId,SkillId[]> = {
   taoist:["skeleton","beast","poison","talisman","heal","ghost"],
 };
 const distance=(a:{x:number;y:number},b:{x:number;y:number})=>Math.hypot(a.x-b.x,a.y-b.y);
+type Point={x:number;y:number};
+function lanePressure(point:Point,origin:Point,target:Point,width:number) {
+  const dx=target.x-origin.x,dy=target.y-origin.y,length2=dx*dx+dy*dy;
+  const t=length2 ? ((point.x-origin.x)*dx+(point.y-origin.y)*dy)/length2 : 0;
+  return t<0 || t>1 ? 0 : Math.max(0,1-Math.hypot(point.x-origin.x-dx*t,point.y-origin.y-dy*t)/width)*65;
+}
+function warningPressure(point:Point,e:Enemy) {
+  return (e.shock ? lanePressure(point,e.shock.origin,e.shock.target,55) : 0)+
+    (e.stompOrigin ? Math.max(0,1-distance(point,e.stompOrigin)/155)*65 : 0)+
+    (e.bossJumpTarget ? Math.max(0,1-distance(point,e.bossJumpTarget)/135)*65 : 0)+
+    (e.chargeTarget ? lanePressure(point,e,e.chargeTarget,50) : 0);
+}
+function engagementPoint(g:Game,target:Enemy):Point {
+  const reach=g.classId==="warrior" ? 40 : g.detectionRange*.75;
+  const dx=g.player.x-target.x,dy=g.player.y-target.y,d=Math.max(1,Math.hypot(dx,dy));
+  const point={x:target.x+dx/d*reach,y:target.y+dy/d*reach};
+  const nav=g.navigation;
+  if(g.canStand(point.x,point.y) && g.attackLineClear(point,target) && (!nav || nav.connected(g.player,point)))return point;
+  // A firing position must be real source floor; otherwise follow the legal
+  // route toward the target until a visible position becomes available.
+  return nav?.reachablePoints(target,reach*.6,reach).filter(p=>nav.connected(g.player,p))
+    .sort((a,b)=>distance(a,g.player)-distance(b,g.player)).slice(0,12)
+    .find(p=>g.attackLineClear(p,target)) ?? target;
+}
 function upgradeScore(g:Game,c:Upgrade) {
   if(c.skill) {
     const preference=priorities[g.classId].indexOf(c.skill);
@@ -104,37 +127,37 @@ export function simulationInput(g:Game,previous={x:0,y:0}) {
     .filter(d=>!g.navigation || g.navigation.connected(p,d))
     .sort((a,b)=>(distance(a,p)-(a.heal && health<.7 ? 200*(1-health) : 0))-
       (distance(b,p)-(b.heal && health<.7 ? 200*(1-health) : 0)))[0];
-  const destination=drop?.heal && health<.7 ? drop : g.classId==="warrior" && g.boss ? g.boss : drop ?? (g.classId==="warrior" ? enemies[0] : undefined);
+  const emergency=!!drop?.heal && health<.7;
+  const boss=g.boss;
+  const focus=boss ?? (g.classId==="warrior" ? enemies.find(e=>distance(e,p)<48 && g.attackLineClear(p,e)) ?? enemies[0] : undefined);
+  const destination=emergency ? drop : boss ? engagementPoint(g,boss) : drop ?? (focus ? engagementPoint(g,focus) : undefined);
   const goal=destination && g.navigation ? g.navigation.waypoint(p,destination) : destination;
   const candidates=[{x:0,y:0},...Array.from({length:8},(_,i)=>({x:Math.cos(i*Math.PI/4),y:Math.sin(i*Math.PI/4)}))];
-  if(goal){const dx=goal.x-p.x,dy=goal.y-p.y,d=Math.hypot(dx,dy);if(d>0)candidates.push({x:dx/d,y:dy/d});}
+  if(goal){const dx=goal.x-p.x,dy=goal.y-p.y,d=Math.hypot(dx,dy),scale=Math.min(1,d/(g.moveSpeed/6));if(d>0)candidates.push({x:dx/d*scale,y:dy/d*scale});}
+  const threatened=enemies.some(e=>(e.windup>0 && distance(e,p)<125) || warningPressure(p,e)>0);
   let best=candidates[0],bestScore=-Infinity;
-  for(const direction of candidates) {
-    // The controller holds this action for ten fixed steps. Do not reject a
-    // valid near waypoint by projecting several cells beyond that waypoint.
-    const speed=goal ? Math.min(1,distance(p,goal)/(g.moveSpeed/6)) : 1;
-    const input={x:direction.x*speed,y:direction.y*speed};
+  for(const input of candidates) {
+    // The exact waypoint gets a short legal step; other candidates retain full
+    // speed so a nearby goal never prevents dodging a committed warning.
     const future={x:p.x+input.x*g.moveSpeed/6,y:p.y+input.y*g.moveSpeed/6};
     if(future.x<35 || future.y<55 || future.x>WORLD.w-35 || future.y>WORLD.h-35 ||
       !g.canStand(future.x,future.y) || g.navigation && !g.navigation.lineClear(p,future,12))continue;
     let score=(input.x*previous.x+input.y*previous.y)*0.4;
-    if(g.classId==="warrior" && input.x===0 && input.y===0 && g.basicCD<0.2 && enemies.some(e=>distance(e,p)<48))score+=18;
+    if(g.classId==="warrior" && !emergency && !threatened && input.x===0 && input.y===0 && g.basicCD<0.2 && enemies.some(e=>distance(e,p)<48))score+=18;
     if(goal)score+=(distance(p,goal)-distance(future,goal))/35;
     else score+=(distance(p,{x:WORLD.w/2,y:WORLD.h/2})-distance(future,{x:WORLD.w/2,y:WORLD.h/2}))/100;
     for(const e of enemies) {
       const d=distance(e,p),horizon=0.4;
       const committed=e.windup>0 || e.shock || e.rangedFireAt!==undefined || e.dormant || (e.staggerUntil ?? 0)>g.clock;
-      const predicted={x:e.x+(committed ? 0 : (p.x-e.x)/Math.max(1,d)*e.speed*horizon),
-        y:e.y+(committed ? 0 : (p.y-e.y)/Math.max(1,d)*e.speed*horizon)};
+      const approach=g.classId==="warrior" && e.id===focus?.id && !committed;
+      const predicted={x:e.x+(committed || approach ? 0 : (p.x-e.x)/Math.max(1,d)*e.speed*horizon),
+        y:e.y+(committed || approach ? 0 : (p.y-e.y)/Math.max(1,d)*e.speed*horizon)};
       if(!g.navigation || g.navigation.lineClear(future,predicted,0)) {
-        const radius=g.classId==="warrior" ? e.windup>0 ? 75 : 42 : e.ranged ? 75 : 105;
+        const radius=g.classId==="warrior" ? e.windup>0 ? (isBossKind(e.kind) ? 125 : 75) : approach ? 28 : 42 : e.ranged ? 75 : 105;
         score-=Math.max(0,1-distance(future,predicted)/radius)**2*50;
         if(distance(future,e)<30)score-=40;
       }
-      if(e.shock && inShockLane(future,e.shock.origin,e.shock.target,55))score-=45;
-      if(e.stompOrigin && distance(future,e.stompOrigin)<155)score-=45;
-      if(e.bossJumpTarget && distance(future,e.bossJumpTarget)<135)score-=40;
-      if(e.chargeTarget && inShockLane(future,e,e.chargeTarget,50))score-=35;
+      score-=warningPressure(future,e);
     }
     for(const missile of g.projectiles.filter(m=>m.faction==="enemy")) {
       const rx=missile.x-p.x,ry=missile.y-p.y;

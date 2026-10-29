@@ -17,6 +17,9 @@ export const newTestSettings = () => ({
   recoverySample:false,
   summonWallSample:false,
   healthWalkSample:false,
+  engagementSample:false,
+  meleeDodgeSample:false,
+  footOcclusionSample:false,
   incomingWallSample:false,
   showDetection:false,
   lootLabels:false,
@@ -185,6 +188,39 @@ export function testHealthWalk(g:Game) {
   g.player.hp=g.maxHP-60;g.test.autowalk=true;g.test.healthWalkSample=true;g.test.lootLabels=true;
   appendLoot(g.drops,{id:g.nextEntityId(),...potion,exp:0,gold:0,heal:20,count:3,born:0});
   if(coin)appendLoot(g.drops,{id:g.nextEntityId(),...coin,exp:2,gold:4,born:0});
+  g.pause();g.emit();return true;
+}
+export function testBossEngagement(g:Game) {
+  if(g.mode!=="test")return false;
+  g.start("test",176,g.classId,false,"redmoon");
+  const point=g.navigation?.reachablePoints(g.player,380,480).sort((a,b)=>
+    Math.hypot(a.x-g.player.x+420,a.y-g.player.y)-Math.hypot(b.x-g.player.x+420,b.y-g.player.y))[0];
+  if(!point)return false;
+  g.test.spawning=false;g.test.god=false;g.test.autowalk=true;g.test.engagementSample=true;
+  const skills:SkillId[]=g.classId==="wizard" ? ["fireball","lightning"] : g.classId==="taoist" ? ["talisman","skeleton","beast"] : ["powerstrike","cleave","thrust"];
+  g.skills=skills.map(id=>{const s=g.newSkill(id);s.cd=0;return s;});
+  Object.assign(g.spawnEnemy("redMoon"),point);
+  g.pause();g.emit();return true;
+}
+export function testMeleeDodge(g:Game) {
+  if(g.mode!=="test")return false;
+  g.start("test",176,"warrior",false,"woma");
+  const nav=g.navigation;if(!nav)return false;
+  const home=[...nav.points].sort((a,b)=>Math.hypot(a.x-g.player.x,a.y-g.player.y)-Math.hypot(b.x-g.player.x,b.y-g.player.y)).find(p=>
+    [-120,-80,40].every(dx=>g.canStand(p.x+dx,p.y) && g.attackLineClear(p,{x:p.x+dx,y:p.y})));
+  if(!home)return false;
+  Object.assign(g.player,home);g.test.spawning=false;g.test.god=false;g.test.autowalk=true;g.test.meleeDodgeSample=true;
+  g.skills=[g.newSkill("powerstrike"),g.newSkill("cleave")];g.skills.forEach(s=>s.cd=0);
+  Object.assign(g.spawnEnemy("womaLord"),{x:home.x+40,y:home.y,speed:0,windup:.65,attackTarget:0,shockCD:Infinity,bossSummonCD:Infinity});
+  g.pause();g.emit();return true;
+}
+export function testFootOcclusion(g:Game) {
+  if(g.mode!=="test")return false;
+  g.start("test",176,"wizard",false,"redmoon");
+  // Pinned D1001 crop: the walkable cell (14,27) sits behind a foreground ledge.
+  const point={x:696,y:880};if(!g.canStand(point.x,point.y))return false;
+  Object.assign(g.player,point,{dir:0});g.skills=[];g.basicCD=Infinity;
+  Object.assign(g.test,{spawning:false,footOcclusionSample:true,pose:"idle",direction:0});
   g.pause();g.emit();return true;
 }
 export function testPlayerFeedback(g:Game,lethal=false) {
