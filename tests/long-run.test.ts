@@ -81,11 +81,11 @@ function run(seed: number, classId: ClassId = "wizard", mapId: MapId = "biche", 
       y: dy / Math.max(25, Math.hypot(dx, dy)),
     };
     g.step(1 / 60);
-    expect(g.gold).toBeGreaterThanOrEqual(0);
-    expect(g.enemies.length).toBeLessThanOrEqual(300);
-    expect(g.drops.length).toBeLessThanOrEqual(300);
-    expect(g.skills.length).toBeLessThanOrEqual(6);
-    expect(g.clock).toBeGreaterThanOrEqual(last);
+    // Check every frame without allocating five matcher objects per tick in
+    // the two-run probe. Keep identical bounds and reject NaN explicitly.
+    if(!Number.isFinite(g.gold) || g.gold<0 || g.enemies.length>300 || g.drops.length>300 ||
+       g.skills.length>6 || !Number.isFinite(g.clock) || g.clock<last)
+      throw new Error(`Run invariant at tick ${step}: gold=${g.gold}, enemies=${g.enemies.length}, drops=${g.drops.length}, skills=${g.skills.length}, clock=${g.clock}, previous=${last}`);
     last = g.clock;
   }
   return {
