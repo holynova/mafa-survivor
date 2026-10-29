@@ -9,7 +9,7 @@ import { inputDiagnostics } from "./input";
 import { hasWorldAppearance } from "./appearance";
 import { appearanceStatus } from "./renderer";
 import { ITEMS, getItem } from "./content";
-import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual,testChapterVisual,testLootVisual,testPotionPickup,testPlayerFeedback,testSummonWall,testHealthWalk,testBossEngagement,testMeleeDodge,testFootOcclusion,testRoleCadence } from "./test-mode";
+import { testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual,testChapterVisual,testLootVisual,testPotionPickup,testPlayerFeedback,testSummonWall,testHealthWalk,testBossEngagement,testMeleeDodge,testFootOcclusion,testRoleCadence,testViewportEdge } from "./test-mode";
 import {damageSourceName} from "./damage-taken";
 import {TEST_BUILDS,testBossBuild} from "./test-builds";
 export function TestTools() {
@@ -73,6 +73,7 @@ export function TestTools() {
             <button onClick={()=>testBossEngagement(game)}>Boss接敌与避险（赤月）</button>
             <button onClick={()=>testMeleeDodge(game)}>战士近战避险（沃玛）</button>
             <button onClick={()=>testFootOcclusion(game)}>前景脚部遮挡（赤月）</button>
+            <button onClick={()=>testViewportEdge(game)}>地图下沿镜头（沃玛）</button>
             {game.classId!=="wizard" && <button onClick={()=>testRoleCadence(game)}>技能节奏与施毒（沃玛）</button>}
           </div>
           {game.test.cadenceSample && <>
@@ -88,6 +89,7 @@ export function TestTools() {
             <details><summary>查看预设技能分支</summary>{game.test.bossBuild.branches.map(line=><p key={line}>{line}</p>)}</details>
           </>}
           {game.test.footOcclusionSample && <p>固定在原赤月源图前景边缘；脚部被挡时仍显示完整人物／武器轮廓，地图条带保持原图。</p>}
+          {game.test.cameraEdgeSample && <p>固定在原沃玛地图最下方的合法地面，检查人物脚部与阴影完整显示在操作栏上方。窗口缩放时随实际操作栏高度调整。</p>}
           {(game.test.engagementSample || game.test.meleeDodgeSample) && <>
             <output aria-label="自动接敌实战诊断">距首领 {game.boss ? Math.round(Math.hypot(game.boss.x-game.player.x,game.boss.y-game.player.y)) : "—"}px · 侦测 {Math.round(game.detectionRange)}px<br />实际输出 {Math.round(Object.values(game.damageDealt).reduce((n,v)=>n+v,0))} · 实际承伤 {Math.round(game.damageTaken.physical+game.damageTaken.magic)}</output>
             <p>已关闭刷怪和无敌，自动走位已开启。点击「继续」观察接敌、攻击和撤离预警；方向键或拖动可接管。{game.test.meleeDodgeSample ? "此样例固定首领近战，关闭其他首领技能。" : "可切换职业后重新载入。"}测试不保存战绩。</p>

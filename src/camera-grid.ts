@@ -11,3 +11,8 @@ export function alignCameraScroll(scroll:number,zoom:number,origin:number,viewpo
   }
   return (pixel+offset)/zoom;
 }
+
+/** Keep camera bounds and centering inside the area above the measured console. */
+export function battleViewport(width:number,height:number,bottomInset=0) {
+  return {width:Math.max(1,width),height:Math.max(1,height-Math.max(0,Math.ceil(bottomInset)))};
+}

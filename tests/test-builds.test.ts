@@ -5,6 +5,7 @@ import {setWorldLayouts} from "../src/world";
 import {getItem,MAPS,PLAYABLE_MAP_IDS} from "../src/content";
 import {hasWorldAppearance} from "../src/appearance";
 import {simulationInput} from "../src/simulation";
+import {testViewportEdge} from "../src/test-mode";
 import biche from "./fixtures/biche-layout.json";
 import mine from "./fixtures/mine-layout.json";
 import woma from "./fixtures/woma-layout.json";
@@ -43,4 +44,9 @@ it("clears preset grants when a new ordinary run starts",()=>{
  expect(g.level).toBe(1);expect(g.skills).toHaveLength(1);expect(g.skills[0].rank).toBe(1);
  expect(Object.values(g.equipment).map(e=>e!.itemId)).toEqual(["equip-extra-木剑"]);
  expect(g.test.bossBuild).toBeNull();expect(g.upgrades).toEqual({});
+});
+it("loads the camera edge probe on actual low source floor and refuses ordinary mode",()=>{
+ setWorldLayouts({woma});const g=new Game();g.start("test");expect(testViewportEdge(g)).toBe(true);
+ expect(g.player.y).toBeGreaterThan(1400);expect(g.player.y).toBeLessThan(1500);expect(g.canStand(g.player.x,g.player.y)).toBe(true);
+ expect(g.phase).toBe("paused");g.start("normal",176,"warrior",false,"biche");const id=g.runId;expect(testViewportEdge(g)).toBe(false);expect(g.runId).toBe(id);
 });

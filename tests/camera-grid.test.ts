@@ -1,5 +1,17 @@
 import {expect,it} from "vitest";
-import {alignCameraScroll} from "../src/camera-grid";
+import {alignCameraScroll,battleViewport} from "../src/camera-grid";
+
+it.each([[1280,720,133],[390,844,122],[844,390,133]])("keeps the bottommost legal actor above the console in a %ix%i view",(width,height,inset)=>{
+ const view=battleViewport(width,height,inset);
+ expect(view.height).toBe(height-inset);
+ const lowestFoot=view.height-35*(width<700 ? 1.15 : 1.5);
+ expect(lowestFoot).toBeLessThan(height-inset-20);
+ expect(view.width).toBe(width);
+});
+it("restores the full lobby view and keeps a tiny resized battle viewport nonzero",()=>{
+ expect(battleViewport(1280,720,0)).toEqual({width:1280,height:720});
+ expect(battleViewport(390,80,122).height).toBe(1);
+});
 
 it.each([1.5,1.15])( "avoids half-screen-pixel map boundaries at zoom %s",zoom=>{
   for(const size of [375,720,1280])for(const scroll of [255,255.4,583.6,80,0,-30.2]) {

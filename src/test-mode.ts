@@ -22,6 +22,7 @@ export const newTestSettings = () => ({
   footOcclusionSample:false,
   cadenceSample:false,
   bossBuild:null as {name:string;boss:Enemy;branches:string[];equipment:string[]} | null,
+  cameraEdgeSample:false,
   incomingWallSample:false,
   showDetection:false,
   lootLabels:false,
@@ -223,6 +224,16 @@ export function testFootOcclusion(g:Game) {
   const point={x:696,y:880};if(!g.canStand(point.x,point.y))return false;
   Object.assign(g.player,point,{dir:0});g.skills=[];g.basicCD=Infinity;
   Object.assign(g.test,{spawning:false,footOcclusionSample:true,pose:"idle",direction:0});
+  g.pause();g.emit();return true;
+}
+export function testViewportEdge(g:Game) {
+  if(g.mode!=="test")return false;
+  g.start("test",176,"warrior",false,"woma");
+  const point=g.navigation?.points.filter(p=>p.y<1500 && p.x>100 && p.x<2100)
+    .sort((a,b)=>b.y-a.y || Math.abs(a.x-1104)-Math.abs(b.x-1104))[0];
+  if(!point)return false;
+  Object.assign(g.player,point);g.skills=[];g.basicCD=Infinity;
+  Object.assign(g.test,{spawning:false,cameraEdgeSample:true,pose:"idle",direction:4});
   g.pause();g.emit();return true;
 }
 /** Actual timed casts against stationary source monsters; no ordinary save rewards. */

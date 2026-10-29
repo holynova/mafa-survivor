@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import {alignCameraScroll} from "./camera-grid";
+import {alignCameraScroll,battleViewport} from "./camera-grid";
 import {heroPose} from "./hero-pose";
 import {effectSprites,poisonTint} from "./effect-visual";
 import {dropVisuals,lootName} from "./loot-visual";
@@ -10,6 +10,8 @@ import { sounds } from "./sound";
 import { setWorldLayouts, type WorldLayout } from "./world";
 import { MovementInput, inputDiagnostics } from "./input";
 import { SCENERY, ITEMS, MAPS, STATIONARY_MONSTERS, isBossKind, type MapId } from "./content";
+let battleBottomInset=0;
+export function setBattleInset(height:number) {battleBottomInset=Math.max(0,height);}
 import { resolveAppearance, weaponBehind } from "./appearance";
 import { game, WORLD, type Enemy } from "./game";
 export type Manifest = {
@@ -82,6 +84,7 @@ class BattleScene extends Phaser.Scene {
   private queuedPages = new Set<string>();
   private failedPages = new Set<string>();
   private heroLook: { body: string; weapon: string | null } = { body: "dress-1", weapon: "weapon-8" };
+  private viewportKey="";
   constructor() {
     super("battle");
   }
@@ -102,7 +105,7 @@ class BattleScene extends Phaser.Scene {
   create() {
     if (this.failed) return;
     this.cameras.main.setBounds(0, 0, WORLD.w, WORLD.h);
-    this.cameras.main.setZoom(this.zoom());
+    this.syncViewport();
     this.cameras.main.roundPixels=false;
     this.paintGround();
     for (const [name, sequence] of Object.entries(assets.animations)) {
@@ -181,16 +184,24 @@ class BattleScene extends Phaser.Scene {
       }
     });
     document.addEventListener("clear-game-input", () => this.clearInput());
-    this.scale.on("resize", () => this.cameras.main.setZoom(this.zoom()));
+    this.scale.on("resize", () => this.syncViewport());
     rendererReady = true;
     for (const f of readyListeners) f();
     game.emit();
   }
   private centerCamera(x:number,y:number) {
+    this.syncViewport();
     const camera=this.cameras.main;
     camera.centerOn(x,y);
     camera.scrollX=alignCameraScroll(camera.scrollX,camera.zoomX,camera.width*camera.originX,camera.x,{min:camera.clampX(-Number.MAX_SAFE_INTEGER),max:camera.clampX(Number.MAX_SAFE_INTEGER)});
     camera.scrollY=alignCameraScroll(camera.scrollY,camera.zoomY,camera.height*camera.originY,camera.y,{min:camera.clampY(-Number.MAX_SAFE_INTEGER),max:camera.clampY(Number.MAX_SAFE_INTEGER)});
+  }
+  private syncViewport() {
+    const view=battleViewport(this.scale.width,this.scale.height,game.phase==="lobby" ? 0 : battleBottomInset);
+    const key=`${view.width}/${view.height}`;
+    if(key===this.viewportKey)return;
+    this.viewportKey=key;
+    this.cameras.main.setViewport(0,0,view.width,view.height).setZoom(this.zoom());
   }
   private zoom() {
     return this.scale.width < 700 ? 1.15 : 1.5;
@@ -823,7 +834,7 @@ export function boot() {
   engine = new Phaser.Game({
     type: Phaser.AUTO,
     parent: "world",
-    backgroundColor: "#1d271f",
+    backgroundColor: isGraybox ? "#1d271f" : "#100c08",
     pixelArt: true,
     antialias: false,
     scale: {

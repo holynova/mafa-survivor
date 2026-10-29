@@ -17,6 +17,7 @@ import {
   frameMS,
   appearanceStatus,
   setAssetManifest,
+  setBattleInset,
 } from "./renderer";
 import { CLASSES, CLASS_IDS } from "./classes";
 import {primaryRange} from "./equipment";
@@ -146,6 +147,15 @@ export function App() {
   const [settledRun,setSettledRun]=useState("");
   const inventoryResumes = useRef(false);
   const checkpointKey = useRef("");
+  const battleConsole = useRef<HTMLElement|null>(null);
+  const inLobby=game.phase==="lobby";
+  useEffect(()=>{
+    const console=battleConsole.current;
+    if(!console){setBattleInset(0);return;}
+    const measure=()=>setBattleInset(console.getBoundingClientRect().height);
+    const observer=new ResizeObserver(measure);observer.observe(console);measure();
+    return ()=>{observer.disconnect();setBattleInset(0);};
+  },[inLobby]);
   useEffect(() => { document.title = `玛法幸存者 · ${game.mapId === "biche" ? "比奇荒野" : MAPS[game.mapId].name}`; }, [game.mapId]);
   useEffect(() => game.subscribe(refresh), []);
   useEffect(()=>{
@@ -645,7 +655,7 @@ export function App() {
               {time(game.clock)} / {game.mode === "trial" ? "01:45" : "15:00"}
             </small>
           </div>
-          <section className="classic-console" aria-label="经典战斗操作栏">
+          <section ref={battleConsole} className="classic-console" aria-label="经典战斗操作栏">
             <div className="vitals">
               {!isGraybox && <div className="classic-orb" aria-hidden="true">
                 <img className="hp-half" src={assetUrl("ui/hp.png")} alt="" style={{clipPath:`inset(${(1-Math.max(0,game.player.hp/game.maxHP))*100}% 0 0 0)`}} />
