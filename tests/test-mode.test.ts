@@ -132,3 +132,14 @@ describe("original map collision grid", () => {
     expect(canStand(-10, 20)).toBe(false);
   });
 });
+
+
+import {testNextWave} from "../src/test-mode";
+it("advances the test tool from both paused combat and shop without granting normal rewards",()=>{
+ const g=new Game();g.start("test");g.pause();expect(testNextWave(g)).toBe(true);expect(g.phase).toBe("shop");expect(g.wave).toBe(1);
+ expect(g.training.total).toBe(0);expect(testNextWave(g)).toBe(true);expect(g.phase).toBe("battle");expect(g.wave).toBe(2);
+});
+it("does not let the test wave shortcut change an ordinary run or settled test run",()=>{
+ const g=new Game();g.start("normal");const clock=g.clock;expect(testNextWave(g)).toBe(false);expect(g.wave).toBe(1);expect(g.clock).toBe(clock);
+ g.start("test");g.finish(false);expect(testNextWave(g)).toBe(false);
+});

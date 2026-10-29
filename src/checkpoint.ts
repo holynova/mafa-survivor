@@ -193,7 +193,7 @@ export function sanitizeCheckpoint(value: unknown): RunCheckpoint | null {
   const validSkills=skillIdsFor(cp.classId);
   if(cp.skillFocus && !cp.skills.some(s=>s.id===cp.skillFocus && s.rank<MAX_SKILL_RANK))cp.skillFocus=null;
   if(cp.bookWish && (!validSkills.has(cp.bookWish) || cp.skills.some(s=>s.id===cp.bookWish)))cp.bookWish=null;
-  if(new Set(cp.booksBought).size!==cp.booksBought.length || cp.booksBought.some(id=>!validSkills.has(id)))return null;
+  if(cp.booksBought.some(id=>!validSkills.has(id)))return null;
   const book=cp.bookOffer;
   if(book && (!validSkills.has(book.skill) || book.wave!==cp.wave ||
     !bookAvailable(book.skill as SkillId,cp.wave) || book.price!==bookPrice(book.skill as SkillId,cp.wave) ||

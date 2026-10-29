@@ -1,5 +1,10 @@
 # GitHub 阶段发布
 
+## alpha.26 六级成长阶段
+
+[v0.1.0-alpha.26](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.26)标签1b2452d6e05cc351b9f5899c45290c015b3c2bd4；[Source checks 40916228249](https://github.com/holynova/mafa-survivor/actions/runs/40916228249)和[Pages／Release 40916989193](https://github.com/holynova/mafa-survivor/actions/runs/40916989193)成功。594项游戏／16Python／原图／29WAV／构建、本地桌面与390px购买、在线版本和原生图集像素通过；19份初始验证附件已上传。冻结a3bc6bf的90局同V7与18局独立构筑均0异常，通关分别5和3，全部法师，平衡未过。交付复核发现重购存档和暂停快捷操作边界，另发alpha.27，不改写此历史标签。
+
+
 ## alpha.25 白日门与石墓一层
 
 [v0.1.0-alpha.25](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.25)固定提交`eb02d90b3d019cd3ce7e339c7803b9b60f370ed5`；[Pages／Release 40891938662](https://github.com/holynova/mafa-survivor/actions/runs/40891938662)与[Source checks 40891938574](https://github.com/holynova/mafa-survivor/actions/runs/40891938574)成功。512游戏测试／16Python／原图裁剪像素／29原WAV／构建、本地两章与390px交互、真实75秒首领战和公网两章／D实按截图通过；版本original／alpha.25／eb02d90匹配。

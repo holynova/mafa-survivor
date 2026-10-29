@@ -9,7 +9,7 @@ import { inputDiagnostics } from "./input";
 import { hasWorldAppearance } from "./appearance";
 import { appearanceStatus } from "./renderer";
 import { ITEMS, getItem } from "./content";
-import { testSkillRank, testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual,testChapterVisual,testLootVisual,testPotionPickup,testPlayerFeedback,testSummonWall,testHealthWalk,testBossEngagement,testMeleeDodge,testFootOcclusion,testRoleCadence,testViewportEdge,testPotionReserve } from "./test-mode";
+import { testNextWave, testSkillRank, testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual,testChapterVisual,testLootVisual,testPotionPickup,testPlayerFeedback,testSummonWall,testHealthWalk,testBossEngagement,testMeleeDodge,testFootOcclusion,testRoleCadence,testViewportEdge,testPotionReserve } from "./test-mode";
 import {damageSourceName} from "./damage-taken";
 import {skillMetrics} from "./skill-metrics";
 import {SKILL_GROWTH} from "./skill-growth";
@@ -389,12 +389,7 @@ export function TestTools() {
           <div className="test-row">
             <button
               onClick={() => {
-                if (game.phase === "shop") game.nextWave();
-                else if (game.phase === "battle") {
-                  game.exp = 0;
-                  game.waveTime = game.duration;
-                  game.endWave();
-                }
+                testNextWave(game);
               }}
             >
               下一波 / 商店

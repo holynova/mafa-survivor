@@ -410,3 +410,12 @@ export function testIncomingWall(g:Game, visible = false) {
   for(let tick=0;tick<66 && g.phase==="battle";tick++)g.step(1/60);
   if(g.phase==="battle")g.pause();g.emit();return true;
 }
+
+/** One click works from either combat or its paused test view. */
+export function testNextWave(g:Game) {
+  if(g.mode!=="test" || !["battle","paused","shop"].includes(g.phase))return false;
+  if(g.phase==="paused")g.pause();
+  if(g.phase==="shop")g.nextWave();
+  else {g.exp=0;g.waveTime=g.duration;g.endWave();}
+  return true;
+}

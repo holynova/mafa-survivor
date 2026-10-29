@@ -57,8 +57,8 @@ it("migrates a legacy branch checkpoint once and durably preserves its original 
  const reread=await readCheckpoint();expect(reread?.skills[0]).toMatchObject(canonicalBonuses("fireball",3));expect(reread?.legacyGrowth?.skills[0].power).toBe(44);
  const saved=await openDB("mafa-survivor",2);expect(await saved.get("meta","run-checkpoint-before-six-levels")).toBeTruthy();saved.close();
 });
-it("rejects duplicate book ledgers and skill ids instead of granting duplicate growth",()=>{
- const g=shop(),cp=g.snapshotCheckpoint()!;cp.booksBought=["firewall","firewall"];expect(sanitizeCheckpoint(cp)).toBeNull();
+it("rejects foreign book ids and duplicate skills instead of granting foreign or duplicate growth",()=>{
+ const g=shop(),cp=g.snapshotCheckpoint()!;cp.booksBought=["beast"];expect(sanitizeCheckpoint(cp)).toBeNull();
  cp.booksBought=[];cp.skills.push({...cp.skills[0]});expect(sanitizeCheckpoint(cp)).toBeNull();
 });
 it("starts a new ordinary run without test grants or previous book limits",()=>{
@@ -77,4 +77,15 @@ it("retains actual summonedSkeleton and beast model ids, HP ratios and caps on r
  expect(g.pets).toHaveLength(3);g.pets[0].hp*=.5;
  const cp=g.snapshotCheckpoint()!,next=new Game();expect(next.resumeCheckpoint(cp)).toBe(true);expect(next.pets).toHaveLength(3);
  expect(next.pets.map(p=>p.kind)).toEqual(["summonedSkeleton","summonedSkeleton","beast"]);expect(next.pets[0].hp/next.pets[0].maxHp).toBeCloseTo(.5);
+});
+
+it("keeps a valid two-purchase ledger when a replaced skill is bought again",()=>{
+ const g=shop();g.buyBook(g.bookOffer!.id);
+ g.skills.push(...(["lightning","shield","repulse","teleport"] as SkillId[]).map(id=>g.newSkill(id)));
+ g.phase="upgrade";g.choices=[{id:"learn-explosion",kind:"skill",skill:"explosion",name:"爆裂火焰",description:"",value:0}];
+ g.choose("learn-explosion");expect(g.phase).toBe("replace");expect(g.replaceSkill(1)).toBe(true);
+ g.wave=6;g.setBookWish("firewall");g.endWave();expect(g.buyBook(g.bookOffer!.id)).toBe(true);expect(g.phase).toBe("replace");expect(g.replaceSkill(1)).toBe(true);
+ expect(g.booksBought).toEqual(["firewall","firewall"]);
+ const next=new Game();expect(next.resumeCheckpoint(g.snapshotCheckpoint())).toBe(true);expect(next.booksBought).toEqual(["firewall","firewall"]);
+ expect(next.skills.find(s=>s.id==="firewall")?.rank).toBe(1);next.nextWave();next.endWave();expect(next.bookOffer).toBeNull();
 });
