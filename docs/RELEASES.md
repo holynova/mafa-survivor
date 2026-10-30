@@ -1,5 +1,11 @@
 # GitHub 阶段发布
 
+## alpha.29 召唤物首领选敌（已发布并线上核验）
+
+[v0.1.0-alpha.29](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.29)固定1d6ed32e8cee1cde70d4888e9bb990e113b27fa6；[Source checks 40987448867](https://github.com/holynova/mafa-survivor/actions/runs/40987448867)与[Pages／Release 40987453031](https://github.com/holynova/mafa-survivor/actions/runs/40987453031)成功。606游戏／16Python／原图像素／29WAV／构建、桌面／390px截图通过。公网original／alpha.29／1d6ed32及原生图集像素一致，实际UI小怪0／教主12伤害与KeyD1080→1112.2通过，操作期间未捕获运行错误。
+
+冻结212038b的同V7正常90局0异常／5法师通关，独立构筑18局0异常／3法师通关；战士／道士仍0胜，道士最终波次5进／3退／22不变，不宣称整体平衡改善。冻结后测试样例仅调整构图、标签和真实CD展示，普通战斗函数不变。独立直接接敌诊断没有进入V7统计或发布控制器。
+
 ## alpha.28 战士移动挥刀（已发布并线上验证）
 
 [v0.1.0-alpha.28](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.28)固定28d7cbf908ea72779b78a20fa8619fbaf935025d；[Source checks 40983124480](https://github.com/holynova/mafa-survivor/actions/runs/40983124480)与[Pages／Release 40983193112](https://github.com/holynova/mafa-survivor/actions/runs/40983193112)成功。601游戏／16Python／原图／29WAV／构建、本地移动中反向挥刀、原版完整人物／武器／Boss与390px截图通过。
