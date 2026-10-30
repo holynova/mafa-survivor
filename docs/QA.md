@@ -1,4 +1,4 @@
-# alpha.34 战士同帧蓄力与测试接敌（本地验收／冻结通过）
+# alpha.34 战士同帧蓄力与测试接敌（已发布并线上核验）
 
 - 新增15项回归，669项／66文件通过；19Python、原图像素／137WAV／资源清单及生产构建通过。早期红回归为新就绪烈火未命中、健康战士面对1伤害杂兵仍后退；正式覆盖两种技能顺序、CD只推进一次、未就绪射程／retryAt／动作锁、同伤害归因、低血量／重击撤退、首领预警、无状态／RNG副作用与原生沃玛测试隔离。
 - 独立Ego空间52实际UI：本帧就绪样例首领39／小怪0，攻杀9／烈火23、半月／刺杀0；杂兵样例从180接近到40px，生命185→184、实际承伤1。只有固定靶接敌验证，首领攻击／自然刷怪关闭；不计入普通通关。第一次跨图蓄力图片尚为旧森林，弃用，等待原图载入后重拍charged-final并查看。
@@ -7,6 +7,10 @@
 - V8→V9比奇战士Boss剩血1837／1630／1722→1000／765／1251，但英雄剩血185／184／175.23→124／111／132.75；沃玛176／17剩Boss3976→4176、3569→3701，17英雄8→0回退保留。该变化来自测试走位，不称作数值平衡改善。
 - 精确替换alpha.33标签Game.ts、其余模块与当前V9不变的30战士局：策略SHA256完全一致，29行逐字段相同；仅17沃玛首领3737→3701，仍HP耗尽。独立运行时探针确认旧Game没有prepareBossCharges，当前新就绪样例在旧Game只造成半月25、烈火0，控制替换确实生效。完整职业／章节平衡未通过。
 - 报告alpha34-clean90.json／clean-build18.json／alpha33-game-v9-war30.json／freeze-summary.json；控制器V9 SHA256为3a8b8ddcecdfaf31c128aabe4e9acc78d2fb60d5d54572f4f91848cc17e30f39。冻结后仅更新文档，不改运行代码；公开部署与交互另验。
+
+- [v0.1.0-alpha.34](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.34)固定90a50096e99fa7d6d178ca6da8d34debcf1328c6；[Source checks41074770459](https://github.com/holynova/mafa-survivor/actions/runs/41074770459)及[Pages／Release41074857919](https://github.com/holynova/mafa-survivor/actions/runs/41074857919)全部成功。公网original／alpha.34／完整SHA一致；32403帧／66图集、白日门与石墓解码像素、全部137WAV共17188914字节的哈希均通过。
+- 公开真实UI新就绪蓄力首领39／小怪0、攻杀9／烈火23；杂兵180→40px、生命185→184／实际承伤1并确认paused=true。已查看public-charged-final／crowd-final／mobile-tools／mobile-battle／bottom-edge／forest六张图，原人物／武器／首领／影子、源地面／完整树冠及下沿脚部保持；1920px底栏left0／width1920／bottom944，390×844的documentWidth390。原生KeyD1080→1097.1，最终重置后有监听的操作期未捕获error／unhandledrejection。
+- 线上自动化曾出现暂停等待超时后进入商店、精确00:02文本被操作延迟错过及后续商店状态定位失败；这些尝试不作为通过证据。重载同一空间，按累计时间≥2等待、确认暂停后才截图，失败清理通过现有HUD按钮执行，不直接改Game状态。未更换空间绕过问题；空间52验收后仅finish一次keep[]，用户原页面保持，未修改声音设置或存档。
 
 # 怪物声音与底部黑区复测 · 2026-10-30
 
