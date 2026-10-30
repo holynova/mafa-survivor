@@ -182,13 +182,13 @@ export function testSummonPriority(g:Game) {
   if(g.mode!=="test" || !["battle","paused"].includes(g.phase))return false;
   g.start("test",176,"taoist",false,"woma");
   const nav=g.navigation;if(!nav)return false;
-  const offsets=[{x:-60,y:0},{x:110,y:0},{x:0,y:110}];
+  const offsets=[{x:-60,y:0},{x:110,y:0},{x:0,y:50}];
   const home=[...nav.points].sort((a,b)=>Math.hypot(a.x-g.player.x,a.y-g.player.y)-Math.hypot(b.x-g.player.x,b.y-g.player.y))
     .find(p=>offsets.every(o=>g.canStand(p.x+o.x,p.y+o.y) && g.attackLineClear(p,{x:p.x+o.x,y:p.y+o.y})));
   if(!home)return false;
-  Object.assign(g.player,{x:home.x,y:home.y+110});
+  Object.assign(g.player,{x:home.x,y:home.y+50});
   g.test.spawning=false;g.skills=[];g.basicCD=Infinity;
-  const skill=g.newSkill("beast");skill.cd=0;g.skills=[skill];g.cast(skill);skill.cd=999;
+  const skill=g.newSkill("beast");skill.cd=0;g.skills=[skill];g.cast(skill);
   const pet=g.pets[0];if(!pet)return false;
   Object.assign(pet,home,{cd:0,speed:0});
   for(const [kind,dx] of [["orcWarrior",-60],["womaLord",110]] as const) {
@@ -196,7 +196,7 @@ export function testSummonPriority(g:Game) {
   }
   for(let i=0;i<12;i++)g.step(1/60);
   g.test.summonPrioritySample=true;
-  g.enemies.forEach((e,i)=>g.floating.push({id:g.nextEntityId(),x:e.x,y:e.y-80,text:`${i ? "首领" : "近处小怪"} · ${Math.round(e.maxHp-e.hp)}伤害`,color:i ? "#f2cf8a" : "#9bd3e0",life:100}));
+  g.enemies.forEach((e,i)=>g.floating.push({id:g.nextEntityId(),x:e.x,y:e.y+25,text:`${i ? "首领" : "小怪"} · ${Math.round(e.maxHp-e.hp)}伤害`,color:i ? "#f2cf8a" : "#9bd3e0",life:100}));
   g.pause();g.emit();return true;
 }
 export function testLootVisual(g:Game) {

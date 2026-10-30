@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { sounds } from "./sound";
 import { game } from "./game";
 import { CLASS_IDS, CLASSES, type ClassId } from "./classes";
-import { SKILLS, MONSTERS, MAPS, PLAYABLE_MAP_IDS, getSkill, type SkillId, type MapId } from "./content";
+import { SKILLS, MONSTERS, MAPS, PLAYABLE_MAP_IDS, isBossKind, getSkill, type SkillId, type MapId } from "./content";
 import { inputDiagnostics } from "./input";
 import { hasWorldAppearance } from "./appearance";
 import { appearanceStatus } from "./renderer";
@@ -81,7 +81,7 @@ export function TestTools() {
             <button onClick={()=>testViewportEdge(game)}>地图下沿镜头（沃玛）</button>
             {game.classId!=="wizard" && <button onClick={()=>testRoleCadence(game)}>技能节奏与施毒（沃玛）</button>}
           </div>
-          {game.test.summonPrioritySample && <><output aria-label="召唤物选敌诊断">{game.enemies.map((e,i)=><span key={e.id}>{i ? "首领" : "近处小怪"}：{Math.round(e.maxHp-e.hp)}伤害<br /></span>)}</output><p>固定靶只检验选敌：首领与更近的小怪分居神兽两侧；射程、视线和喷火范围均照常判定。此样例不代表正常通关能力。</p></>}
+          {game.test.summonPrioritySample && <><output aria-label="召唤物选敌诊断">{game.enemies.map(e=><span key={e.id}>{isBossKind(e.kind) ? "首领" : "近处小怪"}：{Math.round(e.maxHp-e.hp)}伤害<br /></span>)}</output><p>固定靶只检验选敌：首领与更近的小怪分居神兽两侧；射程、视线和喷火范围均照常判定。此样例不代表正常通关能力。</p></>}
           {game.test.cadenceSample && <>
             <output aria-label="技能节奏诊断">样例时间 {game.clock.toFixed(2)}秒<br />{game.skills.map(s=><span key={s.id}>{getSkill(s.id).name}：基础冷却 {getSkill(s.id).cooldown.toFixed(2)}秒 · 当前 {s.cd.toFixed(2)}秒 · 实际伤害 {Math.round(game.damageDealt[s.id]??0)}<br /></span>)}绿毒覆盖 {game.enemies.filter(e=>(e.greenPoison?.until??0)>game.clock).length} / {game.enemies.length} · 红毒覆盖 {game.enemies.filter(e=>(e.redPoison?.until??0)>game.clock).length} / {game.enemies.length}</output>
             <p>无敌、固定高血量靶怪、关闭普攻和刷怪，仅观察真实技能冷却与命中。点击「继续」；道士约4秒后覆盖第二只，点击施毒术可切换红毒。此样例不用于评估生存平衡。</p>
