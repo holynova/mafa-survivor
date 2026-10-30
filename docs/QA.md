@@ -1,4 +1,4 @@
-# alpha.33 宝宝围攻受击（本地已验，待线上复测）
+# alpha.33 宝宝围攻受击（已发布并线上核验）
 
 - 新增8项回归，修复前5项明确失败：六只怪同帧使宝宝掉90而单只15；弱击与重击累加；连续攻击延长伤害；暂停仍扣血。实际enemy windup→hurtPet的回归已通过，覆盖各宝宝独立、较重攻击补差额、较弱攻击不加伤／不延长、0.3秒边界、正常分隔首领攻击、暂停守卫和原沃玛完整样例／普通模式隔离。
 - `npm test`654项／66文件通过，Python19项，资源清单、原图逐像素、137个原WAV与生产构建通过。Impeccable针对TestTools／renderer的detector为[]；狭窄范围审查见reviews/alpha33-pet-ui-audit.md，不冒称整站WCAG或性能认证。
@@ -7,6 +7,11 @@
 - 干净e40e22b36f4d1992c3bc89f600d6f759f0bf3bc2、sourceDirty=false，同V8／同策略源码哈希的90局全部终结、0异常，通关5→6，新增17比奇道士。法师／战士60局逐字段相同；道士30局波次15进／2退／13持平，回退为17祖玛12→8与991沃玛12→11。比奇道士三种子剩Boss1367→890、1633→0、1396→834，等级23／28／24→33／35／28。仍不能宣称全职业平衡通过。
 - 同源独立18构筑全部终结、0异常，仍3次雷火法师胜利；非道士12局逐字段相同，道士6局最终波次不变且仍未通关。
 - 只追首领、冷却时追击、扩大宠物追击范围、修改机器人躲避精度与站定探针均未作为发布实现；部分正常样本回退，未将固定靶运动成功冒充通关。当前src/simulation.ts／equipment.ts／构筑策略未改；最终报告为alpha33-clean90.json／clean-build18.json／freeze-summary.json，早期探针只在忽略目录作诊断。
+
+
+- [v0.1.0-alpha.33](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.33)固定487506073f0a7e038b828f8f5ab1a82178a1d917；[Source checks 41058161038](https://github.com/holynova/mafa-survivor/actions/runs/41058161038)及[Pages／Release 41058298507](https://github.com/holynova/mafa-survivor/actions/runs/41058298507)全部成功。
+- 公网original／alpha.33／完整标签SHA一致；32,403帧／66图集、白日门与石墓原生图集解码像素，以及137WAV共17,188,914字节的逐文件SHA-256与本地一致。首次音频HTTP校验遇到503后，使用限定重试和不可变资源原URL完成校验，不以失败的首轮冒作通过。
+- 真实公开UI仍为四次来袭104／最高59／实际扣59；原生KeyD1080→1103.9，390×844的documentWidth与底栏宽度均390。已查看公开tools／pet-hit／mobile-tools／mobile-battle／bottom-edge／forest六张截图，原版人物、宝宝受击、首领、阴影、地面与树冠保持；围攻有自然模型遮挡，森林展陈另验完整性。操作期捕获error／unhandledrejection为空。固定攻击样例不计为正常通关或成长证据。
 
 # alpha.32 怪物原版声音与底栏修复（已发布并线上核验）
 
