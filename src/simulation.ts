@@ -135,18 +135,18 @@ export function simulationInput(g:Game,previous={x:0,y:0}) {
   const candidates=[{x:0,y:0},...Array.from({length:8},(_,i)=>({x:Math.cos(i*Math.PI/4),y:Math.sin(i*Math.PI/4)}))];
   if(goal){const dx=goal.x-p.x,dy=goal.y-p.y,d=Math.hypot(dx,dy),scale=Math.min(1,d/(g.moveSpeed/6));if(d>0)candidates.push({x:dx/d*scale,y:dy/d*scale});}
   const threatened=enemies.some(e=>(e.windup>0 && distance(e,p)<125) || warningPressure(p,e)>0);
-  // During a warrior Boss fight, choose safety before progress. Ordinary body
-  // spacing must not outweigh every attack opportunity. The player can swing
-  // while moving; committed attacks, ground warnings and missiles still win.
+  // Keep Boss escape priority. For ordinary crowd hits, use the warrior's
+  // current health budget; hero hit recovery prevents simultaneous additive
+  // damage, so nearby weak enemies must not make every approach impossible.
   const bossMelee=g.classId==="warrior" && !!boss && !emergency;
-  let best=candidates[0],bestScore=-Infinity,bestDanger=Infinity;
+  let best=candidates[0],bestScore=-Infinity,bestBossDanger=Infinity;
   for(const input of candidates) {
     // The exact waypoint gets a short legal step; other candidates retain full
     // speed so a nearby goal never prevents dodging a committed warning.
     const future={x:p.x+input.x*g.moveSpeed/6,y:p.y+input.y*g.moveSpeed/6};
     if(future.x<35 || future.y<55 || future.x>WORLD.w-35 || future.y>WORLD.h-35 ||
       !g.canStand(future.x,future.y) || g.navigation && !g.navigation.lineClear(p,future,12))continue;
-    let danger=0,score=(input.x*previous.x+input.y*previous.y)*0.4;
+    let crowdDanger=0,bossDanger=0,score=(input.x*previous.x+input.y*previous.y)*0.4;
     if(!bossMelee && g.classId==="warrior" && !emergency && !threatened && input.x===0 && input.y===0 && g.basicCD<0.2 && enemies.some(e=>distance(e,p)<48))score+=18;
     if(goal)score+=(distance(p,goal)-distance(future,goal))/35;
     else score+=(distance(p,{x:WORLD.w/2,y:WORLD.h/2})-distance(future,{x:WORLD.w/2,y:WORLD.h/2}))/100;
@@ -163,15 +163,21 @@ export function simulationInput(g:Game,previous={x:0,y:0}) {
           // An early windup can admit a swing if, after this 10-tick action,
           // there is still enough time to leave that margin before impact.
           // Jumps use their locked landing warning below, not a melee escape.
-          if(e.windup>0 && !e.bossJumpTarget)
-            danger+=Math.max(0,radius-distance(future,e)-g.moveSpeed*Math.max(0,e.windup-1/6))/radius*50;
+          if(e.windup>0 && !e.bossJumpTarget){
+            const pressure=Math.max(0,radius-distance(future,e)-g.moveSpeed*Math.max(0,e.windup-1/6))/radius*50;
+            if(isBossKind(e.kind))bossDanger+=pressure;
+            else crowdDanger=Math.max(crowdDanger,pressure*e.damage/Math.max(1,p.hp));
+          }
         } else {
           score-=Math.max(0,1-distance(future,predicted)/radius)**2*50;
           if(distance(future,e)<30)score-=40;
         }
       }
-      if(bossMelee)danger+=warningPressure(future,e);
-      else score-=warningPressure(future,e);
+      const warning=warningPressure(future,e);
+      if(bossMelee){
+        if(isBossKind(e.kind))bossDanger+=warning;
+        else crowdDanger=Math.max(crowdDanger,warning*e.damage/Math.max(1,p.hp));
+      }else score-=warning;
     }
     for(const missile of g.projectiles.filter(m=>m.faction==="enemy")) {
       const rx=missile.x-p.x,ry=missile.y-p.y;
@@ -179,11 +185,14 @@ export function simulationInput(g:Game,previous={x:0,y:0}) {
       const t=Math.max(0,Math.min(0.65,-(rx*vx+ry*vy)/Math.max(1,vx*vx+vy*vy)));
       const gap=Math.hypot(rx+vx*t,ry+vy*t);
       const pressure=Math.max(0,1-gap/45)*35;
-      if(bossMelee)danger+=pressure;
-      else score-=pressure;
+      if(bossMelee){
+        if(isBossKind(missile.enemyKind ?? ""))bossDanger+=pressure;
+        else crowdDanger=Math.max(crowdDanger,pressure*missile.damage/Math.max(1,p.hp));
+      }else score-=pressure;
     }
-    if(bossMelee ? danger<bestDanger-1e-6 || Math.abs(danger-bestDanger)<1e-6 && score>bestScore : score>bestScore) {
-      best=input;bestScore=score;bestDanger=danger;
+    const utility=score-(bossMelee ? crowdDanger : 0);
+    if(bossMelee ? bossDanger<bestBossDanger-1e-6 || Math.abs(bossDanger-bestBossDanger)<1e-6 && utility>bestScore : score>bestScore) {
+      best=input;bestScore=utility;bestBossDanger=bossDanger;
     }
   }
   return best;

@@ -941,13 +941,13 @@ export class Game {
     }
     if (this.phase !== "battle") return;
     this.basicCD = Math.max(0, this.basicCD - dt);
-    // A prepared charge gets the brief reachable Boss window before a cone or
-    // line attack can occupy the shared swing animation. All normal attack
-    // gates, damage and one-time charge consumption remain in basicAttack.
+    const chargeCDsAdvanced=this.prepareBossCharges(dt);
+    // Prepared and newly ready charges share this reachable Boss window before
+    // area attacks can occupy the swing. basicAttack retains all hit gates.
     this.basicAttack(true);
     for (const s of this.skills) {
       if (getSkill(s.id).passive) continue;
-      s.cd = Math.max(0, s.cd - dt);
+      if(!chargeCDsAdvanced || s.id!=="powerstrike" && s.id!=="firesword")s.cd = Math.max(0, s.cd - dt);
       if (
         s.cd === 0 &&
         this.clock >= (s.retryAt ?? 0) &&
@@ -1297,6 +1297,19 @@ export class Game {
     if (this.rng.next() < (this.stats.crit_chance ?? 0) / 100)
       damage *= 1.5 + (this.stats.crit_mult ?? 0);
     return damage*ATTACK_CADENCE;
+  }
+  private prepareBossCharges(dt:number) {
+    if(this.classId!=="warrior" || this.basicCD>0 || this.clock<this.player.attackUntil)return false;
+    const fire=this.skills.find(s=>s.id==="firesword");
+    const fireReady=this.charges.firesword || fire && fire.cd<=dt && this.clock>=(fire.retryAt ?? 0);
+    const reach=48+(fireReady ? fire?.range ?? 0 : 0);
+    if(!this.enemies.some(e=>e.hp>0 && isBossKind(e.kind) &&
+      Math.hypot(e.x-this.player.x,e.y-this.player.y)<=reach && this.meleeReachable(e)))return false;
+    for(const s of this.skills)if(s.id==="powerstrike" || s.id==="firesword"){
+      s.cd=Math.max(0,s.cd-dt);
+      if(s.cd===0 && this.clock>=(s.retryAt ?? 0))this.cast(s);
+    }
+    return true;
   }
   basicAttack(chargedBossOnly = false) {
     if (

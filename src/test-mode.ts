@@ -26,6 +26,7 @@ export const newTestSettings = () => ({
   meleeDodgeSample:false,
   meleeWindowSample:false,
   chargedBossSample:false,
+  crowdBudgetSample:null as {boss:Enemy;startDistance:number}|null,
   monsterAudioSample:null as {kind:string;event:MonsterSoundEvent;key:string;playedBefore:number}|null,
   petHitSample:null as {petId:number;beforeHP:number;attacks:number;largestHit:number;separateHits:number}|null,
   footOcclusionSample:false,
@@ -344,8 +345,21 @@ export function testChargedBossStrike(g:Game) {
   g.skills=(["cleave","thrust","powerstrike","firesword"] as const).map(id=>{const s=g.newSkill(id,2);s.cd=0;return s;});
   offsets.forEach(([dx,dy],i)=>Object.assign(g.spawnEnemy(i ? "orc" : "womaLord"),{
     x:home.x+dx,y:home.y+dy,hp:2000,maxHp:2000,speed:0,attackCD:Infinity,shockCD:Infinity,bossSummonCD:Infinity}));
-  for(const id of ["powerstrike","firesword"] as const)g.cast(g.skills.find(s=>s.id===id)!);
   g.step(1/60);g.pause();g.emit();return true;
+}
+/** Fixed light crowd pressure; real input, damage and attack timers remain live. */
+export function testCrowdBudget(g:Game) {
+  if(g.mode!=="test" || !["battle","paused"].includes(g.phase))return false;
+  g.start("test",176,"warrior",false,"woma");
+  const offsets=[[180,0],[30,-8],[30,0],[30,8]] as const;
+  const home=[...(g.navigation?.points ?? [])].sort((a,b)=>Math.hypot(a.x-g.player.x,a.y-g.player.y)-Math.hypot(b.x-g.player.x,b.y-g.player.y))
+    .find(p=>offsets.every(([x,y])=>g.canStand(p.x+x,p.y+y) && g.attackLineClear(p,{x:p.x+x,y:p.y+y})));
+  if(!home)return false;
+  Object.assign(g.player,home);Object.assign(g.test,{spawning:false,god:false,autowalk:true});g.skills=[g.newSkill("powerstrike")];
+  const boss=g.spawnEnemy("womaLord");Object.assign(boss,{x:home.x+180,y:home.y,speed:0,attackCD:Infinity,shockCD:Infinity,bossSummonCD:Infinity});
+  for(const [x,y] of offsets.slice(1))Object.assign(g.spawnEnemy("scarecrow",true),{
+    x:home.x+x,y:home.y+y,hp:2000,maxHp:2000,speed:0,damage:1,windup:.1,attackTarget:0,attackCD:Infinity});
+  g.test.crowdBudgetSample={boss,startDistance:180};g.pause();g.emit();return true;
 }
 export function testFootOcclusion(g:Game) {
   if(g.mode!=="test")return false;

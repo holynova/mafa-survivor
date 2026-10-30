@@ -57,7 +57,7 @@ try {
  }
  const sources=["tools/simulate-builds.mjs","src/simulation.ts","src/equipment.ts","src/builds.ts"],policySources={};
  for(const path of sources)policySources[path]=createHash("sha256").update(await fs.readFile(new URL(path,root))).digest("hex");
- const report={policy:"six-rank-build-v1-shared-v8-movement",policySources,sourceCommit:execFileSync("git",["rev-parse","HEAD"],{cwd:root,encoding:"utf8"}).trim(),sourceDirty:!!execFileSync("git",["status","--porcelain"],{cwd:root,encoding:"utf8"}).trim(),generatedAt:new Date().toISOString(),results};
+ const report={policy:"six-rank-build-v1-shared-v9-movement",policySources,sourceCommit:execFileSync("git",["rev-parse","HEAD"],{cwd:root,encoding:"utf8"}).trim(),sourceDirty:!!execFileSync("git",["status","--porcelain"],{cwd:root,encoding:"utf8"}).trim(),generatedAt:new Date().toISOString(),results};
  await fs.writeFile(new URL(args.out??".artifacts/build-simulation.json",root),JSON.stringify(report,null,2)+"\n");
  if(results.some(r=>r.failure || !r.terminal))process.exitCode=1;
 }finally{await server.close();}

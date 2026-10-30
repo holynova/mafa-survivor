@@ -37,11 +37,65 @@ it("aims an already prepared attack charge at the reachable Boss before a closer
   expect(g.damageDealt.powerstrike??0).toBeGreaterThan(0);
 });
 
+it.each([
+  ["cleave","thrust","powerstrike","firesword"],
+  ["powerstrike","firesword","thrust","cleave"],
+] as SkillId[][])("prepares newly ready charges before spending a reachable Boss swing on area skills: %j",(...order)=>{
+  const {g,boss,guards}=arena(order);g.charges={};
+  for(const s of g.skills)if(s.id==="powerstrike" || s.id==="firesword")s.cd=0;
+  g.step(1/60);
+  expect(g.damageDealt.firesword??0).toBeGreaterThan(0);expect(g.damageDealt.powerstrike??0).toBeGreaterThan(0);
+  expect(g.damageDealt.cleave??0).toBe(0);expect(g.damageDealt.thrust??0).toBe(0);
+  expect(boss.hp).toBeLessThan(10000);expect(guards.every(e=>e.hp===10000)).toBe(true);
+  expect(g.charges).toEqual({});
+});
+
 it("does not release a charge or postpone area attacks while the ordinary swing is cooling down",()=>{
   const {g}=arena();g.basicCD=.5;g.step(1/60);
   expect(g.damageDealt.firesword??0).toBe(0);expect(g.damageDealt.cleave??0).toBeGreaterThan(0);
   expect(g.charges).toEqual({powerstrike:true,firesword:true});
   expect(g.basicCD).toBeCloseTo(.5-1/60,8);
+});
+
+it("advances a charge cooldown once at the ready boundary and starts the full cast cooldown",()=>{
+  const {g}=arena();g.charges={};for(const s of g.skills)if(s.id==="firesword" || s.id==="powerstrike")s.cd=1/120;
+  g.step(1/60);expect(g.damageDealt.firesword??0).toBeGreaterThan(0);
+  expect(g.skills.find(s=>s.id==="firesword")!.cd).toBeCloseTo(5.2,8);
+});
+
+it("does not make an unready fire charge available by ticking its cooldown twice",()=>{
+  const {g}=arena();g.charges={};g.skills.find(s=>s.id==="powerstrike")!.cd=0;
+  g.skills.find(s=>s.id==="firesword")!.cd=2/60;g.step(1/60);
+  expect(g.damageDealt.powerstrike??0).toBeGreaterThan(0);expect(g.damageDealt.firesword??0).toBe(0);
+  expect(g.skills.find(s=>s.id==="firesword")!.cd).toBeCloseTo(1/60,8);
+});
+
+it("keeps ordinary preparation while the swing or current animation is unavailable",()=>{
+  for(const lock of ["cooldown","animation"]){const {g}=arena();g.charges={};
+    for(const s of g.skills)if(s.id==="firesword" || s.id==="powerstrike")s.cd=0;
+    if(lock==="cooldown")g.basicCD=.5;else g.player.attackUntil=.2;
+    g.step(1/60);expect(g.damageDealt.firesword??0).toBe(0);expect(g.charges).toEqual({powerstrike:true,firesword:true});
+  }
+});
+
+it("does not use the future fire range before its charge is ready",()=>{
+  const {g,boss}=arena();boss.x=g.player.x+52;g.charges={};g.skills.find(s=>s.id==="powerstrike")!.cd=0;
+  g.step(1/60);expect(g.damageDealt.firesword??0).toBe(0);expect(g.damageDealt.powerstrike??0).toBe(0);
+  expect(g.damageDealt.cleave??0).toBeGreaterThan(0);expect(g.skills.find(s=>s.id==="firesword")!.cd).toBeCloseTo(10-1/60,8);
+});
+
+it("honors the same retry deadline as ordinary automatic preparation",()=>{
+  const {g}=arena();g.charges={};for(const s of g.skills)if(s.id==="firesword" || s.id==="powerstrike"){s.cd=0;s.retryAt=1;}
+  g.step(1/60);expect(g.damageDealt.firesword??0).toBe(0);expect(g.damageDealt.powerstrike??0).toBe(0);
+  expect(g.charges).toEqual({});expect(g.damageDealt.cleave??0).toBeGreaterThan(0);
+});
+
+it("uses exactly the direct prepared swing damage for newly ready charges",()=>{
+  const direct=arena(),automatic=arena();
+  for(const {g} of [direct,automatic]){g.charges={};for(const s of g.skills)if(s.id==="powerstrike" || s.id==="firesword")s.cd=0;}
+  for(const id of ["powerstrike","firesword"])direct.g.cast(direct.g.skills.find(s=>s.id===id)!);
+  direct.g.basicAttack(true);automatic.g.step(1/60);
+  expect(automatic.boss.hp).toBe(direct.boss.hp);expect(automatic.g.damageDealt).toEqual(direct.g.damageDealt);
 });
 
 it("honors an existing animation lock and never creates a second swing on the next frame",()=>{

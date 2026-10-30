@@ -14,7 +14,7 @@ import {damageSourceName} from "./damage-taken";
 import {skillMetrics} from "./skill-metrics";
 import {SKILL_GROWTH} from "./skill-growth";
 import {TEST_BUILDS,testBossBuild} from "./test-builds";
-import {testMonsterAudio,testPetHitWindow} from "./test-mode";
+import {testMonsterAudio,testPetHitWindow,testCrowdBudget} from "./test-mode";
 import {monsterSoundKey,MONSTER_SOUND_EVENTS} from "./monster-audio";
 export function TestTools() {
   const [open, setOpen] = useState(true),
@@ -84,6 +84,7 @@ export function TestTools() {
             <button onClick={()=>testMeleeDodge(game)}>战士近战避险（沃玛）</button>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testMeleeDodge(game,true)}>战士蓄力抢攻（沃玛）</button>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testChargedBossStrike(game)}>蓄力挥刀验证（沃玛）</button>
+            <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testCrowdBudget(game)}>杂兵接敌预算（沃玛）</button>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testMeleeAim(game,"thrust")}>刺杀1→2级游走（沃玛）</button>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testMeleeAim(game,"cleave")}>半月游走选群（沃玛）</button>
             <button onClick={()=>testFootOcclusion(game)}>前景脚部遮挡（赤月）</button>
@@ -91,7 +92,8 @@ export function TestTools() {
             {game.classId!=="wizard" && <button onClick={()=>testRoleCadence(game)}>技能节奏与施毒（沃玛）</button>}
           </div>
           {game.test.meleeAimSample && <><output aria-label="近战自动瞄准诊断">{game.test.meleeAimSample.kind==="thrust" ? "刺杀1→2级" : "半月手动朝向→自动选群"}<br />对照伤害 {game.test.meleeAimSample.beforeDamage} → {game.test.meleeAimSample.afterDamage}<br />实际命中 {game.test.meleeAimSample.hits} · 右移 {(game.test.meleeAimSample.endX-game.test.meleeAimSample.startX).toFixed(1)}px</output><p>固定高血量靶怪，准确强化只用于测试；关闭普攻和自然刷怪。只检验实际位移、选敌和命中，不代表普通局通关。</p></>}
-          {game.test.chargedBossSample && <><output aria-label="蓄力挥刀诊断">首领实际伤害 {Math.round(game.enemies.filter(e=>isBossKind(e.kind)).reduce((n,e)=>n+e.maxHp-e.hp,0))} · 小怪实际伤害 {Math.round(game.enemies.filter(e=>!isBossKind(e.kind)).reduce((n,e)=>n+e.maxHp-e.hp,0))}<br />攻杀 {Math.round(game.damageDealt.powerstrike??0)} · 烈火 {Math.round(game.damageDealt.firesword??0)}<br />半月 {Math.round(game.damageDealt.cleave??0)} · 刺杀 {Math.round(game.damageDealt.thrust??0)}</output><p>固定高血量靶，已用真实技能预备攻杀／烈火，半月与刺杀也就绪。实步一帧后暂停，只验证施放顺序；准确强化仅用于样例，无敌关闭，不代表普通通关。</p></>}
+          {game.test.chargedBossSample && <><output aria-label="蓄力挥刀诊断">首领实际伤害 {Math.round(game.enemies.filter(e=>isBossKind(e.kind)).reduce((n,e)=>n+e.maxHp-e.hp,0))} · 小怪实际伤害 {Math.round(game.enemies.filter(e=>!isBossKind(e.kind)).reduce((n,e)=>n+e.maxHp-e.hp,0))}<br />攻杀 {Math.round(game.damageDealt.powerstrike??0)} · 烈火 {Math.round(game.damageDealt.firesword??0)}<br />半月 {Math.round(game.damageDealt.cleave??0)} · 刺杀 {Math.round(game.damageDealt.thrust??0)}</output><p>固定高血量靶，攻杀／烈火本帧就绪，与半月／刺杀同时可用。实步一帧后暂停，验证先蓄力接刀；准确强化仅用于样例，无敌关闭，不代表普通通关。</p></>}
+          {game.test.crowdBudgetSample && <><output aria-label="杂兵接敌预算诊断">距首领 {Math.round(Math.hypot(game.test.crowdBudgetSample.boss.x-game.player.x,game.test.crowdBudgetSample.boss.y-game.player.y))}px · 已接近 {Math.round(game.test.crowdBudgetSample.startDistance-Math.hypot(game.test.crowdBudgetSample.boss.x-game.player.x,game.test.crowdBudgetSample.boss.y-game.player.y))}px<br />生命 {game.player.hp.toFixed(1)} / {game.maxHP} · 实际承伤 {(game.damageTaken.physical+game.damageTaken.magic).toFixed(1)}</output><p>三只高血量杂兵同时蓄力，原始伤害各1；首领攻击与自然刷怪关闭，无敌关闭。点击「继续」观察健康战士接敌，方向键可接管。只验证测试走位，完整首领避险另测，不代表普通通关。</p></>}
           {game.test.summonPrioritySample && <><output aria-label="召唤物选敌诊断">{game.enemies.map(e=><span key={e.id}>{isBossKind(e.kind) ? "首领" : "近处小怪"}：{Math.round(e.maxHp-e.hp)}伤害<br /></span>)}</output><p>固定靶只检验选敌：首领与更近的小怪分居神兽两侧；射程、视线和喷火范围均照常判定。此样例不代表正常通关能力。</p></>}
           {game.test.petHitSample && <><output aria-label="宝宝受击诊断">同帧来袭 {game.test.petHitSample.attacks}次 · 实际扣血 {Math.round(game.test.petHitSample.beforeHP-(game.pets.find(p=>p.id===game.test.petHitSample!.petId)?.hp ?? 0))}<br />逐次累加 {game.test.petHitSample.separateHits} · 单次最高 {game.test.petHitSample.largestHit}</output><p>三只小怪与首领真实挥击后暂停；0.3秒内按最高伤害结算，更重攻击补足差额。固定攻击数值只验证受击合并，无敌关闭，不代表普通通关。</p></>}
           {game.test.cadenceSample && <>
