@@ -921,6 +921,11 @@ export class Game {
       }
     }
     if (this.phase !== "battle") return;
+    this.basicCD = Math.max(0, this.basicCD - dt);
+    // A prepared charge gets the brief reachable Boss window before a cone or
+    // line attack can occupy the shared swing animation. All normal attack
+    // gates, damage and one-time charge consumption remain in basicAttack.
+    this.basicAttack(true);
     for (const s of this.skills) {
       if (getSkill(s.id).passive) continue;
       s.cd = Math.max(0, s.cd - dt);
@@ -938,7 +943,6 @@ export class Game {
       )
         this.cast(s);
     }
-    this.basicCD = Math.max(0, this.basicCD - dt);
     this.basicAttack();
     this.updatePets(dt);
     this.hash.rebuild(this.enemies.filter((e) => e.hp > 0));
@@ -1266,11 +1270,12 @@ export class Game {
       damage *= 1.5 + (this.stats.crit_mult ?? 0);
     return damage*ATTACK_CADENCE;
   }
-  basicAttack() {
+  basicAttack(chargedBossOnly = false) {
     if (
       this.phase !== "battle" ||
       this.basicCD > 0 ||
-      this.clock < this.player.attackUntil
+      this.clock < this.player.attackUntil ||
+      chargedBossOnly && (this.classId !== "warrior" || !this.charges.powerstrike && !this.charges.firesword)
     )
       return false;
     const fire = this.charges.firesword
@@ -1284,16 +1289,18 @@ export class Game {
     const targets = this.enemies.filter(
       (e) =>
         e.hp > 0 &&
+        (!chargedBossOnly || isBossKind(e.kind)) &&
         Math.hypot(e.x - this.player.x, e.y - this.player.y) <= range &&
         this.meleeReachable(e) &&
         (this.classId === "warrior" || !this.player.moving ||
           (e.x - this.player.x) * front.x + (e.y - this.player.y) * front.y >=
             0),
     );
+    if(chargedBossOnly && !targets.length)return false;
     targets.sort(
       (a, b) =>
-        (fire && isBossKind(a.kind) ? -1000 : 0) -
-        (fire && isBossKind(b.kind) ? -1000 : 0) +
+        ((fire || chargedBossOnly) && isBossKind(a.kind) ? -1000 : 0) -
+        ((fire || chargedBossOnly) && isBossKind(b.kind) ? -1000 : 0) +
         Math.hypot(a.x - this.player.x, a.y - this.player.y) -
         Math.hypot(b.x - this.player.x, b.y - this.player.y),
     );

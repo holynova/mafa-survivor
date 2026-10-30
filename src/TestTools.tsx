@@ -9,7 +9,7 @@ import { inputDiagnostics } from "./input";
 import { hasWorldAppearance } from "./appearance";
 import { appearanceStatus } from "./renderer";
 import { ITEMS, getItem } from "./content";
-import { testNextWave, testSkillRank, testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual,testChapterVisual,testLootVisual,testPotionPickup,testPlayerFeedback,testSummonWall,testSummonPriority,testMeleeAim,testHealthWalk,testBossEngagement,testMeleeDodge,testFootOcclusion,testRoleCadence,testViewportEdge,testPotionReserve } from "./test-mode";
+import { testNextWave, testSkillRank, testWear, testSpawn, testEquip, testClear, testBossPhase, testMeleeWall, testMeleeFacing, testCombatRecovery, testIncomingWall, testSpellVisual,testChapterVisual,testLootVisual,testPotionPickup,testPlayerFeedback,testSummonWall,testSummonPriority,testMeleeAim,testHealthWalk,testBossEngagement,testMeleeDodge,testChargedBossStrike,testFootOcclusion,testRoleCadence,testViewportEdge,testPotionReserve } from "./test-mode";
 import {damageSourceName} from "./damage-taken";
 import {skillMetrics} from "./skill-metrics";
 import {SKILL_GROWTH} from "./skill-growth";
@@ -78,6 +78,7 @@ export function TestTools() {
             <button onClick={()=>testBossEngagement(game)}>Boss接敌与避险（赤月）</button>
             <button onClick={()=>testMeleeDodge(game)}>战士近战避险（沃玛）</button>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testMeleeDodge(game,true)}>战士蓄力抢攻（沃玛）</button>
+            <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testChargedBossStrike(game)}>蓄力挥刀验证（沃玛）</button>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testMeleeAim(game,"thrust")}>刺杀1→2级游走（沃玛）</button>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testMeleeAim(game,"cleave")}>半月游走选群（沃玛）</button>
             <button onClick={()=>testFootOcclusion(game)}>前景脚部遮挡（赤月）</button>
@@ -85,6 +86,7 @@ export function TestTools() {
             {game.classId!=="wizard" && <button onClick={()=>testRoleCadence(game)}>技能节奏与施毒（沃玛）</button>}
           </div>
           {game.test.meleeAimSample && <><output aria-label="近战自动瞄准诊断">{game.test.meleeAimSample.kind==="thrust" ? "刺杀1→2级" : "半月手动朝向→自动选群"}<br />对照伤害 {game.test.meleeAimSample.beforeDamage} → {game.test.meleeAimSample.afterDamage}<br />实际命中 {game.test.meleeAimSample.hits} · 右移 {(game.test.meleeAimSample.endX-game.test.meleeAimSample.startX).toFixed(1)}px</output><p>固定高血量靶怪，准确强化只用于测试；关闭普攻和自然刷怪。只检验实际位移、选敌和命中，不代表普通局通关。</p></>}
+          {game.test.chargedBossSample && <><output aria-label="蓄力挥刀诊断">首领实际伤害 {Math.round(game.enemies.filter(e=>isBossKind(e.kind)).reduce((n,e)=>n+e.maxHp-e.hp,0))} · 小怪实际伤害 {Math.round(game.enemies.filter(e=>!isBossKind(e.kind)).reduce((n,e)=>n+e.maxHp-e.hp,0))}<br />攻杀 {Math.round(game.damageDealt.powerstrike??0)} · 烈火 {Math.round(game.damageDealt.firesword??0)}<br />半月 {Math.round(game.damageDealt.cleave??0)} · 刺杀 {Math.round(game.damageDealt.thrust??0)}</output><p>固定高血量靶，已用真实技能预备攻杀／烈火，半月与刺杀也就绪。实步一帧后暂停，只验证施放顺序；准确强化仅用于样例，无敌关闭，不代表普通通关。</p></>}
           {game.test.summonPrioritySample && <><output aria-label="召唤物选敌诊断">{game.enemies.map(e=><span key={e.id}>{isBossKind(e.kind) ? "首领" : "近处小怪"}：{Math.round(e.maxHp-e.hp)}伤害<br /></span>)}</output><p>固定靶只检验选敌：首领与更近的小怪分居神兽两侧；射程、视线和喷火范围均照常判定。此样例不代表正常通关能力。</p></>}
           {game.test.cadenceSample && <>
             <output aria-label="技能节奏诊断">样例时间 {game.clock.toFixed(2)}秒<br />{game.skills.map(s=><span key={s.id}>{getSkill(s.id).name}：基础冷却 {getSkill(s.id).cooldown.toFixed(2)}秒 · 当前 {s.cd.toFixed(2)}秒 · 实际伤害 {Math.round(game.damageDealt[s.id]??0)}<br /></span>)}绿毒覆盖 {game.enemies.filter(e=>(e.greenPoison?.until??0)>game.clock).length} / {game.enemies.length} · 红毒覆盖 {game.enemies.filter(e=>(e.redPoison?.until??0)>game.clock).length} / {game.enemies.length}</output>
