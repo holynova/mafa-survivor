@@ -1,3 +1,11 @@
+# alpha.32 蓄力调度冻结
+
+来源0cab07c886a05ed41191a5346f2b1384625c0d1c、sourceDirty=false；V8 SHA256仍为`c61e9ec2bdd66a97ea020a4923a58e42f34f55c9bccf56de50e8a45c5193c97f`，与alpha.31相同。正常90局和独立18局全部终结、0异常，仍为5和3次法师通关，战士／道士0胜。法师／道士60局逐字段相同，战士24局逐字段相同、30局最终波次全部相同；独立构筑14／18逐字段相同且策略源码哈希相同。
+
+本阶段改的是普通战斗中已准备蓄力的调度，不改V8、伤害／护甲／命中／CD或经济。战士6个变化样本中5个首领剩血下降；沃玛176退为HP耗尽、首领剩血3875→3976，不能称为全局数值改善。比奇176／17与alpha.31完全相同，991首领1756→1722，终局HP不变；只读入口追踪显示前两例近身帧仍由射程、冷却或动作锁限制，不能以静止样例替代正常接敌预算。
+
+报告：.artifacts/alpha32-clean90.json、alpha32-clean-build18.json、alpha32-freeze-summary.json。最终截图与公开发布仍待完成。
+
 # alpha.31 V8近战抢攻冻结
 
 来源32e3a5cad461b1579df7d288fd4de6a868af831c、sourceDirty=false；策略fixed-step-kiting-v8-melee-window，SHA256 `c61e9ec2bdd66a97ea020a4923a58e42f34f55c9bccf56de50e8a45c5193c97f`。正常90局和six-rank-build-v1-shared-v8-movement独立18局全部终结、0异常，通关分别5／90和3／18，全部法师。战士／道士仍0胜。
