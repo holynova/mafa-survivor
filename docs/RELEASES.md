@@ -1,8 +1,10 @@
 # GitHub 阶段发布
 
-## alpha.31 战士自动测试的蓄力抢攻（发布准备）
+## alpha.31 战士自动测试的蓄力抢攻（已发布并线上核验）
 
-V8安全优先与原生沃玛66px样例；621游戏／16Python／原像素／29WAV／构建和本地桌面／390px截图、真实17伤害／0承伤及D键通过。冻结32e3a5c的90＋18局0异常、仍只有法师5与3局通关。旧引擎同V8三局逐字段一致，本阶段普通战斗规则与alpha.30相同；公开部署及最终线上验证待补。
+V8安全优先与原生沃玛66px样例；621游戏／16Python／原像素／29WAV／构建和本地桌面／390px截图、真实17伤害／0承伤及D键通过。冻结32e3a5c的90＋18局0异常、仍只有法师5与3局通关。旧引擎同V8三局逐字段一致，本阶段普通战斗规则与alpha.30相同。
+
+[v0.1.0-alpha.31](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.31)固定92912bdadbaec1bb6616d706a6a4b354cd6197ff；[Source checks 41010430318](https://github.com/holynova/mafa-survivor/actions/runs/41010430318)及[Pages／Release 41010486645](https://github.com/holynova/mafa-survivor/actions/runs/41010486645)全部成功。公网original／版本／完整SHA一致，32,403帧／66图集、两张原生图集像素通过；实际新UI首领17伤害／自身0承伤、撤至132px，无敌关闭；KeyD1031.1→1068.7、390px及原版人物／武器／影子、沃玛地面／比奇树冠截图已查看，未捕获操作期运行错误。
 
 ## alpha.30 战士游走与自动近战（已发布并线上核验）
 
