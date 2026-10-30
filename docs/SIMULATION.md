@@ -1,4 +1,4 @@
-# alpha.28 移动挥刀冻结（本地，未发布）
+# alpha.28 移动挥刀冻结
 
 源码f8026deccd7d77b6f60203bb0b17b3b34f9d1f95，sourceDirty=false；控制器仍为V7，policySha256与alpha.26相同。3种子×10章×3职业共90局，全部终结、0不变量异常，5局法师胜利，战士／道士0胜。另6构筑×3种子的18局，使用独立six-rank-build-v1-shared-v7-movement，全部终结、0异常、3局雷火法师胜利。两份干净报告与修改后探针逐项相同。
 
@@ -6,7 +6,7 @@
 
 独立的6套完整预设装备Boss探针用于分离养成和接敌因素，不属于正常经济报告。战士普攻攻杀由Boss剩755HP变为击杀；半月烈火剩925→329HP，仍未杀死。法师／道士预设本来已能杀死首领，正常混战的目标分散、技能取得和养成顺序仍待诊断，不直接推断其原因。
 
-忽略目录中的本地证据：.artifacts/alpha28-clean90.json、alpha28-clean-build18.json、alpha28-freeze-summary.json、alpha28-vs-alpha26.json、alpha28-boss-before.json。真实浏览器空间消失，截图验收尚未完成，故不发布alpha.28。
+忽略目录中的本地证据：.artifacts/alpha28-clean90.json、alpha28-clean-build18.json、alpha28-freeze-summary.json、alpha28-vs-alpha26.json、alpha28-boss-before.json。用户授权重开后，本地实机截图已完成；浏览器预设战士75秒Boss剩43HP，与离线调度结果分开保留，仍不宣称战士普通局通关。
 
 # 真实战斗模拟与阶段记录
 
