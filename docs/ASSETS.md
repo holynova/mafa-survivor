@@ -96,3 +96,12 @@
 ## alpha.7 寺庙源资源
 
 地图、lookID、火焰／电光／箭矢和雕像特殊动作的固定源记录见[TEMPLE.md](TEMPLE.md)。新增内容继续使用原始PNG与原动作阴影，不改变源像素；22,709帧／42图集，寺庙5页按需加载，基础11页不增加。原WAV仍为28个已核验文件，未给新怪伪造未确认音效。
+
+
+## alpha.32 怪物原版声音
+
+从已授权固定mir2x_res@9e21ea6631317d06e064fbfa7e1ea43af6a2d3e6的sound/seff引入108个未改编码WAV，现共137文件／141事件映射，其中37类敌人占111映射。映射参考客户端bb6a22287abcd9f248d2aba755074c254c68787a的clientmonster.cpp、sysconst.hpp、monsterrecord.hpp及monsterrecord.inc；每份源码SHA-256由导入器锁定，详见audio-manifest.json的monsterSoundReference。
+
+声音索引采用原始lookID，不做图片编码所需的减1：0x02000000＋lookID×16，攻击偏移2、受击4、死亡5。邪恶毒蛇lookID80的3个独立WAV在固定包缺失；只对这三项显式复用同族蝎蛇lookID79原声，台账保留requestedSourceFile、sourceKind、sourceFile与reason。没有合成声音或冒用其他Boss声音。神兽喷火的独立音效仍缺可核验映射。
+
+上文按阶段保存的28／29WAV计数属于历史；当前总量以audio-manifest.json与check-audio.py为准。怪物按当前章节预取，全部音效及攻击／受击／死亡开关在本机保存。

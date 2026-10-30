@@ -4,7 +4,9 @@
 
 本阶段改的是普通战斗中已准备蓄力的调度，不改V8、伤害／护甲／命中／CD或经济。战士6个变化样本中5个首领剩血下降；沃玛176退为HP耗尽、首领剩血3875→3976，不能称为全局数值改善。比奇176／17与alpha.31完全相同，991首领1756→1722，终局HP不变；只读入口追踪显示前两例近身帧仍由射程、冷却或动作锁限制，不能以静止样例替代正常接敌预算。
 
-报告：.artifacts/alpha32-clean90.json、alpha32-clean-build18.json、alpha32-freeze-summary.json。最终截图与公开发布仍待完成。
+新增音效／底栏后的最终干净冻结09ea04563f1f0c35f171dc9ce37c84a2d91d7152、sourceDirty=false：正常90与独立18逐字段等同上述0cab07c结果，策略与全部策略源码哈希不变，全部终结／0异常／仍5与3次法师通关。说明音效事件排队和UI没有改变战斗RNG或结算，不代表原有平衡已通过。
+
+报告：.artifacts/alpha32-clean90.json、alpha32-clean-build18.json、alpha32-freeze-summary.json；最终alpha32-audio-clean90.json、alpha32-audio-clean-build18.json及alpha32-audio-freeze-summary.json。
 
 # alpha.31 V8近战抢攻冻结
 
