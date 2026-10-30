@@ -208,7 +208,7 @@ export function testPetHitWindow(g:Game) {
     .find(p=>offsets.every(o=>g.canStand(p.x+o.x,p.y+o.y) && g.attackLineClear(p,{x:p.x+o.x,y:p.y+o.y})));
   if(!home)return false;
   Object.assign(g.player,{x:home.x,y:home.y+100});Object.assign(g.test,{spawning:false,god:false});g.basicCD=Infinity;
-  const skill=g.newSkill("beast");skill.cd=0;g.skills=[skill];g.cast(skill);skill.cd=Infinity;
+  const skill=g.newSkill("beast");skill.cd=0;g.skills=[skill];g.cast(skill);
   const pet=g.pets[0];if(!pet)return false;Object.assign(pet,home,{cd:Infinity});g.effects=[];
   const hits:number[]=[];
   for(let i=1;i<offsets.length;i++){
