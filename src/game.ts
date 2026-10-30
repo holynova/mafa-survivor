@@ -1338,10 +1338,10 @@ export class Game {
             0),
     );
     if(chargedBossOnly && !targets.length)return false;
+    const threat=(e:Enemy)=>isBossKind(e.kind) ? 2 : e.elite ? 1 : 0;
     targets.sort(
       (a, b) =>
-        ((fire || chargedBossOnly) && isBossKind(a.kind) ? -1000 : 0) -
-        ((fire || chargedBossOnly) && isBossKind(b.kind) ? -1000 : 0) +
+        ((fire || chargedBossOnly) ? threat(b)-threat(a) : 0) ||
         Math.hypot(a.x - this.player.x, a.y - this.player.y) -
         Math.hypot(b.x - this.player.x, b.y - this.player.y),
     );

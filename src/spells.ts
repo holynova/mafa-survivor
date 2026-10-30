@@ -297,7 +297,7 @@ const definitions = [
     name: "烈火剑法",
     cooldown: 6.5,
     description:
-      "高威胁敌人进入近身范围时蓄力，强化下一次武器挥砍，不发射火焰波。",
+      "强化下一次武器挥砍，可命中的Boss、精英、普通怪依次优先；不发射火焰波。",
     asset: "item/烈火剑法",
     branches: [
       branch("power", 25, "烈火伤害 +25%"),

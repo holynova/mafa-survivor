@@ -14,7 +14,7 @@ import {damageSourceName} from "./damage-taken";
 import {skillMetrics} from "./skill-metrics";
 import {SKILL_GROWTH} from "./skill-growth";
 import {TEST_BUILDS,testBossBuild} from "./test-builds";
-import {testMonsterAudio,testPetHitWindow,testCrowdBudget} from "./test-mode";
+import {testMonsterAudio,testPetHitWindow,testCrowdBudget,testFirePriority} from "./test-mode";
 import {monsterSoundKey,MONSTER_SOUND_EVENTS} from "./monster-audio";
 export function TestTools() {
   const [open, setOpen] = useState(true),
@@ -84,6 +84,7 @@ export function TestTools() {
             <button onClick={()=>testMeleeDodge(game)}>战士近战避险（沃玛）</button>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testMeleeDodge(game,true)}>战士蓄力抢攻（沃玛）</button>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testChargedBossStrike(game)}>蓄力挥刀验证（沃玛）</button>
+            <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testFirePriority(game)}>烈火优先精英（沃玛）</button>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testCrowdBudget(game)}>杂兵接敌预算（沃玛）</button>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testMeleeAim(game,"thrust")}>刺杀1→2级游走（沃玛）</button>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testMeleeAim(game,"cleave")}>半月游走选群（沃玛）</button>
@@ -96,6 +97,7 @@ export function TestTools() {
           {game.test.crowdBudgetSample && <><output aria-label="杂兵接敌预算诊断">距首领 {Math.round(Math.hypot(game.test.crowdBudgetSample.boss.x-game.player.x,game.test.crowdBudgetSample.boss.y-game.player.y))}px · 已接近 {Math.round(game.test.crowdBudgetSample.startDistance-Math.hypot(game.test.crowdBudgetSample.boss.x-game.player.x,game.test.crowdBudgetSample.boss.y-game.player.y))}px<br />生命 {game.player.hp.toFixed(1)} / {game.maxHP} · 实际承伤 {(game.damageTaken.physical+game.damageTaken.magic).toFixed(1)}</output><p>三只高血量杂兵同时蓄力，原始伤害各1；首领攻击与自然刷怪关闭，无敌关闭。点击「继续」观察健康战士接敌，方向键可接管。只验证测试走位，完整首领避险另测，不代表普通通关。</p></>}
           {game.test.summonPrioritySample && <><output aria-label="召唤物选敌诊断">{game.enemies.map(e=><span key={e.id}>{isBossKind(e.kind) ? "首领" : "近处小怪"}：{Math.round(e.maxHp-e.hp)}伤害<br /></span>)}</output><p>固定靶只检验选敌：首领与更近的小怪分居神兽两侧；射程、视线和喷火范围均照常判定。此样例不代表正常通关能力。</p></>}
           {game.test.petHitSample && <><output aria-label="宝宝受击诊断">同帧来袭 {game.test.petHitSample.attacks}次 · 实际扣血 {Math.round(game.test.petHitSample.beforeHP-(game.pets.find(p=>p.id===game.test.petHitSample!.petId)?.hp ?? 0))}<br />逐次累加 {game.test.petHitSample.separateHits} · 单次最高 {game.test.petHitSample.largestHit}</output><p>三只小怪与首领真实挥击后暂停；0.3秒内按最高伤害结算，更重攻击补足差额。固定攻击数值只验证受击合并，无敌关闭，不代表普通通关。</p></>}
+          {game.test.firePrioritySample && <><output aria-label="烈火精英选敌诊断">精英实际伤害 {Math.round(game.test.firePrioritySample.elite.maxHp-game.test.firePrioritySample.elite.hp)} · 普通怪实际伤害 {Math.round(game.test.firePrioritySample.ordinary.maxHp-game.test.firePrioritySample.ordinary.hp)}<br />烈火归因 {Math.round(game.damageDealt.firesword??0)} · 实际承伤 {(game.damageTaken.physical+game.damageTaken.magic).toFixed(1)}</output><p>两只高血量沃玛战士，较近的是普通怪，较远的是精英；真实蓄力挥刀一帧后暂停。关闭来袭、刷怪与无敌，准确强化仅作选敌检查，不代表普通通关。</p></>}
           {game.test.cadenceSample && <>
             <output aria-label="技能节奏诊断">样例时间 {game.clock.toFixed(2)}秒<br />{game.skills.map(s=><span key={s.id}>{getSkill(s.id).name}：基础冷却 {getSkill(s.id).cooldown.toFixed(2)}秒 · 当前 {s.cd.toFixed(2)}秒 · 实际伤害 {Math.round(game.damageDealt[s.id]??0)}<br /></span>)}绿毒覆盖 {game.enemies.filter(e=>(e.greenPoison?.until??0)>game.clock).length} / {game.enemies.length} · 红毒覆盖 {game.enemies.filter(e=>(e.redPoison?.until??0)>game.clock).length} / {game.enemies.length}</output>
             <p>无敌、固定高血量靶怪、关闭普攻和刷怪，仅观察真实技能冷却与命中。点击「继续」；道士约4秒后覆盖第二只，点击施毒术可切换红毒。此样例不用于评估生存平衡。</p>

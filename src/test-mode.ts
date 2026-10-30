@@ -26,6 +26,7 @@ export const newTestSettings = () => ({
   meleeDodgeSample:false,
   meleeWindowSample:false,
   chargedBossSample:false,
+  firePrioritySample:null as {elite:Enemy;ordinary:Enemy}|null,
   crowdBudgetSample:null as {boss:Enemy;startDistance:number}|null,
   monsterAudioSample:null as {kind:string;event:MonsterSoundEvent;key:string;playedBefore:number}|null,
   petHitSample:null as {petId:number;beforeHP:number;attacks:number;largestHit:number;separateHits:number}|null,
@@ -331,6 +332,20 @@ export function testMeleeDodge(g:Game,attackWindow=false) {
   g.skills=[g.newSkill("powerstrike"),g.newSkill("cleave")];g.skills.forEach(s=>s.cd=0);
   Object.assign(g.spawnEnemy("womaLord"),{x:home.x+(attackWindow ? 66 : 40),y:home.y,speed:0,windup:.65,attackTarget:0,shockCD:Infinity,bossSummonCD:Infinity});
   g.pause();g.emit();return true;
+}
+export function testFirePriority(g:Game) {
+  if(g.mode!=="test" || !["battle","paused"].includes(g.phase))return false;
+  g.start("test",176,"warrior",false,"woma");
+  const offsets=[[-26,-28],[46,0]] as const;
+  const home=[...(g.navigation?.points ?? [])].sort((a,b)=>Math.hypot(a.x-g.player.x,a.y-g.player.y)-Math.hypot(b.x-g.player.x,b.y-g.player.y))
+    .find(p=>offsets.every(([dx,dy])=>g.canStand(p.x+dx,p.y+dy) && g.attackLineClear(p,{x:p.x+dx,y:p.y+dy})));
+  if(!home)return false;
+  Object.assign(g.player,home);Object.assign(g.test,{spawning:false,god:false});
+  g.upgrades.accuracy=100;g.recompute();g.skills=[g.newSkill("firesword")];g.skills[0].cd=0;
+  const actors=offsets.map(([dx,dy],i)=>{const e=g.spawnEnemy("womaWarrior",true);Object.assign(e,{
+    x:home.x+dx,y:home.y+dy,hp:2000,maxHp:2000,elite:i===1,speed:0,attackCD:Infinity,chargeCD:Infinity});return e;});
+  g.test.firePrioritySample={ordinary:actors[0],elite:actors[1]};
+  g.step(1/60);g.pause();g.emit();return true;
 }
 export function testChargedBossStrike(g:Game) {
   if(g.mode!=="test" || !["battle","paused"].includes(g.phase))return false;
