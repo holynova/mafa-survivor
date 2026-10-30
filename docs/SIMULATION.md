@@ -1,3 +1,13 @@
+# alpha.31 V8近战抢攻冻结
+
+来源32e3a5cad461b1579df7d288fd4de6a868af831c、sourceDirty=false；策略fixed-step-kiting-v8-melee-window，SHA256 `c61e9ec2bdd66a97ea020a4923a58e42f34f55c9bccf56de50e8a45c5193c97f`。正常90局和six-rank-build-v1-shared-v8-movement独立18局全部终结、0异常，通关分别5／90和3／18，全部法师。战士／道士仍0胜。
+
+本阶段仅改自动测试策略与样例。和alpha.30 V7比较，法师／道士60局逐字段相同，战士22局逐字段相同、30局最终波次相同；比奇战士三种子Boss剩HP1928→1837、1803→1630、2038→1756，终局HP185／184／175.23。不能将这些控制器变化当作数值平衡收益。
+
+从alpha.30标签309124a导出旧引擎，仅覆盖同一V8控制器和同一报告器，3个比奇战士样本与本版逐字段相同、策略SHA一致；未声称重跑旧版完整90局。普通Game／职业／技能／经济规则源码未改，新测试默认布尔字段不进入普通战斗。完整职业／地图通关仍待继续。
+
+报告：.artifacts/alpha31-clean90.json、alpha31-clean-build18.json、alpha31-alpha30-v8-war3.json、alpha31-freeze-summary.json。
+
 # alpha.30 战士自动瞄准冻结
 
 源码5ce2fe5f083c3770264f1b791ad487f3a7d28d02、sourceDirty=false，同V7／同SHA的90局0异常、5法师胜利；独立构筑18局同策略0异常、3法师胜利。战士／道士仍0胜。正常法师／道士60局与alpha.29逐字段相同；战士最终波次16进／5退／9持平。
