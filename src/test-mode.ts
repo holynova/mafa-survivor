@@ -295,7 +295,7 @@ export function testChargedBossStrike(g:Game) {
   if(g.mode!=="test" || !["battle","paused"].includes(g.phase))return false;
   g.start("test",176,"warrior",false,"woma");
   const nav=g.navigation;if(!nav)return false;
-  const offsets=[[40,0],[-20,-25],[-20,25]] as const;
+  const offsets=[[40,0],[-55,-40],[-55,40]] as const;
   const home=[...nav.points].sort((a,b)=>Math.hypot(a.x-g.player.x,a.y-g.player.y)-Math.hypot(b.x-g.player.x,b.y-g.player.y))
     .find(p=>offsets.every(([dx,dy])=>g.canStand(p.x+dx,p.y+dy) && g.attackLineClear(p,{x:p.x+dx,y:p.y+dy})));
   if(!home)return false;
