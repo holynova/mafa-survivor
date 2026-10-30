@@ -102,6 +102,6 @@
 
 从已授权固定mir2x_res@9e21ea6631317d06e064fbfa7e1ea43af6a2d3e6的sound/seff引入108个未改编码WAV，现共137文件／141事件映射，其中37类敌人占111映射。映射参考客户端bb6a22287abcd9f248d2aba755074c254c68787a的clientmonster.cpp、sysconst.hpp、monsterrecord.hpp及monsterrecord.inc；每份源码SHA-256由导入器锁定，详见audio-manifest.json的monsterSoundReference。
 
-声音索引采用原始lookID，不做图片编码所需的减1：0x02000000＋lookID×16，攻击偏移2、受击4、死亡5。邪恶毒蛇lookID80的3个独立WAV在固定包缺失；只对这三项显式复用同族蝎蛇lookID79原声，台账保留requestedSourceFile、sourceKind、sourceFile与reason。没有合成声音或冒用其他Boss声音。神兽喷火的独立音效仍缺可核验映射。
+声音索引采用原始lookID，不做图片编码所需的减1：0x02000000＋lookID×16，攻击偏移2、受击4、死亡5。邪恶毒蛇lookID80的3个独立WAV在固定包缺失；只对这三项显式复用同族蝎蛇lookID79原声，台账保留requested、sourceKind、sourceFile与reason。没有合成声音或冒用其他Boss声音。神兽喷火的独立音效仍缺可核验映射。
 
 上文按阶段保存的28／29WAV计数属于历史；当前总量以audio-manifest.json与check-audio.py为准。怪物按当前章节预取，全部音效及攻击／受击／死亡开关在本机保存。
