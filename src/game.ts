@@ -57,6 +57,7 @@ import {
 } from "./checkpoint";
 import {
   Rng,
+  PET_HIT_WINDOW,
   clamp,
   combine,
   incomingDamage,
@@ -150,6 +151,8 @@ export type Pet = Entity & {
   cd: number;
   born: number;
   attackUntil: number;
+  hitUntil?: number;
+  hitDamage?: number;
 };
 export type Projectile = Entity & {
   vx: number;
@@ -1223,8 +1226,15 @@ export class Game {
     e.windup = 0.35;
   }
   hurtPet(pet: Pet, raw: number, kind: "physical" | "magic") {
+    if(this.phase!=="battle" || pet.hp<=0)return;
     const base = pet.source === "skeleton" ? 4 : pet.source === "beast" ? 8 : 0;
-    pet.hp = Math.max(0, pet.hp - incomingDamage(raw, base + buffDefense(this, pet.id, kind), 0));
+    const damage=incomingDamage(raw, base + buffDefense(this, pet.id, kind), 0);
+    const within=this.clock<(pet.hitUntil ?? 0),previous=within ? pet.hitDamage ?? 0 : 0;
+    // Coalesce the burst, while a stronger Boss hit still applies its remainder.
+    // Smaller repeated hits never prolong the window or conceal a heavy attack.
+    if(!within)pet.hitUntil=this.clock+PET_HIT_WINDOW;
+    pet.hitDamage=Math.max(previous,damage);
+    pet.hp = Math.max(0, pet.hp - Math.max(0,damage-previous));
   }
   private magicDamage(base: number, s: Skill) {
     const mc = this.rollStat("mc") + (this.stats.mc_flat ?? 0);

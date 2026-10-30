@@ -1,4 +1,5 @@
 import type { Bonuses, StatKey } from "./content";
+export const PET_HIT_WINDOW = .3;
 export class Rng {
   constructor(public seed: number) {}
   next() {

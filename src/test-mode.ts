@@ -8,6 +8,7 @@ import type { SkillId } from "./spells";
 import { canStand } from "./world";
 import {appendLoot} from "./loot";
 import {monsterSoundKey,type MonsterSoundEvent} from "./monster-audio";
+import {incomingDamage} from "./rules";
 export const newTestSettings = () => ({
   god: true,
   autowalk: false,
@@ -26,6 +27,7 @@ export const newTestSettings = () => ({
   meleeWindowSample:false,
   chargedBossSample:false,
   monsterAudioSample:null as {kind:string;event:MonsterSoundEvent;key:string;playedBefore:number}|null,
+  petHitSample:null as {petId:number;beforeHP:number;attacks:number;largestHit:number;separateHits:number}|null,
   footOcclusionSample:false,
   cadenceSample:false,
   bossBuild:null as {name:string;boss:Enemy;branches:string[];equipment:string[]} | null,
@@ -197,6 +199,28 @@ export function testSummonWall(g:Game) {
   return false;
 }
 /** Opposite fixed targets isolate selection from damage, movement and economy. */
+/** Actual enemy windups, including a heavy Boss swing, on source Woma floor. */
+export function testPetHitWindow(g:Game) {
+  if(g.mode!=="test" || !["battle","paused"].includes(g.phase))return false;
+  g.start("test",176,"taoist",false,"woma");
+  const offsets=[{x:0,y:100},{x:-38,y:-15},{x:-38,y:15},{x:-5,y:-40},{x:95,y:10}];
+  const home=[...(g.navigation?.points ?? [])].sort((a,b)=>Math.hypot(a.x-g.player.x,a.y-g.player.y)-Math.hypot(b.x-g.player.x,b.y-g.player.y))
+    .find(p=>offsets.every(o=>g.canStand(p.x+o.x,p.y+o.y) && g.attackLineClear(p,{x:p.x+o.x,y:p.y+o.y})));
+  if(!home)return false;
+  Object.assign(g.player,{x:home.x,y:home.y+100});Object.assign(g.test,{spawning:false,god:false});g.basicCD=Infinity;
+  const skill=g.newSkill("beast");skill.cd=0;g.skills=[skill];g.cast(skill);skill.cd=Infinity;
+  const pet=g.pets[0];if(!pet)return false;Object.assign(pet,home,{cd:Infinity});g.effects=[];
+  const hits:number[]=[];
+  for(let i=1;i<offsets.length;i++){
+    const boss=i===4,offset=offsets[i];const e=g.spawnEnemy(boss ? "womaLord" : "orc");
+    Object.assign(e,{x:home.x+offset.x,y:home.y+offset.y,hp:10000,maxHp:10000,speed:0,damage:boss ? 80 : 20,
+      windup:1/120,attackTarget:pet.id,attackCD:Infinity,shockCD:Infinity,bossSummonCD:Infinity});
+    hits.push(incomingDamage(e.damage,8,0));
+  }
+  const beforeHP=pet.hp;g.step(1/60);
+  g.test.petHitSample={petId:pet.id,beforeHP,attacks:hits.length,largestHit:Math.max(...hits),separateHits:hits.reduce((a,b)=>a+b,0)};
+  g.pause();g.emit();return true;
+}
 export function testSummonPriority(g:Game) {
   if(g.mode!=="test" || !["battle","paused"].includes(g.phase))return false;
   g.start("test",176,"taoist",false,"woma");

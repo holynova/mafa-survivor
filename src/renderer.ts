@@ -15,6 +15,7 @@ let battleBottomInset=0;
 export function setBattleInset(height:number) {battleBottomInset=Math.max(0,height);}
 import { resolveAppearance, weaponBehind } from "./appearance";
 import { game, WORLD, type Enemy } from "./game";
+import {PET_HIT_WINDOW} from "./rules";
 export type Manifest = {
   world?: WorldLayout;
   worlds?: Partial<Record<MapId, WorldLayout>>;
@@ -713,14 +714,15 @@ class BattleScene extends Phaser.Scene {
         if((e.awakenAt ?? 0)>game.clock) this.bars.lineStyle(3,0xffcc84,0.9).strokeCircle(e.x,e.y,42);
       }
       for (const p of game.pets) {
+        const hurt=t<(p.hitUntil ?? 0);
         this.actor(
           "pet-" + p.id,
           p.kind,
-          t < p.attackUntil ? "attack" : "walk",
+          hurt ? "hurt" : t < p.attackUntil ? "attack" : "walk",
           p.dir,
           p.x,
           p.y,
-          t - p.born,
+          hurt ? t-((p.hitUntil ?? 0)-PET_HIT_WINDOW) : t - p.born,
           p.y,
         );
         this.bars
