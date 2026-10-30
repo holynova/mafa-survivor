@@ -27,8 +27,8 @@ export function skillMetrics(g:Game,s:Skill):string[] {
   }
   if(s.id==="repulse")out.push(`击退${n(110*(1+s.knockback/100))}px／无伤害`);
   if(s.id==="nova")out.push(`至少${4-(extra.triggerReduction??0)}敌触发`);
-  if(s.id==="thrust")out.push(`直线${n((96+s.range)*(1+(g.stats.skill_radius??0)/100))}px`,`至少${extra.solo ? 1 : 2}敌命中`);
-  if(s.id==="cleave")out.push(`正面${Math.min(230,180+s.angle)}°`);
+  if(s.id==="thrust")out.push(`直线${n((96+s.range)*(1+(g.stats.skill_radius??0)/100))}px`,`至少${extra.solo ? 1 : 2}敌命中`,extra.solo ? "自动瞄准可见首领／精英" : "移动时沿当前朝向");
+  if(s.id==="cleave")out.push(`正面${Math.min(230,180+s.angle)}°`,"自动朝近处敌群施放");
   if(s.id==="dash")out.push(`冲刺${180+s.range}px`);
   if(s.id==="firesword")out.push(`烈火刀距离${48+s.range}px`);
   if(s.id==="poison")out.push(`持续${duration(6,15)}秒`,`红毒减防${Math.min(35,15+s.power)}%／绿毒跳伤+${extra.poisonPower??0}%`);

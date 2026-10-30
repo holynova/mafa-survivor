@@ -1479,10 +1479,16 @@ export class Game {
     const near = targets.filter(
       (e) => Math.hypot(e.x - this.player.x, e.y - this.player.y) <= radius && this.meleeReachable(e),
     );
-    const minimum=s.id==="thrust" && skillExtras(s).solo ? 1 : 2;
+    const solo=s.id==="thrust" && !!skillExtras(s).solo;
+    const minimum=solo ? 1 : 2;
     if (near.length < minimum) return false;
-    const aim = this.meleeAim(near);
-    const hits = near.filter((e) => {
+    const autoAim=solo && !manual;
+    if(autoAim) {
+      const threat=(e:Enemy)=>isBossKind(e.kind) ? 2 : e.elite ? 1 : 0;
+      near.sort((a,b)=>threat(b)-threat(a) ||
+        Math.hypot(a.x-this.player.x,a.y-this.player.y)-Math.hypot(b.x-this.player.x,b.y-this.player.y));
+    }
+    const hitsFor = (aim:{x:number;y:number}) => near.filter((e) => {
       const dx = e.x - this.player.x,
         dy = e.y - this.player.y;
       const along = dx * aim.x + dy * aim.y,
@@ -1497,7 +1503,23 @@ export class Game {
       );
       return angle <= (Math.min(230, 180 + s.angle) * Math.PI) / 360;
     });
+    let aim = this.meleeAim(near,autoAim),cleaveDir:number|undefined;
+    if(s.id==="cleave" && !manual) {
+      // Compare the eight real attack directions by coverage, then threats.
+      // Movement breaks ties but never overrides a clearly better group.
+      const facing=this.player.dir;let bestScore=[-1,-1,-1,-Infinity];
+      for(let dir=0;dir<8;dir++) {
+        const angle=(dir-2)*Math.PI/4,candidate={x:Math.cos(angle),y:Math.sin(angle)},group=hitsFor(candidate);
+        const score=[group.length,Number(group.some(e=>isBossKind(e.kind))),group.filter(e=>e.elite).length,Math.cos((dir-facing)*Math.PI/4)];
+        const difference=score.findIndex((value,index)=>value!==bestScore[index]);
+        if(difference>=0 && score[difference]>bestScore[difference]) {
+          bestScore=score;aim=candidate;cleaveDir=dir;
+        }
+      }
+    }
+    const hits=hitsFor(aim);
     if (hits.length < minimum) return false;
+    if(cleaveDir!==undefined)this.player.dir=cleaveDir;
     for (const e of hits)
       if (this.physicalHit(e, s.accuracy))
         this.hit(
@@ -1511,7 +1533,7 @@ export class Game {
         );
     this.player.attackUntil = this.clock + 0.35;
     this.player.attackDir = this.player.dir;
-    this.effect(
+    const effect=this.effect(
       s.id,
       this.player.x,
       this.player.y,
@@ -1519,6 +1541,7 @@ export class Game {
       0.35,
       this.player.dir,
     );
+    if(s.id==="thrust")effect.aimAngle=Math.atan2(aim.y,aim.x);
     return true;
   }
   private distanceToSegment(

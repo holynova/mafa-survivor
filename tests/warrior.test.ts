@@ -223,7 +223,7 @@ describe("directional melee and collision-safe dash", () => {
     const a = enemy(g, 30, 10),
       b = enemy(g, 35, -10),
       back = enemy(g, -35);
-    g.cast(s);
+    g.cast(s, true);
     expect(a.hp).toBeLessThan(10000);
     expect(b.hp).toBeLessThan(10000);
     expect(back.hp).toBe(10000);

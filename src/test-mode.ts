@@ -18,6 +18,7 @@ export const newTestSettings = () => ({
   recoverySample:false,
   summonWallSample:false,
   summonPrioritySample:false,
+  meleeAimSample:null as {kind:"thrust"|"cleave";beforeDamage:number;afterDamage:number;hits:number;startX:number;endX:number}|null,
   healthWalkSample:false,
   engagementSample:false,
   meleeDodgeSample:false,
@@ -197,6 +198,26 @@ export function testSummonPriority(g:Game) {
   for(let i=0;i<12;i++)g.step(1/60);
   g.test.summonPrioritySample=true;
   g.enemies.forEach((e,i)=>g.floating.push({id:g.nextEntityId(),x:e.x,y:e.y+25,text:`${i ? "首领" : "小怪"} · ${Math.round(e.maxHp-e.hp)}伤害`,color:i ? "#f2cf8a" : "#9bd3e0",life:100}));
+  g.pause();g.emit();return true;
+}
+/** Real movement and original Woma floor isolate automatic melee aiming. */
+export function testMeleeAim(g:Game,kind:"thrust"|"cleave") {
+  if(g.mode!=="test" || !["battle","paused"].includes(g.phase))return false;
+  g.start("test",176,"warrior",false,"woma");
+  const nav=g.navigation;if(!nav)return false;
+  const offsets=kind==="thrust" ? [{x:-75,y:0}] : [{x:-45,y:-45},{x:-65,y:0},{x:-45,y:45}];
+  const home=[...nav.points].sort((a,b)=>Math.hypot(a.x-g.player.x,a.y-g.player.y)-Math.hypot(b.x-g.player.x,b.y-g.player.y))
+    .find(p=>[...offsets,{x:35,y:0}].every(o=>g.canStand(p.x+o.x,p.y+o.y) && g.attackLineClear(p,{x:p.x+o.x,y:p.y+o.y})));
+  if(!home)return false;
+  Object.assign(g.player,home);g.test.spawning=false;g.basicCD=Infinity;g.upgrades.accuracy=100;g.recompute();
+  const first=g.newSkill(kind);first.cd=0;g.skills=[first];
+  for(const o of offsets)Object.assign(g.spawnEnemy(kind==="thrust" ? "womaLord" : "scarecrow"),{x:home.x+o.x,y:home.y+o.y,hp:2000,maxHp:2000,speed:0,attackCD:Infinity,shockCD:Infinity,bossSummonCD:Infinity});
+  g.input={x:1,y:0};g.player.moving=true;g.player.dir=2;
+  if(kind==="thrust")g.step(1/60);else g.cast(first,true);
+  const beforeDamage=g.damageDealt[kind]??0;
+  if(kind==="thrust"){const upgraded=g.newSkill(kind,2);upgraded.cd=0;g.skills=[upgraded];}
+  for(let i=0;i<5;i++)g.step(1/60);
+  g.test.meleeAimSample={kind,beforeDamage,afterDamage:(g.damageDealt[kind]??0)-beforeDamage,hits:g.enemies.filter(e=>e.hp<e.maxHp).length,startX:home.x,endX:g.player.x};
   g.pause();g.emit();return true;
 }
 export function testLootVisual(g:Game) {

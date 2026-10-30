@@ -256,7 +256,7 @@ const definitions = [
     name: "刺杀剑术",
     cooldown: 2.1,
     description:
-      "前方两格直线内至少两个目标时发动穿透刺击，每个目标仅命中一次。",
+      "窄直线穿透刺击，每个目标仅命中一次。1级至少两敌；2级起自动瞄准可见首领／精英，可边移动边施放。",
     asset: "item/刺杀剑术",
     branches: [
       branch("range", 48, "距离 +1 格"),
@@ -269,7 +269,7 @@ const definitions = [
     classId: "warrior",
     name: "半月弯刀",
     cooldown: 2.2,
-    description: "近身前方至少两名敌人时挥出半月，只命中前方扇形。",
+    description: "自动朝能命中更多近敌的方向挥出半月；至少两敌，只命中当前朝向的扇形。",
     asset: "item/半月弯刀",
     branches: [
       branch("angle", 25, "扇形角度 +25°"),
