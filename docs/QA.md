@@ -1,4 +1,4 @@
-# alpha.35 烈火优先精英（本地验收与冻结通过）
+# alpha.35 烈火优先精英（已部署／线上交互待验）
 
 - 最小回归命令npm test -- tests/fire-target-priority.test.ts，修复前两项明确失败：烈火消耗在近处普通怪，可达精英仍满血。新增11项覆盖实际自动蓄力／固定步、Boss与精英／精英间距离排序、无烈火／单攻杀保持就近、射程／墙体、落空只消费一次、同一刀伤害／归因／CD不变及原生沃玛样例／正常模式隔离。初版墙体夹具把目标放在非法脚部位置，改为合法细墙几何后通过；不把该夹具错误称为战斗根因。
 - 680项游戏／67文件、19Python、原图像素／137WAV／资源清单及生产构建通过；detector[]，增量UI审查16/20，两个既有P2见reviews/alpha35-fire-priority-ui-audit.md。不修改原版素材或普通数值／CD／射程。
@@ -6,6 +6,9 @@
 - 干净b77fbcc35d51e2028aa6ad1d204e84f0a57088af、sourceDirty=false，正常90局与独立18构筑全部终结0异常。同V9、相同策略源码哈希／地图夹具；普通仍6胜（法师5、道士1、战士0），构筑仍3法师胜。法师／道士普通60行、构筑12行逐字段等同alpha.34。战士普通27行逐字段相同，3例波次回退：176蜈蚣11→8、17蜈蚣8→7、991盟重9→8；不称作整体推进或通关平衡改善。
 - 独立构筑15／18行逐字段相同，战士6局均第12波且0胜；176半月烈火等级24→25、17普攻攻杀23→24，其余变化保留原始报告。目标死亡时序改变后续战斗／掉落RNG与成长，不能按同装备固定DPS理解。完整职业／章节平衡未通过。
 - 报告alpha35-clean90.json／clean-build18.json／freeze-summary.json，V9 SHA256仍3a8b8ddcecdfaf31c128aabe4e9acc78d2fb60d5d54572f4f91848cc17e30f39；冻结后只补文档。公网版本、Actions和交互另验。
+
+- [v0.1.0-alpha.35](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.35)固定ff5c797d178208abe05146af3fce62f55b67d468；[Source checks41085557063](https://github.com/holynova/mafa-survivor/actions/runs/41085557063)与[Pages／Release41085768195](https://github.com/holynova/mafa-survivor/actions/runs/41085768195)全部成功。公网original／alpha.35／完整SHA匹配，32403帧／66图集、白日门与石墓解码像素、137WAV共17188914字节的哈希均通过。
+- 线上交互未验收：恢复本轮独立Ego空间53返回task space not found，清单找不到同名空间。没有自行创建替代空间、操作用户页面或把本地图片改名为公开截图；按Ego运行指南申请重开，等待用户答复。现有local-priority／mobile-tools／mobile-battle／bottom-edge／forest只证明本地版本；公开原素材HTTP报告为alpha35-online-version.json。
 
 # alpha.34 战士同帧蓄力与测试接敌（已发布并线上核验）
 
