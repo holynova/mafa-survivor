@@ -1708,9 +1708,10 @@ export class Game {
                 Math.hypot(a.x - p.x, a.y - p.y) -
                 Math.hypot(b.x - p.x, b.y - p.y),
             );
-      // Prefer a target we can actually attack; a closer wall-side enemy must
-      // not steal a ready swing or flame from a visible enemy beside the pet.
-      const target=candidates.find(e=>Math.hypot(e.x-p.x,e.y-p.y)<range && this.attackLineClear(p,e)) ?? candidates[0];
+      // Prioritize threats only among targets this pet can hit now. A distant
+      // or wall-side Boss must not steal attacks from a visible nearby enemy.
+      const attackable=candidates.filter(e=>Math.hypot(e.x-p.x,e.y-p.y)<range && this.attackLineClear(p,e));
+      const target=attackable.find(e=>isBossKind(e.kind)) ?? attackable.find(e=>e.elite) ?? attackable[0] ?? candidates[0];
       const destination = target ?? this.player,
         dx = destination.x - p.x,
         dy = destination.y - p.y,
