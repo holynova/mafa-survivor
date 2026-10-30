@@ -1,5 +1,11 @@
 # GitHub 阶段发布
 
+## alpha.28 战士移动挥刀（已发布并线上验证）
+
+[v0.1.0-alpha.28](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.28)固定28d7cbf908ea72779b78a20fa8619fbaf935025d；[Source checks 40983124480](https://github.com/holynova/mafa-survivor/actions/runs/40983124480)与[Pages／Release 40983193112](https://github.com/holynova/mafa-survivor/actions/runs/40983193112)成功。601游戏／16Python／原图／29WAV／构建、本地移动中反向挥刀、原版完整人物／武器／Boss与390px截图通过。
+
+公网版本original／alpha.28／28d7cbf匹配，32,403帧／66图集、两个原生地图图集像素通过；实际UI载入构筑、KeyD1104→1152.5与桌面／390px截图通过。冻结f8026de与标签的src／tools／tests无差异；90＋18局0异常但仍只有法师通关，战士最终波次13回退／7前进；浏览器预设Boss仍剩43HP，保留差异，不宣称完整平衡通过。
+
 ## alpha.27 六级技能交付版
 
 [v0.1.0-alpha.27](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.27)标签b2dd319e15e8c72acd7bf145c3960223c4b0da78；[Source checks 40920798531](https://github.com/holynova/mafa-survivor/actions/runs/40920798531)与[Pages／Release 40920806165](https://github.com/holynova/mafa-survivor/actions/runs/40920806165)成功。597游戏／16Python／原版资源／29WAV／构建通过，修复技能重购恢复和暂停测试下一波。
