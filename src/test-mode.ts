@@ -7,6 +7,7 @@ import type { Enemy, Game } from "./game";
 import type { SkillId } from "./spells";
 import { canStand } from "./world";
 import {appendLoot} from "./loot";
+import {monsterSoundKey,type MonsterSoundEvent} from "./monster-audio";
 export const newTestSettings = () => ({
   god: true,
   autowalk: false,
@@ -24,6 +25,7 @@ export const newTestSettings = () => ({
   meleeDodgeSample:false,
   meleeWindowSample:false,
   chargedBossSample:false,
+  monsterAudioSample:null as {kind:string;event:MonsterSoundEvent;key:string;playedBefore:number}|null,
   footOcclusionSample:false,
   cadenceSample:false,
   bossBuild:null as {name:string;boss:Enemy;branches:string[];equipment:string[]} | null,
@@ -52,6 +54,20 @@ export function testSpawn(g: Game, kind: string, count: number) {
     e.x = point.x; e.y = point.y;
   }
   g.emit();
+}
+export function testMonsterAudio(g:Game,kind:string,event:MonsterSoundEvent,playedBefore=0){
+  if(g.mode!=="test" || !["battle","paused"].includes(g.phase) || !MONSTERS.some(m=>m.id===kind))return false;
+  g.start("test",176,g.classId,false,"woma");
+  const home=g.navigation && [...g.navigation.points].sort((a,b)=>Math.hypot(a.x-g.player.x,a.y-g.player.y)-Math.hypot(b.x-g.player.x,b.y-g.player.y))
+    .find(p=>g.canStand(p.x+28,p.y) && g.attackLineClear(p,{x:p.x+28,y:p.y}));
+  if(!home)return false;
+  Object.assign(g.player,home);Object.assign(g.test,{spawning:false,god:false});g.skills=[];g.basicCD=Infinity;
+  const attacking=event==="attack",cd=attacking ? 0 : Infinity;
+  const e=g.spawnEnemy(kind,true);Object.assign(e,{x:home.x+28,y:home.y,hp:200,maxHp:200,speed:0,awakenAt:0,dormant:false,
+    attackCD:cd,rangedCD:cd,shockCD:cd,stompCD:cd,bossJumpCD:cd,chargeCD:Infinity,bossSummonCD:Infinity});
+  if(attacking)g.step(1/60);else g.hit(e,event==="hurt" ? 1 : 1000,"test:monster-audio");
+  g.test.monsterAudioSample={kind,event,key:monsterSoundKey(kind,event),playedBefore};
+  g.pause();g.emit();return true;
 }
 export function testEquip(g: Game, id: SkillId, slot: number) {
   if (g.mode !== "test" || !Number.isInteger(slot) || slot < 0 || slot > 5)

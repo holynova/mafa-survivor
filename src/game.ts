@@ -24,6 +24,7 @@ import {updateExpansionEnemy} from "./expansion-enemies";
 import {appendLoot,collectLoot,healthDrop} from "./loot";
 import {newPotionState,useBloodPotion,canCollectPotion} from "./potions";
 import {ATTACK_CADENCE,outputScale} from "./cadence";
+import {monsterSoundKey,type MonsterSoundEvent} from "./monster-audio";
 import {newCombatRecovery,recoverHit,type DamageOrigin,type CombatHealing} from "./combat-recovery";
 import {newDamageTaken,recordDamageTaken,type DamageTaken} from "./damage-taken";
 import { TEMPLE_RANGED, updateTempleEnemy } from "./temple";
@@ -369,6 +370,19 @@ export class Game {
     if(key==="hurt" || key==="death") {
       this.audioEvents.unshift(key);this.audioEvents.length=Math.min(24,this.audioEvents.length);
     }else if (this.audioEvents.length < 24) this.audioEvents.push(key);
+  }
+  monsterSound(e:Enemy,event:MonsterSoundEvent) {
+    if(Math.hypot(e.x-this.player.x,e.y-this.player.y)>this.detectionRange)return;
+    const key=monsterSoundKey(e.kind,event);
+    if(event==="death")this.audioEvents=this.audioEvents.filter(k=>k!==monsterSoundKey(e.kind,"hurt"));
+    if(this.audioEvents.includes(key))return;
+    const monsterEvents=this.audioEvents.filter(k=>k.startsWith("monster:"));
+    if(monsterEvents.length>=6) {
+      const replace=event==="death" ? monsterEvents.find(k=>!k.endsWith(":death")) : undefined;
+      if(!replace)return;
+      this.audioEvents.splice(this.audioEvents.indexOf(replace),1);
+    }
+    this.sound(key);
   }
   nextEntityId() {
     return ++this.id;
@@ -847,6 +861,7 @@ export class Game {
       }
       if ((e.elite || e.kind === "whiteBoar" || e.kind === "skeletonWarrior") && !e.ranged && victim.visible && d > 90 && d < (e.kind === "skeletonWarrior" ? 180 : 300) && e.chargeCD === 0 && e.windup === 0 && (!this.navigation || this.navigation.lineClear(e, victim))) {
         e.chargeTarget = { x: victim.x, y: victim.y };
+        this.monsterSound(e,"attack");
         e.chargeWindupUntil = this.clock + (e.kind === "skeletonWarrior" ? 0.5 : 0.7);
         e.chargeUntil = this.clock + (e.kind === "skeletonWarrior" ? 1.1 : 1.6);
         e.chargeCD = 6;
@@ -882,6 +897,7 @@ export class Game {
       ) {
         e.attackTarget = victim.id;
         e.windup = isBossKind(e.kind) ? 0.65 : 0.4;
+        this.monsterSound(e,"attack");
         continue;
       }
       if (d > (e.ranged ? 230 : 22) || (e.ranged && this.navigation && !this.navigation.lineClear(e, victim, 0))) {
@@ -1149,6 +1165,7 @@ export class Game {
     e.bossJumpOrigin={x:e.x,y:e.y};e.bossJumpTarget={...target};
     e.bossJumpWindupUntil=this.clock+0.8;e.bossJumpUntil=this.clock+1.4;
     e.dir=this.direction(target.x-e.x,target.y-e.y);e.windup=0.8;
+    this.monsterSound(e,"attack");
     return true;
   }
   private updateCorpseKing(e: Enemy, dt: number) {
@@ -1179,6 +1196,7 @@ export class Game {
     }
     if (e.stompCD === 0 && [this.player, ...this.pets].some((p) => p.hp > 0 && Math.hypot(p.x - e.x, p.y - e.y) < 190)) {
       e.stompAt = this.clock + 1;
+      this.monsterSound(e,"attack");
       e.stompOrigin = { x: e.x, y: e.y };
       e.stompCD = e.bossPhase === 2 ? 6 : 9;
       e.windup = 0;
@@ -2027,6 +2045,7 @@ export class Game {
       if (f.kind === "trap" && f.targetId === e.id) f.life = 0;
     const dealt = Math.min(e.hp, damage);
     e.hp -= damage;
+    this.monsterSound(e,e.hp<=0 ? "death" : "hurt");
     e.hitAt = this.clock;
     this.damageDealt[skill] = (this.damageDealt[skill] ?? 0) + dealt;
     recoverHit(this,e,dealt,origin);

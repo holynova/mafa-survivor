@@ -23,6 +23,7 @@ export function updateExpansionEnemy(g:Game,e:Enemy,dt:number,victim:Point & {vi
     }else if(e.shockCD===0 && victim.visible && Math.hypot(victim.x-e.x,victim.y-e.y)<420 && g.attackLineClear(e,victim)) {
       const dx=victim.x-e.x,dy=victim.y-e.y,len=Math.max(1,Math.hypot(dx,dy));
       e.shock={origin:{x:e.x,y:e.y},target:{x:e.x+dx/len*400,y:e.y+dy/len*400},at:g.clock+.9,remaining:1};
+      g.monsterSound(e,"attack");
       e.shockCD=e.bossPhase===2 ? 4 : 6;
     }
     return true;
@@ -54,6 +55,7 @@ export function updateExpansionEnemy(g:Game,e:Enemy,dt:number,victim:Point & {vi
   }
   if(e.stompCD===0 && victim.visible && Math.hypot(victim.x-e.x,victim.y-e.y)<(e.kind==="redMoon" ? 420 : 160) && g.attackLineClear(e,victim)) {
     e.stompOrigin=e.kind==="redMoon" ? {x:victim.x,y:victim.y} : {x:e.x,y:e.y};
+    g.monsterSound(e,"attack");
     e.stompAt=g.clock+.9;e.stompCD=e.bossPhase===2 ? 4 : 6;return true;
   }
   return e.kind==="redMoon";

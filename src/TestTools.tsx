@@ -14,6 +14,8 @@ import {damageSourceName} from "./damage-taken";
 import {skillMetrics} from "./skill-metrics";
 import {SKILL_GROWTH} from "./skill-growth";
 import {TEST_BUILDS,testBossBuild} from "./test-builds";
+import {testMonsterAudio} from "./test-mode";
+import {monsterSoundKey,MONSTER_SOUND_EVENTS} from "./monster-audio";
 export function TestTools() {
   const [open, setOpen] = useState(true),
     [kind, setKind] = useState("orc"),
@@ -68,6 +70,8 @@ export function TestTools() {
             {Object.entries(game.damageTaken.sources).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([source,value])=>
               <span key={source}>{damageSourceName(source)} {value.toFixed(2)}<br /></span>)}
           </output>
+          <div className="test-row">{MONSTER_SOUND_EVENTS.map(event=><button key={event} disabled={!["battle","paused"].includes(game.phase)} onClick={async()=>{await sounds.unlock();await sounds.preloadMonsters([kind]);testMonsterAudio(game,kind,event,sounds.playedByKey[monsterSoundKey(kind,event)]??0);}}>验证怪物{event==="attack" ? "攻击" : event==="hurt" ? "受击" : "死亡"}音效</button>)}</div>
+          {game.test.monsterAudioSample && <output aria-label="怪物音效诊断">{MONSTERS.find(m=>m.id===game.test.monsterAudioSample!.kind)?.name} · {game.test.monsterAudioSample.event==="attack" ? "攻击" : game.test.monsterAudioSample.event==="hurt" ? "受击" : "死亡"}<br />实际播放 {(sounds.playedByKey[game.test.monsterAudioSample.key]??0)-game.test.monsterAudioSample.playedBefore} 次 · {sounds.muted || !sounds.monsters[game.test.monsterAudioSample.event] ? "此类声音已关闭" : sounds.status}</output>}
           <label><input type="checkbox" checked={game.test.showDetection} onChange={e=>{game.test.showDetection=e.target.checked;game.emit();}} />显示侦测圈 · {Math.round(game.detectionRange)}px</label>
           <div className="test-row">
             <button onClick={()=>testSpellVisual(game,"hellfire",rank)}>地狱火定格样例</button>

@@ -528,6 +528,7 @@ class BattleScene extends Phaser.Scene {
       this.accumulator = 0;
       this.autopilotClock=-1;this.autopilotAction={x:0,y:0};
       this.heroLook = { body: "dress-1", weapon: "weapon-8" };
+      void sounds.preloadMonsters([...MAPS[game.mapId].monsterPool,MAPS[game.mapId].boss]);
     }
     if (game.phase === "battle") {
       const axes = this.movementInput.axes;
@@ -569,7 +570,7 @@ class BattleScene extends Phaser.Scene {
     if (game.phase !== "lobby") {
       const audio=game.audioEvents.splice(0);
       for (const key of audio) sounds.play(key);
-      if(game.mode==="test" && audio.some(key=>key==="hurt" || key==="death"))game.emit();
+      if(game.mode==="test" && audio.some(key=>key==="hurt" || key==="death" || key.startsWith("monster:")))game.emit();
       if(game.phase==="battle"){
       if (game.player.moving && game.clock >= this.nextFootstep) {
         sounds.play("step");

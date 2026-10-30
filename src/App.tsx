@@ -23,6 +23,7 @@ import { CLASSES, CLASS_IDS } from "./classes";
 import {primaryRange} from "./equipment";
 import { expNeeded, sellPrice } from "./rules";
 import { sounds } from "./sound";
+import {AudioSettings} from "./AudioSettings";
 import {
   assetUrl,
   isGraybox,
@@ -809,6 +810,7 @@ export function App() {
               <button aria-label="查看装备与属性" onClick={toggleInventory}>装备</button>
               <button aria-label={game.phase==="paused" ? "继续战斗" : "暂停战斗"} onClick={()=>game.pause()}>{game.phase==="paused" ? "继续" : "暂停"}</button>
             </div>
+            <AudioSettings />
           </section>
         </>
       )}

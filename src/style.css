@@ -2168,7 +2168,7 @@ body:has(.lobby) .vignette {
 .classic-ui .upgrade-card,.classic-ui .shop-card { border-color:#79623b; background:#120c08b8; }
 .classic-ui .test-tools section { background:#21180ff5; border-color:#8c7448; }
 
-.classic-console { position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:min(1100px,100%); height:133px; display:flex; align-items:stretch; pointer-events:none; z-index:3; font-family:SimSun,"Songti SC",serif; text-shadow:1px 1px #000; }
+.classic-console { position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:100%; height:133px; display:flex; align-items:stretch; pointer-events:none; z-index:3; font-family:SimSun,"Songti SC",serif; text-shadow:1px 1px #000; }
 .classic-console .vitals { position:relative; flex:0 0 178px; width:178px; height:133px; display:block; background:var(--mir-board) left top /800px 133px no-repeat; }
 .classic-orb { position:absolute; inset:0; }
 .classic-orb img { position:absolute; top:7px; width:36px; height:88px; image-rendering:pixelated; }
@@ -2235,6 +2235,14 @@ body:has(.lobby) .vignette {
 }
 
 .console-mobile-actions {display:none;}
+.audio-settings {position:absolute;left:12px;bottom:calc(100% + 10px);pointer-events:auto;color:#ead8a8;font:12px SimSun,"Songti SC",serif;}
+.audio-settings summary {cursor:pointer;min-height:36px;padding:9px 12px;background:#241b10;border:1px solid #9b8050;box-sizing:border-box;}
+.audio-settings fieldset {position:absolute;left:0;bottom:calc(100% + 6px);width:240px;max-width:calc(100vw - 24px);padding:10px 12px;margin:0;background:#21180ff5;border:1px solid #9b8050;box-sizing:border-box;}
+.audio-settings legend {padding:0 5px;color:#f1dfb6;}
+.audio-settings label {display:flex;align-items:center;gap:10px;min-height:40px;cursor:pointer;font-size:13px;}
+.audio-settings input {width:18px;height:18px;accent-color:#b99b55;}
+.audio-settings p {margin:8px 0 2px;color:#c9b783;font-size:11px;line-height:1.5;}
+.audio-settings summary:focus-visible,.audio-settings input:focus-visible {outline:2px solid #f3d581;outline-offset:3px;}
 .console-mobile-actions .potion-mobile {min-width:70px;white-space:nowrap;}
 .console-mobile-actions .potion-mobile:disabled {opacity:.8;color:#c4b48c;}
 @media(max-width:700px) {.console-mobile-actions {display:flex;position:fixed;right:7px;bottom:147px;gap:5px;pointer-events:auto;} .console-mobile-actions button {padding:7px 12px;font-size:11px;}}

@@ -11,6 +11,7 @@ export function inShockLane(point: Point, origin: Point, target: Point, width = 
 function warning(g: Game, e: Enemy, victim: Point, remaining: number) {
   const dx = victim.x - e.x, dy = victim.y - e.y, d = Math.max(1, Math.hypot(dx, dy));
   e.shock = { origin: {x:e.x,y:e.y}, target: {x:e.x+dx/d*440,y:e.y+dy/d*440}, at:g.clock+0.8, remaining };
+  g.monsterSound(e,"attack");
   e.dir = g.direction(dx,dy);
 }
 /** Returns true while an enemy is committed to a telegraphed action or recovery. */
