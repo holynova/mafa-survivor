@@ -77,6 +77,7 @@ export function TestTools() {
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testSummonPriority(game)}>召唤物首领优先（沃玛）</button>
             <button onClick={()=>testBossEngagement(game)}>Boss接敌与避险（赤月）</button>
             <button onClick={()=>testMeleeDodge(game)}>战士近战避险（沃玛）</button>
+            <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testMeleeDodge(game,true)}>战士蓄力抢攻（沃玛）</button>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testMeleeAim(game,"thrust")}>刺杀1→2级游走（沃玛）</button>
             <button disabled={!["battle","paused"].includes(game.phase)} onClick={()=>testMeleeAim(game,"cleave")}>半月游走选群（沃玛）</button>
             <button onClick={()=>testFootOcclusion(game)}>前景脚部遮挡（赤月）</button>
@@ -101,7 +102,7 @@ export function TestTools() {
           {game.test.cameraEdgeSample && <p>固定在原沃玛地图最下方的合法地面，检查人物脚部与阴影完整显示在操作栏上方。窗口缩放时随实际操作栏高度调整。</p>}
           {(game.test.engagementSample || game.test.meleeDodgeSample) && <>
             <output aria-label="自动接敌实战诊断">距首领 {game.boss ? Math.round(Math.hypot(game.boss.x-game.player.x,game.boss.y-game.player.y)) : "—"}px · 侦测 {Math.round(game.detectionRange)}px<br />实际输出 {Math.round(Object.values(game.damageDealt).reduce((n,v)=>n+v,0))} · 实际承伤 {Math.round(game.damageTaken.physical+game.damageTaken.magic)}</output>
-            <p>已关闭刷怪和无敌，自动走位已开启。点击「继续」观察接敌、攻击和撤离预警；方向键或拖动可接管。{game.test.meleeDodgeSample ? "此样例固定首领近战，关闭其他首领技能。" : "可切换职业后重新载入。"}测试不保存战绩。</p>
+            <p>已关闭刷怪和无敌，自动走位已开启。点击「继续」观察接敌、攻击和撤离预警；方向键或拖动可接管。{game.test.meleeWindowSample ? "从66px进入普攻距离，利用早期蓄力抢攻后撤离；其他首领技能关闭，只验证近战窗口。" : game.test.meleeDodgeSample ? "此样例固定首领近战，关闭其他首领技能。" : "可切换职业后重新载入。"}测试不保存战绩。</p>
           </>}
           {game.test.summonWallSample && <output aria-label="神兽隔墙伤害诊断">{game.enemies.slice(0,2).map((e,i)=><span key={e.id}>{i ? "可见" : "墙后"}目标实际伤害 {Math.round(e.maxHp-e.hp)}<br /></span>)}同一喷火扇形，按原地图阻挡判定。测试不保存战绩。</output>}
           <button onClick={()=>testChapterVisual(game)}>重置本章并展陈怪物（暂停）</button>
