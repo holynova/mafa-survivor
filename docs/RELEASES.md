@@ -1,5 +1,11 @@
 # GitHub 阶段发布
 
+## alpha.30 战士游走与自动近战（已发布并线上核验）
+
+[v0.1.0-alpha.30](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.30)固定309124a9e42e8726ac67c1ef9b1a87fa7d8f8dee；[Source checks 40996253296](https://github.com/holynova/mafa-survivor/actions/runs/40996253296)与[Pages／Release 40996257039](https://github.com/holynova/mafa-survivor/actions/runs/40996257039)成功。617游戏／16Python／原像素／29WAV／构建，本地和公开页桌面／390px原人物、武器、目标和地面截图通过。公网版本original／alpha.30／309124a一致，原生图集像素通过；刺杀对照0→14、半月0→46、KeyD1097.1→1131.3，未捕获操作期运行错误。
+
+冻结5ce2fe5的src／tools／tests与标签相同：90＋18局0异常，仍只有法师5与3局通关，战士16进／5退／9不变；不宣称完整平衡已过。Impeccable技术审查16／20，两个非阻塞P2（31px测试按钮、结果需继续滚动）已记录。
+
 ## alpha.29 召唤物首领选敌（已发布并线上核验）
 
 [v0.1.0-alpha.29](https://github.com/holynova/mafa-survivor/releases/tag/v0.1.0-alpha.29)固定1d6ed32e8cee1cde70d4888e9bb990e113b27fa6；[Source checks 40987448867](https://github.com/holynova/mafa-survivor/actions/runs/40987448867)与[Pages／Release 40987453031](https://github.com/holynova/mafa-survivor/actions/runs/40987453031)成功。606游戏／16Python／原图像素／29WAV／构建、桌面／390px截图通过。公网original／alpha.29／1d6ed32及原生图集像素一致，实际UI小怪0／教主12伤害与KeyD1080→1112.2通过，操作期间未捕获运行错误。
