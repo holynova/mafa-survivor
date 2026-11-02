@@ -47,6 +47,6 @@
   "hostingMigration": {
     "requestedAt": "2026-11-02",
     "basis": "The project owner invoked hn-project-publisher for the existing public project; reuse the same original-media public-distribution authorization and pinned sources on Cloudflare Workers.",
-    "domain": "mafa-survivor.xiaosang.cc"
+    "url": "https://xiaosang.cc/mafa-survivor/"
   }
 }

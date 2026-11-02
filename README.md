@@ -6,7 +6,7 @@ A browser survivor game with three classes, 33 skills with six ranks, ten chapte
 
 ![实机截图（测试模式） / In-game test-mode screenshot](assets/screenshot.png)
 
-- [Cloudflare Demo（待上线验证 / pending verification）](https://mafa-survivor.xiaosang.cc/)
+- [Cloudflare Demo（待上线验证 / pending verification）](https://xiaosang.cc/mafa-survivor/)
 - [GitHub Repo](https://github.com/holynova/mafa-survivor)
 - [GitHub Pages 回退 / fallback](https://holynova.github.io/mafa-survivor/)
 - [开发说明 / Development](docs/DEVELOPMENT.md) · [进度 / Status](docs/STATUS.md)
@@ -27,13 +27,14 @@ npm run dev
 
 ```sh
 npm test
-npm run build:cloudflare
+npm run deploy:prepare
+# Check, commit and push the generated subtree on portfolio master.
 npm run deploy:check
 npm run deploy
 ```
 
-Cloudflare Worker: `mafa-survivor` · Custom Domain: `mafa-survivor.xiaosang.cc`.
+Cloudflare Worker: `xiaosang-portfolio` · Path: `/mafa-survivor/`.
 
-仅从干净的`main`在本地手动部署；Git推送不会发布Cloudflare。旧Pages保留回退，本次不维护双平台同步。发布记录见[Cloudflare说明](docs/CLOUDFLARE.md)。
+项目从干净`main`构建，产物在作品集`master`提交后手动发布；Git推送不会发布Cloudflare。旧Pages保留回退，本次不维护双平台同步。发布记录见[Cloudflare说明](docs/CLOUDFLARE.md)。
 
-Deploy locally from a clean `main` checkout. Git push does not deploy Cloudflare. Existing Pages remains a fallback. See the [deployment notes](docs/CLOUDFLARE.md).
+Build from clean project `main`, commit the generated subtree on portfolio `master`, then deploy the existing Worker locally. Set `PORTFOLIO_DIR` if the portfolio is not a sibling checkout. Git push does not deploy Cloudflare. Existing Pages remains a fallback. See the [deployment notes](docs/CLOUDFLARE.md).

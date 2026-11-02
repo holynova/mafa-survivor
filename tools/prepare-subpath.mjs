@@ -1,0 +1,14 @@
+import {execFileSync,spawnSync} from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+const root=process.cwd(),portfolio=path.resolve(process.env.PORTFOLIO_DIR || "../holynova.github.io");
+const git=(cwd,...args)=>execFileSync("git",args,{cwd,encoding:"utf8"}).trim();
+if(git(root,"branch","--show-current")!=="main" || git(root,"status","--porcelain"))throw new Error("Prepare from clean project main");
+if(git(portfolio,"branch","--show-current")!=="master" || !git(portfolio,"remote","get-url","origin").includes("holynova/holynova.github.io"))throw new Error("Use the portfolio master checkout");
+const target=path.join(portfolio,"mafa-survivor"),repository="https://github.com/holynova/mafa-survivor";
+if(git(portfolio,"status","--porcelain","--","mafa-survivor"))throw new Error("Preserve existing changes in the generated subtree first");
+if(fs.existsSync(target) && (!fs.existsSync(path.join(target,"build-source.json")) || JSON.parse(fs.readFileSync(path.join(target,"build-source.json"),"utf8")).repository!==repository))throw new Error("Target is not this project's managed build");
+const result=spawnSync("npm",["run","build:cloudflare"],{stdio:"inherit"});if(result.status!==0)process.exit(result.status ?? 1);
+fs.rmSync(target,{recursive:true,force:true});fs.cpSync(path.join(root,"dist"),target,{recursive:true});
+fs.writeFileSync(path.join(target,"build-source.json"),JSON.stringify({repository,branch:"main",commit:git(root,"rev-parse","HEAD"),version:JSON.parse(fs.readFileSync("package.json","utf8")).version,base:"/mafa-survivor/"},null,2)+"\n");
+console.log("Prepared "+target+". Check, commit and push portfolio master; then run npm run deploy:check and npm run deploy.");

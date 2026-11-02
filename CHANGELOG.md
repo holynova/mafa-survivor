@@ -2,9 +2,9 @@
 
 ## v0.1.0-alpha.36 — Cloudflare 发布
 
-- 增加根路径的 Cloudflare Workers 手动构建／部署配置，原版素材与游戏规则沿用 alpha.35。
+- 增加 /mafa-survivor/ 子路径的 Cloudflare Workers 手动构建／部署配置，原版素材与游戏规则沿用 alpha.35。
 - 增加可见 GitHub 源码入口、统一 Umami 统计及三职业页面简介；更新双语 README、截图与最终域名二维码。
-- GitHub Pages 原版本保留作回退，本次不触发新的 Pages 发布；Cloudflare 与作品集分别从唯一主分支手动部署。
+- GitHub Pages 原版本保留作回退，本次不触发新的 Pages 发布；游戏从 main 构建，产物在作品集 master 提交后手动发布到既有 xiaosang-portfolio Worker。
 - 完整职业／章节平衡仍未完成，alpha.35 的战士回退样本保留。
 
 ## v0.1.0-alpha.35 — 烈火优先精英

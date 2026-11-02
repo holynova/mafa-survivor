@@ -16,9 +16,10 @@
     "simulate": "node tools/simulate.mjs",
     "simulate:builds": "node tools/simulate-builds.mjs",
     "build:cloudflare": "node tools/build-cloudflare.mjs",
-    "deploy:check": "wrangler deploy --dry-run --config wrangler.jsonc",
+    "deploy:check": "node tools/deploy-cloudflare.mjs --dry-run",
     "deploy": "node tools/deploy-cloudflare.mjs",
-    "preview": "vite preview --host 127.0.0.1 --port 5183 --strictPort"
+    "preview": "vite preview --base /mafa-survivor/ --host 127.0.0.1 --port 5183 --strictPort",
+    "deploy:prepare": "node tools/prepare-subpath.mjs"
   },
   "dependencies": {
     "idb": "^8.0.0",
