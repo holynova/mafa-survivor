@@ -6,7 +6,7 @@ A browser survivor game with three classes, 33 skills with six ranks, ten chapte
 
 ![实机截图（测试模式） / In-game test-mode screenshot](assets/screenshot.png)
 
-- [Cloudflare Demo（待上线验证 / pending verification）](https://xiaosang.cc/mafa-survivor/)
+- [Cloudflare Demo](https://xiaosang.cc/mafa-survivor/)
 - [GitHub Repo](https://github.com/holynova/mafa-survivor)
 - [GitHub Pages 回退 / fallback](https://holynova.github.io/mafa-survivor/)
 - [开发说明 / Development](docs/DEVELOPMENT.md) · [进度 / Status](docs/STATUS.md)

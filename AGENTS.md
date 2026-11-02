@@ -22,4 +22,4 @@
 
 - 用户已调用 hn-project-publisher；以此段覆盖上面的默认 Pages 阶段发布条款。项目源码与 Wrangler 配置只在 main 维护，从干净 main 的同一提交在本地执行 npm run deploy。
 - 用户进一步指定子路径：生产目标为 https://xiaosang.cc/mafa-survivor/，复用 xiaosang-portfolio Worker；游戏 main 构建，产物与收录在作品集 master 提交后手动发布；旧 Pages 与旧工作流保留回退，本次不触发新的 Pages 标签发布。不得新建 Cloudflare 发布分支、Action 或 Workers Builds/Git 集成。
-- 应用变更递增现有 alpha.N 版本，文档／截图／仓库元数据变化不强制递增或重部署。游戏和 xiaosang.cc 作品集 Worker 各自手动发布并分别验收。
+- 应用变更递增现有 alpha.N 版本，文档／截图／仓库元数据变化不强制递增或重部署。游戏子目录与作品集共用 xiaosang-portfolio Worker，按变更手动发布并分别验收游戏和作品集入口。
