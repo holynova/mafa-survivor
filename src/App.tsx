@@ -298,6 +298,7 @@ export function App() {
           {releaseVersion} · {releaseCommit}
           {isGraybox ? " · 灰盒测试版" : ""}
         </span>
+        <a href={repositoryUrl} target="_blank" rel="noreferrer">GitHub</a>
         <a href={repositoryUrl + "/releases"} target="_blank" rel="noreferrer">
           版本记录
         </a>

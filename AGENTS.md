@@ -17,3 +17,9 @@
 
 - 人物外观使用真实装备映射，武器 shape 要减 WEAPON_BEGIN=1，前后层使用源 weaponorder 表；模型缺失装备不进入公开版本商店或精英掉落，不能冒用其他装备模型。
 - 地图物件是相邻竖条，不得独立按角色矩形范围修改条带 alpha；保持源前后层与完整树冠。人物/怪物阴影使用来源已登记的动作阴影。
+
+## 当前发布方式（2026-11-02）
+
+- 用户已调用 hn-project-publisher；以此段覆盖上面的默认 Pages 阶段发布条款。项目源码与 Wrangler 配置只在 main 维护，从干净 main 的同一提交在本地执行 npm run deploy。
+- 生产目标为 Cloudflare Worker mafa-survivor 与 https://mafa-survivor.xiaosang.cc/；旧 Pages 与旧工作流保留回退，本次不触发新的 Pages 标签发布。不得新建 Cloudflare 发布分支、Action 或 Workers Builds/Git 集成。
+- 应用变更递增现有 alpha.N 版本，文档／截图／仓库元数据变化不强制递增或重部署。游戏和 xiaosang.cc 作品集 Worker 各自手动发布并分别验收。
