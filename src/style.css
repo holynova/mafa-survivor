@@ -2295,3 +2295,9 @@ body:has(.lobby) .vignette {
 @media(max-width:600px) {
  .classic-ui:has(.modal-backdrop) .release-badge { top:4px; right:4px; left:auto; }
 }
+
+/* 两步确认态：仅描边与文字微变 */
+.secondary.confirming {
+  border-color: #c25a5a;
+  color: #f2b8b8;
+}

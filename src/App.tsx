@@ -14,7 +14,6 @@ import {
   assets,
   isReady,
   readyListeners,
-  frameMS,
   appearanceStatus,
   setAssetManifest,
   setBattleInset,
@@ -148,6 +147,7 @@ export function App() {
   const [progressBusy, setProgressBusy] = useState(true);
   const [chapterError, setChapterError] = useState("");
   const [savedRun, setSavedRun] = useState<RunCheckpoint | null>(null);
+  const [confirmDiscardRun, setConfirmDiscardRun] = useState(false);
   const [settledRun,setSettledRun]=useState("");
   const inventoryResumes = useRef(false);
   const checkpointKey = useRef("");
@@ -258,6 +258,12 @@ export function App() {
     }
   };
   const discardRun = async () => {
+    if (!confirmDiscardRun) {
+      setConfirmDiscardRun(true);
+      setTimeout(() => setConfirmDiscardRun(false), 3000);
+      return;
+    }
+    setConfirmDiscardRun(false);
     setSavedRun(null);
     checkpointKey.current = "";
     await clearCheckpoint().catch(() => {});
@@ -289,7 +295,7 @@ export function App() {
       <TestTools />
       {(appearanceStatus.loading || appearanceStatus.error) && (
         <div className="appearance-notice" role="status">
-          {appearanceStatus.error || "正在载入原版素材…"}
+          {appearanceStatus.error || "正在加载游戏资源…"}
           {appearanceStatus.error && <button onClick={() => document.dispatchEvent(new Event("retry-appearance"))}>重试</button>}
         </div>
       )}
@@ -312,8 +318,8 @@ export function App() {
       </div>
       {assetError && (
         <div className="asset-error" role="alert">
-          <h2>原版素材未加载</h2>
-          <p>请按 README 运行素材导入脚本，再刷新页面。</p>
+          <h2>游戏素材没能加载出来</h2>
+          <p>请检查网络连接，然后点「重新加载」再试一次。</p>
           <button onClick={() => location.reload()}>重新加载</button>
         </div>
       )}
@@ -375,8 +381,8 @@ export function App() {
                         try { game.applyProgress(await unlockChapter(game.mapId)); }
                         catch (error) { setChapterError(error instanceof Error ? error.message : "解锁未保存，请重试。"); }
                         finally { setProgressBusy(false); }
-                      }}>解锁正常远征 · {chapter.unlockCost} 玛法结晶</button>
-                    <p className="muted">正常通关比奇可获得3结晶。短局试玩与快速测试可直接进入本章。</p>
+                      }}>解锁标准远征 · {chapter.unlockCost} 玛法结晶</button>
+                    <p className="muted">正常通关比奇可获得 3 玛法结晶。短局试玩与快速测试可直接进入本章。</p>
                   </>}
                   {chapterError && <p className="inline-error">{chapterError}</p>}
                 </div>
@@ -396,8 +402,8 @@ export function App() {
                       <button className="primary" disabled={progressBusy} onClick={resumeRun}>
                         继续
                       </button>
-                      <button className="secondary" disabled={progressBusy} onClick={discardRun}>
-                        放弃
+                      <button className={`secondary${confirmDiscardRun ? " confirming" : ""}`} disabled={progressBusy} onClick={discardRun}>
+                        {confirmDiscardRun ? "确认放弃？" : "放弃"}
                       </button>
                     </div>
                   </div>
@@ -408,7 +414,7 @@ export function App() {
                     disabled={!ready || assetError || progressBusy || !chapterUnlocked}
                     onClick={() => start("normal")}
                   >
-                    {ready ? chapterUnlocked ? game.mapId === "biche" ? "进入荒野" : game.mapId === "mine" ? "进入矿洞" : "开始远征" : "正常远征尚未解锁" : "正在载入原版素材…"}
+                    {ready ? chapterUnlocked ? game.mapId === "biche" ? "进入荒野" : game.mapId === "mine" ? "进入矿洞" : "开始远征" : "标准远征尚未解锁" : "正在加载游戏资源…"}
                     <span>12 波 · 每波 75 秒</span>
                   </button>
                   <button
@@ -450,7 +456,7 @@ export function App() {
                     value={seed}
                     onChange={(e) => setSeed(e.target.value)}
                   />
-                  <span>相同种子可复现随机选择</span>
+                  <span>相同种子，每局内容完全一样</span>
                 </div>
               </div>
             )}
@@ -473,7 +479,7 @@ export function App() {
                 <p className="muted">
                   法师 14 项、战士 6 项、道士 13 项技能可选，单局最多装备 6
                   项。普通攻击独立于技能槽；空格可触发瞬移、冲撞或手动技能。
-                  道士可在行囊中切换红绿毒和治疗优先目标。
+                  道士可在装备面板中切换红绿毒和治疗优先目标。
                 </p>
               </div>
             )}
@@ -526,7 +532,7 @@ export function App() {
               <div className="skill-book">
                 <p className="muted">
                   {game.classInfo.name}经典技能池 · 每局最多 6 项 ·
-                  数值为幸存者玩法设计值
+                  数值已按本游戏重新调整
                 </p>
                 {SKILLS.filter((skill) => skill.classId === game.classId).map(
                   (skill) => (
@@ -784,7 +790,7 @@ export function App() {
               </button>
             </span>
             <span>
-              {game.enemies.length} 怪物 · {frameMS.toFixed(1)} ms
+              {game.enemies.length} 怪物
             </span>
           </div>
             </div>
@@ -794,7 +800,7 @@ export function App() {
               <span className="wallet">◈ {game.gold}</span>
               <span className="kills">击败 {game.kills}</span>
               <button className="potion-use" aria-label="使用储备血瓶（Q）" disabled={game.phase!=="battle" || game.player.hp>=game.maxHP || !game.potions.reserve.length || game.potions.cd>0} title="最多储备3瓶；半血自动使用，Q可提前使用；间隔2秒" onClick={()=>game.useBloodPotion()}>
-                <Icon frame="item/金创药（小）"/><span>{game.potions.cd>0 ? game.potions.cd.toFixed(1)+"s" : `Q ${game.potions.reserve.length}/3`}</span>
+                <Icon frame="item/金创药（小）"/><span>{game.potions.cd>0 ? game.potions.cd.toFixed(1)+"秒" : `Q ${game.potions.reserve.length}/3`}</span>
               </button>
               <button aria-label="查看装备与属性" onClick={toggleInventory}>
                 {!isGraybox && <img src={assetUrl("ui/character.png")} alt="" />}<span>装备</span>
@@ -827,7 +833,7 @@ export function App() {
             <h2 id="upgrade-title">
               修行精进 <small>Lv.{game.level}</small>
             </h2>
-            <p className="muted">选择一项强化。技能最高6级，重点培养两个主力；6级终阶第6波开放。</p>
+            <p className="muted">选择一项强化。技能最高 6 级，第 6 波起才能升到 6 级；建议重点培养两个主力技能。</p>
             {game.training.waveExp>0 && <p className="training-reward">本波修炼获得 {game.training.waveExp}经验</p>}
             <label className="upgrade-focus">关注技能 <select aria-label="升级关注技能" value={game.skillFocus??""} onChange={e=>game.setSkillFocus((e.target.value||null) as SkillId|null)}>
               <option value="">不关注</option>{game.skills.filter(s=>s.rank<6).map(s=><option key={s.id} value={s.id}>{getSkill(s.id).name} Lv.{s.rank}</option>)}
@@ -1074,7 +1080,7 @@ export function App() {
             <div className="stat-grid">
               {[
                 ["最大生命", Math.ceil(game.maxHP)],
-                ["移动速度", Math.round(game.moveSpeed) + " px/s"],
+                ["移动速度", Math.round(game.moveSpeed)],
                 ["攻击", `${game.stats.dc_min ?? 0}–${game.stats.dc_max ?? 0}`],
                 [
                   "魔法",
@@ -1089,11 +1095,11 @@ export function App() {
                   "魔御",
                   `${(game.stats.mdef_min ?? 0) + (game.stats.mdef_flat ?? 0)}–${(game.stats.mdef_max ?? 0) + (game.stats.mdef_flat ?? 0)}`,
                 ],
-                ["准确", game.stats.accuracy ?? 90],
+                ["准确", (game.stats.accuracy ?? 90) + "%"],
                 ["幸运", game.stats.luck ?? 0],
                 ["冷却缩减", (game.stats.cooldown_reduction ?? 0) + "%"],
-                ["拾取半径", Math.round(game.pickupRadius) + " px"],
-                ["侦测距离", Math.round(game.detectionRange) + " px"],
+                ["拾取半径", Math.round(game.pickupRadius)],
+                ["侦测距离", Math.round(game.detectionRange)],
                 [
                   game.classId === "warrior" ? "物理伤害" : game.classId === "taoist" ? "道术伤害" : "魔法伤害",
                   "+" +
@@ -1105,7 +1111,7 @@ export function App() {
                     ] ?? 0) +
                     "%",
                 ],
-                ["生命回复", (game.stats.hp_regen ?? 0) + "/s"],
+                ["生命回复", "每秒 " + (game.stats.hp_regen ?? 0) + " 点"],
                 ["击杀回复", (game.stats.hp_on_kill ?? 0) + " 点/次"],
                 ["生命偷取", (game.stats.lifesteal ?? 0) + "% · 法术按1/3"],
               ].map(([n, v]) => (
@@ -1166,7 +1172,7 @@ export function App() {
               )}
             </div>
             <p className="muted fine-print">
-              装备数值为本游戏设计值；穿脱装备会完整重算属性。全局 CD 缩减
+              装备数值为本游戏设计值；穿脱装备会完整重算属性。全局冷却缩减
               ≤40%，移速加成 ≤35%，拾取加成 ≤150%。
             </p>
           </section>
