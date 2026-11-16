@@ -11,6 +11,7 @@ import {sounds} from './sound';
 import {EvolutionBook} from './EvolutionBook';
 import {AudioSettings} from './AudioSettings';
 import {SURVIVAL_OPEN_MAP_TEST,CHARMS,EVOLUTIONS,survivalChoices,survivalStarter,BUILD_GUIDES} from './survivor';
+import {releaseVersion,repositoryUrl} from './release';
 import {ShareCardButton} from './ShareCard';
 import './survivor.css';
 import {readSurvivalSave,SURVIVOR_SAVE_KEY,type SurvivorSave} from './survivor-save';
@@ -34,7 +35,7 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
  const recentEvolution=game.survival.evolved.at(-1);
  const selectingEvolution=game.phase==='upgrade'&&game.choices.some(c=>c.id.startsWith('evo:'));
  return <div className="survivor-ui">{error&&<p className="survivor-error" role="alert">{error}</p>}{game.phase==='lobby'?<section className="survivor-panel survivor-lobby">
- <p className="survivor-eyebrow">连续生存 · 开发版</p><h1>玛法幸存者</h1><p className="survivor-subtitle">生存 20 分钟 · 击败最终首领</p>
+ <p className="survivor-eyebrow">连续生存 · {releaseVersion}</p><h1>玛法幸存者</h1><p className="survivor-subtitle">生存 20 分钟 · 击败最终首领</p>
  <div className="survivor-tabs" aria-label="选择职业">{CLASS_IDS.map(id=><button key={id} aria-pressed={role===id} onClick={()=>setRole(id)}>{CLASSES[id].name}</button>)}</div>
  <p className="survivor-starter">初始技能 · {getSkill(survivalStarter(role)).name}</p>
  <fieldset className="survivor-map-picker"><legend>选择章节</legend><div>{CHAPTER_PATH.map(id=><button key={id} aria-pressed={map===id} disabled={!SURVIVAL_OPEN_MAP_TEST&&!chapterUnlocked(progress,id)} onClick={()=>setMap(id)}>{MAPS[id].name}</button>)}</div></fieldset>
@@ -44,7 +45,7 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
  <p className="survivor-hint">拖动移动 · 自动攻击 · 自动存档</p>
  <details className="survivor-more"><summary>玩法与图鉴</summary><p>{BUILD_GUIDES[role].text}</p><p>最多携带6个技能与6个被动。技能升至8级，搭配被动与精英宝箱完成进化。</p><SurvivorGrowthBook classId={role}/><p>电脑使用 WASD／方向键移动，Q 使用血瓶。</p></details>
  <details className="survivor-more"><summary>章节与战绩</summary>{CHAPTER_PATH.map(id=>{const r=chapterRequirement(id);return <p key={id}>{MAPS[id].name} · {progress.won.includes(id)?'已通关':(SURVIVAL_OPEN_MAP_TEST||chapterUnlocked(progress,id))?`最佳 ${clock(progress.best[id]??0)}`:`需${MAPS[r!.map].name}生存${r!.seconds/60}分钟`}</p>;})}{readSurvivorRecords(localStorage).slice(0,5).map(r=><p key={r.runId}>{CLASSES[r.classId].name} · {MAPS[r.mapId].name} · {clock(r.seconds)} · {r.won?'生还':'倒下'}</p>)}</details>
- <ShareCardButton/><a className="survivor-legacy" href="?">返回原版</a>
+ <ShareCardButton/><a className="survivor-legacy" href={repositoryUrl} target="_blank" rel="noreferrer">GitHub 源码</a><a className="survivor-legacy" href="?">返回原版</a>
  </section>:<>
  {game.phase==='battle'&&<SurvivorHud/>}
  {game.phase==='battle'&&<><SurvivorJoystick/><div className="survivor-controls"><div>{game.survival.chests.length>0&&<p>宝箱 {game.survival.chests.length} · 靠近拾取</p>}{game.skills.some(s=>s.id==='teleport')&&<button onClick={()=>game.useManualSkill()}>瞬息移动</button>}<button aria-label={`使用血瓶，剩余${game.potions.reserve.length}瓶`} disabled={!game.potions.reserve.length} onClick={()=>game.useBloodPotion()}>血瓶 ×{game.potions.reserve.length}</button></div></div></>}

@@ -335,7 +335,7 @@ export function App() {
             <h1>
               玛法<span>幸存者</span>
             </h1>
-            <p className="tagline">故地重临，一人生还。</p>
+            <p className="tagline">故地重临，一人生还。</p><a href="?survivor" className="survivor-entry-link">试玩新版 · 连续生存模式 →</a>
             <nav className="lobby-tabs" aria-label="主菜单">
               {(["play", "guide", "talents", "records", "skills"] as const).map((t, i) => (
                 <button
