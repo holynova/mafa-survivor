@@ -50,3 +50,17 @@ npm run deploy
 - 额外请求旧项目 `/origami-studio/` 遇网络超时，未记为页面回归通过；已通过JSON完整比较确认旧条目和链接没有变更。
 
 职业／章节平衡仍有alpha.35的已知限制，本次不宣称修复通关平衡。旧Pages沿用原已发布版本作回退，不表示与Cloudflare的alpha.36同步。
+
+
+## alpha.38 发布核验（2026-11-16）
+
+- 新版入口：https://xiaosang.cc/mafa-survivor/?survivor；原版入口 https://xiaosang.cc/mafa-survivor/ 保留。
+- 应用版本 v0.1.0-alpha.38，构建源码 main `6b0ef5a9d2f6139427256bb1c3e7e42af88a5c9f`；文档后续提交不改变产物来源。
+- 游戏及作品集更新提交 `f2f7bbf55fab4a945e4f552ab8571b2affcd8d07`；发布前合入其他项目的最新更新，实际发布作品集 master 快照 `0196a82e241b6ce5a2dc3d3749f6c98d4d29aba7`，使用干净 detached worktree。
+- 共享 Worker `xiaosang-portfolio` 手动部署成功，Cloudflare version ID `2e0300a7-e7c9-4458-a616-1e59a2398a92`。游戏与作品集共用此部署，不另建 Worker。
+- 共享图库保留版本 1.0.2 / `ee4df09520706aac342e9324356858ab15d9a825`，3666 originals、11898 media 文件；本地缺少的 _headers 从同提交源文件恢复到独立 staging，未修改图库源目录。线上 release.json 与发布前一致。
+- 发布前 80 文件 / 772 测试通过；资源、音效、类型检查、生产构建、README/版本校验、作品集数据校验及 Wrangler dry-run 通过。旧 Pages 沿用原版本作为回退，未触发标签部署。
+- HTTPS 线上 version.json 的版本、SHA、original 模式核对通过；分享截图、半月技能图标请求成功。390×844 真实浏览器进入战士战斗，人物/地面/底部 HUD 截图已查看；页面宽度390，无横向溢出，生产版无 __MAFA__ 调试对象。
+- 线上暂停、保存退出、原版主菜单与新版跳转入口已检查。分享 PNG 成功下载并查看，1080×1380，二维码经 Vision 解码为新版完整 URL。
+- GitHub Homepage 回读为新版 URL；作品集线上 JSON 的简介、截图和 Demo URL 已更新，卡片图片已加载（naturalWidth1440），Repo/Demo 目标正确。GitHub Profile 本次不在范围。
+- alpha 阶段平衡限制仍见 SURVIVOR-PACING-REVIEW.md；本次短时浏览器验收不代表全地图真人通关或性能压力测试。
