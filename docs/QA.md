@@ -769,3 +769,10 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 实际鼠标指针拖动摇杆：角色x=1104→1181，头部偏移30px；松手归零，拖动中暂停后输入归零且摇杆卸载。选择火球1→2后回战斗，结算展开伤害与返回开局均已验证。
 - 已检查`.artifacts/ui-finish-joystick.png`、`ui-finish-upgrade-landscape.png`、`ui-finish-result-mobile.png`、`ui-finish-result-landscape.png`；结算使用测试数据，不向普通战绩或章节进度发奖励。横屏第一版退出按钮超出首屏，改双列后重拍通过。
 - 全量740项中739项通过，一项旧save-backup测试超出5000ms（实际6637ms）；随即单独重跑该文件28项全部通过，未放宽超时或跳过断言。新增2项摇杆向量测试通过。素材检查、构建通过，仍有既存大包提示。真机多点触控尚未验收。
+
+### 移动端中断与满槽排版（2026-11-16）
+- 原渲染器已支持失焦／切后台暂停。本次补统一新版pagehide与orientationchange处理：清除键盘／战场拖动／摇杆输入后暂停并保存；重复事件不会切回战斗，待选卡不关闭、不重抽。恢复仍由用户继续。
+- 320×640满槽道士构筑（6技能、3进化、6被动）长名称无横向溢出，截图`.artifacts/lifecycle-full-build-320.png`已查看。错误条限定高度和宽度，避免长错误占满整屏。
+- 实际指针拖摇杆中派发orientationchange，phase=paused且input/touchInput全零；这是浏览器事件注入验证，未声称真机旋屏。
+- 待选阶段派发orientationchange和pagehide后，存档及实际刷新续局均保持s:fireball／s:ice／s:repulse，phase=upgrade。截图`.artifacts/lifecycle-resumed-choice.png`已查看；结束后通过界面放弃本次验证局返回开局。
+- 743项／76文件测试通过（maxWorkers=4，减少上轮并发超时影响），素材检查和构建通过，已有大包警告保留。真机后台回收、旋屏与多点触摸仍待实机验收。

@@ -1,3 +1,4 @@
+import {suspendSurvival} from './survivor-lifecycle';
 import {SurvivorJoystick} from './SurvivorJoystick';
 import {SurvivorGrowthBook} from './SurvivorGrowthBook';
 import {useEffect,useReducer,useState} from 'react';
@@ -19,9 +20,11 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
  const persist=()=>{try{const cp=game.snapshotSurvival();if(cp){setProgress(updateSurvivorProgress(game,localStorage));localStorage.setItem(SURVIVOR_SAVE_KEY,JSON.stringify(cp));setSaved(cp);setError(e=>e.startsWith('存档未保存')?'':e);return true;}return false;}catch{setError('存档未保存：本机存储不可用或已满，请勿刷新。');return false;}};
  const discard=()=>{try{localStorage.removeItem(SURVIVOR_SAVE_KEY);setSaved(null);return true;}catch{setError('无法清除本机存档，请检查浏览器存储。');return false;}};
  useEffect(()=>{let phase=game.phase;const unsub=game.subscribe(()=>{if(game.result&&game.mode==='normal')try{setProgress(updateSurvivorProgress(game,localStorage));recordSurvival(game,localStorage);localStorage.removeItem(SURVIVOR_SAVE_KEY);setSaved(null);}catch{setError('本机存储不可用，本局战绩未保存。');}else if(game.phase!==phase)persist();phase=game.phase;update();});
- const timer=window.setInterval(persist,5000);const saveHidden=()=>{if(document.hidden)persist();};
- window.addEventListener('pagehide',persist);document.addEventListener('visibilitychange',saveHidden);
- const onReady=()=>setReady(true);const onError=()=>setError('原版素材加载失败，请刷新重试。');readyListeners.add(onReady);document.addEventListener('asset-error',onError);setBattleInset(0);return()=>{unsub();clearInterval(timer);window.removeEventListener('pagehide',persist);document.removeEventListener('visibilitychange',saveHidden);readyListeners.delete(onReady);document.removeEventListener('asset-error',onError);};},[]);
+ const timer=window.setInterval(persist,5000);
+ const suspend=()=>{suspendSurvival(game);document.dispatchEvent(new Event('clear-game-input'));persist();};
+ const saveHidden=()=>{if(document.hidden)suspend();};
+ window.addEventListener('pagehide',suspend);window.addEventListener('orientationchange',suspend);screen.orientation?.addEventListener('change',suspend);document.addEventListener('visibilitychange',saveHidden);
+ const onReady=()=>setReady(true);const onError=()=>setError('原版素材加载失败，请刷新重试。');readyListeners.add(onReady);document.addEventListener('asset-error',onError);setBattleInset(0);return()=>{unsub();clearInterval(timer);window.removeEventListener('pagehide',suspend);window.removeEventListener('orientationchange',suspend);screen.orientation?.removeEventListener('change',suspend);document.removeEventListener('visibilitychange',saveHidden);readyListeners.delete(onReady);document.removeEventListener('asset-error',onError);};},[]);
  const start=()=>{if(!chapterUnlocked(progress,map)){setError('请先完成前置章节的生存目标。');return;}if(!discard())return;setError('');void sounds.unlock();game.survivorMode=true;game.unlockedMaps.add(map);game.start('normal',Date.now()>>>0,role,false,map);};
  const resume=()=>{if(!saved)return;setRole(saved.state.classId);setMap(saved.state.mapId);setError('');void sounds.unlock();if(!game.resumeSurvival(saved))setError('存档无法读取，请另开新局。');};
  const leave=()=>{try{setProgress(updateSurvivorProgress(game,localStorage));}catch{setError('章节进度未保存，请检查浏览器存储后重试。');return;}if(!discard())return;game.touchInput={x:0,y:0};game.phase='lobby';game.emit();};
