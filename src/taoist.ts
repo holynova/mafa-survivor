@@ -419,7 +419,7 @@ export function updateTaoist(g: Game) {
       poison.until >= g.clock - 1e-8 &&
       poison.tickAt <= g.clock + 1e-8
     ) {
-      g.hit(e, poison.damage, "poison");
+      g.hit(e, poison.damage, poison.origin??"poison");
       poison.tickAt += 1;
     }
     if (poison && poison.until < g.clock - 1e-8) delete e.greenPoison;

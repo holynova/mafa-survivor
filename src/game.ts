@@ -102,7 +102,7 @@ export type Enemy = Entity & {
   agility?: number;
   defense?: number;
   magicDefense?: number;
-  greenPoison?: { until: number; tickAt: number; damage: number };
+  greenPoison?: { until: number; tickAt: number; damage: number; origin?: 'evolution:poison' };
   redPoison?: { until: number; reduction: number };
   trapUntil?: number;
   revealUntil?: number;
@@ -191,6 +191,7 @@ export type Fx = Entity & {
   width?: number;
   spread?: number;
   aimAngle?: number;
+  alpha?: number;
 };
 export type Floating = Entity & { text: string; color: string; life: number };
 export type Skill = {
@@ -740,6 +741,7 @@ export class Game {
       this.input = { x: 0, y: 0 };
       this.emit();
     } else if (this.phase === "paused") {
+      if(this.survivorMode)this.survival.toast="";
       this.phase = this.previous;
       this.emit();
     }
@@ -1889,7 +1891,7 @@ export class Game {
       didCast = this.teleport(s);
     } else if (s.id === "shield") {
       this.player.shieldUntil =
-        this.clock + Math.min(7, 6 * (1 + s.duration / 100));
+        this.clock + Math.min(this.survivorMode?9:7, 6 * (1 + s.duration / 100));
     } else if (s.id === "fireball" || s.id === "bigfireball") {
       for (const e of targets.slice(0, Math.min(3, 1 + s.count))) {
         const dx = e.x - this.player.x,

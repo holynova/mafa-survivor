@@ -475,6 +475,7 @@ class BattleScene extends Phaser.Scene {
     scale = 1,
     frameRate = 10,
     rotation = 0,
+    alpha = 1,
   ) {
     if (isGraybox) {
       this.bars
@@ -490,7 +491,7 @@ class BattleScene extends Phaser.Scene {
         x,
         y,
         depth,
-        1,
+        alpha,
         scale,
       );
       if(rotation) {
@@ -796,7 +797,7 @@ class BattleScene extends Phaser.Scene {
             sprite.scale??(["explosion", "ice", "nova", "repulse"].includes(f.kind)
               ? Math.max(0.8, f.radius / 120)
               : 1),
-            sprite.frameRate,sprite.rotation,
+            sprite.frameRate,sprite.rotation,f.alpha,
           ));
         }
       }
