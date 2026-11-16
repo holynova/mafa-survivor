@@ -1,3 +1,4 @@
+import {survivorExpNeeded} from './survivor-pacing';
 import {snapshotSurvival,parseSurvivalSave} from './survivor-save';
 import {survivalBonuses,survivalGrowth,tuneSurvivalEnemy,newSurvival,survivalStarter,survivalTick,survivalChoices,chooseSurvival,survivalDeath,survivalSplash} from "./survivor";
 import {
@@ -456,6 +457,7 @@ export class Game {
   get moveSpeed() {
     return this.classInfo.speed * (1 + (this.stats.move_speed ?? 0) / 100);
   }
+  get experienceRequired() {return this.survivorMode?survivorExpNeeded(this.level):expNeeded(this.level);}
   get pickupRadius() {
     return 70 * (1 + (this.stats.pickup_radius ?? 0) / 100);
   }
@@ -1085,7 +1087,7 @@ export class Game {
       }
     }
     this.enemies = this.enemies.filter((x) => x.hp > 0);
-    if (this.exp >= expNeeded(this.level)) {
+    if (this.exp >= this.experienceRequired) {
       this.beginUpgrade();
       return;
     }
@@ -2224,7 +2226,7 @@ export class Game {
     if (this.player.hp === 0) this.finish(false);
   }
   beginUpgrade() {
-    this.exp -= expNeeded(this.level);
+    this.exp -= this.experienceRequired;
     this.level++;
     this.choices = this.makeChoices();
     this.phase = "upgrade";
@@ -2374,7 +2376,7 @@ export class Game {
     this.recompute();
     this.choices = [];
     this.phase = "battle";
-    if (this.exp >= expNeeded(this.level)) this.beginUpgrade();
+    if (this.exp >= this.experienceRequired) this.beginUpgrade();
     else this.emit();
   }
   replaceSkill(index: number | null) {
@@ -2402,7 +2404,7 @@ export class Game {
     this.recompute();
     this.phase = fromBook ? "shop" : "battle";
     if(fromBook){this.emit();return true;}
-    if (this.exp >= expNeeded(this.level)) this.beginUpgrade();
+    if (this.exp >= this.experienceRequired) this.beginUpgrade();
     else this.emit();
     return true;
   }
@@ -2431,7 +2433,7 @@ export class Game {
     this.enemies = [];
     this.projectiles = [];
     this.effects = [];
-    if (this.exp >= expNeeded(this.level)) {
+    if (this.exp >= this.experienceRequired) {
       this.beginUpgrade();
       return;
     }

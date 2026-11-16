@@ -19,7 +19,8 @@ try{
  else if(g.phase==='paused'){firstEvo??=g.clock;g.pause();}
  else {if(steps%5===0)move=simulationInput(g,move);g.input=move;g.step(.05);if(process.argv.includes('--check-save')&&steps%1200===0&&g.phase==='battle'){const begin=performance.now();const cp=g.snapshotSurvival();maxSaveMS=Math.max(maxSaveMS,performance.now()-begin);maxSaveCharacters=Math.max(maxSaveCharacters,JSON.stringify(cp).length);saveChecks++;}}
  }
- reports.push({mapId,seed,classId,damageTaken:g.damageTaken,checkpoints,saveChecks,maxSaveCharacters,maxSaveMS,phase:g.phase,seconds:Math.round(g.clock),level:g.level,kills:g.kills,firstUpgrade,firstEvo,skills:g.skills.map(s=>({id:s.id,rank:s.rank})),evolved:g.survival.evolved,evolutionDamage:Object.fromEntries(Object.entries(g.damageDealt).filter(([id])=>id.startsWith('evolution:')))});console.log(JSON.stringify(reports.at(-1)));
+ const finalBoss=g.enemies.find(e=>e.id===g.survival.finalBossId);
+ reports.push({finalBoss:finalBoss?{kind:finalBoss.kind,hp:finalBoss.hp,maxHp:finalBoss.maxHp,distance:Math.hypot(finalBoss.x-g.player.x,finalBoss.y-g.player.y),lineClear:g.attackLineClear(g.player,finalBoss)}:null,mapId,seed,classId,damageTaken:g.damageTaken,checkpoints,saveChecks,maxSaveCharacters,maxSaveMS,phase:g.phase,seconds:Math.round(g.clock),level:g.level,kills:g.kills,firstUpgrade,firstEvo,skills:g.skills.map(s=>({id:s.id,rank:s.rank})),evolved:g.survival.evolved,evolutionDamage:Object.fromEntries(Object.entries(g.damageDealt).filter(([id])=>id.startsWith('evolution:')))});console.log(JSON.stringify(reports.at(-1)));
  }
  await fs.writeFile(process.argv.find(a=>a.startsWith('--out='))?.slice(6)??'.artifacts/survival-simulation.json',JSON.stringify({note:'Legacy kiting bot, not human win-rate; no direct teleport/chest-seeking.',focusEvolutions:process.argv.includes('--focus-evolutions'),reports},null,2));
 }finally{await server.close();}
