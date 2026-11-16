@@ -785,3 +785,10 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 浏览器390×844查看`.artifacts/director-zuma-start.png`与`director-zuma-roster.png`，原地面、柱体、卫士／雕像／弓手完整；混合怪群为测试模式布置位置，出生类型由实际director选择。D键1080→1131.25复测成功。最初两次被视口旋转后的自动暂停中断，稳定视口再继续后通过。
 - 749项／77文件测试、素材检查、构建通过；新增预算、补位、怪物多样性、独立精英触发、召唤数值测试。修正测试夹具访问私有spawned的写法后，6项目标回归重跑通过；未修改运行时私有字段可见性。
 - 扩展十地图×三职业×两种子共60局，59局生还，1187次快照校验通过；法师20/20、战士20/20、道士19/20。失败样本：mengzhong taoist 种子176 695秒。固定策略机器人，不能作为最终玩家难度结论。完整报告在`.artifacts/survival-director-simulation.json`。
+
+### 2026-11-16：全地图测试入口与原版技能 HUD
+- 新生存模式 10 张地图暂时全部开放，不修改历史章节解锁记录；浏览器确认 10 个选项可选，并实际进入赤月山谷。
+- 顶部使用已登记原版 board/chat/hp 素材；32 个技能按钮从固定源逐字节导入，心灵启示缺源保留“启”字并登记，不冒用其他图标。HUD 显示实际冷却遮罩/倒计时，升级卡显示对应技能图标。
+- 390×844、320×640 截图已查看，六技能布局无横向溢出；冷却从正数归零，点击技能打开暂停构筑。截图：.artifacts/classic-hud-mobile.png、classic-hud-six.png、classic-hud-320.png、classic-choice-mobile.png。
+- npm test -- --maxWorkers=4：77 文件、749 测试通过；assets:check 通过；uv run --with pillow python tools/check-visual-assets.py：0 failures；生产构建通过（保留现有大包提示）。
+- 仅改造分支与本地开发版；未更新生产原版。
