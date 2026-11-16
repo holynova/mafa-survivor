@@ -3,7 +3,7 @@ import {EVOLUTIONS,eligibleEvolutions,evolveSkill} from './survivor-evolutions';
 export {EVOLUTIONS,survivalSplash,evolutionReadiness} from './survivor-evolutions';
 import {CLASSES,type ClassId} from './classes';
 import type {Game,Enemy,Skill,Upgrade} from './game';
-import {getSkill,SKILLS,MAPS,NATIVE_ELITES,CHAPTER_PRESSURE,type StatKey} from './content';
+import {getSkill,SKILLS,MAPS,NATIVE_ELITES,CHAPTER_PRESSURE,EXPANSION_RANGED,isBossKind,type StatKey} from './content';
 import type {SkillId} from './spells';
 import {canonicalBonuses,SKILL_GROWTH} from './skill-growth';
 export const SURVIVAL_SECONDS=1200;
@@ -47,9 +47,20 @@ export function tuneSurvivalEnemy(g:Game,e:Enemy,tier:'normal'|'elite'|'boss'){
  e.defense=(e.defense??0)/pressure;e.magicDefense=(e.magicDefense??0)/pressure;
  if(tier==='normal')e.exp=Math.max(2,Math.round(e.exp*2/Math.sqrt(pressure)));
 }
+const rangedKinds=new Set(['spider','skeletonArcher','flameWoma','zumaArcher',...EXPANSION_RANGED]);
+export const survivalRangedBudget=(seconds:number)=>Math.min(24,6+Math.floor(Math.max(0,seconds)/60));
+/** More melee early; ranged units cannot accumulate into an unbounded firing line. */
+export function survivalSpawnKind(g:Game){
+ const ordinary=MAPS[g.mapId].monsterPool.filter(id=>!isBossKind(id)&&!NATIVE_ELITES.includes(id));
+ const rangedCount=g.enemies.filter(e=>e.hp>0&&e.ranged).length;
+ const allowed=ordinary.filter(id=>!rangedKinds.has(id)||rangedCount<survivalRangedBudget(g.clock));
+ const pool=allowed.length?allowed:ordinary;
+ const meleeWeight=g.clock<300?4:2;
+ return g.rng.pick(pool.flatMap(id=>Array(rangedKinds.has(id)?1:meleeWeight).fill(id) as string[]));
+}
 export function survivalTick(g:Game){const state=g.survival;g.wave=Math.min(12,1+Math.floor(g.clock/100));
  if(g.clock>=SURVIVAL_SECONDS){g.finish(true);return;}
- if(g.clock>=state.spawnAt&&g.enemies.length<220){const e=g.spawnEnemy();tuneSurvivalEnemy(g,e,'normal');state.spawnAt=g.clock+Math.max(.14,1.1-g.clock/1200);}
+ if(g.clock>=state.spawnAt&&g.enemies.length<220){const e=g.spawnEnemy(survivalSpawnKind(g));tuneSurvivalEnemy(g,e,'normal');state.spawnAt=g.clock+Math.max(.14,1.1-g.clock/1200);}
  if(g.clock>=state.eliteAt&&g.enemies.length<240){const native=MAPS[g.mapId].monsterPool.filter(id=>NATIVE_ELITES.includes(id));const e=g.spawnEnemy(native.length?g.rng.pick(native):undefined);if(!e.elite){e.elite=true;e.hp=e.maxHp=e.maxHp*4;}tuneSurvivalEnemy(g,e,'elite');e.exp*=3;state.eliteAt=g.clock+120;}
  if(g.clock>=state.bossAt&&g.enemies.length<240){const boss=g.spawnEnemy(MAPS[g.mapId].boss);tuneSurvivalEnemy(g,boss,'boss');state.bossAt=g.clock+300;}
  for(const c of [...state.chests])if(Math.hypot(g.player.x-c.x,g.player.y-c.y)<55){state.chests=state.chests.filter(x=>x.id!==c.id);const candidates=eligibleEvolutions(g);

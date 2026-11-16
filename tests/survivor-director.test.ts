@@ -1,0 +1,12 @@
+import {describe,it,expect} from 'vitest';
+import {Game} from '../src/game';
+import {survivalSpawnKind,survivalRangedBudget,tuneSurvivalEnemy,survivalTick} from '../src/survivor';
+const run=()=>{const g=new Game();g.survivorMode=true;g.unlockedMaps.add('zuma');g.start('normal',176,'warrior',false,'zuma');return g;};
+describe('survival ranged pressure',()=>{
+ it('limits ordinary ranged population while still filling the wave with native melee',()=>{const g=run();for(let i=0;i<6;i++)g.spawnEnemy('zumaArcher');const kinds=new Set<string>();for(let i=0;i<100;i++)kinds.add(survivalSpawnKind(g));expect(kinds).toEqual(new Set(['zumaGuard','zumaStatue']));});
+ it('reopens a ranged slot after an archer dies and grows the budget gradually',()=>{const g=run();for(let i=0;i<6;i++)g.spawnEnemy('zumaArcher');g.enemies[0].hp=0;expect(Array.from({length:100},()=>survivalSpawnKind(g))).toContain('zumaArcher');expect([0,120,600,1200].map(survivalRangedBudget)).toEqual([6,8,16,24]);});
+ it('keeps all three original Zuma types available and makes archers a minority early',()=>{const g=run();const samples=Array.from({length:900},()=>survivalSpawnKind(g));expect(new Set(samples)).toEqual(new Set(['zumaArcher','zumaGuard','zumaStatue']));expect(samples.filter(id=>id==='zumaArcher').length).toBeLessThan(180);});
+ it('does not reintroduce old wave-based elite triggers into ordinary survival spawns',()=>{const g=run();g.wave=4;Reflect.set(g,'spawned',Math.floor(g.spawnBudget/2));expect(g.spawnEnemy('zumaGuard').elite).toBe(false);const old=new Game();old.start('normal');old.wave=4;Reflect.set(old,'spawned',Math.floor(old.spawnBudget/2));expect(old.spawnEnemy('orc').elite).toBe(true);});
+ it('still spawns the scheduled elite and boss even when ranged slots are full',()=>{const g=run();for(let i=0;i<30;i++)g.spawnEnemy('zumaArcher');g.clock=300;survivalTick(g);expect(g.enemies.some(e=>e.elite)).toBe(true);expect(g.enemies.some(e=>e.kind==='zumaLord')).toBe(true);});
+});
+it('boss adds use the same chapter scaling as normal enemies without double scaling or changing original mode',()=>{const g=run();g.wave=8;const normal=g.spawnEnemy('zumaGuard');tuneSurvivalEnemy(g,normal,'normal');const add=g.spawnEnemy('zumaGuard',true);expect(add.hp).toBe(normal.hp);expect(add.damage).toBe(normal.damage);expect(add.defense).toBe(normal.defense);const old=new Game();old.start('normal');old.wave=8;expect(old.spawnEnemy('zumaGuard',true).hp).toBeGreaterThan(add.hp);});

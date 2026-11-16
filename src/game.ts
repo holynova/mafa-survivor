@@ -1,5 +1,5 @@
 import {snapshotSurvival,parseSurvivalSave} from './survivor-save';
-import {survivalBonuses,survivalGrowth,newSurvival,survivalStarter,survivalTick,survivalChoices,chooseSurvival,survivalDeath,survivalSplash} from "./survivor";
+import {survivalBonuses,survivalGrowth,tuneSurvivalEnemy,newSurvival,survivalStarter,survivalTick,survivalChoices,chooseSurvival,survivalDeath,survivalSplash} from "./survivor";
 import {
   ITEMS,
   MONSTERS,
@@ -1104,7 +1104,7 @@ export class Game {
   }
   spawnEnemy(kind?: string, summoned = false) {
     const eliteWave=this.mode==="trial" ? this.wave===2 : [4,7,10,12].includes(this.wave);
-    const scheduledElite = eliteWave && this.spawned === Math.floor(this.spawnBudget/2);
+    const scheduledElite = !this.survivorMode && eliteWave && this.spawned === Math.floor(this.spawnBudget/2);
     if (!kind && scheduledElite) {
       const native=MAPS[this.mapId].monsterPool.filter(id=>NATIVE_ELITES.includes(id));
       if(native.length)kind=native.length===1 ? native[0] : this.rng.pick(native);
@@ -1169,7 +1169,9 @@ export class Game {
             }
           : {}),
     });
-    return this.enemies.at(-1)!;
+    const spawned=this.enemies.at(-1)!;
+    if(this.survivorMode&&summoned)tuneSurvivalEnemy(this,spawned,isBossKind(spawned.kind)?"boss":spawned.elite?"elite":"normal");
+    return spawned;
   }
   private summonBossMinion(boss: Enemy) {
     for(let i=0;i<2 && this.enemies.length<300;i++) {
