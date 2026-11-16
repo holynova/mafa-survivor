@@ -1,8 +1,11 @@
+import {CLASSES,type ClassId} from './classes';
 import type {Game,Enemy,Skill,Upgrade} from './game';
 import {getSkill,SKILLS,MAPS,NATIVE_ELITES,CHAPTER_PRESSURE,type StatKey} from './content';
 import type {SkillId} from './spells';
 import {canonicalBonuses,SKILL_GROWTH, type GrowthStep} from './skill-growth';
 export const SURVIVAL_SECONDS=1200;
+export const survivalStarter=(id:ClassId)=>id==='warrior'?'cleave':CLASSES[id].startingSkill;
+export const BUILD_GUIDES={wizard:{main:['fireball','lightning'],text:'火球清怪，雷电补足精英伤害；优先火焰戒指与广域护符。'},warrior:{main:['cleave','firesword'],text:'先强化半月清出空间，再用烈火击破精英；搭配广域护符与锋锐戒指。'},taoist:{main:['talisman','beast'],text:'火符负责前期，神兽形成双核；灵魂项链同时满足两条进化配方。'}} as const;
 export const CHARMS=[
  {id:'flame',name:'火焰戒指',stat:'mc_bonus_pct',value:8},
  {id:'edge',name:'锋锐戒指',stat:'dc_bonus_pct',value:8},

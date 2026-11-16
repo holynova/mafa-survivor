@@ -1,5 +1,5 @@
 import {snapshotSurvival,parseSurvivalSave} from './survivor-save';
-import {newSurvival,survivalTick,survivalChoices,chooseSurvival,survivalDeath,survivalSplash} from "./survivor";
+import {newSurvival,survivalStarter,survivalTick,survivalChoices,chooseSurvival,survivalDeath,survivalSplash} from "./survivor";
 import {
   ITEMS,
   MONSTERS,
@@ -510,7 +510,7 @@ export class Game {
       attackUntil: 0,
       attackDir: 4,
     };
-    this.skills = [this.newSkill(this.classInfo.startingSkill)];
+    this.skills = [this.newSkill(this.survivorMode?survivalStarter(this.classId):this.classInfo.startingSkill)];
     this.basicCD = 0;
     this.charges = {};
     this.tao = createTaoState();
