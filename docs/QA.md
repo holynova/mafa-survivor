@@ -755,3 +755,10 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - `.artifacts/survival-growth-book.png`、`survival-four-fireballs.png`、`survival-four-summons.png`、`original-loader-regression.png`均已查看；手机视口390×844，测试布置的技能场景不是自然整局实录。
 - 新测试页首次出现mir-6／mir-7图片XHR status=0失败；本地PNG CRC、解压、浏览器fetch/createImageBitmap/原生Image均正常。Phaser loader改为HTMLImageElement后新旧入口都正常加载；不是素材源更换。
 - 十地图三职业固定种子176模拟26/30生还，祖玛／赤月战士与祖玛／盟重道士失败待平衡；结果`.artifacts/survival-growth-simulation.json`。未测真机，不报告真机FPS。
+
+### 连续生存 UI 精简（2026-11-16）
+- 开局页保留职业、初始技能、章节目标及主操作；玩法／图鉴、章节／战绩折叠。移除常驻开发说明条和原型链接。
+- 战斗HUD只保留等级、时间、经验、生命与暂停；390px宽实测高度92.5px。技能／被动／击杀改在暂停查看，移除空槽与地图重复文字；无血瓶时使用按钮禁用。
+- 暂停页用双列技能摘要，属性、成长进化和音效折叠；保存退出为次要按钮，放弃先展开明确后果再确认。升级卡保留名称、等级与真实增量，配方长文移到图鉴。结算伤害表折叠。
+- 390×844手机开局／战斗／暂停、320×640升级卡、1280×800桌面已截图查看：`.artifacts/ui-simple-*.png`。没有新增横向溢出；主要操作在首屏。浏览器完成职业选择→开局→暂停→保存退出→续局，图鉴切换半月、声音设置4个开关可访问，7→8级选择成功并回到战斗。
+- 738项测试、素材检查、构建通过。仅改变新版UI；原版入口与战斗规则不变。新增版仍未部署到线上。
