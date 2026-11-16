@@ -792,3 +792,11 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 390×844、320×640 截图已查看，六技能布局无横向溢出；冷却从正数归零，点击技能打开暂停构筑。截图：.artifacts/classic-hud-mobile.png、classic-hud-six.png、classic-hud-320.png、classic-choice-mobile.png。
 - npm test -- --maxWorkers=4：77 文件、749 测试通过；assets:check 通过；uv run --with pillow python tools/check-visual-assets.py：0 failures；生产构建通过（保留现有大包提示）。
 - 仅改造分支与本地开发版；未更新生产原版。
+
+### 2026-11-16：底部全宽 HUD、全屏拖动与最终首领
+- 原版 HUD 移到底部，自动铺满宽度，血球与技能框共享底部区域；320×640、390×844、1280×800 实测宽度等于屏宽、底边贴合、无横向溢出，血瓶位于其上方。截图 bottom-hud-{small,mobile,desktop}.png。
+- 战场任意触点生成淡化浮动摇杆，松手/取消/失焦清零；真实浏览器输入验证 x=1→0，暂停按钮仍响应。Ego 原生鼠标转交会触发页面隐藏自动暂停，改用同一页面 CDP 输入完成验证，未关闭游戏生命周期保护。
+- 移除怪物远程射击的瞄准指示线，保留实际弹道和独立的 Boss 范围攻击预警。
+- 每关 2 分钟起每 2 分钟精英，5/10/15 分钟阶段 Boss，18 分钟唯一最终 Boss；达到 20 分钟且击杀最终 Boss 才胜利。最终 Boss 不受普通怪物数量上限阻塞；加时战斗可保存、恢复和记录。10 地图逐项单测覆盖，实际最终 Boss 截图 final-boss-mobile.png。
+- 金币/金币外观经验拾取触发固定源 s_money（0102006A.WAV），同批合并且播放间隔至少 160ms，遵守全局静音。浏览器确认 coinPlayed=1；原版 WAV 来源与哈希已登记。
+- 78 文件 / 762 测试通过，assets:check、check-audio.py、生产构建通过；构建仍有已有的大包警告。本阶段仅更新改造分支，本地测试入口 5186/?survivor。

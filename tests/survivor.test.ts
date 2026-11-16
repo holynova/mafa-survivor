@@ -4,7 +4,7 @@ import {survivalChoices,survivalTick,survivalBonuses} from '../src/survivor';
 const run=()=>{const g=new Game();g.survivorMode=true;g.start('normal',176);return g;};
 describe('continuous survival isolation and progression',()=>{
  it('does not clear enemies or enter a shop at 75 seconds',()=>{const g=run();g.clock=74.99;g.waveTime=74.99;g.exp=0;const e=g.spawnEnemy();g.step(.02);expect(g.phase).toBe('battle');expect(g.enemies.some(x=>x.id===e.id)).toBe(true);});
- it('survival wins without boss kill at 20 minutes',()=>{const g=run();g.clock=1199.99;g.step(.02);expect(g.phase).toBe('won');expect(g.result?.crystals).toBe(0);});
+ it('20 minutes alone cannot bypass the final boss',()=>{const g=run();g.clock=1199.99;g.step(.02);expect(g.phase).toBe('battle');expect(g.survival.finalBossId).toBeGreaterThan(0);g.survival.finalBossDefeated=true;g.step(.02);expect(g.phase).toBe('won');expect(g.result?.crystals).toBe(0);});
  it('pause never advances clock or director',()=>{const g=run();g.pause();g.step(40);expect(g.clock).toBe(0);expect(g.enemies.length).toBe(0);});
  it('rank eight progresses independently of legacy wave lock',()=>{const g=run();const s=g.skills[0];s.rank=7;g.phase='upgrade';g.choices=survivalChoices(g);const c=g.choices.find(c=>c.skill===s.id)!;expect(c).toBeTruthy();g.choose(c.id);expect(s.rank).toBe(8);expect(s.power).toBe(survivalBonuses(s).power);});
  it('full inventory never offers new skills or a seventh passive',()=>{const g=run();g.skills=['fireball','lightning','firewall','shield','ice','nova'].map(id=>g.newSkill(id as 'fireball',6));g.skills.forEach(s=>s.rank=8);g.survival.charms={flame:5,haste:5,area:5,life:5,magnet:5,recovery:5};expect(survivalChoices(g)).toEqual([]);});

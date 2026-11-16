@@ -23,7 +23,7 @@ export const CHARMS=[
  {id:'swift',name:'疾行靴',stat:'move_speed',value:4},
  {id:'recovery',name:'回春戒指',stat:'hp_regen',value:.5},
 ] as const;
-export function newSurvival(){return {spawnAt:0,eliteAt:120,bossAt:300,rerolls:3,charms:{} as Record<string,number>,evolved:[] as SkillId[],evoReadyAt:{} as Partial<Record<SkillId,number>>,chests:[] as {id:number;x:number;y:number;eligible:boolean}[],nextChest:1,choiceChest:false,toast:'',end:false};}
+export function newSurvival(){return {spawnAt:0,eliteAt:120,bossAt:300,finalBossId:0,finalBossDefeated:false,rerolls:3,charms:{} as Record<string,number>,evolved:[] as SkillId[],evoReadyAt:{} as Partial<Record<SkillId,number>>,chests:[] as {id:number;x:number;y:number;eligible:boolean}[],nextChest:1,choiceChest:false,toast:'',end:false};}
 /** Rank 1–6 retain verified effects; the last two ranks specialize by skill role. */
 export const survivalLateGrowth=(id:SkillId)=>SURVIVAL_LATE_GROWTH[id];
 export function survivalGrowth(id:SkillId){return [...SKILL_GROWTH[id],...survivalLateGrowth(id)];}
@@ -61,13 +61,15 @@ export function survivalSpawnKind(g:Game){
  return g.rng.pick(pool.flatMap(id=>Array(rangedKinds.has(id)?1:meleeWeight).fill(id) as string[]));
 }
 export function survivalTick(g:Game){const state=g.survival;g.wave=Math.min(12,1+Math.floor(g.clock/100));
- if(g.clock>=SURVIVAL_SECONDS){g.finish(true);return;}
+ if(g.clock>=SURVIVAL_SECONDS&&state.finalBossDefeated){g.finish(true);return;}
+ // The final encounter is mandatory and cannot be blocked by the ordinary population cap.
+ if(g.clock>=1080&&!state.finalBossId){const boss=g.spawnEnemy(MAPS[g.mapId].boss);tuneSurvivalEnemy(g,boss,'boss');boss.hp=boss.maxHp=boss.maxHp*1.5;state.finalBossId=boss.id;state.toast='最终首领现身';}
  if(g.clock>=state.spawnAt&&g.enemies.length<220){const e=g.spawnEnemy(survivalSpawnKind(g));tuneSurvivalEnemy(g,e,'normal');state.spawnAt=g.clock+Math.max(.14,1.1-g.clock/1200);}
- if(g.clock>=state.eliteAt&&g.enemies.length<240){const native=MAPS[g.mapId].monsterPool.filter(id=>NATIVE_ELITES.includes(id));const e=g.spawnEnemy(native.length?g.rng.pick(native):undefined);if(!e.elite){e.elite=true;e.hp=e.maxHp=e.maxHp*4;}tuneSurvivalEnemy(g,e,'elite');e.exp*=3;state.eliteAt=g.clock+120;}
- if(g.clock>=state.bossAt&&g.enemies.length<240){const boss=g.spawnEnemy(MAPS[g.mapId].boss);tuneSurvivalEnemy(g,boss,'boss');state.bossAt=g.clock+300;}
+ if(g.clock>=state.eliteAt&&g.clock<1080){const native=MAPS[g.mapId].monsterPool.filter(id=>NATIVE_ELITES.includes(id));const e=g.spawnEnemy(native.length?g.rng.pick(native):survivalSpawnKind(g));if(!e.elite){e.elite=true;e.hp=e.maxHp=e.maxHp*4;}tuneSurvivalEnemy(g,e,'elite');e.exp*=3;state.eliteAt=g.clock+120;}
+ if(g.clock>=state.bossAt&&g.clock<1080){const boss=g.spawnEnemy(MAPS[g.mapId].boss);tuneSurvivalEnemy(g,boss,'boss');state.bossAt=g.clock+300;}
  for(const c of [...state.chests])if(Math.hypot(g.player.x-c.x,g.player.y-c.y)<55){state.chests=state.chests.filter(x=>x.id!==c.id);const candidates=eligibleEvolutions(g);
  if(c.eligible&&candidates.length===1){evolveSkill(g,candidates[0].id);}
  else if(c.eligible&&candidates.length>1){state.choiceChest=true;state.toast='选择进化';g.choices=candidates.map(s=>({id:'evo:'+s.id,kind:'skill',skill:s.id,name:EVOLUTIONS[s.id]!.name,description:EVOLUTIONS[s.id]!.description,value:0}));g.phase='upgrade';}
  else{g.choices=survivalChoices(g);if(g.choices.length){state.choiceChest=true;g.phase='upgrade';}else g.player.hp=g.maxHP;state.toast='宝箱强化';}g.input={x:0,y:0};g.emit();break;}
 }
-export function survivalDeath(g:Game,e:Enemy){if(!e.summoned&&(e.elite||e.kind===MAPS[g.mapId].boss))g.survival.chests.push({id:g.survival.nextChest++,x:e.x,y:e.y,eligible:e.born>=360});}
+export function survivalDeath(g:Game,e:Enemy){if(e.id===g.survival.finalBossId)g.survival.finalBossDefeated=true;if(!e.summoned&&(e.elite||e.kind===MAPS[g.mapId].boss))g.survival.chests.push({id:g.survival.nextChest++,x:e.x,y:e.y,eligible:e.born>=360});}

@@ -118,7 +118,7 @@ export class OriginalSounds {
       return;
     }
     const now = this.context.currentTime;
-    if (now - (this.last.get(key) ?? -10) < (monster==="attack" ? .28 : monster ? .16 : .09)) return;
+    if (now - (this.last.get(key) ?? -10) < (key==="coin" ? .16 : monster==="attack" ? .28 : monster ? .16 : .09)) return;
     if(monster && this.monsterSources.size>=3){
       const replace=monster==="death" ? [...this.monsterSources].find(([,event])=>event!=="death")?.[0] : undefined;
       if(!replace)return;

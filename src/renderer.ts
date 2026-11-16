@@ -720,12 +720,6 @@ class BattleScene extends Phaser.Scene {
             .fillStyle(0xd6904b,0.14).fillCircle(e.bossJumpTarget.x,e.bossJumpTarget.y,110)
             .lineStyle(2,0xf1ba72,0.6).lineBetween(e.x,e.y,e.bossJumpTarget.x,e.bossJumpTarget.y);
         }
-        if (e.rangedTarget && e.rangedFireAt !== undefined) {
-          const spread=e.kind === "zumaArcher" ? [-0.22,0,0.22] : [0];
-          const angle=Math.atan2(e.rangedTarget.y-e.y,e.rangedTarget.x-e.x);
-          for (const offset of spread) this.bars.lineStyle(2,0xeab46b,0.7)
-            .lineBetween(e.x,e.y,e.x+Math.cos(angle+offset)*420,e.y+Math.sin(angle+offset)*420);
-        }
         if(e.shock) this.bars.lineStyle(76,0xd18a4c,0.17)
           .lineBetween(e.shock.origin.x,e.shock.origin.y,e.shock.target.x,e.shock.target.y)
           .lineStyle(2,0xffcf81,0.85).lineBetween(e.shock.origin.x,e.shock.origin.y,e.shock.target.x,e.shock.target.y);
