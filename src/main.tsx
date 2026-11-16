@@ -1,10 +1,11 @@
+import { SurvivorApp } from "./SurvivorApp";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { App, loadArtPositions } from "./App";
 import { boot } from "./renderer";
 import "./style.css";
 const root = createRoot(document.getElementById("root")!);
-root.render(<App />);
+root.render(new URLSearchParams(location.search).has("survivor") ? <SurvivorApp /> : <App />);
 loadArtPositions()
   .then(() => boot())
   .catch(() => document.dispatchEvent(new CustomEvent("asset-error")));

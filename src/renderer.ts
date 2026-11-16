@@ -212,6 +212,7 @@ class BattleScene extends Phaser.Scene {
   private clearInput() {
     this.showLootNames=false;
     this.drag = null;
+    game.touchInput = {x:0,y:0};
     game.input = { x: 0, y: 0 };
     this.input.keyboard?.resetKeys();
     this.movementInput?.clear();
@@ -546,6 +547,7 @@ class BattleScene extends Phaser.Scene {
         x = Phaser.Math.Clamp((p.x - this.drag.x) / 45, -1, 1);
         y = Phaser.Math.Clamp((p.y - this.drag.y) / 45, -1, 1);
       }
+      if(game.survivorMode && x===0 && y===0){x=game.touchInput.x;y=game.touchInput.y;}
       game.input = { x, y };
       const manual=this.movementInput.held.size>0 || !!(this.drag && p.isDown);
       this.accumulator +=
@@ -582,6 +584,7 @@ class BattleScene extends Phaser.Scene {
     this.seen.clear();
     this.seenLabels.clear();
     this.bars.clear();
+    if(game.survivorMode)for(const chest of game.survival.chests){this.bars.fillStyle(chest.eligible?0xd8b36f:0x94acbb,1);this.bars.fillRect(chest.x-11,chest.y-9,22,18);this.bars.lineStyle(2,0x342718);this.bars.strokeRect(chest.x-11,chest.y-9,22,18);}
     const t = game.clock;
     if (game.phase === "lobby") {
       this.centerCamera(WORLD.w / 2 + 70, WORLD.h / 2);

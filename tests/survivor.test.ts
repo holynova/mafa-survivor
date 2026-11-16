@@ -1,0 +1,23 @@
+import {describe,it,expect} from 'vitest';
+import {Game} from '../src/game';
+import {survivalChoices,survivalTick,survivalBonuses} from '../src/survivor';
+const run=()=>{const g=new Game();g.survivorMode=true;g.start('normal',176);return g;};
+describe('continuous survival isolation and progression',()=>{
+ it('does not clear enemies or enter a shop at 75 seconds',()=>{const g=run();g.clock=74.99;g.waveTime=74.99;g.exp=0;const e=g.spawnEnemy();g.step(.02);expect(g.phase).toBe('battle');expect(g.enemies.some(x=>x.id===e.id)).toBe(true);});
+ it('survival wins without boss kill at 20 minutes',()=>{const g=run();g.clock=1199.99;g.step(.02);expect(g.phase).toBe('won');expect(g.result?.crystals).toBe(0);});
+ it('pause never advances clock or director',()=>{const g=run();g.pause();g.step(40);expect(g.clock).toBe(0);expect(g.enemies.length).toBe(0);});
+ it('rank eight progresses independently of legacy wave lock',()=>{const g=run();const s=g.skills[0];s.rank=7;g.phase='upgrade';g.choices=survivalChoices(g);const c=g.choices.find(c=>c.skill===s.id)!;expect(c).toBeTruthy();g.choose(c.id);expect(s.rank).toBe(8);expect(s.power).toBe(survivalBonuses(s).power);});
+ it('full inventory never offers new skills or a seventh passive',()=>{const g=run();g.skills=['fireball','lightning','firewall','shield','ice','nova'].map(id=>g.newSkill(id as 'fireball',6));g.skills.forEach(s=>s.rank=8);g.survival.charms={flame:5,haste:5,area:5,life:5,magnet:5,recovery:5};expect(survivalChoices(g)).toEqual([]);});
+ it('eligible chest evolves exactly once and pauses',()=>{const g=run();g.skills[0].rank=8;g.survival.charms.flame=1;g.survival.chests=[{id:1,x:g.player.x,y:g.player.y,eligible:true}];survivalTick(g);expect(g.survival.evolved).toEqual(['fireball']);expect(g.phase).toBe('paused');expect(g.survival.chests).toHaveLength(0);});
+ it('early chest cannot evolve a ready weapon',()=>{const g=run();g.skills[0].rank=8;g.survival.charms.flame=1;g.survival.chests=[{id:1,x:g.player.x,y:g.player.y,eligible:false}];survivalTick(g);expect(g.survival.evolved).toHaveLength(0);expect(g.phase).toBe('upgrade');});
+ it('evolution applies real splash without recursive chains',()=>{const g=run();g.survival.evolved=['fireball'];const a=g.spawnEnemy('scarecrow'),b=g.spawnEnemy('scarecrow');a.x=b.x=1100;a.y=b.y=760;a.hp=b.hp=100;g.hit(a,20,'fireball');expect(b.hp).toBeLessThan(100);expect(a.hp).toBe(80);});
+ it('new run clears charms, evolution and touch input',()=>{const g=run();g.survival.charms.flame=5;g.survival.evolved=['fireball'];g.touchInput={x:1,y:0};g.start('normal');expect(g.survival.evolved).toEqual([]);expect(g.survival.charms).toEqual({});expect(g.touchInput.x).toBe(0);});
+});
+
+describe('survival director and role-specific growth',()=>{
+ it('clears touch input when pausing',()=>{const g=run();g.touchInput={x:1,y:-1};g.pause();expect(g.touchInput).toEqual({x:0,y:0});});
+ it('spawns the chapter boss at five minutes without a shop',()=>{const g=run();g.clock=300;survivalTick(g);expect(g.enemies.some(e=>e.kind==='boss')).toBe(true);expect(g.phase).toBe('battle');const n=g.enemies.length;survivalTick(g);expect(g.enemies).toHaveLength(n);});
+ it('never offers unrelated class damage charms',()=>{const g=run();for(let i=0;i<100;i++)expect(survivalChoices(g).some(c=>['p:edge','p:spirit'].includes(c.id))).toBe(false);});
+ it('support skill rank seven reduces cooldown instead of adding useless damage',()=>{const g=run();const s=g.newSkill('repulse');s.rank=7;const b=survivalBonuses(s);expect(b.localCDR).toBe(25);expect(b.power).toBe(0);});
+ it('lightning evolution jumps beyond the first target radius',()=>{const g=run();g.survival.evolved=['lightning'];const a=g.spawnEnemy('scarecrow'),b=g.spawnEnemy('scarecrow'),c=g.spawnEnemy('scarecrow');[a,b,c].forEach((e,i)=>{e.x=800+i*150;e.y=700;e.hp=100;});g.hit(a,30,'lightning');expect(b.hp).toBeLessThan(100);expect(c.hp).toBeLessThan(b.hp+5);expect(c.hp).toBeGreaterThan(b.hp);});
+});

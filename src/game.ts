@@ -1,3 +1,4 @@
+import {newSurvival,survivalTick,survivalChoices,chooseSurvival,survivalDeath,survivalSplash} from "./survivor";
 import {
   ITEMS,
   MONSTERS,
@@ -271,6 +272,9 @@ export class Game {
   potions=newPotionState();
   test = newTestSettings();
   audioEvents: string[] = [];
+  survivorMode = false;
+  survival = newSurvival();
+  touchInput = {x:0,y:0};
   phase: Phase = "lobby";
   mode: Mode = "normal";
   seed = 176;
@@ -468,6 +472,8 @@ export class Game {
     this.classId = classId;
     this.mapId = mapId;
     this.mode = mode;
+    this.survival = newSurvival();
+    this.touchInput={x:0,y:0};
     this.warriorFourSlot = warriorFourSlot;
     this.test = newTestSettings();
     this.audioEvents = [];
@@ -716,6 +722,7 @@ export class Game {
   pause() {
     if (this.phase === "battle") {
       this.previous = "battle";
+      this.touchInput = {x:0,y:0};
       this.phase = "paused";
       this.input = { x: 0, y: 0 };
       this.emit();
@@ -729,6 +736,7 @@ export class Game {
     if (this.phase !== "battle") return;
     this.clock += dt;
     this.waveTime += dt;
+    if(this.survivorMode){survivalTick(this);if(this.phase!=="battle")return;}
     this.potions.cd=Math.max(0,this.potions.cd-dt);
     if(this.player.hp/this.maxHP<=.5)useBloodPotion(this);
     this.player.hp = Math.min(
@@ -764,7 +772,7 @@ export class Game {
     }
     if (this.player.moving) revealActor(this, 0);
     updateTaoist(this);
-    const spawning = this.mode !== "test" || this.test.spawning;
+    const spawning = !this.survivorMode && (this.mode !== "test" || this.test.spawning);
     if (spawning) this.spawnTimer -= dt;
     const budget=this.spawnBudget;
     if (
@@ -1064,7 +1072,7 @@ export class Game {
       this.beginUpgrade();
       return;
     }
-    if (this.waveTime >= this.duration) {
+    if (!this.survivorMode && this.waveTime >= this.duration) {
       this.endWave();
       return;
     }
@@ -1401,6 +1409,7 @@ export class Game {
       const dealt = (actual * part.value) / total;
       this.damageDealt.basic -= dealt;
       this.damageDealt[part.id] = (this.damageDealt[part.id] ?? 0) + dealt;
+      if(this.survivorMode)survivalSplash(this,target,dealt,part.id);
     }
     for (const id of [power?.id, fire?.id])
       if (id)
@@ -2072,6 +2081,7 @@ export class Game {
     e.hitAt = this.clock;
     this.damageDealt[skill] = (this.damageDealt[skill] ?? 0) + dealt;
     recoverHit(this,e,dealt,origin);
+    if(this.survivorMode)survivalSplash(this,e,dealt,skill);
     if (this.floating.length < 45)
       this.floating.push({
         id: ++this.id,
@@ -2082,6 +2092,7 @@ export class Game {
         life: 0.7,
       });
     if (e.hp <= 0) {
+      if(this.survivorMode)survivalDeath(this,e);
       this.kills++;
       this.waveKills++;
       if (e.kind===MAPS[this.mapId].boss) this.bossKilled = true;
@@ -2202,6 +2213,7 @@ export class Game {
     this.emit();
   }
   makeChoices(): Upgrade[] {
+    if(this.survivorMode)return survivalChoices(this);
     const unlearned = SKILLS.filter(
       (s) =>
         s.classId === this.classId && !this.skills.some((a) => a.id === s.id),
@@ -2315,6 +2327,7 @@ export class Game {
   }
   choose(id: string) {
     if (this.phase !== "upgrade") return;
+    if(this.survivorMode){chooseSurvival(this,id);return;}
     const c = this.choices.find((c) => c.id === id);
     if (!c) return;
     if (c.kind === "skill") {
@@ -2600,7 +2613,7 @@ export class Game {
   finish(won: boolean) {
     if (this.result) return;
     this.phase = won ? "won" : "dead";
-    const runCrystals = this.mode === "normal" && won ? 3 : 0;
+    const runCrystals = !this.survivorMode && this.mode === "normal" && won ? 3 : 0;
     this.crystals += runCrystals;
     this.result = {
       classId: this.classId,
