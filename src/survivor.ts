@@ -1,5 +1,5 @@
 import type {Game,Enemy,Skill,Upgrade} from './game';
-import {getSkill,SKILLS,MAPS,NATIVE_ELITES,type StatKey} from './content';
+import {getSkill,SKILLS,MAPS,NATIVE_ELITES,CHAPTER_PRESSURE,type StatKey} from './content';
 import type {SkillId} from './spells';
 import {canonicalBonuses,SKILL_GROWTH, type GrowthStep} from './skill-growth';
 export const SURVIVAL_SECONDS=1200;
@@ -45,11 +45,20 @@ export function chooseSurvival(g:Game,id:string){const c=g.choices.find(x=>x.id=
  else{const key=id.slice(2),n=g.survival.charms[key]??0;if(n>=5)return;g.survival.charms[key]=n+1;g.upgrades[c.stat!]=(g.upgrades[c.stat!]??0)+c.value;g.recompute();if(c.stat==='hp_max')g.player.hp=Math.min(g.maxHP,g.player.hp+c.value);}
  g.choices=[];g.phase='battle';g.survival.choiceChest=false;g.emit();
 }
+/** Every chapter starts at level one in this mode; legacy chapter stats assumed prior equipment. */
+export function tuneSurvivalEnemy(g:Game,e:Enemy,tier:'normal'|'elite'|'boss'){
+ const pressure=g.mapId==='bairimen'?2:CHAPTER_PRESSURE[g.mapId];
+ const hp=tier==='boss'?(.7+g.clock/1200)/Math.sqrt(pressure):(tier==='normal'?.65:1)/pressure;
+ e.hp=e.maxHp=Math.max(8,e.maxHp*hp);
+ e.damage*=(tier==='normal'?.7:1)/Math.sqrt(pressure);
+ e.defense=(e.defense??0)/pressure;e.magicDefense=(e.magicDefense??0)/pressure;
+ if(tier==='normal')e.exp=Math.max(2,Math.round(e.exp*2/Math.sqrt(pressure)));
+}
 export function survivalTick(g:Game){const state=g.survival;g.wave=Math.min(12,1+Math.floor(g.clock/100));
  if(g.clock>=SURVIVAL_SECONDS){g.finish(true);return;}
- if(g.clock>=state.spawnAt&&g.enemies.length<220){const e=g.spawnEnemy();e.hp=e.maxHp=Math.max(8,e.hp*.65);e.damage*=.7;e.exp*=2;state.spawnAt=g.clock+Math.max(.14,1.1-g.clock/1200);}
- if(g.clock>=state.eliteAt&&g.enemies.length<240){const native=MAPS[g.mapId].monsterPool.filter(id=>NATIVE_ELITES.includes(id));const e=g.spawnEnemy(native.length?g.rng.pick(native):undefined);if(!e.elite){e.elite=true;e.hp=e.maxHp=e.maxHp*4;}e.exp*=3;state.eliteAt=g.clock+120;}
- if(g.clock>=state.bossAt&&g.enemies.length<240){const boss=g.spawnEnemy(MAPS[g.mapId].boss);boss.hp=boss.maxHp=boss.maxHp*(.7+g.clock/1200);state.bossAt=g.clock+300;}
+ if(g.clock>=state.spawnAt&&g.enemies.length<220){const e=g.spawnEnemy();tuneSurvivalEnemy(g,e,'normal');state.spawnAt=g.clock+Math.max(.14,1.1-g.clock/1200);}
+ if(g.clock>=state.eliteAt&&g.enemies.length<240){const native=MAPS[g.mapId].monsterPool.filter(id=>NATIVE_ELITES.includes(id));const e=g.spawnEnemy(native.length?g.rng.pick(native):undefined);if(!e.elite){e.elite=true;e.hp=e.maxHp=e.maxHp*4;}tuneSurvivalEnemy(g,e,'elite');e.exp*=3;state.eliteAt=g.clock+120;}
+ if(g.clock>=state.bossAt&&g.enemies.length<240){const boss=g.spawnEnemy(MAPS[g.mapId].boss);tuneSurvivalEnemy(g,boss,'boss');state.bossAt=g.clock+300;}
  for(const c of [...state.chests])if(Math.hypot(g.player.x-c.x,g.player.y-c.y)<55){state.chests=state.chests.filter(x=>x.id!==c.id);const s=g.skills.find(s=>s.rank===8&&!state.evolved.includes(s.id)&&EVOLUTIONS[s.id]&&(state.charms[EVOLUTIONS[s.id]!.charm]??0)>0);
  if(c.eligible&&s){state.evolved.push(s.id);state.toast='进化完成：'+EVOLUTIONS[s.id]!.name;g.pause();}
  else{g.choices=survivalChoices(g);if(g.choices.length){state.choiceChest=true;g.phase='upgrade';}else g.player.hp=g.maxHP;state.toast='宝箱强化';}g.input={x:0,y:0};g.emit();break;}

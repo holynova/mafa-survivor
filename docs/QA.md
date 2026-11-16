@@ -718,3 +718,12 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 原生KeyD输入：x从1104到1217.67；ArrowRight输入也有效。摇杆实际改变x/y，松开/暂停清零。
 - 3职业比奇固定种子完整20分钟模拟，结果见 `.artifacts/survival-simulation.json`，方法和限制见 docs/redesign/IMPLEMENTATION.md。
 - 尚未完成全部地图视觉回归、移动真机长局性能、续局存档；不得将此阶段称最终完整版。
+
+
+## 2026-11-16 连续生存：续局与地图数值
+
+- 703项回归通过；素材检查、生产构建通过。续局测试覆盖8级进化、毒状态、召唤物、持续火场、飞行弹、掉落、随机序列、原候选卡／重掷次数、损坏数据和原版隔离。
+- Ego Lite空间61，390×844真实刷新续局：02秒／2只怪物保留，恢复为paused且输入清零。待选升级刷新后保留相同三张候选和upgrade阶段。
+- 截图 `.artifacts/survival-resume-{lobby,paused,upgrade}.png` 与 `survival-zuma-visual.png` 已检查；祖玛测试怪物手动摆放以检查完整原版帧，不冒充自然通关。
+- 两种子十地图三职业60局、45局生还；502次战斗快照验证成功。详见 docs/redesign/IMPLEMENTATION.md；机器人成绩不代表玩家胜率。
+- 仍缺移动真机长局性能、跨局解锁、更多进化及战士狭窄图平衡；没有覆盖线上原版。

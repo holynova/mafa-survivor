@@ -1,3 +1,4 @@
+import {snapshotSurvival,parseSurvivalSave} from './survivor-save';
 import {newSurvival,survivalTick,survivalChoices,chooseSurvival,survivalDeath,survivalSplash} from "./survivor";
 import {
   ITEMS,
@@ -582,6 +583,18 @@ export class Game {
     this.stats = combine(sources);
     this.player.hp = Math.min(this.player.hp, this.maxHP);
     refreshSummons(this);
+  }
+  snapshotSurvival() {return snapshotSurvival(this,this.id+1);}
+  resumeSurvival(raw:unknown) {
+    const saved=parseSurvivalSave(raw);if(!saved)return false;
+    this.survivorMode=true;this.unlockedMaps.add(saved.state.mapId);
+    this.start('normal',saved.state.seed,saved.state.classId,false,saved.state.mapId);
+    Object.assign(this,saved.state);
+    this.id=saved.nextId-1;this.rng=new Rng(saved.rngState);
+    this.recompute();this.player.hp=saved.state.player.hp;
+    this.previous='battle';this.phase=saved.state.phase==='upgrade'?'upgrade':'paused';
+    this.input={x:0,y:0};this.touchInput={x:0,y:0};this.player.moving=false;
+    this.floating=[];this.audioEvents=[];this.result=null;this.emit();return true;
   }
   /** Stable wave-boundary state for refresh recovery; live combat is never saved. */
   snapshotCheckpoint(): RunCheckpoint | null {
