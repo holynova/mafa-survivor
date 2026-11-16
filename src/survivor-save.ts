@@ -24,7 +24,7 @@ const survival=z.object({spawnAt:n,eliteAt:n,bossAt:n,rerolls:z.number().int().m
 const c=checkpointSchema.shape;
 const stateSchema=z.object({
  classId:c.classId,mapId:c.mapId,runId:c.runId,seed:c.seed,phase:z.enum(['battle','upgrade','paused']),clock:z.number().finite().min(0).max(1200),wave:c.wave,waveTime:n,kills:c.kills,gold:c.gold,totalGold:c.totalGold,level:c.level,exp:c.exp,damageDealt:c.damageDealt,purchases:c.purchases,potions:c.potions,combatRecovery:c.combatRecovery,damageTaken:c.damageTaken,player:c.player,
- skills:z.array(c.skills.element.extend({rank:z.number().int().min(1).max(8)})).min(1).max(6),
+ skills:z.array(c.skills.element.extend({rank:z.number().int().min(1).max(8),duration:z.number().finite().min(0).max(150)})).min(1).max(6),
  pets:z.array(c.pets.element.extend({hitUntil:n.optional(),hitDamage:n.optional()})).max(30),
  equipment:z.partialRecord(z.enum(SLOT_KEYS),z.object({itemId:item,paid:n})),
  passives:z.record(item,n),upgrades:z.record(z.string().refine(k=>k in STAT_NAMES),n),

@@ -1,10 +1,11 @@
+import {SURVIVAL_LATE_GROWTH} from './survivor-growth';
 import {EVOLUTIONS,eligibleEvolutions,evolveSkill} from './survivor-evolutions';
 export {EVOLUTIONS,survivalSplash,evolutionReadiness} from './survivor-evolutions';
 import {CLASSES,type ClassId} from './classes';
 import type {Game,Enemy,Skill,Upgrade} from './game';
 import {getSkill,SKILLS,MAPS,NATIVE_ELITES,CHAPTER_PRESSURE,type StatKey} from './content';
 import type {SkillId} from './spells';
-import {canonicalBonuses,SKILL_GROWTH, type GrowthStep} from './skill-growth';
+import {canonicalBonuses,SKILL_GROWTH} from './skill-growth';
 export const SURVIVAL_SECONDS=1200;
 export const survivalStarter=(id:ClassId)=>id==='warrior'?'cleave':CLASSES[id].startingSkill;
 export const BUILD_GUIDES={wizard:{main:['fireball','lightning'],text:'火球清怪，雷电补足精英伤害；优先火焰戒指与广域护符。'},warrior:{main:['cleave','firesword'],text:'先强化半月清出空间，再用烈火击破精英；搭配广域护符与锋锐戒指。'},taoist:{main:['talisman','beast'],text:'火符负责前期，神兽形成双核；灵魂项链同时满足两条进化配方。'}} as const;
@@ -22,15 +23,7 @@ export const CHARMS=[
 ] as const;
 export function newSurvival(){return {spawnAt:0,eliteAt:120,bossAt:300,rerolls:3,charms:{} as Record<string,number>,evolved:[] as SkillId[],evoReadyAt:{} as Partial<Record<SkillId,number>>,chests:[] as {id:number;x:number;y:number;eligible:boolean}[],nextChest:1,choiceChest:false,toast:'',end:false};}
 /** Rank 1–6 retain verified effects; the last two ranks specialize by skill role. */
-export function survivalLateGrowth(id:SkillId):readonly GrowthStep[]{
- if(['skeleton','beast','charm'].includes(id))return [{label:'召唤生命+25%；召唤伤害+20%',add:{summonHP:25,summonPower:20}},{label:'召唤伤害+25%；补召冷却−10%',add:{summonPower:25,localCDR:10}}];
- if(id==='shield')return [{label:'持续时间+20%',add:{duration:20}},{label:'冷却−15%',add:{localCDR:15}}];
- if(['repulse','trap','invisible','groupInvisible','teleport','dash','reveal'].includes(id))return [{label:'冷却−10%',add:{localCDR:10}},{label:'冷却−10%',add:{localCDR:10}}];
- if(['swordsmanship','spirit'].includes(id))return [{label:'普攻威力+20%',add:{power:20}},{label:'普攻威力+25%；准确+3',add:{power:25,accuracy:3}}];
- if(id==='poison')return [{label:'毒素持续时间+25%',add:{duration:25}},{label:'冷却−15%',add:{localCDR:15}}];
- if(id==='holy')return [{label:'成功率+5个百分点',add:{chance:5}},{label:'冷却−15%',add:{localCDR:15}}];
- return [{label:'威力+20%',add:{power:20}},{label:'冷却−10%；威力+15%',add:{localCDR:10,power:15}}];
-}
+export const survivalLateGrowth=(id:SkillId)=>SURVIVAL_LATE_GROWTH[id];
 export function survivalGrowth(id:SkillId){return [...SKILL_GROWTH[id],...survivalLateGrowth(id)];}
 export function survivalBonuses(s:Skill){const b=canonicalBonuses(s.id,Math.min(6,s.rank));for(const step of survivalLateGrowth(s.id).slice(0,Math.max(0,s.rank-6)))for(const [key,value] of Object.entries(step.add))if(key in b)b[key as keyof typeof b]+=value;return b;}
 export function survivalChoices(g:Game):Upgrade[]{const pool:Upgrade[]=[];
@@ -41,7 +34,7 @@ export function survivalChoices(g:Game):Upgrade[]{const pool:Upgrade[]=[];
 }
 export function chooseSurvival(g:Game,id:string){const c=g.choices.find(x=>x.id===id);if(!c)return;
  if(c.id.startsWith('evo:')){if(c.skill&&eligibleEvolutions(g).some(s=>s.id===c.skill))evolveSkill(g,c.skill);return;}
- if(c.skill){let s=g.skills.find(x=>x.id===c.skill);if(s){if(s.rank>=8)return;s.rank++;}else{if(g.skills.length>=6)return;s=g.newSkill(c.skill);g.skills.push(s);}Object.assign(s,survivalBonuses(s));}
+ if(c.skill){let s=g.skills.find(x=>x.id===c.skill);if(s){if(s.rank>=8)return;s.rank++;}else{if(g.skills.length>=6)return;s=g.newSkill(c.skill);g.skills.push(s);}Object.assign(s,survivalBonuses(s));g.recompute();}
  else{const key=id.slice(2),n=g.survival.charms[key]??0;if(n>=5||(!n&&Object.keys(g.survival.charms).length>=6))return;g.survival.charms[key]=n+1;g.upgrades[c.stat!]=(g.upgrades[c.stat!]??0)+c.value;g.recompute();if(c.stat==='hp_max')g.player.hp=Math.min(g.maxHP,g.player.hp+c.value);}
  g.choices=[];g.phase='battle';g.survival.choiceChest=false;g.emit();
 }

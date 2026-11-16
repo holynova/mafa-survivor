@@ -18,7 +18,7 @@ describe('survival director and role-specific growth',()=>{
  it('clears touch input when pausing',()=>{const g=run();g.touchInput={x:1,y:-1};g.pause();expect(g.touchInput).toEqual({x:0,y:0});});
  it('spawns the chapter boss at five minutes without a shop',()=>{const g=run();g.clock=300;survivalTick(g);expect(g.enemies.some(e=>e.kind==='boss')).toBe(true);expect(g.phase).toBe('battle');const n=g.enemies.length;survivalTick(g);expect(g.enemies).toHaveLength(n);});
  it('never offers unrelated class damage charms',()=>{const g=run();for(let i=0;i<100;i++)expect(survivalChoices(g).some(c=>['p:edge','p:spirit'].includes(c.id))).toBe(false);});
- it('support skill rank seven reduces cooldown instead of adding useless damage',()=>{const g=run();const s=g.newSkill('repulse');s.rank=7;const b=survivalBonuses(s);expect(b.localCDR).toBe(25);expect(b.power).toBe(0);});
+ it('support skill rank seven extends control instead of adding useless damage',()=>{const g=run();const s=g.newSkill('repulse');s.rank=7;const b=survivalBonuses(s);expect(b.localCDR).toBe(15);expect(b.power).toBe(0);});
  it('lightning evolution jumps beyond the first target radius',()=>{const g=run();g.survival.evolved=['lightning'];const a=g.spawnEnemy('scarecrow'),b=g.spawnEnemy('scarecrow'),c=g.spawnEnemy('scarecrow');[a,b,c].forEach((e,i)=>{e.x=800+i*150;e.y=700;e.hp=100;});g.hit(a,30,'lightning');expect(b.hp).toBeLessThan(100);expect(c.hp).toBeLessThan(b.hp+5);expect(c.hp).toBeGreaterThan(b.hp);});
 });
 

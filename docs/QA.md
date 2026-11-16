@@ -748,3 +748,10 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 220怪／1000掉落固定冻结场景用于比较渲染维护成本，不用于宣称实机FPS。完整帧边界保留跨屏高大贴图，旋转特效保守不裁剪；战斗模拟不按视口裁剪。
 - 新增边缘贴图、居中掉落、相机缩放、八选六被动、五级侦测与实际火球目标范围回归。测试与构建日志在`.artifacts/*-density.log`；原版资产检查通过。
 - 六局模拟结果在`.artifacts/survival-density-simulation.json`，120次正常局快照校验通过。
+
+### 连续生存改版：逐技能高等级成长（2026-11-16）
+- 738项／74文件测试、assets:check、生产构建通过；保留已有大包警告。
+- 新增真实4弹／4目标、火墙同存5片、12秒毒、3骷髅＋1神兽、召唤生命升级、旧存档成长规范化、全部33个满级技能存档往返验证。初次全图模拟发现心灵启示duration=150超出旧校验120，修复后重新跑完30局，560快照通过。
+- `.artifacts/survival-growth-book.png`、`survival-four-fireballs.png`、`survival-four-summons.png`、`original-loader-regression.png`均已查看；手机视口390×844，测试布置的技能场景不是自然整局实录。
+- 新测试页首次出现mir-6／mir-7图片XHR status=0失败；本地PNG CRC、解压、浏览器fetch/createImageBitmap/原生Image均正常。Phaser loader改为HTMLImageElement后新旧入口都正常加载；不是素材源更换。
+- 十地图三职业固定种子176模拟26/30生还，祖玛／赤月战士与祖玛／盟重道士失败待平衡；结果`.artifacts/survival-growth-simulation.json`。未测真机，不报告真机FPS。

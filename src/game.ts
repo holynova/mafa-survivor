@@ -1,5 +1,5 @@
 import {snapshotSurvival,parseSurvivalSave} from './survivor-save';
-import {newSurvival,survivalStarter,survivalTick,survivalChoices,chooseSurvival,survivalDeath,survivalSplash} from "./survivor";
+import {survivalBonuses,survivalGrowth,newSurvival,survivalStarter,survivalTick,survivalChoices,chooseSurvival,survivalDeath,survivalSplash} from "./survivor";
 import {
   ITEMS,
   MONSTERS,
@@ -592,6 +592,8 @@ export class Game {
     this.start('normal',saved.state.seed,saved.state.classId,false,saved.state.mapId);
     Object.assign(this,saved.state);
     this.id=saved.nextId-1;this.rng=new Rng(saved.rngState);
+    for(const skill of this.skills)Object.assign(skill,survivalBonuses(skill));
+    for(const choice of this.choices)if(choice.skill&&choice.id.startsWith("s:")){const rank=this.skills.find(s=>s.id===choice.skill)?.rank??0;choice.description=survivalGrowth(choice.skill)[rank]?.label??choice.description;}
     this.recompute();this.player.hp=saved.state.player.hp;
     this.previous='battle';this.phase=saved.state.phase==='upgrade'?'upgrade':'paused';
     this.input={x:0,y:0};this.touchInput={x:0,y:0};this.player.moving=false;
@@ -1573,7 +1575,7 @@ export class Game {
       const angle = Math.acos(
         clamp(along / Math.max(1, Math.hypot(dx, dy)), -1, 1),
       );
-      return angle <= (Math.min(230, 180 + s.angle) * Math.PI) / 360;
+      return angle <= (Math.min(this.survivorMode?270:230, 180 + s.angle) * Math.PI) / 360;
     });
     let aim = this.meleeAim(near,autoAim),cleaveDir:number|undefined;
     if(s.id==="cleave" && !manual) {
@@ -1893,7 +1895,7 @@ export class Game {
       this.player.shieldUntil =
         this.clock + Math.min(this.survivorMode?9:7, 6 * (1 + s.duration / 100));
     } else if (s.id === "fireball" || s.id === "bigfireball") {
-      for (const e of targets.slice(0, Math.min(3, 1 + s.count))) {
+      for (const e of targets.slice(0, Math.min(this.survivorMode?4:3, 1 + s.count))) {
         const dx = e.x - this.player.x,
           dy = e.y - this.player.y,
           l = Math.max(1, Math.hypot(dx, dy)),
@@ -1918,19 +1920,19 @@ export class Game {
         });
       }
     } else if (s.id === "lightning") {
-      for (const e of targets.slice(0, Math.min(3, 1 + s.count))) {
+      for (const e of targets.slice(0, Math.min(this.survivorMode?4:3, 1 + s.count))) {
         this.hit(e, this.magicDamage(15, s), s.id);
         this.effect("lightning", e.x, e.y, 0, 0.5);
       }
     } else if (s.id === "firewall") {
       const candidates=[...targets],placed:{x:number;y:number}[]=[];
-      for(let i=0;i<Math.min(3,1+s.count) && candidates.length;i++) {
+      for(let i=0;i<Math.min(this.survivorMode?4:3,1+s.count) && candidates.length;i++) {
         const e=this.densest(candidates,100);
         const point={x:e.x+(this.player.x-e.x)*0.2,y:e.y+(this.player.y-e.y)*0.2};
         if(this.canStand(point.x,point.y,0) && this.attackLineClear(this.player,point) &&
             placed.every(p=>Math.hypot(p.x-point.x,p.y-point.y)>=48)) {
           const existing=this.effects.filter(f=>f.kind==="firewall" && f.life>0);
-          if(existing.length>=Math.min(4,2+s.count))existing[0].life=0;
+          if(existing.length>=Math.min(this.survivorMode?5:4,2+s.count))existing[0].life=0;
           this.effect("firewall",point.x,point.y,rad(64),6*(1+s.duration/100)*(1+(this.stats.duration??0)/100));
           placed.push(point);
         }
@@ -1987,7 +1989,7 @@ export class Game {
     } else if (s.id === "holy") {
       const undead = targets.filter((e) => this.isUndead(e));
       if (!undead.length) return;
-      for (const e of undead.slice(0, Math.min(3, 1 + s.count))) {
+      for (const e of undead.slice(0, Math.min(this.survivorMode?4:3, 1 + s.count))) {
         if (e.elite || isBossKind(e.kind))
           this.hit(e, Math.min(e.maxHp * 0.15, this.magicDamage(30, s)), s.id);
         else if (
@@ -2188,7 +2190,7 @@ export class Game {
     const shield =
       this.clock < this.player.shieldUntil
         ? Math.min(
-            0.35,
+            this.survivorMode?0.4:0.35,
             0.2 +
               (this.skills.find((s) => s.id === "shield")?.shieldReduction ??
                 0) /

@@ -8,7 +8,7 @@ const root = createRoot(document.getElementById("root")!);
 root.render(new URLSearchParams(location.search).has("survivor") ? <SurvivorApp /> : <App />);
 loadArtPositions()
   .then(() => boot())
-  .catch(() => document.dispatchEvent(new CustomEvent("asset-error")));
+  .catch((error) => {console.error("Game initialization failed",error);document.dispatchEvent(new CustomEvent("asset-error"));});
 // Development-only simulation handle for reproducible browser QA and profiling.
 import { game } from "./game";
 declare global {

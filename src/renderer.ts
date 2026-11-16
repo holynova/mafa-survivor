@@ -98,6 +98,7 @@ class BattleScene extends Phaser.Scene {
     for (const page of assets.pages.filter((p) => !p.lazy))
       this.load.atlas(page.key, assetUrl(page.image), assetUrl(page.data));
     this.load.on("loaderror", (file: Phaser.Loader.File) => {
+      console.error("Asset loading failed",file.key,file.src);
       if (!rendererReady) {
         this.failed = true;
         document.dispatchEvent(new CustomEvent("asset-error"));
@@ -868,6 +869,8 @@ export function boot() {
     type: Phaser.AUTO,
     parent: "world",
     backgroundColor: isGraybox ? "#1d271f" : "#100c08",
+    // Native image loading avoids copying large atlases through XHR/blob buffers.
+    loader: { imageLoadType: "HTMLImageElement" },
     pixelArt: true,
     antialias: false,
     scale: {

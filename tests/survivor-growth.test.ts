@@ -1,0 +1,19 @@
+import {describe,it,expect} from 'vitest';
+import {Game} from '../src/game';
+import {SKILLS,type SkillId} from '../src/spells';
+import {survivalBonuses,survivalGrowth,survivalChoices} from '../src/survivor';
+import {canonicalBonuses} from '../src/skill-growth';
+const arena=(id:SkillId,rank=8)=>{const g=new Game();g.survivorMode=true;g.start('normal',176,SKILLS.find(s=>s.id===id)!.classId);const s=g.newSkill(id);s.rank=rank;Object.assign(s,survivalBonuses(s));s.cd=0;g.skills=[s];return {g,s};};
+const enemy=(g:Game,x=100,y=0)=>{const e=g.spawnEnemy('orc');Object.assign(e,{x:g.player.x+x,y:g.player.y+y,hp:10000,maxHp:10000,speed:0});return e;};
+describe('eight-rank survival specializations',()=>{
+ it('covers all skills and keeps ranks one to six identical to the original',()=>{for(const def of SKILLS){expect(survivalGrowth(def.id)).toHaveLength(8);for(let rank=1;rank<=6;rank++){const s=new Game().newSkill(def.id);s.rank=rank;expect(survivalBonuses(s)).toEqual(canonicalBonuses(def.id,rank));}}});
+ it.each(['fireball','talisman'] as const)('%s fires four separate shots at rank eight, three at seven',id=>{for(const rank of [7,8]){const {g,s}=arena(id,rank);[80,120,160,200,240].forEach(x=>enemy(g,x));g.cast(s);expect(g.projectiles).toHaveLength(rank===8?4:3);expect(new Set(g.projectiles.map(p=>p.targetId)).size).toBe(g.projectiles.length);}});
+ it('does not concentrate four fireballs on a single target',()=>{const {g,s}=arena('fireball');enemy(g);g.cast(s);expect(g.projectiles).toHaveLength(1);});
+ it('lightning hits exactly four distinct targets',()=>{const {g,s}=arena('lightning');const es=[80,120,160,200,240].map(x=>enemy(g,x));g.cast(s);expect(es.filter(e=>e.hp<e.maxHp)).toHaveLength(4);});
+ it('poison affects four enemies for twelve seconds',()=>{const {g,s}=arena('poison');const es=[80,120,160,200,240].map(x=>enemy(g,x));g.cast(s);expect(es.filter(e=>e.greenPoison)).toHaveLength(4);expect(es[0].greenPoison!.until).toBeCloseTo(12);});
+ it('rank eight permits three skeletons plus one beast, never a fourth skeleton',()=>{const {g,s}=arena('skeleton');for(let i=0;i<5;i++){s.cd=0;g.cast(s);}expect(g.pets).toHaveLength(3);const beast=g.newSkill('beast');g.skills.push(beast);beast.cd=0;g.cast(beast);expect(g.pets).toHaveLength(4);});
+ it('uses all five persistent fire fields with nine-second duration',()=>{const {g,s}=arena('firewall');[[100,-120],[200,0],[100,120],[-100,0]].forEach(([x,y])=>enemy(g,x,y));g.cast(s);expect(g.effects.filter(f=>f.kind==='firewall'&&f.life>0)).toHaveLength(4);s.cd=0;g.cast(s);const fields=g.effects.filter(f=>f.kind==='firewall'&&f.life>0);expect(fields).toHaveLength(5);expect(fields[0].life).toBeCloseTo(9);});
+ it('refreshes existing summon health on upgrade without healing its percentage',()=>{const {g,s}=arena('skeleton',6);g.cast(s);const pet=g.pets[0];pet.hp=pet.maxHp/2;const max=pet.maxHp;g.phase='upgrade';g.choices=survivalChoices(g);g.choose('s:skeleton');expect(s.rank).toBe(7);expect(pet.maxHp).toBeGreaterThan(max);expect(pet.hp/pet.maxHp).toBeCloseTo(.5);});
+ it('normalizes old high-rank saves and refreshes descriptions without rerolling choices',()=>{const {g,s}=arena('fireball',7);s.count=2;s.power=44;g.phase='upgrade';g.choices=survivalChoices(g);g.choices.find(c=>c.skill==='fireball')!.description='旧描述';const cp=g.snapshotSurvival()!,restored=new Game();expect(restored.resumeSurvival(cp)).toBe(true);expect(restored.skills[0].power).toBe(34);expect(restored.choices.map(c=>c.id)).toEqual(g.choices.map(c=>c.id));expect(restored.choices.find(c=>c.skill==='fireball')!.description).toContain('4发');expect(restored.rng.seed).toBe(cp.rngState);});
+});
+it('round-trips every rank-eight skill including extended revelation duration',()=>{for(const def of SKILLS){const {g,s}=arena(def.id);const save=g.snapshotSurvival();expect(save).not.toBeNull();const restored=new Game();expect(restored.resumeSurvival(save)).toBe(true);expect(restored.skills[0]).toEqual(s);}});
