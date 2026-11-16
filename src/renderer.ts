@@ -155,7 +155,7 @@ class BattleScene extends Phaser.Scene {
       "SPACE",
       "ALT",
     ]);
-    this.input.keyboard!.on("keydown-ESC", () => game.pause());
+    this.input.keyboard!.on("keydown-ESC", () => {if(!document.querySelector("dialog[open]"))game.pause();});
     this.input.keyboard!.on("keydown-P", () => game.pause());
     this.input.keyboard!.on("keydown-SPACE", () => game.useManualSkill());
     this.input.keyboard!.on("keydown-ALT",()=>{this.showLootNames=true;});
@@ -396,7 +396,9 @@ class BattleScene extends Phaser.Scene {
     const body = assets.animations[`${this.heroLook.body}/${motion}/${dir}`];
     if (!body?.length) return;
     const terminalDeath=motion==="death" && !(game.mode==="test" && game.test.pose==="death");
-    const frame = body[terminalDeath ? Math.min(body.length-1,Math.floor(time*9)) : Math.floor(time * 9) % body.length];
+    const liveAttack=motion==="attack" && !(game.mode==="test" && game.test.pose!=="live");
+    const attackFrame=Math.min(body.length-1,Math.max(0,Math.floor((1-(game.player.attackUntil-game.clock)/.35)*body.length)));
+    const frame = body[liveAttack ? attackFrame : terminalDeath ? Math.min(body.length-1,Math.floor(time*9)) : Math.floor(time * 9) % body.length];
     const index = Number(frame.split("/").at(-1));
     const matching = (name: string) => assets.animations[`${name}/${motion}/${dir}`]?.find((f) => Number(f.split("/").at(-1)) === index);
     const shadow = matching(this.heroLook.body + "-shadow");

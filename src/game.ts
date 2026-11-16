@@ -1556,7 +1556,7 @@ export class Game {
       (e) => Math.hypot(e.x - this.player.x, e.y - this.player.y) <= radius && this.meleeReachable(e),
     );
     const solo=s.id==="thrust" && !!skillExtras(s).solo;
-    const minimum=solo ? 1 : 2;
+    const minimum=solo || (this.survivorMode && s.id==="cleave") ? 1 : 2;
     if (near.length < minimum) return false;
     const autoAim=solo && !manual;
     if(autoAim) {

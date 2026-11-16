@@ -21,8 +21,9 @@ export function effectSprites(f:Fx):EffectSprite[]{
  }
  if(f.kind==="thrust") {
   const angle=((f.dir??4)-2)*Math.PI/4;
-  return [{animation:`thrust/${f.dir??4}`,x:f.x,y:f.y,time:f.total-f.life,depth:2100,rotation:(f.aimAngle??angle)-angle}];
+  return [{animation:`thrust/${f.dir??4}`,x:f.x,y:f.y,time:f.total-f.life,depth:Math.max(2100,f.y+300),frameRate:6/f.total,rotation:(f.aimAngle??angle)-angle}];
  }
+ if(["cleave","powerstrike","firesword"].includes(f.kind))return [{animation:`${f.kind}/${f.dir??4}`,x:f.x,y:f.y,time:f.total-f.life,depth:Math.max(2100,f.y+300),frameRate:6/f.total,scale:f.kind==="cleave"?Math.max(1,f.radius/70):1}];
  const directional=["beam","powerstrike","thrust","cleave","firesword","womaShock","beastflame","overlordBlade"];
  return [{animation:directional.includes(f.kind)?`${f.kind}/${f.dir??4}`:f.kind,x:f.x,y:f.y,time:f.total-f.life,depth:2100}];
 }
