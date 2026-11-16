@@ -27,7 +27,26 @@ export const CHARMS=[
 export function newSurvival(){return {spawnAt:0,eliteAt:120,bossAt:300,finalBossId:0,finalBossDefeated:false,eliteDefeats:0,rerolls:3,charms:{} as Record<string,number>,evolved:[] as SkillId[],evoReadyAt:{} as Partial<Record<SkillId,number>>,chests:[] as {id:number;x:number;y:number;eligible:boolean}[],nextChest:1,choiceChest:false,toast:'',end:false};}
 /** Rank 1–6 retain verified effects; the last two ranks specialize by skill role. */
 export const survivalLateGrowth=(id:SkillId)=>SURVIVAL_LATE_GROWTH[id];
-export function survivalGrowth(id:SkillId){return [...SKILL_GROWTH[id],...survivalLateGrowth(id)].map((step,index)=>id==='cleave'&&index===0?{...step,label:'正面180°；半径70px；单个近敌即可触发，优先覆盖敌群'}:step);}
+export function survivalDescription(id:SkillId){
+ const descriptions:Partial<Record<SkillId,string>>={
+  cleave:'向附近敌人挥出半月刀光；一个目标即可触发，优先覆盖敌群。',
+  invisible:'生命低于60%且120px内有敌人时隐身；移动和自动攻击不解除。普通怪贴身、精英与首领仍可侦测。',
+  groupInvisible:'160px内有敌人时，为自身及范围内宝宝隐身；单人也可施放，移动和自动攻击不解除。精英与首领仍可侦测。',
+  groupHeal:'附近至少两名友方受伤，或自身生命低于70%时治疗范围内所有受伤友方；无需召唤物也能自救。',
+  teleport:'生命低于30%且90px内有敌人时自动传送到远处空地；无安全落点时等待。',
+ };
+ return descriptions[id]??getSkill(id).description;
+}
+export function survivalGrowth(id:SkillId){return [...SKILL_GROWTH[id],...survivalLateGrowth(id)].map((step,index)=>{
+ const labels:Partial<Record<SkillId,Record<number,string>>>={
+  cleave:{0:'正面180°；半径70px；单个近敌即可触发，优先覆盖敌群'},
+  invisible:{0:'隐身6秒；生命低于60%且近处有敌触发；移动/自动攻击不解除'},
+  groupInvisible:{0:'自身及72px内友方隐身5秒；近敌触发，单人可用，行动不解除'},
+  groupHeal:{0:'半径144px群疗；两名友方受伤或自身生命低于70%触发',4:'自身治疗阈值70%→80%'},
+  teleport:{0:'生命低于30%且近处有敌时自动传送；最小距离200px'},
+ };
+ return labels[id]?.[index]?{...step,label:labels[id]![index]}:step;
+});}
 export function survivalBonuses(s:Skill){const b=canonicalBonuses(s.id,Math.min(6,s.rank));for(const step of survivalLateGrowth(s.id).slice(0,Math.max(0,s.rank-6)))for(const [key,value] of Object.entries(step.add))if(key in b)b[key as keyof typeof b]+=value;return b;}
 export function survivalChoices(g:Game):Upgrade[]{const pool:Upgrade[]=[];
  for(const s of g.skills.filter(s=>s.rank<8))pool.push({id:'s:'+s.id,kind:'skill',skill:s.id,name:getSkill(s.id).name+` ${s.rank}→${s.rank+1}`,description:survivalGrowth(s.id)[s.rank].label,value:0});

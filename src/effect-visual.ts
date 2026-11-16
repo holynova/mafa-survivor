@@ -13,11 +13,11 @@ export function effectSprites(f:Fx):EffectSprite[]{
  }
  if(f.kind==="beastflame") {
   const offset=Math.PI/5*((f.spread??1)-1),angle=((f.dir??4)-2)*Math.PI/4;
-  return (offset>0 ? [-offset,0,offset] : [0]).map(rotation=>({animation:`beastflame/${f.dir??4}`,x:f.x,y:f.y,time:f.total-f.life,depth:2100,scale:f.radius/140,rotation:rotation+(f.aimAngle??angle)-angle}));
+  return (offset>0 ? [-offset,0,offset] : [0]).map(rotation=>({animation:`beastflame/${f.dir??4}`,x:f.x,y:f.y,time:f.total-f.life,depth:Math.max(2100,f.y+300),scale:f.radius/140,rotation:rotation+(f.aimAngle??angle)-angle}));
  }
  if(f.kind==="beam") {
   const angle=f.aimAngle??((f.dir??4)-2)*Math.PI/4,spread=Math.max(0,((f.width??36)-36)/2);
-  return (spread>0 ? [-spread,0,spread] : [0]).map(offset=>({animation:`beam/${f.dir??4}`,x:f.x-Math.sin(angle)*offset,y:f.y+Math.cos(angle)*offset,time:f.total-f.life,depth:2100,scale:f.radius/520,rotation:angle-((f.dir??4)-2)*Math.PI/4}));
+  return (spread>0 ? [-spread,0,spread] : [0]).map(offset=>({animation:`beam/${f.dir??4}`,x:f.x-Math.sin(angle)*offset,y:f.y+Math.cos(angle)*offset,time:f.total-f.life,depth:Math.max(2100,f.y+300),scale:f.radius/520,rotation:angle-((f.dir??4)-2)*Math.PI/4}));
  }
  if(f.kind==="thrust") {
   const angle=((f.dir??4)-2)*Math.PI/4;
@@ -25,7 +25,7 @@ export function effectSprites(f:Fx):EffectSprite[]{
  }
  if(["cleave","powerstrike","firesword"].includes(f.kind))return [{animation:`${f.kind}/${f.dir??4}`,x:f.x,y:f.y,time:f.total-f.life,depth:Math.max(2100,f.y+300),frameRate:6/f.total,scale:f.kind==="cleave"?Math.max(1,f.radius/70):1}];
  const directional=["beam","powerstrike","thrust","cleave","firesword","womaShock","beastflame","overlordBlade"];
- return [{animation:directional.includes(f.kind)?`${f.kind}/${f.dir??4}`:f.kind,x:f.x,y:f.y,time:f.total-f.life,depth:2100}];
+ return [{animation:directional.includes(f.kind)?`${f.kind}/${f.dir??4}`:f.kind,x:f.x,y:f.y,time:f.total-f.life,depth:Math.max(2100,f.y+300),frameRate:["heal","groupHeal","invisible","groupInvisible","ghost","armor","poison","skeleton"].includes(f.kind)?10/f.total:undefined}];
 }
 export function poisonTint(enemy:Pick<Enemy,"redPoison"|"greenPoison"> & {hp?:number},clock:number):number|undefined{
  if(enemy.hp!==undefined && enemy.hp<=0)return undefined;

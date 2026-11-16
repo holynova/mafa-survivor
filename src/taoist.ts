@@ -49,6 +49,10 @@ export function revealActor(g: Game, id: number) {
     buff.visibleUntil = g.clock + 1.5;
   }
 }
+/** Survival combat is automatic: an action must not cancel its own defensive skill. */
+export function revealOnAction(g: Game, id: number) {
+  if (!g.survivorMode) revealActor(g, id);
+}
 export function canDetect(
   g: Game,
   e: Enemy,
@@ -114,7 +118,7 @@ function heal(g: Game, id: number, amount: number, source: SkillId) {
   if (net <= 0) return 0;
   friend.actor.hp += net;
   g.tao.healing[source] = (g.tao.healing[source] ?? 0) + net;
-  g.effect(source, friend.actor.x, friend.actor.y, 0, 0.8);
+  g.effect(source, friend.actor.x, friend.actor.y, 0, 0.8).targetId = id;
   if (g.floating.length < 45)
     g.floating.push({
       id: g.nextEntityId(),
@@ -232,7 +236,7 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
         (1 + (g.stats.sc_bonus_pct ?? 0) / 100);
       for (const f of selected) heal(g, f.id, amount, s.id);
     } else {
-      if (injured.length < 2 && g.player.hp / g.maxHP >= 0.35+(skillExtras(s).triggerHP??0)/100) return false;
+      if (injured.length < 2 && g.player.hp / g.maxHP >= (g.survivorMode ? 0.7 : 0.35)+(skillExtras(s).triggerHP??0)/100) return false;
       if (!injured.length) return false;
       const amount =
         (14 + g.rollStat("sc")) *
@@ -252,35 +256,35 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
       const buff = actorBuffs(g, f.id);
       buff[until] = g.clock + duration(g, s, 8, g.survivorMode?14:12);
       buff[s.id === "ghost" ? "ghostPower" : "armorPower"] = value;
-      g.effect(s.id, f.actor.x, f.actor.y, 0, 0.8);
+      g.effect(s.id, f.actor.x, f.actor.y, 0, 0.8).targetId = f.id;
     }
     return true;
   }
   if (s.id === "invisible") {
     if (
-      g.player.moving ||
+      (!g.survivorMode && g.player.moving) ||
       g.player.hp / g.maxHP >= 0.6+(skillExtras(s).triggerHP??0)/100 ||
-      targets.filter((e) => distance(e, g.player) < 120).length < 2
+      targets.filter((e) => distance(e, g.player) < 120).length < (g.survivorMode ? 1 : 2)
     )
       return false;
     if (!hide(g, 0, s)) return false;
-    g.effect(s.id, g.player.x, g.player.y, 0, 1);
+    g.effect(s.id, g.player.x, g.player.y, 0, 1).targetId = 0;
     return true;
   }
   if (s.id === "groupInvisible") {
     const near = friends(g).filter(
       (f) => distance(f.actor, g.player) <= radius(g, s, 72),
     );
-    if (!near.some((f) => f.id !== 0)) return false;
+    if (g.survivorMode ? !targets.some(e => distance(e, g.player) < 160) : !near.some((f) => f.id !== 0)) return false;
     let applied = false;
     for (const f of near) {
       if (
-        (f.id === 0 && g.player.moving) ||
-        (f.id !== 0 && (f.actor as Pet).moving)
+        !g.survivorMode && ((f.id === 0 && g.player.moving) ||
+        (f.id !== 0 && (f.actor as Pet).moving))
       )
         continue;
       if (hide(g, f.id, s)) {
-        g.effect(s.id, f.actor.x, f.actor.y, 0, 1);
+        g.effect(s.id, f.actor.x, f.actor.y, 0, 1).targetId = f.id;
         applied = true;
       }
     }
@@ -288,7 +292,7 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
   }
   if (s.id === "talisman") {
     if (!targets.length) return false;
-    revealActor(g, 0);
+    revealOnAction(g, 0);
     const spirit = g.skills.find((s) => s.id === "spirit");
     for (const e of targets.slice(0, Math.min(g.survivorMode?4:3, 1 + s.count))) {
       const dx = e.x - g.player.x,
@@ -317,7 +321,7 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
   }
   if (s.id === "poison") {
     if (!targets.length) return false;
-    revealActor(g, 0);
+    revealOnAction(g, 0);
     for (const e of targets.slice(0, Math.min(g.survivorMode?4:3, 1 + s.count))) {
       const until = g.clock + duration(g, s, 6, 15);
       if (g.tao.poisonMode === "green") {
@@ -370,7 +374,7 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
     if (!eligible.length) return false;
     const center = eligible[0],
       range = radius(g, s, 72);
-    revealActor(g, 0);
+    revealOnAction(g, 0);
     for (const e of eligible.filter((e) => distance(e, center) <= range)) {
       e.trapUntil = g.clock + duration(g, s, 4, 8);
       e.windup = 0;

@@ -1,3 +1,4 @@
+import {invisible} from "./taoist";
 import {cameraWorldView,frameBounds,intersectsView,type ViewRect} from './render-visibility';
 import Phaser from "phaser";
 import {alignCameraScroll,battleViewport} from "./camera-grid";
@@ -738,6 +739,7 @@ class BattleScene extends Phaser.Scene {
           p.y,
           hurt ? t-((p.hitUntil ?? 0)-PET_HIT_WINDOW) : t - p.born,
           p.y,
+          invisible(game,p.id) ? 0.4 : 1,
         );
         this.bars
           .lineStyle(1, 0x83c88a, 0.8)
@@ -774,7 +776,7 @@ class BattleScene extends Phaser.Scene {
           p.x,
           p.y - (p.height ?? 0),
           t,
-          2200,
+          Math.max(2200,p.y+300),
           p.visual === "poison" ? 0.55 : 0.8,
         );
       for (const f of game.effects) {
@@ -825,7 +827,7 @@ class BattleScene extends Phaser.Scene {
         game.player.y,
         hero.time,
         game.player.y + 0.5,
-        1,
+        invisible(game,0) ? 0.4 : 1,
       );
       if(hero.motion==="hurt" && t-(game.player.hitUntil-.45)<.09)
         for(const key of ["hero","hero-weapon","hero-cover","weapon-cover"])this.bodies.get(key)?.setTint(0xff9890);

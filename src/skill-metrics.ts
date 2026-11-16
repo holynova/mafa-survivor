@@ -37,7 +37,7 @@ export function skillMetrics(g:Game,s:Skill):string[] {
   if(s.id==="charm")out.push(`上限${Math.min(5,2+s.count)}只／伤害+${s.summonPower}%／生命+${s.summonHP}%`);
   if(s.id==="invisible" || s.id==="groupInvisible")out.push(`持续${duration(s.id==="invisible" ? 6 : 5,s.id==="invisible" ? 8 : 9)}秒`,`发现距离${Math.max(8,28-s.chance)}px`);
   if(s.id==="invisible")out.push(`自身生命低于${60+(extra.triggerHP??0)}%触发`);
-  if(s.id==="groupHeal")out.push(`自身急救阈值${35+(extra.triggerHP??0)}%`);
+  if(s.id==="groupHeal")out.push(`自身急救阈值${(g.survivorMode?70:35)+(extra.triggerHP??0)}%`);
   if(["ghost","armor"].includes(s.id))out.push(`加成值+${s.power}%／持续${duration(8,12)}秒`);
   if(s.id==="trap")out.push(`持续${duration(4,8)}秒／受伤解除`);
   if(s.id==="reveal")out.push(`显示${duration(6,12)}秒`,extra.revealDetails ? "防御／免疫／可追踪冷却" : s.power ? "血量／防御" : "血量");

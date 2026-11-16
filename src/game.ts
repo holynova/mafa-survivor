@@ -43,7 +43,7 @@ import {
   enemyVictim,
   canDetect,
   invisible,
-  revealActor,
+  revealOnAction,
   buffDefense,
   clearTaoSkill,
 } from "./taoist";
@@ -789,7 +789,7 @@ export class Game {
         this.player.y = ny;
       this.player.dir = this.direction(dx, dy);
     }
-    if (this.player.moving) revealActor(this, 0);
+    if (this.player.moving) revealOnAction(this, 0);
     updateTaoist(this);
     const spawning = !this.survivorMode && (this.mode !== "test" || this.test.spawning);
     if (spawning) this.spawnTimer -= dt;
@@ -979,7 +979,7 @@ export class Game {
         s.cd === 0 &&
         this.clock >= (s.retryAt ?? 0) &&
         (s.id !== "teleport" ||
-          (this.automaticTeleport &&
+          ((this.survivorMode || this.automaticTeleport) &&
             this.player.hp / this.maxHP < 0.3 &&
             this.enemies.some(
               (e) =>
@@ -1063,7 +1063,13 @@ export class Game {
         e.burnAt = this.clock + 0.5;
       }
     }
-    for (const f of this.effects) f.life -= dt;
+    for (const f of this.effects) {
+      f.life -= dt;
+      if (f.targetId !== undefined && ["heal","groupHeal","invisible","groupInvisible","ghost","armor"].includes(f.kind)) {
+        const actor = f.targetId === 0 ? this.player : this.pets.find(p => p.id === f.targetId && p.hp > 0);
+        if (actor) { f.x = actor.x; f.y = actor.y; } else f.life = 0;
+      }
+    }
     for (const f of this.floating) {
       f.life -= dt;
       f.y -= dt * 22;
@@ -1388,7 +1394,7 @@ export class Game {
     // Each charge modifies this one swing, including a missed swing. Never create
     // another attack or projectile; split the actual damage only for attribution.
     this.charges = {};
-    revealActor(this, 0);
+    revealOnAction(this, 0);
     if (!landed) return true;
     const passive = this.skills.find((s) =>
       ["swordsmanship", "spirit"].includes(s.id),
@@ -1792,10 +1798,10 @@ export class Game {
             break;
           }
         }
-        revealActor(this, p.id);
+        revealOnAction(this, p.id);
       }
       const range = source === "beast" ? 140 * (1 + (skill?.radius ?? 0) / 100) : 42;
-      const candidates = invisible(this, p.id)
+      const candidates = !this.survivorMode && invisible(this, p.id)
         ? []
         : this.enemies
             .filter(
@@ -1820,7 +1826,7 @@ export class Game {
       if (d > 1) p.dir = this.direction(dx, dy);
       const clear=!target || this.attackLineClear(p,target);
       if (target && d < range && clear && p.cd === 0) {
-        revealActor(this, p.id);
+        revealOnAction(this, p.id);
         const sc = source === "charm" ? 0 : this.rollStat("sc") * 0.8;
         const damage = Math.round(
           (p.damage + sc) *
@@ -1868,7 +1874,7 @@ export class Game {
         if (this.freePoint(nx, p.y, 0, 12)) p.x = nx;
         if (this.freePoint(p.x, ny, 0, 12)) p.y = ny;
         p.moving = true;
-        revealActor(this, p.id);
+        revealOnAction(this, p.id);
       }
     }
     this.pets = this.pets.filter((p) => p.hp > 0);
