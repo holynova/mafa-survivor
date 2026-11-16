@@ -149,8 +149,8 @@ function summon(g: Game, s: Skill) {
   const all = g.pets.filter(
     (p) => p.hp > 0 && ["skeleton", "beast"].includes(p.source ?? ""),
   );
-  const cap = source === "skeleton" ? Math.min(2, 1 + s.count) : 1;
-  if (owned.length >= cap || all.length >= 3) return false;
+  const cap = source === "skeleton" ? Math.min(g.survivorMode?3:2, 1 + s.count) : 1;
+  if (owned.length >= cap || all.length >= (g.survivorMode?4:3)) return false;
   let point: { x: number; y: number } | undefined;
   for (let i = 0; i < 16; i++) {
     const a = (i * Math.PI) / 8,
@@ -192,7 +192,7 @@ function hide(g: Game, id: number, s: Skill) {
     return false;
   buff.invisibleUntil =
     g.clock +
-    duration(g, s, s.id === "invisible" ? 6 : 5, s.id === "invisible" ? 8 : 9);
+    duration(g, s, s.id === "invisible" ? 6 : 5, s.id === "invisible" ? (g.survivorMode?9:8) : 9);
   buff.invisibleSource = s.id;
   buff.detectionRadius = Math.max(8, 28 - s.chance);
   return true;
@@ -225,7 +225,7 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
         ...injured
           .filter((f) => f.id !== first.id)
           .sort((a, b) => a.actor.hp / a.maxHp - b.actor.hp / b.maxHp),
-      ].slice(0, Math.min(3, 1 + s.count));
+      ].slice(0, Math.min(g.survivorMode?4:3, 1 + s.count));
       const amount =
         (18 + g.rollStat("sc") * 1.5) *
         (1 + s.power / 100) *
@@ -250,7 +250,7 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
       (f) => distance(f.actor, g.player) <= radius(g, s, 160),
     )) {
       const buff = actorBuffs(g, f.id);
-      buff[until] = g.clock + duration(g, s, 8, 12);
+      buff[until] = g.clock + duration(g, s, 8, g.survivorMode?14:12);
       buff[s.id === "ghost" ? "ghostPower" : "armorPower"] = value;
       g.effect(s.id, f.actor.x, f.actor.y, 0, 0.8);
     }
@@ -290,7 +290,7 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
     if (!targets.length) return false;
     revealActor(g, 0);
     const spirit = g.skills.find((s) => s.id === "spirit");
-    for (const e of targets.slice(0, Math.min(3, 1 + s.count))) {
+    for (const e of targets.slice(0, Math.min(g.survivorMode?4:3, 1 + s.count))) {
       const dx = e.x - g.player.x,
         dy = e.y - g.player.y,
         d = Math.max(1, Math.hypot(dx, dy));
@@ -318,7 +318,7 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
   if (s.id === "poison") {
     if (!targets.length) return false;
     revealActor(g, 0);
-    for (const e of targets.slice(0, Math.min(3, 1 + s.count))) {
+    for (const e of targets.slice(0, Math.min(g.survivorMode?4:3, 1 + s.count))) {
       const until = g.clock + duration(g, s, 6, 15);
       if (g.tao.poisonMode === "green") {
         const tick =
@@ -349,10 +349,10 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
   if (s.id === "reveal") {
     const chosen = targets
       .filter((e) => e.elite || isBossKind(e.kind))
-      .slice(0, Math.min(3, 1 + s.count));
+      .slice(0, Math.min(g.survivorMode?4:3, 1 + s.count));
     if (!chosen.length) return false;
     for (const e of chosen) {
-      e.revealUntil = g.clock + duration(g, s, 6, 12);
+      e.revealUntil = g.clock + duration(g, s, 6, g.survivorMode?15:12);
       e.revealTags = s.power > 0;
       e.revealDetails=!!skillExtras(s).revealDetails;
     }
@@ -419,7 +419,7 @@ export function updateTaoist(g: Game) {
       poison.until >= g.clock - 1e-8 &&
       poison.tickAt <= g.clock + 1e-8
     ) {
-      g.hit(e, poison.damage, "poison");
+      g.hit(e, poison.damage, poison.origin??"poison");
       poison.tickAt += 1;
     }
     if (poison && poison.until < g.clock - 1e-8) delete e.greenPoison;

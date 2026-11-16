@@ -9,6 +9,16 @@ const manifest = JSON.parse(
 );
 const frames = {};
 const failures = [];
+const iconCatalog = JSON.parse(fs.readFileSync(new URL("./skill-icon-sources.json", import.meta.url), "utf8"));
+for (const [id, source] of Object.entries(iconCatalog.frames)) {
+  const icon = manifest.skillIcons?.frames[id];
+  if (!icon || !fs.existsSync(new URL(icon.file, root))) { failures.push(`${id}: missing original skill icon`); continue; }
+  const png = fs.readFileSync(new URL(icon.file, root));
+  const blob = createHash("sha1").update(`blob ${png.length}\0`).update(png).digest("hex");
+  if (blob !== source.sha || createHash("sha256").update(png).digest("hex") !== icon.sha256 || png.readUInt32BE(16) !== icon.width || png.readUInt32BE(20) !== icon.height)
+    failures.push(`${id}: skill icon differs from pinned original`);
+}
+if (manifest.skillIcons?.ref !== iconCatalog.ref || !manifest.skillIcons?.missing?.reveal) failures.push("skill icon provenance incomplete");
 const stationary=new Set(monsters.stationaryModels ?? []);
 for (const page of manifest.pages) {
   const atlas = JSON.parse(fs.readFileSync(new URL(page.data, root), "utf8"));

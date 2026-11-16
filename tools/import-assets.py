@@ -225,6 +225,7 @@ for path in OUT.glob('atlas*'):
 print('Packed',len(meta),'frames on',len(pages),'pages',flush=True)
 
 import runpy
+runpy.run_path(str(ROOT/"tools/import-skill-icons.py"))
 runpy.run_path(str(ROOT/"tools/write-asset-ledger.py"))
 (OUT/'SOURCE_LICENSE.txt').write_bytes(request(f'https://raw.githubusercontent.com/etorth/mir2x_res/{REF}/LICENSE'))
 (OUT/'SOURCE_NATIVE_MAPS.txt').write_text('Native map chapter sources (separately pinned):\n'+

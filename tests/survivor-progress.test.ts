@@ -1,0 +1,15 @@
+import {describe,it,expect} from 'vitest';
+import {Game} from '../src/game';
+import {CHAPTER_PATH,chapterUnlocked,chapterGoal,newSurvivorProgress,readSurvivorProgress,updateSurvivorProgress,SURVIVOR_PROGRESS_KEY} from '../src/survivor-progress';
+import {recordSurvival,SURVIVOR_RECORD_KEY} from '../src/survivor-records';
+const memory=()=>{const data=new Map<string,string>();return {data,getItem:(k:string)=>data.get(k)??null,setItem:(k:string,v:string)=>{data.set(k,v);}};};
+const run=()=>{const g=new Game();g.survivorMode=true;g.start('normal',176);return g;};
+describe('permanent survivor chapter progress',()=>{
+ it('starts with one chapter and exposes the next concrete goal',()=>{const p=newSurvivorProgress();expect(CHAPTER_PATH.filter(id=>chapterUnlocked(p,id))).toEqual(['biche']);expect(chapterGoal(p,'biche')).toContain('5分钟');});
+ it('unlocks at the threshold even before victory and never loses the best time',()=>{const g=run(),s=memory();g.clock=299;let p=updateSurvivorProgress(g,s);expect(chapterUnlocked(p,'mine')).toBe(false);g.clock=300;p=updateSurvivorProgress(g,s);expect(chapterUnlocked(p,'mine')).toBe(true);expect(chapterUnlocked(readSurvivorProgress(s),'mine')).toBe(true);g.clock=10;updateSurvivorProgress(g,s);expect(readSurvivorProgress(s).best.biche).toBe(300);expect([...s.data.keys()]).toEqual([SURVIVOR_PROGRESS_KEY]);});
+ it('test mode and original mode cannot unlock chapters',()=>{const s=memory(),g=run();g.mode='test';g.clock=1200;expect(chapterUnlocked(updateSurvivorProgress(g,s),'mine')).toBe(false);g.mode='normal';g.survivorMode=false;expect(updateSurvivorProgress(g,s).visited).toEqual([]);expect(s.data.size).toBe(0);});
+ it('retains unlocks after the twenty-run history is replaced',()=>{const s=memory(),g=run();g.clock=600;updateSurvivorProgress(g,s);s.setItem(SURVIVOR_RECORD_KEY,'[]');expect(chapterUnlocked(readSurvivorProgress(s),'mine')).toBe(true);});
+ it('migrates previously played chapters without relocking the earlier demo',()=>{const s=memory(),g=run();g.mapId='redmoon';g.clock=70;g.finish(false);recordSurvival(g,s);const p=readSurvivorProgress(s);expect(chapterUnlocked(p,'redmoon')).toBe(true);expect(p.best.redmoon).toBe(70);expect(chapterUnlocked(p,'mine')).toBe(false);});
+ it('records victory and evolution once and recovers from broken data',()=>{const g=run(),s=memory();s.setItem(SURVIVOR_PROGRESS_KEY,'{broken');expect(readSurvivorProgress(s)).toEqual(newSurvivorProgress());g.survival.evolved=['fireball'];g.clock=1200;g.finish(true);updateSurvivorProgress(g,s);updateSurvivorProgress(g,s);expect(readSurvivorProgress(s).won).toEqual(['biche']);expect(readSurvivorProgress(s).evolved).toEqual(['fireball']);});
+});
+it('uses cleave only for the new warrior while preserving original starting skill',()=>{const g=new Game();g.start('normal',176,'warrior');expect(g.skills[0].id).toBe('powerstrike');g.survivorMode=true;g.start('normal',176,'warrior');expect(g.skills[0].id).toBe('cleave');const cp=g.snapshotSurvival();const r=new Game();expect(r.resumeSurvival(cp)).toBe(true);expect(r.skills[0].id).toBe('cleave');});

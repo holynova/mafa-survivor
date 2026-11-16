@@ -1,0 +1,5 @@
+import {game} from './game';
+import {getSkill} from './content';
+import type {SkillId} from './spells';
+import {CHARMS,EVOLUTIONS,evolutionReadiness} from './survivor';
+export function EvolutionBook(){return <details className="survivor-evolution-book"><summary>进化图鉴 · {game.classInfo.name}</summary>{(Object.keys(EVOLUTIONS) as SkillId[]).filter(id=>getSkill(id).classId===game.classId).map(id=>{const state=evolutionReadiness(game,id)!;return <article className="survivor-rule" key={id}><b>{getSkill(id).name} → {state.recipe.name}</b><p>{state.recipe.description}</p>{state.evolved?<p className="survivor-met">已完成进化</p>:<><p className={state.rank===8?'survivor-met':''}>{state.rank===8?'✓':'○'} 技能 {state.rank}/8{state.rank===0?' · 尚未学习':''}</p><p className={state.hasCharm?'survivor-met':''}>{state.hasCharm?'✓':'○'} {CHARMS.find(c=>c.id===state.recipe.charm)?.name} · {state.hasCharm?'已持有':'未持有'}</p><p className={state.eligibleChests?'survivor-met':''}>{state.eligibleChests?'✓':'○'} 地上可进化宝箱 {state.eligibleChests} 个</p></>}</article>;})}<p className="survivor-note">新模式8分钟后出生的精英／首领掉落的宝箱能进化；每击败两只精英获得一个宝箱，阶段首领必掉。多个技能满足条件时可以自行选择；其他合格配方留待下一只宝箱。</p></details>;}

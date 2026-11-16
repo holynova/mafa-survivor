@@ -1,3 +1,6 @@
+import {survivorExpNeeded} from './survivor-pacing';
+import {snapshotSurvival,parseSurvivalSave} from './survivor-save';
+import {survivalBonuses,survivalGrowth,tuneSurvivalEnemy,newSurvival,survivalStarter,survivalTick,survivalChoices,chooseSurvival,survivalDeath,survivalSplash} from "./survivor";
 import {
   ITEMS,
   MONSTERS,
@@ -100,7 +103,7 @@ export type Enemy = Entity & {
   agility?: number;
   defense?: number;
   magicDefense?: number;
-  greenPoison?: { until: number; tickAt: number; damage: number };
+  greenPoison?: { until: number; tickAt: number; damage: number; origin?: 'evolution:poison' };
   redPoison?: { until: number; reduction: number };
   trapUntil?: number;
   revealUntil?: number;
@@ -189,6 +192,7 @@ export type Fx = Entity & {
   width?: number;
   spread?: number;
   aimAngle?: number;
+  alpha?: number;
 };
 export type Floating = Entity & { text: string; color: string; life: number };
 export type Skill = {
@@ -271,6 +275,9 @@ export class Game {
   potions=newPotionState();
   test = newTestSettings();
   audioEvents: string[] = [];
+  survivorMode = false;
+  survival = newSurvival();
+  touchInput = {x:0,y:0};
   phase: Phase = "lobby";
   mode: Mode = "normal";
   seed = 176;
@@ -450,6 +457,7 @@ export class Game {
   get moveSpeed() {
     return this.classInfo.speed * (1 + (this.stats.move_speed ?? 0) / 100);
   }
+  get experienceRequired() {return this.survivorMode?survivorExpNeeded(this.level):expNeeded(this.level);}
   get pickupRadius() {
     return 70 * (1 + (this.stats.pickup_radius ?? 0) / 100);
   }
@@ -468,6 +476,8 @@ export class Game {
     this.classId = classId;
     this.mapId = mapId;
     this.mode = mode;
+    this.survival = newSurvival();
+    this.touchInput={x:0,y:0};
     this.warriorFourSlot = warriorFourSlot;
     this.test = newTestSettings();
     this.audioEvents = [];
@@ -503,7 +513,7 @@ export class Game {
       attackUntil: 0,
       attackDir: 4,
     };
-    this.skills = [this.newSkill(this.classInfo.startingSkill)];
+    this.skills = [this.newSkill(this.survivorMode?survivalStarter(this.classId):this.classInfo.startingSkill)];
     this.basicCD = 0;
     this.charges = {};
     this.tao = createTaoState();
@@ -576,6 +586,20 @@ export class Game {
     this.stats = combine(sources);
     this.player.hp = Math.min(this.player.hp, this.maxHP);
     refreshSummons(this);
+  }
+  snapshotSurvival() {return snapshotSurvival(this,this.id+1);}
+  resumeSurvival(raw:unknown) {
+    const saved=parseSurvivalSave(raw);if(!saved)return false;
+    this.survivorMode=true;this.unlockedMaps.add(saved.state.mapId);
+    this.start('normal',saved.state.seed,saved.state.classId,false,saved.state.mapId);
+    Object.assign(this,saved.state);
+    this.id=saved.nextId-1;this.rng=new Rng(saved.rngState);
+    for(const skill of this.skills)Object.assign(skill,survivalBonuses(skill));
+    for(const choice of this.choices)if(choice.skill&&choice.id.startsWith("s:")){const rank=this.skills.find(s=>s.id===choice.skill)?.rank??0;choice.description=survivalGrowth(choice.skill)[rank]?.label??choice.description;}
+    this.recompute();this.player.hp=saved.state.player.hp;
+    this.previous='battle';this.phase=saved.state.phase==='upgrade'?'upgrade':'paused';
+    this.input={x:0,y:0};this.touchInput={x:0,y:0};this.player.moving=false;
+    this.floating=[];this.audioEvents=[];this.result=null;this.emit();return true;
   }
   /** Stable wave-boundary state for refresh recovery; live combat is never saved. */
   snapshotCheckpoint(): RunCheckpoint | null {
@@ -716,10 +740,12 @@ export class Game {
   pause() {
     if (this.phase === "battle") {
       this.previous = "battle";
+      this.touchInput = {x:0,y:0};
       this.phase = "paused";
       this.input = { x: 0, y: 0 };
       this.emit();
     } else if (this.phase === "paused") {
+      if(this.survivorMode)this.survival.toast="";
       this.phase = this.previous;
       this.emit();
     }
@@ -729,6 +755,7 @@ export class Game {
     if (this.phase !== "battle") return;
     this.clock += dt;
     this.waveTime += dt;
+    if(this.survivorMode){survivalTick(this);if(this.phase!=="battle")return;}
     this.potions.cd=Math.max(0,this.potions.cd-dt);
     if(this.player.hp/this.maxHP<=.5)useBloodPotion(this);
     this.player.hp = Math.min(
@@ -764,7 +791,7 @@ export class Game {
     }
     if (this.player.moving) revealActor(this, 0);
     updateTaoist(this);
-    const spawning = this.mode !== "test" || this.test.spawning;
+    const spawning = !this.survivorMode && (this.mode !== "test" || this.test.spawning);
     if (spawning) this.spawnTimer -= dt;
     const budget=this.spawnBudget;
     if (
@@ -1060,11 +1087,11 @@ export class Game {
       }
     }
     this.enemies = this.enemies.filter((x) => x.hp > 0);
-    if (this.exp >= expNeeded(this.level)) {
+    if (this.exp >= this.experienceRequired) {
       this.beginUpgrade();
       return;
     }
-    if (this.waveTime >= this.duration) {
+    if (!this.survivorMode && this.waveTime >= this.duration) {
       this.endWave();
       return;
     }
@@ -1079,7 +1106,7 @@ export class Game {
   }
   spawnEnemy(kind?: string, summoned = false) {
     const eliteWave=this.mode==="trial" ? this.wave===2 : [4,7,10,12].includes(this.wave);
-    const scheduledElite = eliteWave && this.spawned === Math.floor(this.spawnBudget/2);
+    const scheduledElite = !this.survivorMode && eliteWave && this.spawned === Math.floor(this.spawnBudget/2);
     if (!kind && scheduledElite) {
       const native=MAPS[this.mapId].monsterPool.filter(id=>NATIVE_ELITES.includes(id));
       if(native.length)kind=native.length===1 ? native[0] : this.rng.pick(native);
@@ -1144,7 +1171,9 @@ export class Game {
             }
           : {}),
     });
-    return this.enemies.at(-1)!;
+    const spawned=this.enemies.at(-1)!;
+    if(this.survivorMode&&summoned)tuneSurvivalEnemy(this,spawned,isBossKind(spawned.kind)?"boss":spawned.elite?"elite":"normal");
+    return spawned;
   }
   private summonBossMinion(boss: Enemy) {
     for(let i=0;i<2 && this.enemies.length<300;i++) {
@@ -1401,6 +1430,7 @@ export class Game {
       const dealt = (actual * part.value) / total;
       this.damageDealt.basic -= dealt;
       this.damageDealt[part.id] = (this.damageDealt[part.id] ?? 0) + dealt;
+      if(this.survivorMode)survivalSplash(this,target,dealt,part.id);
     }
     for (const id of [power?.id, fire?.id])
       if (id)
@@ -1528,7 +1558,7 @@ export class Game {
       (e) => Math.hypot(e.x - this.player.x, e.y - this.player.y) <= radius && this.meleeReachable(e),
     );
     const solo=s.id==="thrust" && !!skillExtras(s).solo;
-    const minimum=solo ? 1 : 2;
+    const minimum=solo || (this.survivorMode && s.id==="cleave") ? 1 : 2;
     if (near.length < minimum) return false;
     const autoAim=solo && !manual;
     if(autoAim) {
@@ -1549,7 +1579,7 @@ export class Game {
       const angle = Math.acos(
         clamp(along / Math.max(1, Math.hypot(dx, dy)), -1, 1),
       );
-      return angle <= (Math.min(230, 180 + s.angle) * Math.PI) / 360;
+      return angle <= (Math.min(this.survivorMode?270:230, 180 + s.angle) * Math.PI) / 360;
     });
     let aim = this.meleeAim(near,autoAim),cleaveDir:number|undefined;
     if(s.id==="cleave" && !manual) {
@@ -1867,9 +1897,9 @@ export class Game {
       didCast = this.teleport(s);
     } else if (s.id === "shield") {
       this.player.shieldUntil =
-        this.clock + Math.min(7, 6 * (1 + s.duration / 100));
+        this.clock + Math.min(this.survivorMode?9:7, 6 * (1 + s.duration / 100));
     } else if (s.id === "fireball" || s.id === "bigfireball") {
-      for (const e of targets.slice(0, Math.min(3, 1 + s.count))) {
+      for (const e of targets.slice(0, Math.min(this.survivorMode?4:3, 1 + s.count))) {
         const dx = e.x - this.player.x,
           dy = e.y - this.player.y,
           l = Math.max(1, Math.hypot(dx, dy)),
@@ -1894,19 +1924,19 @@ export class Game {
         });
       }
     } else if (s.id === "lightning") {
-      for (const e of targets.slice(0, Math.min(3, 1 + s.count))) {
+      for (const e of targets.slice(0, Math.min(this.survivorMode?4:3, 1 + s.count))) {
         this.hit(e, this.magicDamage(15, s), s.id);
         this.effect("lightning", e.x, e.y, 0, 0.5);
       }
     } else if (s.id === "firewall") {
       const candidates=[...targets],placed:{x:number;y:number}[]=[];
-      for(let i=0;i<Math.min(3,1+s.count) && candidates.length;i++) {
+      for(let i=0;i<Math.min(this.survivorMode?4:3,1+s.count) && candidates.length;i++) {
         const e=this.densest(candidates,100);
         const point={x:e.x+(this.player.x-e.x)*0.2,y:e.y+(this.player.y-e.y)*0.2};
         if(this.canStand(point.x,point.y,0) && this.attackLineClear(this.player,point) &&
             placed.every(p=>Math.hypot(p.x-point.x,p.y-point.y)>=48)) {
           const existing=this.effects.filter(f=>f.kind==="firewall" && f.life>0);
-          if(existing.length>=Math.min(4,2+s.count))existing[0].life=0;
+          if(existing.length>=Math.min(this.survivorMode?5:4,2+s.count))existing[0].life=0;
           this.effect("firewall",point.x,point.y,rad(64),6*(1+s.duration/100)*(1+(this.stats.duration??0)/100));
           placed.push(point);
         }
@@ -1963,7 +1993,7 @@ export class Game {
     } else if (s.id === "holy") {
       const undead = targets.filter((e) => this.isUndead(e));
       if (!undead.length) return;
-      for (const e of undead.slice(0, Math.min(3, 1 + s.count))) {
+      for (const e of undead.slice(0, Math.min(this.survivorMode?4:3, 1 + s.count))) {
         if (e.elite || isBossKind(e.kind))
           this.hit(e, Math.min(e.maxHp * 0.15, this.magicDamage(30, s)), s.id);
         else if (
@@ -2072,6 +2102,7 @@ export class Game {
     e.hitAt = this.clock;
     this.damageDealt[skill] = (this.damageDealt[skill] ?? 0) + dealt;
     recoverHit(this,e,dealt,origin);
+    if(this.survivorMode)survivalSplash(this,e,dealt,skill);
     if (this.floating.length < 45)
       this.floating.push({
         id: ++this.id,
@@ -2082,6 +2113,7 @@ export class Game {
         life: 0.7,
       });
     if (e.hp <= 0) {
+      if(this.survivorMode)survivalDeath(this,e);
       this.kills++;
       this.waveKills++;
       if (e.kind===MAPS[this.mapId].boss) this.bossKilled = true;
@@ -2162,7 +2194,7 @@ export class Game {
     const shield =
       this.clock < this.player.shieldUntil
         ? Math.min(
-            0.35,
+            this.survivorMode?0.4:0.35,
             0.2 +
               (this.skills.find((s) => s.id === "shield")?.shieldReduction ??
                 0) /
@@ -2194,7 +2226,7 @@ export class Game {
     if (this.player.hp === 0) this.finish(false);
   }
   beginUpgrade() {
-    this.exp -= expNeeded(this.level);
+    this.exp -= this.experienceRequired;
     this.level++;
     this.choices = this.makeChoices();
     this.phase = "upgrade";
@@ -2202,6 +2234,7 @@ export class Game {
     this.emit();
   }
   makeChoices(): Upgrade[] {
+    if(this.survivorMode)return survivalChoices(this);
     const unlearned = SKILLS.filter(
       (s) =>
         s.classId === this.classId && !this.skills.some((a) => a.id === s.id),
@@ -2315,6 +2348,7 @@ export class Game {
   }
   choose(id: string) {
     if (this.phase !== "upgrade") return;
+    if(this.survivorMode){chooseSurvival(this,id);return;}
     const c = this.choices.find((c) => c.id === id);
     if (!c) return;
     if (c.kind === "skill") {
@@ -2342,7 +2376,7 @@ export class Game {
     this.recompute();
     this.choices = [];
     this.phase = "battle";
-    if (this.exp >= expNeeded(this.level)) this.beginUpgrade();
+    if (this.exp >= this.experienceRequired) this.beginUpgrade();
     else this.emit();
   }
   replaceSkill(index: number | null) {
@@ -2370,7 +2404,7 @@ export class Game {
     this.recompute();
     this.phase = fromBook ? "shop" : "battle";
     if(fromBook){this.emit();return true;}
-    if (this.exp >= expNeeded(this.level)) this.beginUpgrade();
+    if (this.exp >= this.experienceRequired) this.beginUpgrade();
     else this.emit();
     return true;
   }
@@ -2399,7 +2433,7 @@ export class Game {
     this.enemies = [];
     this.projectiles = [];
     this.effects = [];
-    if (this.exp >= expNeeded(this.level)) {
+    if (this.exp >= this.experienceRequired) {
       this.beginUpgrade();
       return;
     }
@@ -2600,7 +2634,7 @@ export class Game {
   finish(won: boolean) {
     if (this.result) return;
     this.phase = won ? "won" : "dead";
-    const runCrystals = this.mode === "normal" && won ? 3 : 0;
+    const runCrystals = !this.survivorMode && this.mode === "normal" && won ? 3 : 0;
     this.crystals += runCrystals;
     this.result = {
       classId: this.classId,

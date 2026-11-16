@@ -37,7 +37,7 @@ def sound(name,seen=None):
   if found:return found
  return None
 mapping={k:v for k,n in names.items() if (v:=sound(n))}
-mapping.update(step='01000001.WAV',attack='01010034.WAV',unarmed='01010039.WAV',hurt='0103008A.WAV',death='01030090.WAV')
+mapping.update(coin='0102006A.WAV',step='01000001.WAV',attack='01010034.WAV',unarmed='01010039.WAV',hurt='0103008A.WAV',death='01030090.WAV')
 reference_hashes={
  'client/src/clientmonster.cpp':'0460baa44df7f2f9f078f01fa6738b1a8cb7f7a3af910da65db90131f95f9765',
  'common/src/sysconst.hpp':'536f549b0448c2cee6d9caf4e0890e81abdcee5fd01f054b240584a904073a4d',
@@ -68,6 +68,7 @@ def load(filename):
  return filename,{'sourcePath':'sound/seff/'+filename,'sha1':sha,'sha256':hashlib.sha256(b).hexdigest(),'bytes':len(b),'permissionStatus':'permission_pending'}
 files=dict(ThreadPoolExecutor(12).map(load,sorted(set(mapping.values()))))
 manifest={'ref':ref,'repository':'https://github.com/etorth/mir2x_res','rightsStatus':'UNVERIFIED_THIRD_PARTY_ART','releaseStatus':'BLOCKED_BY_ASSET_RIGHTS','mappingReference':{'ref':source_ref,'sourcePath':'common/src/magicrecord.inc','sha256':hashlib.sha256(srcfile.read_bytes()).hexdigest(),'soundFormula':'0x04000000 + seffBase * 16 + stage; references resolved; first existing stage retained'},'heroSoundReference':{'ref':source_ref,'sourcePath':'client/src/soundeffectdb.cpp','sha256':'c531cfce810fe6f36eb1c59d56a53a35fb65b23646b7a5513e36c31dc721357c','note':'s_man_struck = 138.wav; s_man_die = 144.wav; 0x01030000 + source sound number. Current source actors are male.'},'mapping':mapping,'files':files,'missing':[k for k in names if k not in mapping]}
+manifest['coinSoundReference']={'ref':source_ref,'sourcePath':'client/src/soundeffectdb.cpp','sha256':'c531cfce810fe6f36eb1c59d56a53a35fb65b23646b7a5513e36c31dc721357c','note':'s_money = 106.wav; system sound bank 0x01020000 + 106 = 0102006A.WAV'}
 manifest['monsterSoundReference']={'references':references,'modelsPath':'tools/monster-models.json','modelsSha256':hashlib.sha256(models_path.read_bytes()).hexdigest(),
  'soundFormula':'0x02000000 + raw lookID * 16 + event offset; attack=2, hitted=4, die=5. No sprite lookID-1 adjustment.',
  'aliases':monster_aliases,'missing':monster_missing}

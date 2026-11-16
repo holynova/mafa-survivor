@@ -34,6 +34,7 @@ export function appendLoot(drops:Drop[],drop:Drop) {
 function gold(g:Game,amount:number){g.gold+=amount;g.waveGold+=amount;g.totalGold+=amount;}
 /** Return false when part of a potion stack should remain on the floor. */
 export function collectLoot(g:Game,d:Drop) {
+  if((d.gold>0||d.exp>0)&&!g.audioEvents.includes("coin"))g.sound("coin");
   gold(g,d.gold);g.exp+=d.exp;d.gold=0;d.exp=0;
   if(d.heal) {
     return collectPotion(g,d);

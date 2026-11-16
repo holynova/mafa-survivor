@@ -1,0 +1,170 @@
+{
+  "repository": "https://github.com/etorth/mir2x_res",
+  "ref": "9e21ea6631317d06e064fbfa7e1ea43af6a2d3e6",
+  "mappingSource": "https://github.com/etorth/mir2x/blob/bb6a22287abcd9f248d2aba755074c254c68787a/client/src/gui/skillboard/skillboard.hpp",
+  "frames": {
+    "fireball": {
+      "path": "05001000.PNG",
+      "sha": "20b48e297318d5d022b80431c9a5500367eec1ba",
+      "sourceName": "火球术"
+    },
+    "lightning": {
+      "path": "0500100A.PNG",
+      "sha": "37a7273b5f0d7524224225826cdbb089aa700f06",
+      "sourceName": "雷电术"
+    },
+    "firewall": {
+      "path": "05001015.PNG",
+      "sha": "d4df3852661cc638978f339b268529c570b0deee",
+      "sourceName": "火墙"
+    },
+    "shield": {
+      "path": "0500101D.PNG",
+      "sha": "8ebfe8df4306cac8f30fd57516176c53e97444c0",
+      "sourceName": "魔法盾"
+    },
+    "repulse": {
+      "path": "05001007.PNG",
+      "sha": "12aca6e31504fff7ebe84ad6733fdb1a88bd07cb",
+      "sourceName": "抗拒火环"
+    },
+    "hellfire": {
+      "path": "05001008.PNG",
+      "sha": "1581df3cec0075b4fc49736e709ee20feb004948",
+      "sourceName": "地狱火"
+    },
+    "bigfireball": {
+      "path": "05001004.PNG",
+      "sha": "5a5941552af0bfc821640c7704fe4c152311b101",
+      "sourceName": "大火球"
+    },
+    "teleport": {
+      "path": "05001014.PNG",
+      "sha": "b6b0df025a271338090bdfa99434e2614cd64283",
+      "sourceName": "瞬息移动"
+    },
+    "explosion": {
+      "path": "05001016.PNG",
+      "sha": "44b9cac52092b7f275925b7a02cd3032db4703ed",
+      "sourceName": "爆裂火焰"
+    },
+    "beam": {
+      "path": "05001009.PNG",
+      "sha": "00f4e6f69a12d35b099e606ebd95dd89a430a3c6",
+      "sourceName": "疾光电影"
+    },
+    "nova": {
+      "path": "05001017.PNG",
+      "sha": "c75f984e4beeb0df5bfc84b069ecffe40e323d3e",
+      "sourceName": "地狱雷光"
+    },
+    "holy": {
+      "path": "0500101E.PNG",
+      "sha": "f13a3966a9ee43bdcea1ad67700235d4a54ef37e",
+      "sourceName": "圣言术"
+    },
+    "ice": {
+      "path": "0500101F.PNG",
+      "sha": "07e6ea1217517b6f5789f2067a227c4cad57b914",
+      "sourceName": "冰咆哮"
+    },
+    "charm": {
+      "path": "05001013.PNG",
+      "sha": "d730958357de948d4d0261bcb3afb7f932a90d33",
+      "sourceName": "诱惑之光"
+    },
+    "swordsmanship": {
+      "path": "05001002.PNG",
+      "sha": "aa906b2e94bba912e4f9a58a54b50a5e432f8b0f",
+      "sourceName": "基本剑术"
+    },
+    "powerstrike": {
+      "path": "05001006.PNG",
+      "sha": "09d0bae6362fc90c7ecc70eeaa8aa886ed5b2702",
+      "sourceName": "攻杀剑术"
+    },
+    "thrust": {
+      "path": "0500100B.PNG",
+      "sha": "6f49fc016ab380f7aa73a19a7cf8808b55a9a1bc",
+      "sourceName": "刺杀剑术"
+    },
+    "cleave": {
+      "path": "05001018.PNG",
+      "sha": "cd3d389a3762d63a87076cce4700d88d65b9f6d0",
+      "sourceName": "半月弯刀"
+    },
+    "dash": {
+      "path": "0500101A.PNG",
+      "sha": "3ef87fcc2ba62156b87729bdd0e621a6609e8554",
+      "sourceName": "野蛮冲撞"
+    },
+    "firesword": {
+      "path": "05001019.PNG",
+      "sha": "d272aab4f16e8370a8041bbef5d11e21a5ac758f",
+      "sourceName": "烈火剑法"
+    },
+    "heal": {
+      "path": "05001001.PNG",
+      "sha": "eedeb068eceb744fe53499359760c80989ba4e3f",
+      "sourceName": "治愈术"
+    },
+    "spirit": {
+      "path": "05001003.PNG",
+      "sha": "aa906b2e94bba912e4f9a58a54b50a5e432f8b0f",
+      "sourceName": "精神力战法"
+    },
+    "poison": {
+      "path": "05001005.PNG",
+      "sha": "0e77a60298b82b41b4d4a83aa4beb5ec694d7d36",
+      "sourceName": "施毒术"
+    },
+    "talisman": {
+      "path": "0500100C.PNG",
+      "sha": "76e656982aa3644c270c88a718274054eb25dc18",
+      "sourceName": "灵魂火符"
+    },
+    "skeleton": {
+      "path": "0500103B.PNG",
+      "sha": "6d37ae1175136a89719877f772e5cbbd06fd6313",
+      "sourceName": "召唤骷髅"
+    },
+    "invisible": {
+      "path": "05001011.PNG",
+      "sha": "cbfa40216889d521f791928be9bd83f94b96d237",
+      "sourceName": "隐身术"
+    },
+    "groupInvisible": {
+      "path": "05001012.PNG",
+      "sha": "27ea856094c683be1e8a80a94f24a19884b4e5db",
+      "sourceName": "集体隐身术"
+    },
+    "ghost": {
+      "path": "0500100D.PNG",
+      "sha": "04d0da0902953a3639a450be91d0b83c9ec5ed48",
+      "sourceName": "幽灵盾"
+    },
+    "armor": {
+      "path": "0500100E.PNG",
+      "sha": "de25eaae9852d38f36df3b1b26b7edd6cfb6b2f4",
+      "sourceName": "神圣战甲术"
+    },
+    "trap": {
+      "path": "0500100F.PNG",
+      "sha": "10eabd78dc91d529fd062c210e5b5c105ad73dda",
+      "sourceName": "困魔咒"
+    },
+    "groupHeal": {
+      "path": "0500101B.PNG",
+      "sha": "5090b4caa8007ec7f62e3ea0849619b9d35ef907",
+      "sourceName": "群体治愈术"
+    },
+    "beast": {
+      "path": "0500101C.PNG",
+      "sha": "0879f3f84ae8f73beba809d7446388a375f44f1c",
+      "sourceName": "召唤神兽"
+    }
+  },
+  "missing": {
+    "reveal": "心灵启示未出现在该固定源的技能按钮映射；显示文字「启」，不冒用其他技能图标。"
+  }
+}
