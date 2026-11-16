@@ -64,3 +64,10 @@ npm run deploy
 - 线上暂停、保存退出、原版主菜单与新版跳转入口已检查。分享 PNG 成功下载并查看，1080×1380，二维码经 Vision 解码为新版完整 URL。
 - GitHub Homepage 回读为新版 URL；作品集线上 JSON 的简介、截图和 Demo URL 已更新，卡片图片已加载（naturalWidth1440），Repo/Demo 目标正确。GitHub Profile 本次不在范围。
 - alpha 阶段平衡限制仍见 SURVIVOR-PACING-REVIEW.md；本次短时浏览器验收不代表全地图真人通关或性能压力测试。
+
+## alpha.39 全技能修复发布（2026-11-16）
+- 构建源码 main `1bffb3188398ef31851502f1e203762c8215defa`；作品集 master `6e594250a237470f727f75b63aa7fcb782bff587`。仅更新游戏子目录，原有 Repo/Demo/二维码/作品集条目复用。
+- Worker `xiaosang-portfolio`，version ID `9838c7ec-5f53-4a98-9aa8-e28bb2a4c1b8`；干净主分支提交的 detached worktree 手动 dry-run / deploy 成功。线上 version.json、build-source.json 返回 alpha.39 / 对应 SHA；图库 release.json 保持1.0.2/ee4df095。
+- 全量1087项中1084通过、3项长模拟并发超时；针对这3个文件单worker复测82项全部通过，未调整测试超时或跳过断言。新增技能审计315项通过；资源检查、类型检查/生产构建、版本验证、作品集校验、GitHub Source checks通过。既有大包提示保留。
+- 新入口仍为 https://xiaosang.cc/mafa-survivor/?survivor，原版入口保留。线上390×844真实浏览器查看alpha.39大厅与群体治疗成长图鉴，70%/80%条件已同步，宽度390，无调试对象；截图 `.artifacts/skill-audit/online-alpha39-growth.png` 已查看。
+- 逐技能施法截图与行为断言在本地相同源码完成；线上没有强行注入生产存档或调试对象来伪造技能解锁，不宣称已在公网正常局逐项随机抽到33技能。完整结果见 SKILL-AUDIT.md。
