@@ -1,3 +1,4 @@
+import {cameraWorldView,frameBounds,intersectsView,type ViewRect} from './render-visibility';
 import Phaser from "phaser";
 import {alignCameraScroll,battleViewport} from "./camera-grid";
 import {heroPose} from "./hero-pose";
@@ -52,8 +53,11 @@ let rendererReady = false;
 export const readyListeners = new Set<() => void>();
 export const isReady = () => rendererReady;
 export let frameMS = 0;
+export const renderMetrics={updateMS:0,drawRequests:0,culled:0,bodies:0,labels:0,pool:0};
 export const appearanceStatus = { loading: false, error: "" };
 class BattleScene extends Phaser.Scene {
+  private visibleView:ViewRect|null=null;
+  private inView(x:number,y:number,width:number,height:number){return !game.survivorMode||game.phase==="lobby"||!this.visibleView||intersectsView({x,y,width,height},this.visibleView);}
   private autopilotClock=-1;
   private autopilotAction={x:0,y:0};
   private bodies = new Map<string, Phaser.GameObjects.Image>();
@@ -198,6 +202,7 @@ class BattleScene extends Phaser.Scene {
     camera.centerOn(x,y);
     camera.scrollX=alignCameraScroll(camera.scrollX,camera.zoomX,camera.width*camera.originX,camera.x,{min:camera.clampX(-Number.MAX_SAFE_INTEGER),max:camera.clampX(Number.MAX_SAFE_INTEGER)});
     camera.scrollY=alignCameraScroll(camera.scrollY,camera.zoomY,camera.height*camera.originY,camera.y,{min:camera.clampY(-Number.MAX_SAFE_INTEGER),max:camera.clampY(Number.MAX_SAFE_INTEGER)});
+    this.visibleView=cameraWorldView(camera.scrollX,camera.scrollY,camera.width,camera.height,camera.zoomX,camera.zoomY);
   }
   private syncViewport() {
     const view=battleViewport(this.scale.width,this.scale.height,game.phase==="lobby" ? 0 : battleBottomInset);
@@ -328,12 +333,15 @@ class BattleScene extends Phaser.Scene {
     alpha = 1,
     scale = 1,
     offset = true,
+    cull = true,
   ) {
+    if(import.meta.env.DEV)renderMetrics.drawRequests++;
     if (isGraybox) {
       this.bars.fillStyle(0xcbb368, alpha).fillRect(x - 4, y - 4, 8, 8);
       return;
     }
     if (!assets.frames[frame]) return;
+    if(cull&&game.survivorMode&&game.phase!=="lobby"&&this.visibleView&&!intersectsView(frameBounds(assets.frames[frame],x,y,scale,offset),this.visibleView)){if(import.meta.env.DEV)renderMetrics.culled++;return;}
     this.seen.add(key);
     let image = this.bodies.get(key);
     if (!image) {
@@ -493,6 +501,8 @@ class BattleScene extends Phaser.Scene {
         depth,
         alpha,
         scale,
+        true,
+        rotation===0,
       );
       if(rotation) {
         const frame=assets.frames[frames[Math.floor(time*frameRate)%frames.length]];
@@ -509,6 +519,8 @@ class BattleScene extends Phaser.Scene {
   }
   update(_time: number, delta: number) {
     if (!rendererReady) return;
+    const measuredStart=import.meta.env.DEV?performance.now():0;
+    if(import.meta.env.DEV){renderMetrics.drawRequests=0;renderMetrics.culled=0;}
     if (!isGraybox) {
       const kinds = [...new Set([...MAPS[game.mapId].monsterPool, MAPS[game.mapId].boss, ...game.enemies.map((e) => e.kind)])];
       const models = ["world-" + game.mapId, ...(game.mapId === "woma" || game.mapId === "zuma" ? ["womaFlame", "womaShock", "arrow"] : []),...(kinds.includes("overlord") ? ["overlordBlade","overlordDeath"] : []), ...kinds.flatMap((kind) => [kind, kind + "-shadow"])];
@@ -618,8 +630,9 @@ class BattleScene extends Phaser.Scene {
       );
     } else {
       this.centerCamera(game.player.x, game.player.y);
+      const liveIds=new Set(game.enemies.map(e=>e.id));
       for (const [id, e] of this.lastEnemies)
-        if (!game.enemies.some((n) => n.id === id) && e.hp <= 0)
+        if (!liveIds.has(id) && e.hp <= 0)
           this.corpses.push({
             kind: e.kind,
             dir: e.dir,
@@ -666,8 +679,8 @@ class BattleScene extends Phaser.Scene {
         const tint=poisonTint(e,game.clock);
         if(tint!==undefined)this.bodies.get("enemy-"+e.id)?.setTint(tint);
         const insight=enemyInsight(game,e);
-        if(insight)this.label(-1000000-e.id,insight,e.x,e.y-90,"#e6dfaf",1,11);
-        if (e.elite || e.hp < e.maxHp || insight) {
+        if(insight&&this.inView(e.x-200,e.y-110,400,120))this.label(-1000000-e.id,insight,e.x,e.y-90,"#e6dfaf",1,11);
+        if ((e.elite || e.hp < e.maxHp || insight)&&this.inView(e.x-40,e.y-65,80,10)) {
           const w = isBossKind(e.kind) ? 64 : 32;
           this.bars
             .fillStyle(0x150c09, 0.85)
@@ -741,6 +754,7 @@ class BattleScene extends Phaser.Scene {
       const mouse=this.cameras.main.getWorldPoint(this.input.activePointer.x,this.input.activePointer.y);
       const lootLabels:Phaser.Geom.Rectangle[]=[];
       for (const d of game.drops) {
+        if(!this.inView(d.x-180,d.y-200,360,240))continue;
         for(const [i,part] of dropVisuals(d).entries()) {
           const key=`drop-${d.id}-${i}`;
           this.draw(key+"-shadow",part.frame,d.x+part.dx+1,d.y+part.dy-1,-31,.45,1,false);
@@ -841,9 +855,10 @@ class BattleScene extends Phaser.Scene {
     for (const [key, image] of this.bodies)
       if (!this.seen.has(key)) {
         image.setVisible(false);
-        this.pool.push(image);
+        if(game.survivorMode&&this.pool.length>=512)image.destroy();else this.pool.push(image);
         this.bodies.delete(key);
       }
+    if(import.meta.env.DEV){renderMetrics.updateMS=performance.now()-measuredStart;renderMetrics.bodies=this.bodies.size;renderMetrics.labels=this.labels.size;renderMetrics.pool=this.pool.length;}
   }
 }
 let engine: Phaser.Game | null = null;

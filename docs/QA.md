@@ -742,3 +742,9 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 9局定向新配方模拟8局生还、166次快照检查；3条新进化都有实际伤害统计，策略不同不与前轮普通自动构筑胜率直接比较。
 - Ego Lite空间64，390×844：图鉴缺失条件、多配方选择、不可重掷、选择后结果、火墙爆裂／攻杀冲击／怪物中毒变色截图均已查看。火墙新增层改为50%不透明度，人物与装备仍可辨识。截图 `.artifacts/survival-evolution-{book,choice,unlocked}.png` 和 `survival-{firewall,powerstrike,poison}-evolution-fx.png`。
 - 战斗场景为测试模式布置，不记普通战绩／章节目标；原版默认入口与线上发布未替换。
+
+### 连续生存改版：视口裁剪与新被动（2026-11-16）
+- 测试证据：`.artifacts/density-before.json`、`density-after.json`及同名PNG，`survival-passive-stats.png`；已逐张查看。390×844下人物、怪物、树冠与地面无新增碎片或接缝，完整底部战场可见。
+- 220怪／1000掉落固定冻结场景用于比较渲染维护成本，不用于宣称实机FPS。完整帧边界保留跨屏高大贴图，旋转特效保守不裁剪；战斗模拟不按视口裁剪。
+- 新增边缘贴图、居中掉落、相机缩放、八选六被动、五级侦测与实际火球目标范围回归。测试与构建日志在`.artifacts/*-density.log`；原版资产检查通过。
+- 六局模拟结果在`.artifacts/survival-density-simulation.json`，120次正常局快照校验通过。
