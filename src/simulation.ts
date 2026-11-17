@@ -150,7 +150,12 @@ export function simulationInput(g:Game,previous={x:0,y:0},options:{seekChests?:b
   const focus=boss ?? challenge ?? elite ?? (g.classId==="warrior" ? enemies.find(e=>distance(e,p)<48 && g.attackLineClear(p,e)) ?? enemies[0] : undefined);
   const destination=emergency ? drop : chest ?? gear ?? (challenge ? engagementPoint(g,challenge) : elite ? engagementPoint(g,elite) : boss ? engagementPoint(g,boss) : drop ?? (focus ? engagementPoint(g,focus) : undefined));
   const goal=destination && g.navigation ? g.navigation.waypoint(p,destination) : destination;
-  const candidates=[{x:0,y:0},...Array.from({length:8},(_,i)=>({x:Math.cos(i*Math.PI/4),y:Math.sin(i*Math.PI/4)}))];
+  // Exact cardinal zeros matter at clamped world edges: cos(3π/2) is
+  // slightly negative, which falsely rejects an otherwise legal north step.
+  const candidates=[{x:0,y:0},...Array.from({length:8},(_,i)=>({
+    x:i===2||i===6?0:Math.cos(i*Math.PI/4),
+    y:i===0||i===4?0:Math.sin(i*Math.PI/4),
+  }))];
   if(goal){const dx=goal.x-p.x,dy=goal.y-p.y,d=Math.hypot(dx,dy),scale=Math.min(1,d/(g.moveSpeed/6));if(d>0)candidates.push({x:dx/d*scale,y:dy/d*scale});}
   const threatened=enemies.some(e=>(e.windup>0 && distance(e,p)<125) || warningPressure(p,e)>0);
   // Keep Boss escape priority. For ordinary crowd hits, use the warrior's

@@ -2,6 +2,7 @@ import {afterEach,expect,it} from "vitest";
 import {Game} from "../src/game";
 import {simulationInput} from "../src/simulation";
 import {setWorldLayouts} from "../src/world";
+import bairimen from "./fixtures/bairimen-layout.json";
 import redmoon from "./fixtures/redmoon-layout.json";
 import woma from "./fixtures/woma-layout.json";
 import {testBossEngagement,testMeleeDodge,testFootOcclusion} from "../src/test-mode";
@@ -62,4 +63,14 @@ it("steps sideways off the middle of a poison lane instead of standing inside it
  const {g,boss}=arena("wizard");boss.x=g.player.x+225;
  boss.shock={origin:{x:boss.x,y:boss.y},target:{x:g.player.x-175,y:g.player.y},at:g.clock+.9,remaining:1};
  const input=simulationInput(g);expect(Math.abs(input.y)).toBeGreaterThan(.9);
+});
+
+it("leaves the exact left boundary on Bai Ri Men to reach the visible final target",()=>{
+ setWorldLayouts({bairimen});const g=new Game();g.start("test",176,"wizard",false,"bairimen");g.test.spawning=false;g.enemies=[];g.drops=[];
+ Object.assign(g.player,{x:35,y:1488});const boss=g.spawnEnemy("redMoon");Object.assign(boss,{x:72,y:1136,hp:100000,maxHp:100000,stompCD:Infinity});
+ const observed=()=>JSON.stringify({player:g.player,boss,clock:g.clock,drops:g.drops,damage:g.damageDealt});
+ const before=observed();const input=simulationInput(g);expect(input.x).toBe(0);expect(input.y).toBeLessThan(0);
+ expect(observed()).toBe(before);
+ for(let tick=0;tick<600;tick++){if(tick%5===0)g.input=simulationInput(g,g.input);g.step(.05);expect(g.canStand(g.player.x,g.player.y)).toBe(true);}
+ expect(g.player.y).toBeLessThan(1400);expect(boss.hp).toBeLessThan(boss.maxHp);
 });
