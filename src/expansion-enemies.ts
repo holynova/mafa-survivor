@@ -1,3 +1,4 @@
+import {canStartMajorAttack} from './attack-budget';
 import type {Enemy,Game} from "./game";
 import type {Point} from "./world";
 import {inShockLane} from "./temple";
@@ -20,7 +21,7 @@ export function updateExpansionEnemy(g:Game,e:Enemy,dt:number,victim:Point & {vi
         for(let d=40;d<400;d+=48)g.effect("poison",e.x+dx/len*d,e.y+dy/len*d,0,.7);
         e.shock=undefined;e.staggerUntil=g.clock+.7;
       }
-    }else if(e.shockCD===0 && victim.visible && Math.hypot(victim.x-e.x,victim.y-e.y)<420 && g.attackLineClear(e,victim)) {
+    }else if(e.shockCD===0 && canStartMajorAttack(g,e) && victim.visible && Math.hypot(victim.x-e.x,victim.y-e.y)<420 && g.attackLineClear(e,victim)) {
       const dx=victim.x-e.x,dy=victim.y-e.y,len=Math.max(1,Math.hypot(dx,dy));
       e.shock={origin:{x:e.x,y:e.y},target:{x:e.x+dx/len*400,y:e.y+dy/len*400},at:g.clock+.9,remaining:1};
       g.monsterSound(e,"attack");
@@ -53,7 +54,7 @@ export function updateExpansionEnemy(g:Game,e:Enemy,dt:number,victim:Point & {vi
     }
     return true;
   }
-  if(e.stompCD===0 && victim.visible && Math.hypot(victim.x-e.x,victim.y-e.y)<(e.kind==="redMoon" ? 420 : 160) && g.attackLineClear(e,victim)) {
+  if(e.stompCD===0 && canStartMajorAttack(g,e) && victim.visible && Math.hypot(victim.x-e.x,victim.y-e.y)<(e.kind==="redMoon" ? 420 : 160) && g.attackLineClear(e,victim)) {
     e.stompOrigin=e.kind==="redMoon" ? {x:victim.x,y:victim.y} : {x:e.x,y:e.y};
     g.monsterSound(e,"attack");
     e.stompAt=g.clock+.9;e.stompCD=e.bossPhase===2 ? 4 : 6;return true;

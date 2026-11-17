@@ -1,3 +1,4 @@
+import {canStartMajorAttack} from './attack-budget';
 import {survivorExpNeeded} from './survivor-pacing';
 import {snapshotSurvival,parseSurvivalSave} from './survivor-save';
 import {survivalBonuses,survivalGrowth,tuneSurvivalEnemy,newSurvival,survivalStarter,survivalTick,survivalChoices,chooseSurvival,survivalDeath,survivalSplash,SURVIVAL_SECONDS,FINAL_OVERTIME_SECONDS,BUILD_GUIDES} from "./survivor";
@@ -895,7 +896,7 @@ export class Game {
         if(e.kind === "womaBrave")e.staggerUntil=this.clock+1.8;
         continue;
       }
-      if ((e.elite || e.kind === "whiteBoar" || e.kind === "skeletonWarrior") && !e.ranged && victim.visible && d > 90 && d < (e.kind === "skeletonWarrior" ? 180 : 300) && e.chargeCD === 0 && e.windup === 0 && (!this.navigation || this.navigation.lineClear(e, victim))) {
+      if ((e.elite || e.kind === "whiteBoar" || e.kind === "skeletonWarrior") && !e.ranged && victim.visible && d > 90 && d < (e.kind === "skeletonWarrior" ? 180 : 300) && e.chargeCD === 0 && e.windup === 0 && canStartMajorAttack(this,e) && (!this.navigation || this.navigation.lineClear(e, victim))) {
         e.chargeTarget = { x: victim.x, y: victim.y };
         this.monsterSound(e,"attack");
         e.chargeWindupUntil = this.clock + (e.kind === "skeletonWarrior" ? 0.5 : 0.7);
@@ -929,6 +930,7 @@ export class Game {
         victim.visible &&
         d < (isBossKind(e.kind) ? 72 : 29) &&
         e.attackCD === 0 &&
+        (!(e.elite||isBossKind(e.kind))||canStartMajorAttack(this,e)) &&
         this.attackLineClear(e,victim)
       ) {
         e.attackTarget = victim.id;
@@ -1199,6 +1201,7 @@ export class Game {
     }
   }
   private startBossJump(e: Enemy, victim: {x:number;y:number}) {
+    if(!canStartMajorAttack(this,e))return false;
     const dx=victim.x-e.x,dy=victim.y-e.y,d=Math.max(1,Math.hypot(dx,dy));
     const intended={x:e.x+dx/d*Math.min(300,d),y:e.y+dy/d*Math.min(300,d)};
     const safe=(p:{x:number;y:number})=>this.canStand(p.x,p.y) && this.obstacles.every(o=>Math.hypot(p.x-o.x,p.y-o.y)>o.r+12);
@@ -1238,7 +1241,7 @@ export class Game {
       }
       return true;
     }
-    if (e.stompCD === 0 && [this.player, ...this.pets].some((p) => p.hp > 0 && Math.hypot(p.x - e.x, p.y - e.y) < 190)) {
+    if (e.stompCD === 0 && canStartMajorAttack(this,e) && [this.player, ...this.pets].some((p) => p.hp > 0 && Math.hypot(p.x - e.x, p.y - e.y) < 190)) {
       e.stompAt = this.clock + 1;
       this.monsterSound(e,"attack");
       e.stompOrigin = { x: e.x, y: e.y };

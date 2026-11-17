@@ -1,3 +1,5 @@
+import {isBossKind} from './content';
+import {canStartMajorAttack} from './attack-budget';
 import type {Enemy,Game} from "./game";
 import type {Point} from "./world";
 
@@ -17,7 +19,7 @@ export function updateRangedEnemy(g:Game,e:Enemy,dt:number,victim:Point & {visib
       return true;
     }
     const d=Math.hypot(victim.x-e.x,victim.y-e.y);
-    if (victim.visible && d<420 && e.rangedCD===0 && (!g.navigation || g.navigation.lineClear(e,victim,0))) {
+    if ((!(e.elite||isBossKind(e.kind))||canStartMajorAttack(g,e)) && victim.visible && d<420 && e.rangedCD===0 && (!g.navigation || g.navigation.lineClear(e,victim,0))) {
       e.rangedTarget={x:victim.x,y:victim.y}; e.rangedFireAt=g.clock+0.7;
       g.monsterSound(e,"attack");
       e.dir=g.direction(victim.x-e.x,victim.y-e.y);

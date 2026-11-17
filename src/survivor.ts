@@ -1,3 +1,4 @@
+import {chapterMonsterWeight,chapterRangedLimit} from './survivor-director';
 import type {EquipmentPreference} from './auto-equipment';
 import type {Slot} from './content';
 import {awardSupply} from './survivor-supplies';
@@ -84,10 +85,10 @@ export const survivalRangedBudget=(seconds:number)=>Math.min(24,6+Math.floor(Mat
 export function survivalSpawnKind(g:Game){
  const ordinary=MAPS[g.mapId].monsterPool.filter(id=>!isBossKind(id)&&!NATIVE_ELITES.includes(id));
  const rangedCount=g.enemies.filter(e=>e.hp>0&&e.ranged).length;
- const allowed=ordinary.filter(id=>!rangedKinds.has(id)||rangedCount<survivalRangedBudget(g.clock));
+ const allowed=ordinary.filter(id=>chapterMonsterWeight(g.mapId,g.clock,id)>0&&(!rangedKinds.has(id)||rangedCount<chapterRangedLimit(g.mapId,g.clock,survivalRangedBudget(g.clock))));
  const pool=allowed.length?allowed:ordinary;
  const meleeWeight=g.clock<300?4:2;
- return g.rng.pick(pool.flatMap(id=>Array(rangedKinds.has(id)?1:meleeWeight).fill(id) as string[]));
+ return g.rng.pick(pool.flatMap(id=>Array((rangedKinds.has(id)?1:meleeWeight)*chapterMonsterWeight(g.mapId,g.clock,id)).fill(id) as string[]));
 }
 export function survivalTick(g:Game){const state=g.survival;g.wave=Math.min(12,1+Math.floor(g.clock/100));
  if(g.clock>=SURVIVAL_SECONDS&&state.finalBossDefeated){g.finish(true);return;}

@@ -1,5 +1,5 @@
 /** Independent from legacy chapter progression; no time gates or level cap. */
-export function survivorExpNeeded(level:number){const n=Math.max(0,Math.floor(level)-1);return Math.round(20+14*n+.35*n*n);}
+export function survivorExpNeeded(level:number){const n=Math.max(0,Math.floor(level)-1);const focusPacing=1+Math.min(1.4,Math.max(0,level-3)*.2);return Math.round((20+14*n+.35*n*n)*focusPacing);}
 export const EVOLUTION_CHEST_AFTER=480;
 /** Alternate short recovery windows and pressure; never scales to the player's level. */
 export function survivorSpawnInterval(seconds:number){

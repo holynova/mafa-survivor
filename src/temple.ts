@@ -1,3 +1,4 @@
+import {canStartMajorAttack} from './attack-budget';
 import type { Enemy, Game } from "./game";
 import type { Point } from "./world";
 
@@ -52,7 +53,7 @@ export function updateTempleEnemy(g: Game, e: Enemy, dt: number, victim: Point &
     }
     return true;
   }
-  if(e.shockCD===0 && victim.visible && Math.hypot(victim.x-e.x,victim.y-e.y)<430) {
+  if(e.shockCD===0 && canStartMajorAttack(g,e) && victim.visible && Math.hypot(victim.x-e.x,victim.y-e.y)<430) {
     warning(g,e,victim,e.kind==="womaLord" ? 2 : e.bossPhase===2 ? 4 : 3);
     e.shockCD=e.bossPhase===2 ? 7 : 10;return true;
   }
