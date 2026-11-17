@@ -119,7 +119,7 @@ export function simulateShop(g:Game,trace?:ShopTrace[]) {
 }
 
 /** Observes the same combat state the view consumes; only returns legal input. */
-export function simulationInput(g:Game,previous={x:0,y:0},options:{seekChests?:boolean;huntElites?:boolean;pursueChallenge?:boolean}={}) {
+export function simulationInput(g:Game,previous={x:0,y:0},options:{seekChests?:boolean;huntElites?:boolean;pursueChallenge?:boolean;seekExperience?:boolean}={}) {
   const p=g.player;
   const health=p.hp/g.maxHP;
   const enemies=g.enemies.filter(e=>e.hp>0 && distance(e,p)<650)
@@ -166,14 +166,22 @@ export function simulationInput(g:Game,previous={x:0,y:0},options:{seekChests?:b
       !g.canStand(future.x,future.y) || g.navigation && !g.navigation.lineClear(p,future,12))continue;
     let crowdDanger=0,bossDanger=0,score=(input.x*previous.x+input.y*previous.y)*0.4;
     if(!bossMelee && g.classId==="warrior" && !emergency && !threatened && input.x===0 && input.y===0 && g.basicCD<0.2 && enemies.some(e=>distance(e,p)<48))score+=18;
-    if(goal)score+=(distance(p,goal)-distance(future,goal))/35;
+    // An opt-in collection policy values movement toward real XP more strongly;
+    // damage, warning and collision penalties remain unchanged.
+    const collecting=options.seekExperience && destination===drop && !!drop?.exp && !emergency;
+    if(goal)score+=(distance(p,goal)-distance(future,goal))/35*(collecting?4:1);
     else score+=(distance(p,{x:WORLD.w/2,y:WORLD.h/2})-distance(future,{x:WORLD.w/2,y:WORLD.h/2}))/100;
     for(const e of enemies) {
       const d=distance(e,p),horizon=0.4;
       const committed=e.windup>0 || e.shock || e.rangedFireAt!==undefined || e.dormant || (e.staggerUntil ?? 0)>g.clock;
       const approach=g.classId==="warrior" && e.id===focus?.id && !committed;
-      const predicted={x:e.x+(committed || approach ? 0 : (p.x-e.x)/Math.max(1,d)*e.speed*horizon),
-        y:e.y+(committed || approach ? 0 : (p.y-e.y)/Math.max(1,d)*e.speed*horizon)};
+      // A nearby summon can be the actual victim. Do not invent an approach
+      // toward the player while the observed enemy is pursuing that summon.
+      const victim=options.seekExperience && e.lastSeen && e.lastSeen.until>g.clock
+        ? g.pets.find(pet=>pet.id===e.lastSeen!.id&&pet.hp>0) ?? p : p;
+      const victimDistance=Math.max(1,victim===p?d:distance(e,victim));
+      const predicted={x:e.x+(committed || approach ? 0 : (victim.x-e.x)/victimDistance*e.speed*horizon),
+        y:e.y+(committed || approach ? 0 : (victim.y-e.y)/victimDistance*e.speed*horizon)};
       if(!g.navigation || g.navigation.lineClear(future,predicted,0)) {
         const radius=g.classId==="warrior" ? e.windup>0 ? (isBossKind(e.kind) ? 125 : 75) : approach ? 28 : 42 : e.ranged ? 75 : 105;
         if(bossMelee) {

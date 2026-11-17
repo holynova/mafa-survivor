@@ -140,3 +140,40 @@ node tools/simulate-survival.mjs --maps=biche,shimu,bairimen --roles=warrior,wiz
 |biche|1260|14|1309|201|627|4055|0|
 |shimu|60|3|27|9|49|79|11|
 |shimu|120|3|58|40|49|206|77|
+
+## 主动拾取策略与召唤辅助路线
+
+为隔离走位偏差，模拟器新增显式 `--seek-experience`（默认关闭）：朝实际经验目标前进的效用乘4；根据敌人最近观察到的存活召唤物目标预测其移动方向，不再一律假设朝玩家移动。地形、碰撞、普通敌人风险、Boss预警及弹幕罚分原样保留，不自动拾取、不送经验或免伤。该策略不保证更安全，也不保证更高通关率。
+
+验证：实际行走拾取而非规划时加经验；即时Boss近战威胁优先撤离；关闭选项与默认一致。111文件/1225测试通过，素材校验与构建通过（保留现有大包警告）；复用玩家距离计算的等价优化后补跑相关5测试。石墓42关闭选项的11项结果与原基线完全相同。未改画面或玩家输入，不新增浏览器资源。
+
+三章三种子：新策略默认道士5/9通关（比奇2、石墓3、白日门0）；骷髅＋火符0/9通关。石墓42骷髅起手120秒从3级升至6级，终局从163秒5级变为499秒13级；比奇42从终局14级升到19级仍超时。故拾取是重要因素，但不是全部原因。
+
+额外探索：骷髅起手不占两项主攻推荐，改追踪火符＋神兽，仍真实逐级选取、没有额外技能赠送。比奇42在1230秒通关；石墓42活到1136秒仍失败。它改变了后续构筑和随机路径，只能称支持进一步验证的信号，不能归因于单项技能增益。此推荐只存在本地试验副本，未修改产品。
+
+下一步：扩展骷髅辅助路线至三章三种子并以相同策略对照，再决定职业起手推荐及文案；暂不统一上调骷髅伤害，不发布平衡完成声明。
+
+复现：上一节命令追加 `--seek-experience`；默认组传 `--starter=default`。辅助试验复制工具，把替换道士的pair改为 `['talisman','beast']`，其他规则不变。完整本地报告见下列同名.artifacts JSON；20局汇总如下（此前两局pilot与其中两局重复，不算额外独立样本）。
+
+|报告|章节|种子|结局|秒|等级|击杀|
+|---|---|---:|---|---:|---:|---:|
+|alpha45-xp-policy-default-nine|biche|176|won|1235|23|2907|
+|alpha45-xp-policy-default-nine|biche|42|dead|1320|22|2918|
+|alpha45-xp-policy-default-nine|biche|2026|won|1303|24|2914|
+|alpha45-xp-policy-default-nine|shimu|176|won|1252|22|2857|
+|alpha45-xp-policy-default-nine|shimu|42|won|1245|23|2857|
+|alpha45-xp-policy-default-nine|shimu|2026|won|1264|23|2857|
+|alpha45-xp-policy-default-nine|bairimen|176|dead|1320|22|2853|
+|alpha45-xp-policy-default-nine|bairimen|42|dead|1194|24|2746|
+|alpha45-xp-policy-default-nine|bairimen|2026|dead|1320|19|2856|
+|alpha45-xp-policy-nine|biche|176|dead|1320|16|1040|
+|alpha45-xp-policy-nine|biche|42|dead|1320|19|1819|
+|alpha45-xp-policy-nine|biche|2026|dead|1320|17|1486|
+|alpha45-xp-policy-nine|shimu|176|dead|231|7|164|
+|alpha45-xp-policy-nine|shimu|42|dead|499|13|539|
+|alpha45-xp-policy-nine|shimu|2026|dead|419|11|367|
+|alpha45-xp-policy-nine|bairimen|176|dead|830|15|1000|
+|alpha45-xp-policy-nine|bairimen|42|dead|835|9|875|
+|alpha45-xp-policy-nine|bairimen|2026|dead|1320|21|2846|
+|alpha45-skeleton-support-pilot|biche|42|won|1230|20|2903|
+|alpha45-skeleton-support-pilot|shimu|42|dead|1136|19|2238|
