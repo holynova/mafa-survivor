@@ -1,3 +1,4 @@
+import {visualPreferences,DEFAULT_VISUAL,floatingPresentation,effectOpacity} from './visual-settings';
 import {atlasResidency,unusedAtlasPages} from './asset-residency';
 import {eliteScale,monsterName,enemyDangerZones,type DangerZone} from './encounters';
 import {drawDanger} from './danger-render';
@@ -72,6 +73,7 @@ class BattleScene extends Phaser.Scene {
   private deathStartedAt:number|null=null;
   private bars!: Phaser.GameObjects.Graphics;
   private danger!: Phaser.GameObjects.Graphics;
+  private dangerOutline!: Phaser.GameObjects.Graphics;
   private dangerMemory = new Map<string,DangerZone>();
   private movementInput!: MovementInput;
   private accumulator = 0;
@@ -142,6 +144,7 @@ class BattleScene extends Phaser.Scene {
     });
     this.bars = this.add.graphics().setDepth(5000);
     this.danger = this.add.graphics().setDepth(1900);
+    this.dangerOutline = this.add.graphics().setDepth(5200);
     this.movementInput = new MovementInput(
       window,
       () => game.phase === "battle",
@@ -625,6 +628,7 @@ class BattleScene extends Phaser.Scene {
     this.seenLabels.clear();
     this.bars.clear();
     this.danger.clear();
+    this.dangerOutline.clear();
     if(game.survivorMode)for(const chest of game.survival.chests){this.bars.fillStyle(chest.eligible?0xd8b36f:0x94acbb,1);this.bars.fillRect(chest.x-11,chest.y-9,22,18);this.bars.lineStyle(2,0x342718);this.bars.strokeRect(chest.x-11,chest.y-9,22,18);}
     const t = game.clock;
     if (game.phase === "lobby") {
@@ -719,7 +723,7 @@ class BattleScene extends Phaser.Scene {
           this.bodies.get('enemy-cast-'+e.id)?.setTint(0xff6555);
         }
         if(e.elite||isBossKind(e.kind)){
-          for(const zone of enemyDangerZones(e,t,game.survivorMode)){drawDanger(this.danger,zone,t);this.dangerMemory.set(zone.id,zone);}
+          for(const zone of enemyDangerZones(e,t,game.survivorMode)){drawDanger(this.danger,zone,t,0,game.survivorMode&&visualPreferences.reduceFlash,this.dangerOutline);this.dangerMemory.set(zone.id,zone);}
         }else {
         if (e.windup > 0) {
           this.bars
@@ -756,7 +760,7 @@ class BattleScene extends Phaser.Scene {
       for(const [id,zone] of this.dangerMemory){
         if(activeZones.has(id))continue;
         const living=game.enemies.some(e=>e.id===Number(id.split(':')[0])&&e.hp>0);
-        if(living&&t>=zone.until&&t-zone.until<.25)drawDanger(this.danger,zone,t,1-(t-zone.until)/.25);
+        if(living&&t>=zone.until&&t-zone.until<.25)drawDanger(this.danger,zone,t,1-(t-zone.until)/.25,game.survivorMode&&visualPreferences.reduceFlash,this.dangerOutline);
         else this.dangerMemory.delete(id);
       }
       for (const p of game.pets) {
@@ -810,6 +814,7 @@ class BattleScene extends Phaser.Scene {
           Math.max(2200,p.y+300),
           p.visual === "poison" ? 0.55 : 0.8,
         );
+      const visual=game.survivorMode?visualPreferences:DEFAULT_VISUAL;
       for (const f of game.effects) {
         if (f.kind === "firewall") {
           const r = f.radius / 64;
@@ -827,7 +832,7 @@ class BattleScene extends Phaser.Scene {
               f.y + y * r,
               t + i * 0.1,
               40,
-              r,
+              r,10,0,effectOpacity(f.kind,visual.effects),
             ),
           );
         } else {
@@ -841,7 +846,7 @@ class BattleScene extends Phaser.Scene {
             sprite.scale??(["explosion", "ice", "nova", "repulse"].includes(f.kind)
               ? Math.max(0.8, f.radius / 120)
               : 1),
-            sprite.frameRate,sprite.rotation,f.alpha,
+            sprite.frameRate,sprite.rotation,(f.alpha??1)*effectOpacity(f.kind,visual.effects),
           ));
         }
       }
@@ -860,7 +865,7 @@ class BattleScene extends Phaser.Scene {
         game.player.y + 0.5,
         invisible(game,0) ? 0.4 : 1,
       );
-      if(hero.motion==="hurt" && t-(game.player.hitUntil-.45)<.09)
+      if(!visual.reduceFlash && hero.motion==="hurt" && t-(game.player.hitUntil-.45)<.09)
         for(const key of ["hero","hero-weapon","hero-cover","weapon-cover"])this.bodies.get(key)?.setTint(0xff9890);
       if (hero.motion!=="death" && t < game.player.shieldUntil)
         this.fx(
@@ -875,7 +880,7 @@ class BattleScene extends Phaser.Scene {
       if(hero.motion!=="death")this.bars
         .lineStyle(1, 0xe4cc83, 0.65)
         .strokeEllipse(game.player.x, game.player.y + 3, 30, 15);
-      for (const f of game.floating)this.label(f.id,f.text,f.x,f.y,f.color,Math.min(1,f.life*2),15);
+      for (const f of floatingPresentation(game.floating,visual.numbers))this.label(f.id,f.text,f.x,f.y,f.color,Math.min(1,f.life*2),15);
     }
     for (const [id, label] of this.labels)
       if (!this.seenLabels.has(id)) {

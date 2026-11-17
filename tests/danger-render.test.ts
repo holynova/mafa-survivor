@@ -1,0 +1,5 @@
+import {expect,it} from 'vitest';
+import type Phaser from 'phaser';
+import {drawDanger} from '../src/danger-render';
+function graphics(){const calls:{method:string;args:unknown[]}[]=[];const g=new Proxy({}, {get:(_t,key)=> (...args:unknown[])=>{calls.push({method:String(key),args});return g;}}) as Phaser.GameObjects.Graphics;return {g,calls};}
+it('keeps the damage boundary identical with reduced flash and draws its border separately above effects',()=>{const zone={id:'test',shape:'circle' as const,x:50,y:70,radius:130,progress:.5,until:1};const a=graphics(),b=graphics(),outlineA=graphics(),outlineB=graphics();drawDanger(a.g,zone,0,0,false,outlineA.g);drawDanger(b.g,zone,0,0,true,outlineB.g);expect(outlineA.calls).toEqual(outlineB.calls);expect(outlineB.calls.filter(c=>c.method==='fillCircle')).toHaveLength(0);expect(b.calls.find(c=>c.method==='fillCircle')?.args).toEqual([50,70,130]);expect(outlineB.calls.find(c=>c.method==='strokeCircle')?.args).toEqual([50,70,130]);expect(outlineB.calls.filter(c=>c.method==='lineBetween')).toHaveLength(8);});
