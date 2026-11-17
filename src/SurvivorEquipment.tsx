@@ -1,0 +1,5 @@
+import {game} from './game';
+import {getItem,SLOT_KEYS,SLOT_NAMES} from './content';
+import {EQUIPMENT_PREFERENCES,setEquipmentPreference,toggleEquipmentLock} from './auto-equipment';
+const labels={offense:'输出',survival:'生存',summon:'召唤'};
+export function SurvivorEquipment(){return <details className="survivor-more"><summary>当前装备 · 同阶偏{labels[game.survival.equipmentPreference]}</summary><div className="survivor-tabs" aria-label="同阶装备偏好">{EQUIPMENT_PREFERENCES.map(value=><button key={value} aria-pressed={game.survival.equipmentPreference===value} onClick={()=>setEquipmentPreference(game,value)}>{labels[value]}</button>)}</div><p>未锁定部位优先穿高阶，同阶按偏好比较。锁定后保留当前装备，其他掉落仍自动出售；解锁不会找回已售装备。</p>{SLOT_KEYS.filter(slot=>game.equipment[slot]).map(slot=>{const item=getItem(game.equipment[slot]!.itemId),locked=game.survival.equipmentLocks.includes(slot);return <div className="survivor-rule" key={slot}><p>{SLOT_NAMES[slot]} · {item.name} · {item.tier}阶</p><button aria-pressed={locked} aria-label={`${locked?'解锁':'锁定'}${SLOT_NAMES[slot]}`} onClick={()=>toggleEquipmentLock(game,slot)}>{locked?'已锁定 · 解锁':'锁定装备'}</button></div>;})}</details>;}

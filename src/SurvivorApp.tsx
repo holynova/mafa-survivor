@@ -1,3 +1,4 @@
+import {SurvivorEquipment} from './SurvivorEquipment';
 import {SurvivorSupplies} from './SurvivorSupplies';
 import {SurvivorBuildFocus} from './SurvivorBuildFocus';
 import {mainRecipeForChoice} from './survivor-focus';
@@ -59,7 +60,7 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
  {game.phase==='paused'&&<section className="survivor-panel survivor-pause"><p className="survivor-eyebrow">{MAPS[game.mapId].name} · {clock(game.clock)}</p><h2>{game.survival.toast||'已暂停'}</h2>{game.survival.toast.startsWith('进化完成')&&recentEvolution&&<p>{EVOLUTIONS[recentEvolution]?.description}</p>}
  <button className="survivor-primary" onClick={()=>{game.survival.toast='';game.pause();}}>继续战斗</button>
  <SurvivorSkillManager/>
- <details className="survivor-more"><summary>当前装备</summary>{Object.entries(game.equipment).map(([slot,e])=><p key={slot}>{getItem(e.itemId).name} · {getItem(e.itemId).tier}阶</p>)}<p>自动穿戴更高品质装备，同品质优先职业属性；较差与替下的装备自动出售。武器和衣服改变外观。</p></details>
+ <SurvivorEquipment/>
  {game.skills.some(s=>s.id==='poison')&&<div className="survivor-tabs"><button aria-pressed={game.tao.poisonMode==='green'} onClick={()=>game.setPoisonMode('green')}>绿毒 · 伤害</button><button aria-pressed={game.tao.poisonMode==='red'} onClick={()=>game.setPoisonMode('red')}>红毒 · 减防</button></div>}
  <details className="survivor-more"><summary>被动与属性 · {Object.keys(game.survival.charms).length}/6</summary>{Object.entries(game.survival.charms).map(([id,n])=><p key={id}>{CHARMS.find(c=>c.id===id)?.name} · {n}/5</p>)}<p>侦测 {Math.round(game.detectionRange)} · 移速 +{Math.round(game.stats.move_speed??0)}%</p><p>击败 {game.kills}</p></details>
  <SurvivorSupplies/><SurvivorBuildFocus/><details className="survivor-more"><summary>成长与进化</summary><EvolutionBook/><SurvivorGrowthBook classId={game.classId} skills={game.skills}/></details>
