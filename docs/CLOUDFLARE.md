@@ -155,3 +155,15 @@ npm run deploy
 - 线上repos.json与master完整结构相等；作品卡片Demo正确、390×844 WebP解码成功；图库ee4df095/1.0.2与wujun1897dda/1.0.2回执前后完整相等。Homepage、README、QR与卡片材料已满足并复用，Profile不在范围。.impeccable保留未动。
 - 作品集数据源检查通过；check-demo-links继续报告上游web-motion-showcase的既有Pages例外，未改其他项目或放宽检查。
 - 此次提供首领方位和观测可靠性改进，没有调低敌人生命或宣称章节平衡完成；完整优化清单继续执行。
+
+
+## alpha.48 阶段测试版发布（2026-11-17）
+
+- 构建源码main `b0d4318ecd267b7fd5ff6ef350c38f05fc66d24c`，v0.1.0-alpha.48/original；作品集master `bcccfc3c3c03f21c1900e44017309faa900d37c4`；共享Worker xiaosang-portfolio version ID `78bc3af9-05d1-440b-8cf6-73f96768a795`。
+- 1245测试、素材校验/类型/构建与README/版本校验通过；Source checks44083970887成功。完整共享站点dry-run/deploy通过，5文件上传、19935复用，19972组装文件。继续使用既有main/master手动子路径发布，无新部署分支或Action。
+- Ego97线上version与完整SHA匹配，production __MAFA__不存在。实际恢复原17.7667秒旧战士存档；CDP触摸使dragging=true/摇杆30px，切横屏触发暂停并清理拖动。恢复后时钟到18.1秒，存档角色仍(1104,768)、moving=false。后续新触摸实际推进至18.6833秒，角色右移到(1138.1667,768)，touchCancel后暂停/保存退出成功。读的是实际保存状态，没有开发对象注入或免费属性。
+- 两次工具调用之间默认视口重置导致再次暂停；第一次找暂停按钮未找到后重新读取确认paused，没有绕过暂停。此为浏览器协议触摸/方向切换证据，不等于实体手机及物理D键验收。
+- 已查看alpha48-online-rotation-844.png、alpha48-online-restored-390.png。暂停界面及恢复HUD/原版地形正常，人物位于树冠遮挡区，未将此截图称为人物完整动作/遮挡对比验收。手机画面清晰度矩阵仍按路线图推进。
+- 原五项run/progress/records/guide/diagnostics在导航退出游戏后精确恢复true；Ego97已关闭，本轮无临时dev服务。
+- 线上repos.json与发布master完整结构相等；卡片Demo正确、390×844 WebP正常解码，Homepage正确。图库ee4df095/1.0.2、wujun1897dda/1.0.2完整回执前后一致。README、二维码、卡片材料沿用，Profile不在范围，.impeccable保留。
+- 作品集数据源检查通过；check-demo-links保留上游web-motion-showcase旧Pages例外，不改无关项目或弱化检查。此次不改变战斗数值，整体优化目标尚未完成。

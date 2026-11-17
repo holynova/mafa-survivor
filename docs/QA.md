@@ -1224,3 +1224,15 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 真实渲染运行后，明确注入的KeyboardEvent D：held=(1,0)→pause=(0,0)→恢复+repeat=(0,0)→fresh=(1,0)→keyup=(0,0)。这是适配器/渲染器链路，不是物理键盘原生投递通过；此前Ego原生键盘事件未投递的缺口仍保留。
 - 已查看alpha48-input-upgrade-390.png、alpha48-input-rotate-844.png、alpha48-input-resume-844.png：升级内容/原版技能图标完整，横屏暂停可滚动，恢复底部HUD对齐。恢复场景人物在树冠遮挡处，不把该截图当人物全动作或遮挡效果重新验收。
 - 本轮使用测试局，不写普通存档/战绩；未修改持久设置。Ego96与自建5186服务已关闭。候选尚未发布，线上保持alpha.47；实体手机、后台返回与混合原生输入仍待补验。
+
+
+## alpha.48 阶段测试版发布（2026-11-17）
+
+- 构建源码main `b0d4318ecd267b7fd5ff6ef350c38f05fc66d24c`，v0.1.0-alpha.48/original；作品集master `bcccfc3c3c03f21c1900e44017309faa900d37c4`；共享Worker xiaosang-portfolio version ID `78bc3af9-05d1-440b-8cf6-73f96768a795`。
+- 1245测试、素材校验/类型/构建与README/版本校验通过；Source checks44083970887成功。完整共享站点dry-run/deploy通过，5文件上传、19935复用，19972组装文件。继续使用既有main/master手动子路径发布，无新部署分支或Action。
+- Ego97线上version与完整SHA匹配，production __MAFA__不存在。实际恢复原17.7667秒旧战士存档；CDP触摸使dragging=true/摇杆30px，切横屏触发暂停并清理拖动。恢复后时钟到18.1秒，存档角色仍(1104,768)、moving=false。后续新触摸实际推进至18.6833秒，角色右移到(1138.1667,768)，touchCancel后暂停/保存退出成功。读的是实际保存状态，没有开发对象注入或免费属性。
+- 两次工具调用之间默认视口重置导致再次暂停；第一次找暂停按钮未找到后重新读取确认paused，没有绕过暂停。此为浏览器协议触摸/方向切换证据，不等于实体手机及物理D键验收。
+- 已查看alpha48-online-rotation-844.png、alpha48-online-restored-390.png。暂停界面及恢复HUD/原版地形正常，人物位于树冠遮挡区，未将此截图称为人物完整动作/遮挡对比验收。手机画面清晰度矩阵仍按路线图推进。
+- 原五项run/progress/records/guide/diagnostics在导航退出游戏后精确恢复true；Ego97已关闭，本轮无临时dev服务。
+- 线上repos.json与发布master完整结构相等；卡片Demo正确、390×844 WebP正常解码，Homepage正确。图库ee4df095/1.0.2、wujun1897dda/1.0.2完整回执前后一致。README、二维码、卡片材料沿用，Profile不在范围，.impeccable保留。
+- 作品集数据源检查通过；check-demo-links保留上游web-motion-showcase旧Pages例外，不改无关项目或弱化检查。此次不改变战斗数值，整体优化目标尚未完成。
