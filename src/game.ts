@@ -1,6 +1,6 @@
 import {survivorExpNeeded} from './survivor-pacing';
 import {snapshotSurvival,parseSurvivalSave} from './survivor-save';
-import {survivalBonuses,survivalGrowth,tuneSurvivalEnemy,newSurvival,survivalStarter,survivalTick,survivalChoices,chooseSurvival,survivalDeath,survivalSplash,SURVIVAL_SECONDS,FINAL_OVERTIME_SECONDS} from "./survivor";
+import {survivalBonuses,survivalGrowth,tuneSurvivalEnemy,newSurvival,survivalStarter,survivalTick,survivalChoices,chooseSurvival,survivalDeath,survivalSplash,SURVIVAL_SECONDS,FINAL_OVERTIME_SECONDS,BUILD_GUIDES} from "./survivor";
 import {
   ITEMS,
   MONSTERS,
@@ -517,6 +517,7 @@ export class Game {
     };
     this.skills = [this.newSkill(this.survivorMode?survivalStarter(this.classId):this.classInfo.startingSkill)];
     this.survival.seenSkills=this.skills.map(s=>s.id);
+    this.survival.mainSkills=[...BUILD_GUIDES[this.classId].main];
     this.basicCD = 0;
     this.charges = {};
     this.tao = createTaoState();

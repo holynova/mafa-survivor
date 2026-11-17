@@ -1,3 +1,4 @@
+import {focusedChoices} from './survivor-focus';
 import {announceEncounter} from './encounters';
 import {EVOLUTION_CHEST_AFTER,survivorSpawnInterval,survivalThreatScale} from './survivor-pacing';
 import {SURVIVAL_LATE_GROWTH} from './survivor-growth';
@@ -26,7 +27,7 @@ export const CHARMS=[
  {id:'swift',name:'疾行靴',stat:'move_speed',value:4},
  {id:'recovery',name:'回春戒指',stat:'hp_regen',value:.5},
 ] as const;
-export function newSurvival(){return {spawnAt:0,eliteAt:120,bossAt:300,finalBossId:0,finalBossDefeated:false,overtimeEndsAt:0,timedOut:false,respecs:2,seenSkills:[] as SkillId[],eliteDefeats:0,rerolls:3,charms:{} as Record<string,number>,evolved:[] as SkillId[],evoReadyAt:{} as Partial<Record<SkillId,number>>,chests:[] as {id:number;x:number;y:number;eligible:boolean}[],nextChest:1,choiceChest:false,toast:'',end:false};}
+export function newSurvival(){return {spawnAt:0,eliteAt:120,bossAt:300,finalBossId:0,finalBossDefeated:false,overtimeEndsAt:0,timedOut:false,respecs:2,seenSkills:[] as SkillId[],mainSkills:[] as SkillId[],focusMisses:{} as Partial<Record<SkillId,number>>,eliteDefeats:0,rerolls:3,charms:{} as Record<string,number>,evolved:[] as SkillId[],evoReadyAt:{} as Partial<Record<SkillId,number>>,chests:[] as {id:number;x:number;y:number;eligible:boolean}[],nextChest:1,choiceChest:false,toast:'',end:false};}
 /** Rank 1–6 retain verified effects; the last two ranks specialize by skill role. */
 export const survivalLateGrowth=(id:SkillId)=>SURVIVAL_LATE_GROWTH[id];
 export function survivalDescription(id:SkillId){
@@ -54,7 +55,7 @@ export function survivalChoices(g:Game):Upgrade[]{const pool:Upgrade[]=[];
  for(const s of g.skills.filter(s=>s.rank<8))pool.push({id:'s:'+s.id,kind:'skill',skill:s.id,name:getSkill(s.id).name+` ${s.rank}→${s.rank+1}`,description:survivalGrowth(s.id)[s.rank].label,value:0});
  if(g.skills.length<6)for(const s of SKILLS.filter(s=>s.classId===g.classId&&!g.skills.some(x=>x.id===s.id)))pool.push({id:'s:'+s.id,kind:'skill',skill:s.id,name:'学习 '+s.name,description:survivalGrowth(s.id)[0].label,value:0});
  for(const c of CHARMS){if((c.id==='flame'&&g.classId!=='wizard')||(c.id==='edge'&&g.classId!=='warrior')||(c.id==='spirit'&&g.classId!=='taoist'))continue;const n=g.survival.charms[c.id]??0;if(n>=5||(!n&&Object.keys(g.survival.charms).length>=6))continue;pool.push({id:'p:'+c.id,kind:'stat',stat:c.stat as StatKey,value:c.value,name:`${c.name} ${n}→${n+1}`,description:`${c.stat==='detection_range'?'侦测距离':c.stat==='move_speed'?'移动速度':c.stat==='hp_max'?'最大生命':c.stat==='hp_regen'?'每秒生命恢复':c.stat==='cooldown_reduction'?'冷却缩减':c.stat==='skill_radius'?'技能范围':c.stat==='pickup_radius'?'拾取范围':'职业伤害'} +${c.value}${['hp_max','hp_regen'].includes(c.stat)?'':'%'}`});}
- const shuffled=g.rng.shuffle(pool);const owned=shuffled.find(c=>c.skill&&g.skills.some(s=>s.id===c.skill));const choices=(owned?[owned,...shuffled.filter(c=>c!==owned)]:shuffled).slice(0,3);
+ const choices=focusedChoices(g,g.rng.shuffle(pool));
  g.survival.seenSkills=[...new Set([...g.survival.seenSkills,...g.skills.map(s=>s.id),...choices.flatMap(c=>c.skill?[c.skill]:[])])];return choices;
 }
 export function chooseSurvival(g:Game,id:string){const c=g.choices.find(x=>x.id===id);if(!c)return;
