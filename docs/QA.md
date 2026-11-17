@@ -1400,3 +1400,22 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 后续fbf670b干净冻结：三策略162、严格非神兽24、石阁道士6、事件36和新种子事件对照36，共264局/4755次恢复/0异常。264包含不同策略，不是264个真人完整通关。源码哈希、各报告局数/恢复/文件哈希和命令见DIRECTOR-REVIEW末节。战士/法师108行与前版本逐项一致，严格24行与独立探针逐项一致；不重跑已通过且未改变的图片/音频内容。
 - 线上只读检查：xiaosang.cc/mafa-survivor/返回200，HTML缓存public,max-age=0,must-revalidate；version.json仍alpha.51/db760ca509b90b35f63f91f24ee2e0851d4d15ea/original。没有通过发布替换生产版本，不能说手机拿到了本地候选。
 - 设备可用性只读核查：本机未发现adb命令；Remote Desktop Commander仅返回一台离线Mac，无在线安卓目标。因此实体安卓拖动、长局GPU/存储及扬声器/耳机/单声道仍未验收；没有把桌面CDP或设备清单当真机通过。D键当前浏览器送达问题也未关闭。
+
+
+### 2026-11-18 D键：页面外部输入拦截隔离（源码未改，未发布）
+
+在Ego118复现既有D未送达，按同一浏览器、相同CDP参数比较三种上下文。捕获窗口keydown/keyup、目标元素与isTrusted；没有改写浏览器配置、停用扩展或把合成事件当原生输入。
+
+|上下文|正文A / D / →|输入框A / D / →|应用脚本|
+|---|---|---|---|
+|about:blank临时HTML|全送达|全送达|无游戏/Vite|
+|5186同域临时HTML|A/→送达，D无事件|全送达|仅Vite HMR，无游戏|
+|5187纯静态HTML|A/→送达，D无事件|全送达|无外部脚本，仅内联采集器；favicon404|
+
+这条命令启动纯静态复现：`python3 -m http.server 5187 --bind 127.0.0.1 --directory .artifacts`，访问临时alpha52-input-isolation.html，以Input.dispatchKeyEvent发送keyDown/keyUp，key=d/code=KeyD/windowsVirtualKeyCode=68；A用65、右箭头用39。静态页的网络资源只有favicon.ico，document.scripts只有一个内联采集器。页面正文D缺事件因此并非只在游戏或Phaser/Vite中发生；具体浏览器功能/扩展仍未确证，不给未知扩展定责。
+
+另以同域iframe中的实际游戏复验：source布局比奇、战士、test模式禁止生成、原速度，等待新局清键完成后发送相同trusted按键并步进0.2秒。A使x1104→1063、右箭头1104→1145；D无窗口事件、input=0、x1104。iframe没有消除该环境问题；不把它算D通过，不通过隐藏输入框或改全局浏览器配置绕过。两张原版游戏/纯静态截图均已查看，人物/地面/树冠与底栏完整；iframe外的白边为诊断宿主页，不是游戏底部黑区回归。
+
+证据alpha52-input-isolation-{blank,local,static,frame}.json、同名前缀日志及static/frame.png。8个游戏存储键逐字未变；Ego118、Vite5186会话53509和纯静态5187会话38312已退出。临时HTML只在忽略的.artifacts目录，未进入产品/发布产物。无功能源码、素材、音频或生产变更，既有1321测试及fbf670b冻结回归的规则哈希保持。
+
+结论范围：游戏内部不是D未送达的唯一原因；本机HTTP页面外部拦截已复现，具体实现未知。D的完整原生验收继续保留，方向键是已验证的替代操作。安卓触控与D问题不同，不能用该键盘诊断关闭安卓缺口。手机型号/实际URL/当前摇杆表现已再次集中询问，等待真实设备信息。
