@@ -1,8 +1,9 @@
+import {resolveSurvivorStart} from './survivor-starts';
 import {SurvivorTelemetry} from "./survivor-telemetry";
 import {canStartMajorAttack} from './attack-budget';
 import {survivorExpNeeded} from './survivor-pacing';
 import {snapshotSurvival,parseSurvivalSave} from './survivor-save';
-import {survivalBonuses,survivalGrowth,tuneSurvivalEnemy,newSurvival,survivalStarter,survivalTick,survivalChoices,chooseSurvival,survivalDeath,survivalSplash,SURVIVAL_SECONDS,FINAL_OVERTIME_SECONDS,BUILD_GUIDES} from "./survivor";
+import {survivalBonuses,survivalGrowth,tuneSurvivalEnemy,newSurvival,survivalTick,survivalChoices,chooseSurvival,survivalDeath,survivalSplash,SURVIVAL_SECONDS,FINAL_OVERTIME_SECONDS,BUILD_GUIDES} from "./survivor";
 import {
   ITEMS,
   MONSTERS,
@@ -478,7 +479,7 @@ export class Game {
       ...canonicalBonuses(id,rank),
     };
   }
-  start(mode: Mode, seed = 176, classId: ClassId = this.classId, warriorFourSlot = false, mapId: MapId = this.mapId) {
+  start(mode: Mode, seed = 176, classId: ClassId = this.classId, warriorFourSlot = false, mapId: MapId = this.mapId, survivorStart?: SkillId) {
     if (!PLAYABLE_MAP_IDS.includes(mapId)) return;
     if (mode === "normal" && !this.unlockedMaps.has(mapId)) return;
     this.classId = classId;
@@ -522,9 +523,9 @@ export class Game {
       attackUntil: 0,
       attackDir: 4,
     };
-    this.skills = [this.newSkill(this.survivorMode?survivalStarter(this.classId):this.classInfo.startingSkill)];
+    this.skills = [this.newSkill(this.survivorMode?resolveSurvivorStart(this.classId,survivorStart):this.classInfo.startingSkill)];
     this.survival.seenSkills=this.skills.map(s=>s.id);
-    this.survival.mainSkills=[...BUILD_GUIDES[this.classId].main];
+    this.survival.mainSkills=this.survivorMode?[this.skills[0].id,...BUILD_GUIDES[this.classId].main.filter(id=>id!==this.skills[0].id)].slice(0,2):[...BUILD_GUIDES[this.classId].main];
     this.basicCD = 0;
     this.charges = {};
     this.tao = createTaoState();

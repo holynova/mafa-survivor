@@ -73,3 +73,4 @@
  .mir-skill-dock{grid-column:2;grid-row:1}
  .mir-hud-frame>progress{grid-column:1/-1;grid-row:2}
 }
+.survivor-start-picker button[aria-pressed=true]{border-color:#d6b46c}.survivor-start-picker button:disabled{opacity:1;color:#c8bba0;border-style:dashed}.survivor-start-picker button:disabled .survivor-choice-title{opacity:.7}.survivor-start-picker small{line-height:1.5}
