@@ -1,7 +1,7 @@
 import {afterEach,expect,it} from 'vitest';
 import {Game} from '../src/game';
 import {acceptChapterChallenge,challengeAvailable,tickChapterChallenge} from '../src/chapter-challenge';
-import {getItem} from '../src/content';
+import {getItem,ITEMS} from '../src/content';
 import {parseSurvivalSave} from '../src/survivor-save';
 import {collectLoot} from '../src/loot';
 import {setWorldLayouts} from '../src/world';
@@ -24,5 +24,27 @@ it('supports each source chapter and class with a legal approach and usable weap
   const g=new Game();g.survivorMode=true;g.unlockedMaps.add(map);g.start('normal',176,role,false,map);g.clock=130;g.pause();expect(acceptChapterChallenge(g),`${map}/${role}`).toBe(true);
   const e=g.enemies.find(e=>e.id===g.survival.challenge.enemyId)!;expect(g.navigation!.lineClear(g.player,e,12)).toBe(true);g.pause();g.hit(e,1e6,'basic');
   const item=g.drops.filter(d=>d.itemId).map(d=>getItem(d.itemId!)).find(i=>i.slot==='weapon'&&i.tier===2);expect(item).toBeDefined();expect(g.validItem(item!)).toBe(true);
+ }
+});
+it('rewards improve the class primary attack over the starter weapon, rather than only being equippable',()=>{
+ for(const role of ['warrior','wizard','taoist'] as const)for(let seed=1;seed<=32;seed++){
+  const g=new Game();g.survivorMode=true;g.start('normal',seed,role);g.clock=130;g.pause();
+  const starter=getItem(g.equipment.weapon!.itemId),prefix=role==='warrior'?'dc':role==='wizard'?'mc':'sc';
+  const power=(item:typeof starter)=>(item.stats[`${prefix}_min`]??0)+(item.stats[`${prefix}_max`]??0)+(prefix==='mc'?2*(item.stats.mc_flat??0):0);
+  expect(acceptChapterChallenge(g)).toBe(true);g.pause();g.hit(g.enemies.find(e=>e.id===g.survival.challenge.enemyId)!,1e6,'basic');
+  const event=g.telemetry.snapshot(g)!.events.find(e=>e.type==='challenge-complete')!;
+  const reward=getItem(String(event.details.item));
+  expect(power(reward),`${role}/${seed}: ${reward.name}`).toBeGreaterThan(power(starter));
+ }
+});
+it('keeps reward pickup subject to equipment locks and does not replace higher-tier weapons',()=>{
+ for(const locked of [true,false]){
+  const g=run();const advanced=ITEMS.find(i=>i.slot==='weapon'&&i.tier>2&&g.validItem(i))!;
+  if(locked)g.survival.equipmentLocks=['weapon'];else g.equipment.weapon={itemId:advanced.id,paid:0};
+  const before=g.equipment.weapon!.itemId;g.pause();expect(acceptChapterChallenge(g)).toBe(true);g.pause();
+  g.hit(g.enemies.find(e=>e.id===g.survival.challenge.enemyId)!,1e6,'basic');
+  const item=g.telemetry.snapshot(g)!.events.find(e=>e.type==='challenge-complete')!.details.item;
+  const drop=g.drops.find(d=>d.itemId===item)!;const gold=g.gold;collectLoot(g,drop);
+  expect(g.equipment.weapon!.itemId).toBe(before);expect(g.gold).toBeGreaterThan(gold);
  }
 });

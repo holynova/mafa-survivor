@@ -1,5 +1,6 @@
 import type {Game,Enemy} from './game';
 import {ITEMS,type MapId} from './content';
+import {isPrimaryWeaponUpgrade} from './equipment';
 import {appendLoot} from './loot';
 import {announceEncounter} from './encounters';
 import {tuneSurvivalEnemy} from './survivor';
@@ -7,7 +8,10 @@ export type ChapterChallenge={status:'idle'|'active'|'won'|'expired';enemyId:num
 export const newChapterChallenge=():ChapterChallenge=>({status:'idle',enemyId:0,endsAt:0});
 export const CHAPTER_CHALLENGES:Partial<Record<MapId,{name:string;kind:string}>>={biche:{name:'郊外剿匪',kind:'orcWarrior'},shimu:{name:'石墓清道',kind:'blackBoar'},bairimen:{name:'林地猎蛛',kind:'moonSpider'}};
 export function challengeAvailable(g:Game){return g.survivorMode&&!!CHAPTER_CHALLENGES[g.mapId]&&g.survival.challenge.status==='idle'&&g.clock>=120&&g.clock<240;}
-const rewards=(g:Game)=>ITEMS.filter(i=>i.kind==='equipment'&&i.slot==='weapon'&&i.tier===2&&g.validItem(i));
+const starterWeapon=ITEMS.find(i=>i.name==='木剑');
+// A class-legal weapon can still have zero magic/taoist offense. The guaranteed
+// bonus should improve the starter's primary stat, without scaling to current gear.
+const rewards=(g:Game)=>ITEMS.filter(i=>i.kind==='equipment'&&i.slot==='weapon'&&i.tier===2&&g.validItem(i)&&isPrimaryWeaponUpgrade(g.classId,starterWeapon,i));
 export function acceptChapterChallenge(g:Game){
  if(g.phase!=='paused'||!challengeAvailable(g)||g.enemies.filter(e=>e.hp>0).length>=220||!rewards(g).length)return false;
  const points=g.navigation?.reachablePoints(g.player,180,280).filter(p=>g.canStand(p.x,p.y)&&g.navigation!.lineClear(g.player,p,12));
