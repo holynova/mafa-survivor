@@ -1,3 +1,4 @@
+import {stompWindup,stompRecovery} from './boss-timing';
 import {canStartMajorAttack} from './attack-budget';
 import type {Enemy,Game} from "./game";
 import type {Point} from "./world";
@@ -50,14 +51,14 @@ export function updateExpansionEnemy(g:Game,e:Enemy,dt:number,victim:Point & {vi
           else g.hurtPet(actor as typeof g.pets[number],e.damage*1.15,"magic");
         }
       g.effect(e.kind==="overlord" ? "overlordBlade" : "explosion",point.x,point.y,130,.8,e.dir);
-      e.stompAt=undefined;e.stompOrigin=undefined;e.staggerUntil=g.clock+1;
+      e.stompAt=undefined;e.stompOrigin=undefined;e.staggerUntil=g.clock+stompRecovery(e.kind,g.survivorMode);
     }
     return true;
   }
   if(e.stompCD===0 && canStartMajorAttack(g,e) && victim.visible && Math.hypot(victim.x-e.x,victim.y-e.y)<(e.kind==="redMoon" ? 420 : 160) && g.attackLineClear(e,victim)) {
     e.stompOrigin=e.kind==="redMoon" ? {x:victim.x,y:victim.y} : {x:e.x,y:e.y};
     g.monsterSound(e,"attack");
-    e.stompAt=g.clock+.9;e.stompCD=e.bossPhase===2 ? 4 : 6;return true;
+    e.stompAt=g.clock+stompWindup(e.kind,g.survivorMode);e.stompCD=e.bossPhase===2 ? 4 : 6;return true;
   }
   return e.kind==="redMoon";
 }

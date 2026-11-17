@@ -719,7 +719,7 @@ class BattleScene extends Phaser.Scene {
           this.bodies.get('enemy-cast-'+e.id)?.setTint(0xff6555);
         }
         if(e.elite||isBossKind(e.kind)){
-          for(const zone of enemyDangerZones(e,t)){drawDanger(this.danger,zone,t);this.dangerMemory.set(zone.id,zone);}
+          for(const zone of enemyDangerZones(e,t,game.survivorMode)){drawDanger(this.danger,zone,t);this.dangerMemory.set(zone.id,zone);}
         }else {
         if (e.windup > 0) {
           this.bars
@@ -752,7 +752,7 @@ class BattleScene extends Phaser.Scene {
         }
         if((e.awakenAt ?? 0)>game.clock) this.bars.lineStyle(3,0xffcc84,0.9).strokeCircle(e.x,e.y,42);
       }
-      const activeZones=new Set(game.enemies.flatMap(e=>enemyDangerZones(e,t).map(z=>z.id)));
+      const activeZones=new Set(game.enemies.flatMap(e=>enemyDangerZones(e,t,game.survivorMode).map(z=>z.id)));
       for(const [id,zone] of this.dangerMemory){
         if(activeZones.has(id))continue;
         const living=game.enemies.some(e=>e.id===Number(id.split(':')[0])&&e.hp>0);
