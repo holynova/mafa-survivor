@@ -1145,3 +1145,13 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 已查看alpha45-support-guide-390.png（推荐全文）、alpha45-support-guide-320.png（实际截图是选中起手列表，非下方推荐全文）、alpha45-support-battle-390.png（实际为升级弹框）、alpha45-support-live-390.png（实际战斗）。320px无横向溢出；原版角色/召唤物/地面在截图中正常，无新增资源或环境改动。此场景不覆盖所有树木遮挡/全部地图。
 - 原生D键第一次遇升级暂停不算验收；第二次battle状态x仍1104，未证明右移成功，保留原生输入缺口，不修改产品去适应自动化。
 - 导航旧模式终止幸存者持久化后恢复全部五键，逐项相等true；空间87已finish关闭，dev21703已Ctrl-C退出。用户页面保留。
+
+### 原生D键验收边界定位（alpha.45候选）
+
+独立Ego空间88、dev5186、survivor测试模式；未另开普通局，不改普通存档。页面临时捕获keydown/keyup，同时读取实际inputDiagnostics、game.input、坐标、phase与右侧canStand。
+
+1. battle、(1104,768)、右侧10px合法时，keyboard.down('d')等待2秒：页面事件0、held为空、输入(0,0)、坐标不变。
+2. canvas明确focus后，包装器仍事件0；底层Input.dispatchKeyEvent KeyD及page.press('canvas','d')仍事件0。中间一次等待期间进入upgrade，故该次不能作为移动判断；随后重新清空敌人与掉落并把三个survival生成时钟置远、phase=battle，再做定向press，事件仍0。test.spawning=false本身未阻止survivor时间线，不把该参数称为冻结所有生成。
+3. 对照合成window KeyboardEvent：捕获trusted=false的KeyD，held=KeyD、输入(1,0)，角色x移动至1125.5；keyup后输入(0,0)。已查看alpha45-keyboard-probe.png桌面截图。
+
+结论：当前观察到的失败发生在浏览器投递/页面事件观测边界，不能据此宣称游戏D键逻辑有错，也不能证明真人物理键盘通过。没有修改游戏去绕过工具限制。具体阻断来自浏览器、自动化或扩展尚无证据区分，保留实体键盘验收项。临时探针已移除，导航退出测试；空间88已关闭，dev94416已停止。
