@@ -157,3 +157,18 @@ it.each(["biche","mine","woma","zuma"] as const)("runs the recovery sample at le
     expect(g.player.hp).toBeLessThanOrEqual(g.maxHP);expect(g.result).toBeNull();
   }
 });
+
+it('gives survivor warriors bounded kill recovery and recalculates it once across resume',()=>{
+ const g=new Game();g.survivorMode=true;g.start('normal',176,'warrior');
+ expect(g.stats.hp_on_kill).toBe(.5);
+ g.upgrades.hp_on_kill=.2;g.recompute();expect(g.stats.hp_on_kill).toBe(.7);
+ g.player.hp=100;
+ const victim=enemy(g,1);g.hit(victim,2,'cleave','direct','weapon');
+ expect(g.player.hp).toBeCloseTo(100.7);
+ expect(g.combatRecovery.healing.onKill).toBeCloseTo(.7);
+ const restored=new Game();expect(restored.resumeSurvival(g.snapshotSurvival())).toBe(true);
+ expect(restored.stats.hp_on_kill).toBe(.7);
+ restored.recompute();expect(restored.stats.hp_on_kill).toBe(.7);
+ for(const role of ['wizard','taoist'] as const){g.start('normal',176,role);expect(g.stats.hp_on_kill??0).toBe(0);}
+ g.survivorMode=false;g.start('normal',176,'warrior');expect(g.stats.hp_on_kill??0).toBe(0);
+});

@@ -1,4 +1,4 @@
-import {stompWindup,stompRecovery} from './boss-timing';
+import {stompWindup,stompRecovery,stompRadius} from './boss-timing';
 import {canStartMajorAttack} from './attack-budget';
 import type {Enemy,Game} from "./game";
 import type {Point} from "./world";
@@ -46,11 +46,11 @@ export function updateExpansionEnemy(g:Game,e:Enemy,dt:number,victim:Point & {vi
     if(g.clock>=e.stompAt) {
       const point=e.stompOrigin;
       for(const actor of [g.player,...g.pets.filter(p=>p.hp>0)])
-        if(Math.hypot(actor.x-point.x,actor.y-point.y)<130 && g.attackLineClear(e,actor) && g.attackLineClear(point,actor)) {
+        if(Math.hypot(actor.x-point.x,actor.y-point.y)<stompRadius(e.kind,g.survivorMode) && g.attackLineClear(e,actor) && g.attackLineClear(point,actor)) {
           if(actor===g.player)g.hurt(e.damage*1.15,"magic",false,`${e.kind}:stomp`);
           else g.hurtPet(actor as typeof g.pets[number],e.damage*1.15,"magic");
         }
-      g.effect(e.kind==="overlord" ? "overlordBlade" : "explosion",point.x,point.y,130,.8,e.dir);
+      g.effect(e.kind==="overlord" ? "overlordBlade" : "explosion",point.x,point.y,stompRadius(e.kind,g.survivorMode),.8,e.dir);
       e.stompAt=undefined;e.stompOrigin=undefined;e.staggerUntil=g.clock+stompRecovery(e.kind,g.survivorMode);
     }
     return true;

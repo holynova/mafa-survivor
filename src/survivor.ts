@@ -37,6 +37,8 @@ export function newSurvival(){return {challenge:newChapterChallenge(),spawnAt:0,
 export const survivalLateGrowth=(id:SkillId)=>SURVIVAL_LATE_GROWTH[id];
 export function survivalDescription(id:SkillId){
  const descriptions:Partial<Record<SkillId,string>>={
+  beast:'召唤神兽喷火。在你的侦测范围与视线内，宝宝会优先靠近最终首领，再按实际射程攻击。',
+  skeleton:'召唤骷髅近战协助。宝宝会优先靠近你视线与侦测范围内的最终首领。',
   cleave:'向附近敌人挥出半月刀光；一个目标即可触发，优先覆盖敌群。',
   invisible:'生命低于60%且120px内有敌人时隐身；移动和自动攻击不解除。普通怪贴身、精英与首领仍可侦测。',
   groupInvisible:'160px内有敌人时，为自身及范围内宝宝隐身；单人也可施放，移动和自动攻击不解除。精英与首领仍可侦测。',
@@ -72,7 +74,11 @@ export function chooseSurvival(g:Game,id:string){const c=g.choices.find(x=>x.id=
 /** Every chapter starts at level one in this mode; legacy chapter stats assumed prior equipment. */
 export function tuneSurvivalEnemy(g:Game,e:Enemy,tier:'normal'|'elite'|'boss'){
  const pressure=g.mapId==='bairimen'?2:CHAPTER_PRESSURE[g.mapId];
- const hp=tier==='boss'?(.7+g.clock/1200)/Math.sqrt(pressure):(tier==='normal'?.65:1)/pressure;
+ // Original chapter HP assumed carried equipment. These two chapters restart at level one.
+ const bossHealth = g.mapId === 'shimu' ? .8 : g.mapId === 'bairimen' ? .65 : 1;
+ const hp = tier === 'boss'
+  ? bossHealth * (.7 + g.clock / 1200) / Math.sqrt(pressure)
+  : (tier === 'normal' ? .65 : 1) / pressure;
  const threat=survivalThreatScale(g.clock,tier);
  e.hp=e.maxHp=Math.max(8,e.maxHp*hp*threat.hp);
  e.speed*=threat.speed;

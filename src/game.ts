@@ -577,6 +577,7 @@ export class Game {
   private statSources(equipment:Partial<Record<Slot,Equipped>>=this.equipment) {
     return [
       this.classInfo.base,
+      ...(this.survivorMode && this.classId === "warrior" ? [{hp_on_kill: .5}] : []),
       this.talentBonuses,
       this.upgrades,
       ...Object.values(equipment).map((e) => getItem(e.itemId).stats),
@@ -1390,7 +1391,10 @@ export class Game {
             0),
     );
     if(chargedBossOnly && !targets.length)return false;
-    const threat=(e:Enemy)=>isBossKind(e.kind) ? 2 : e.elite ? 1 : 0;
+    const threat = (enemy: Enemy) => {
+      if (this.survivorMode && enemy.id === this.survival.finalBossId) return 3;
+      return isBossKind(enemy.kind) ? 2 : enemy.elite ? 1 : 0;
+    };
     targets.sort(
       (a, b) =>
         ((fire || chargedBossOnly) ? threat(b)-threat(a) : 0) ||
@@ -1585,7 +1589,10 @@ export class Game {
     if (near.length < minimum) return false;
     const autoAim=solo && !manual;
     if(autoAim) {
-      const threat=(e:Enemy)=>isBossKind(e.kind) ? 2 : e.elite ? 1 : 0;
+      const threat = (enemy: Enemy) => {
+        if (this.survivorMode && enemy.id === this.survival.finalBossId) return 3;
+        return isBossKind(enemy.kind) ? 2 : enemy.elite ? 1 : 0;
+      };
       near.sort((a,b)=>threat(b)-threat(a) ||
         Math.hypot(a.x-this.player.x,a.y-this.player.y)-Math.hypot(b.x-this.player.x,b.y-this.player.y));
     }
@@ -1681,7 +1688,9 @@ export class Game {
       .sort((a, b) => {
         const priority = (e: Enemy) =>
           (weighted
-            ? isBossKind(e.kind)
+            ? this.survivorMode && e.id===this.survival.finalBossId
+              ? -2000
+              : isBossKind(e.kind)
               ? -1000
               : e.elite
                 ? -500
@@ -1693,7 +1702,10 @@ export class Game {
       });
     if(["fireball","bigfireball","talisman"].includes(s.id)) {
       const focus=targets.find(e=>e.id===s.focusTarget),first=targets[0];
-      const threat=(e:Enemy)=>isBossKind(e.kind) ? 2 : e.elite ? 1 : 0;
+      const threat = (enemy: Enemy) => {
+        if (this.survivorMode && enemy.id === this.survival.finalBossId) return 3;
+        return isBossKind(enemy.kind) ? 2 : enemy.elite ? 1 : 0;
+      };
       if(focus && first && threat(focus)>=threat(first) &&
         Math.hypot(focus.x-this.player.x,focus.y-this.player.y)<=Math.hypot(first.x-this.player.x,first.y-this.player.y)+150) {
         targets.splice(targets.indexOf(focus),1);targets.unshift(focus);
@@ -1833,10 +1845,17 @@ export class Game {
                 Math.hypot(a.x - p.x, a.y - p.y) -
                 Math.hypot(b.x - p.x, b.y - p.y),
             );
-      // Prioritize threats only among targets this pet can hit now. A distant
-      // or wall-side Boss must not steal attacks from a visible nearby enemy.
+      // Assist the player with a visible final objective, approaching through
+      // the source map. Other threats retain immediate attack-range priority.
       const attackable=candidates.filter(e=>Math.hypot(e.x-p.x,e.y-p.y)<range && this.attackLineClear(p,e));
-      const target=attackable.find(e=>isBossKind(e.kind)) ?? attackable.find(e=>e.elite) ?? attackable[0] ?? candidates[0];
+      const finalInRange = this.survivorMode
+        ? attackable.find(e => e.id === this.survival.finalBossId) : undefined;
+      const visibleFinal = this.survivorMode ? candidates.find(e =>
+        e.id === this.survival.finalBossId &&
+        Math.hypot(e.x - this.player.x, e.y - this.player.y) <= this.detectionRange &&
+        this.attackLineClear(this.player, e)) : undefined;
+      const target = finalInRange ?? visibleFinal ?? attackable.find(e => isBossKind(e.kind)) ??
+        attackable.find(e => e.elite) ?? attackable[0] ?? candidates[0];
       const destination = target ?? this.player,
         dx = destination.x - p.x,
         dy = destination.y - p.y,

@@ -1,4 +1,4 @@
-import {stompWindup} from './boss-timing';
+import {stompWindup,stompRadius} from './boss-timing';
 import type {Enemy,Game} from './game';
 import {isBossKind,MONSTERS} from './content';
 export const monsterName=(kind:string)=>MONSTERS.find(m=>m.id===kind)?.name??kind;
@@ -17,7 +17,7 @@ export function enemyDangerZones(e:Enemy,clock:number,survivorMode=false):Danger
  if(e.hp<=0||!e.elite&&!isBossKind(e.kind))return [];
  const progress=(until:number,duration:number)=>Math.max(0,Math.min(1,1-(until-clock)/duration));
  if(e.shock)return [{id:`${e.id}:shock:${e.shock.at}`,shape:'lane',x:e.shock.origin.x,y:e.shock.origin.y,toX:e.shock.target.x,toY:e.shock.target.y,width:76,until:e.shock.at,progress:progress(e.shock.at,e.kind==='chulong'?.9:.8)}];
- if(e.stompAt!==undefined&&e.stompOrigin)return [{id:`${e.id}:stomp:${e.stompAt}`,shape:'circle',...e.stompOrigin,radius:130,until:e.stompAt,progress:progress(e.stompAt,stompWindup(e.kind,survivorMode))}];
+ if(e.stompAt!==undefined&&e.stompOrigin)return [{id:`${e.id}:stomp:${e.stompAt}`,shape:'circle',...e.stompOrigin,radius:stompRadius(e.kind,survivorMode),until:e.stompAt,progress:progress(e.stompAt,stompWindup(e.kind,survivorMode))}];
  if(e.bossJumpTarget&&clock<(e.bossJumpUntil??0))return [{id:`${e.id}:jump:${e.bossJumpUntil}`,shape:'circle',...e.bossJumpTarget,radius:110,until:e.bossJumpUntil!,progress:progress(e.bossJumpUntil!,1.4)}];
  if(e.chargeTarget&&clock<(e.chargeWindupUntil??0))return [{id:`${e.id}:charge:${e.chargeWindupUntil}`,shape:'lane',x:e.x,y:e.y,toX:e.chargeTarget.x,toY:e.chargeTarget.y,width:64,until:e.chargeWindupUntil!,progress:progress(e.chargeWindupUntil!,e.kind==='skeletonWarrior'?.5:.7)}];
  if(e.windup>0&&!e.ranged)return [{id:`${e.id}:melee`,shape:'circle',x:e.x,y:e.y,radius:isBossKind(e.kind)?105:46,until:clock+e.windup,progress:1-e.windup/(isBossKind(e.kind)?.65:.4)}];
