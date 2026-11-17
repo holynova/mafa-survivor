@@ -4,7 +4,7 @@ import {OriginalSounds} from "../src/sound";
 afterEach(()=>vi.unstubAllGlobals());
 function audio(budget?:number){
  const stored=new Map<string,string>(),requests:string[]=[],nodes:{stopped:boolean;onended:(()=>void)|null}[]=[];
- const context={state:"running",currentTime:1,destination:{},resume:async()=>{},createGain:()=>({gain:{value:1},connect(){}}),decodeAudioData:async()=>({length:256,numberOfChannels:1}),
+ const context={state:"running",currentTime:1,destination:{},resume:async()=>{},createWaveShaper:()=>({curve:null,oversample:"none",connect(){}}),createGain:()=>({gain:{value:1},connect(){}}),decodeAudioData:async()=>({length:256,numberOfChannels:1}),
   createBufferSource:()=>{const n={stopped:false,onended:null as (()=>void)|null,buffer:{},connect(){},disconnect(){},start(){},stop(){this.stopped=true;this.onended?.();}};nodes.push(n);return n;}};
  vi.stubGlobal("window",{localStorage:{getItem:(k:string)=>stored.get(k)??null,setItem:(k:string,v:string)=>stored.set(k,v)}});
  vi.stubGlobal("AudioContext",class {constructor(){return context;}});

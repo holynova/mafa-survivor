@@ -1,3 +1,4 @@
+import {connectAudioOutput} from './audio-output';
 import {OriginalMusic,CHAPTER_MUSIC} from "./music";
 import type {MapId} from "./content";
 import { assetUrl, isGraybox } from "./release";
@@ -82,7 +83,7 @@ export class OriginalSounds {
         this.context = new AudioContext();
         this.gain = this.context.createGain();
         this.gain.gain.value = this.muted ? 0 : this.volume;
-        this.gain.connect(this.context.destination);
+        connectAudioOutput(this.context,this.gain);
         this.combatGain=this.context.createGain();this.combatGain.gain.value=this.combatVolume;this.combatGain.connect(this.gain);
         this.musicGain=this.context.createGain();this.musicGain.gain.value=this.musicVolume;this.musicGain.connect(this.gain);
         if(typeof this.context.createMediaElementSource==="function")this.music=new OriginalMusic(this.context,this.musicGain);

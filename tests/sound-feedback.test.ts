@@ -8,6 +8,7 @@ it("keeps injury/death audible under spell voice saturation and respects mute",a
   state="running";currentTime=1;destination={};
   constructor(){context=this;}
   async resume(){}
+  createWaveShaper(){return {curve:null,oversample:"none",connect(){}};}
   createGain(){return {gain:{value:1},connect(){}};}
   async decodeAudioData(){return {};}
   createBufferSource(){const n={started:false,stopped:false,onended:null as (()=>void)|null,buffer:{},connect(){},disconnect(){},start(){this.started=true;},stop(){this.stopped=true;this.onended?.();}};nodes.push(n);return n;}

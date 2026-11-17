@@ -1031,3 +1031,11 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 原生page.click受失焦暂停影响，首次按钮不存在、第二次只进入暂停，未虚报成功。随后Page.bringToFront、恢复测试battle状态，CDP touchStart/touchEnd点第六技能左上内4px，真实打开技能面板并选中“基本剑术”。未禁用自动暂停；这是浏览器触摸事件验证，不是实体手机手指或原生D键验收。
 - 105文件/1189测试、assets:check、最终生产build通过；日志alpha43-touch-hud-{tests,assets,build}.log。保留原有chunk警告。
 - 测试局未写普通战绩；固定摇杆只改内存并恢复。空间76关闭，临时5186服务停止。当前候选未发布。
+
+
+## alpha.43候选：混音输出软削峰
+
+- 新增主输出软曲线，原版素材未改；离线测试覆盖静音、符号对称、单调性、低电平线性和幅度上限。106文件/1190测试、assets:check、build通过，日志alpha43-audio-output-{tests,assets,build}.log；既存chunk警告保留。
+- Ego空间77真实原版音频解码/OfflineAudioContext双声道6组前后对照；100%总量处理前峰值1.60/1.94，处理后<0.98，样本超限为零，35%原线性区基本保持；不是物理设备听感认证。详情见SURVIVOR-MUSIC-REVIEW。
+- 真实页面解锁成功、fireball实际调度一次、无错误；390px场景截图alpha43-audio-output-scene-390.png已查看，人物/树冠完整。未在本轮补齐原生D键、树下穿行或实机听感验收。
+- 测试局不写普通战绩；没有更改持久化声音设置。空间77、音频上下文及临时5186服务已关闭。未发布。
