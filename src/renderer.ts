@@ -402,14 +402,14 @@ class BattleScene extends Phaser.Scene {
     return complete;
   }
   /** Reuse the exact source silhouette; contrast both light leaves and dark trunks. */
-  private coverSilhouette(key:string,frame:string,x:number,y:number,depth:number,alpha:number){
+  private coverSilhouette(key:string,frame:string,x:number,y:number,depth:number,alpha:number,scale=1,tint=0xffe2a0){
     for(const [index,[dx,dy]] of [[-1,0],[1,0],[0,-1],[0,1]].entries()){
       const edge=`${key}-edge-${index}`;
-      this.draw(edge,frame,x+dx,y+dy,depth-.3,alpha*.85);
+      this.draw(edge,frame,x+dx,y+dy,depth-.3,alpha*.85,scale);
       this.bodies.get(edge)?.setTintFill(0x181509);
     }
-    this.draw(key,frame,x,y,depth,alpha*.62);
-    this.bodies.get(key)?.setTintFill(0xffe2a0);
+    this.draw(key,frame,x,y,depth,alpha*.62,scale);
+    this.bodies.get(key)?.setTintFill(tint);
   }
   private hero(motion: string, dir: number, x: number, y: number, time: number, depth: number, alpha: number) {
     const desired = resolveAppearance(game.classId, game.phase === "lobby"
@@ -487,16 +487,22 @@ class BattleScene extends Phaser.Scene {
     const frames =
       assets.animations[`${name}/${motion}/${dir}`] ??
       assets.animations[`${name}/idle/${dir}`];
-    if (frames?.length)
+    if (frames?.length) {
+      const frame=frames[Math.floor(time * 9) % frames.length];
       this.draw(
         key,
-        frames[Math.floor(time * 9) % frames.length],
+        frame,
         x,
         y - height,
         depth,
         alpha,
         scale,
       );
+      // Friendly summons remain locatable beneath intact original scenery.
+      // Keep their source animation and invisibility alpha; enemies stay occluded.
+      if(key.startsWith("pet-") && this.occluders.some(part=>coversActor(part,{x,y})))
+        this.coverSilhouette(key+"-cover",frame,x,y-height,4090,alpha*.7,scale,0xbde5c4);
+    }
   }
   private fx(
     key: string,
