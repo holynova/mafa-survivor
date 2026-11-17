@@ -1247,3 +1247,11 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 回到(1104,768)，covering为空，bodies仅hero/weapon/shadow，附加轮廓退出；图层观测使用临时inspectHeroForQA导出，已从最终源码删除。热更新后第一次误导入了无query的第二个模块实例而超时，随后用performance中实际renderer URL检查，没有创建新空间。
 - 最终1245项测试、assets:check、类型/生产构建及assets:visual-check全部通过；原图校验failures=0。未增加只重复渲染常量的单测，沿用透明条带/前景采样机制测试与真实截图。Ego98及自建5186服务已关闭，普通存储/持久设置未修改。
 - 本次只通过上述原图位置和静态灰度样本。满屏法术、所有职业/装备/动作、完整色觉与设备性能验收仍未完成，不称整项战斗清晰度通过。待阶段发布，线上仍alpha.48。
+
+### alpha.49候选补验：密集效果与三职业遮挡
+
+- Ego99，原比奇树冠(1080,880)，390×844；使用测试局与冻结时钟10秒的明确压力fixture，不计普通存档/战绩，不作为自然成长或动态性能样本。
+- 法师：19个敌人、11个真实法术效果、4个投射物，同时设置最终首领范围与精英近战蓄力。分别查看alpha49-dense-full-390.png、alpha49-dense-reduced-390.png、alpha49-dense-gray-320.png；主角浅金轮廓及危险边缘仍可辨认。低效果/减闪与320×740灰度brightness(.55)前后，enemies/effects/projectiles/player/skills序列化状态完全相等；这是显示模拟，不替代真实屏幕和完整色觉验收。
+- 道士：13敌人，施毒、群疗、隐身及两只召唤物同时存在。首次updatePets(.05)仍处于出生CD，没有喷火；将测试宠物CD清零再走真实updatePets后生成beastflame，两个宠物attackUntil=10.4，首领实际失血。查看alpha49-dense-tao-390.png及alpha49-dense-tao-flame-390.png，喷火和危险边缘可见。隐身主角仍可定位，但树冠与密集效果中的召唤物本体不够突出，列为后续改进项。
+- 战士：12个近身敌人，真实cast只触发cleave，查看alpha49-dense-warrior-390.png确认半月白色刀光及主角轮廓；未把未触发的刺杀/烈火/攻杀记为通过。
+- 以上均为选定动画阶段的静态压力截图；尚不覆盖所有装备/动作、动态追踪或真机帧预算。视觉偏好只改内存，临时canvas filter已撤回；没有更改普通持久设置。测试空间99与自建5186服务已关闭。此次只补证据，没有修改生产代码，alpha.49仍待发布。
