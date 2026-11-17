@@ -3,9 +3,12 @@ import fs from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 const flags=new Set(['--accept-challenge','--hunt-elites','--seek-chests','--use-recovery','--focus-evolutions','--check-save']);
-for(const arg of process.argv.slice(2))if(!flags.has(arg)&&!/^--(maps|roles|seeds|strategy|out|max-steps)=.+$/.test(arg))throw new Error(`Unknown simulation option: ${arg}`);
+for(const arg of process.argv.slice(2))if(!flags.has(arg)&&!/^--(maps|roles|seeds|strategy|starter|out|max-steps)=.+$/.test(arg))throw new Error(`Unknown simulation option: ${arg}`);
 const maxSteps=Number(process.argv.find(a=>a.startsWith('--max-steps='))?.slice(12)??40000);
 if(!Number.isSafeInteger(maxSteps)||maxSteps<1||maxSteps>40000)throw new Error('max-steps must be an integer from 1 to 40000');
+const starterPolicy=process.argv.find(a=>a.startsWith('--starter='))?.slice(10)??'default';
+if(!['default','alternative'].includes(starterPolicy))throw new Error('starter must be default or alternative');
+const sourceMetadata={sourceCommit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),sourceDirty:!!execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim(),policyHash:createHash('sha256').update(await fs.readFile('tools/simulate-survival.mjs')).update(await fs.readFile('src/simulation.ts')).digest('hex')};
 const server=await createServer({server:{middlewareMode:true,watch:null,hmr:false},appType:'custom'});
 try{
  const {buySupply,supplyCredits,supplyCost}=await server.ssrLoadModule('/src/survivor-supplies.ts');
@@ -17,7 +20,8 @@ try{
  const {isBossKind}=await server.ssrLoadModule('/src/content.ts');
  const {Game}=await server.ssrLoadModule('/src/game.ts');
  const {simulationInput}=await server.ssrLoadModule('/src/simulation.ts');
- const {EVOLUTIONS,BUILD_GUIDES}=await server.ssrLoadModule('/src/survivor.ts');
+ const {SURVIVOR_STARTS}=await server.ssrLoadModule('/src/survivor-starts.ts');
+ const {EVOLUTIONS}=await server.ssrLoadModule('/src/survivor.ts');
  const {setWorldLayouts}=await server.ssrLoadModule('/src/world.ts');
  const maps=(process.argv.find(a=>a.startsWith('--maps='))?.slice(7)??'biche').split(',');
  const roles=(process.argv.find(a=>a.startsWith('--roles='))?.slice(8)??'wizard,warrior,taoist').split(',');
@@ -28,7 +32,7 @@ try{
  if(!['legacy','single','dual','spread'].includes(strategy))throw new Error('Unknown build strategy');
  const reports=[];
  for(const mapId of maps)for(const seed of seeds)for(const classId of roles){
- const g=new Game();g.survivorMode=true;g.unlockedMaps.add(mapId);g.start('normal',seed,classId,false,mapId);const pair=BUILD_GUIDES[classId].main;if(strategy!=='legacy')g.survival.mainSkills=strategy==='single'?[pair[0]]:strategy==='dual'?[...pair]:[];const checkpoints=[];let firstRank4=null,firstRank8=null;let nextSample=60;let firstUpgrade=null,firstEvo=null,steps=0,saveChecks=0,maxSaveCharacters=0,maxSaveMS=0,move={x:0,y:0};let failure=null;let challengeAttempted=false;const challengeTransitions=[];let challengeStatus=g.survival.challenge.status;
+ const g=new Game();g.survivorMode=true;g.unlockedMaps.add(mapId);g.start('normal',seed,classId,false,mapId,starterPolicy==='alternative'?SURVIVOR_STARTS[classId][1]:undefined);const starter=g.skills[0].id;const pair=[...g.survival.mainSkills];if(strategy!=='legacy')g.survival.mainSkills=strategy==='single'?[pair[0]]:strategy==='dual'?[...pair]:[];const checkpoints=[];let firstRank4=null,firstRank8=null;let nextSample=60;let firstUpgrade=null,firstEvo=null,steps=0,saveChecks=0,maxSaveCharacters=0,maxSaveMS=0,move={x:0,y:0};let failure=null;let challengeAttempted=false;const challengeTransitions=[];let challengeStatus=g.survival.challenge.status;
  while(!['won','dead'].includes(g.phase)&&steps++<maxSteps){
  if(g.survival.challenge.status!==challengeStatus){challengeStatus=g.survival.challenge.status;challengeTransitions.push({at:g.clock,status:challengeStatus,hp:g.player.hp,equipment:{...g.equipment},skills:g.skills.map(s=>s.id+':'+s.rank)});}
  if(firstEvo===null&&g.survival.evolved.length)firstEvo=g.clock;
@@ -43,8 +47,8 @@ try{
  const diagnostic=g.telemetry.snapshot(g);
  const encounters=g.enemies.filter(e=>e.hp>0&&(e.elite||isBossKind(e.kind))).map(e=>({kind:e.kind,hp:e.hp,maxHp:e.maxHp,distance:Math.hypot(e.x-g.player.x,e.y-g.player.y),lineClear:g.attackLineClear(g.player,e)}));
  const finalBoss=g.enemies.find(e=>e.id===g.survival.finalBossId);
- reports.push({acceptChallenge,challengeAttempted,challenge:{...g.survival.challenge},challengeTransitions,challengeEvents:diagnostic?.events.filter(e=>e.type.startsWith('challenge-'))??[],huntElites,failure,deathSource:g.result?.deathSource??null,lastInterval:diagnostic?.current??diagnostic?.samples.at(-1)??null,encounters,equipment:g.equipment,seekChests,useRecovery,damageDealt:{...g.damageDealt},remainingChests:g.survival.chests.length,suppliesBought:g.survival.suppliesBought,potionHealing:g.tao.healing.bloodPotion??0,strategy,firstRank4,firstRank8,gold:g.gold,totalGold:g.totalGold,supplyCredits:g.survival.supplyBosses.length-g.survival.suppliesBought,finalBoss:finalBoss?{kind:finalBoss.kind,hp:finalBoss.hp,maxHp:finalBoss.maxHp,distance:Math.hypot(finalBoss.x-g.player.x,finalBoss.y-g.player.y),lineClear:g.attackLineClear(g.player,finalBoss)}:null,mapId,seed,classId,damageTaken:g.damageTaken,checkpoints,saveChecks,maxSaveCharacters,maxSaveMS,phase:g.phase,seconds:Math.round(g.clock),level:g.level,kills:g.kills,firstUpgrade,firstEvo,skills:g.skills.map(s=>({id:s.id,rank:s.rank})),evolved:g.survival.evolved,evolutionDamage:Object.fromEntries(Object.entries(g.damageDealt).filter(([id])=>id.startsWith('evolution:')))});console.log(JSON.stringify(reports.at(-1)));
+ reports.push({starter,starterPolicy,acceptChallenge,challengeAttempted,challenge:{...g.survival.challenge},challengeTransitions,challengeEvents:diagnostic?.events.filter(e=>e.type.startsWith('challenge-'))??[],huntElites,failure,deathSource:g.result?.deathSource??null,lastInterval:diagnostic?.current??diagnostic?.samples.at(-1)??null,encounters,equipment:g.equipment,seekChests,useRecovery,damageDealt:{...g.damageDealt},remainingChests:g.survival.chests.length,suppliesBought:g.survival.suppliesBought,potionHealing:g.tao.healing.bloodPotion??0,strategy,firstRank4,firstRank8,gold:g.gold,totalGold:g.totalGold,supplyCredits:g.survival.supplyBosses.length-g.survival.suppliesBought,finalBoss:finalBoss?{kind:finalBoss.kind,hp:finalBoss.hp,maxHp:finalBoss.maxHp,distance:Math.hypot(finalBoss.x-g.player.x,finalBoss.y-g.player.y),lineClear:g.attackLineClear(g.player,finalBoss)}:null,mapId,seed,classId,damageTaken:g.damageTaken,checkpoints,saveChecks,maxSaveCharacters,maxSaveMS,phase:g.phase,seconds:Math.round(g.clock),level:g.level,kills:g.kills,firstUpgrade,firstEvo,skills:g.skills.map(s=>({id:s.id,rank:s.rank})),evolved:g.survival.evolved,evolutionDamage:Object.fromEntries(Object.entries(g.damageDealt).filter(([id])=>id.startsWith('evolution:')))});console.log(JSON.stringify(reports.at(-1)));
  }
- await fs.writeFile(process.argv.find(a=>a.startsWith('--out='))?.slice(6)??'.artifacts/survival-simulation.json',JSON.stringify({sourceCommit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),sourceDirty:!!execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim(),policyHash:createHash('sha256').update(await fs.readFile('tools/simulate-survival.mjs')).update(await fs.readFile('src/simulation.ts')).digest('hex'),maxSteps,acceptChallenge,huntElites,note:'Scripted movement/build/recovery strategy, not human win-rate; no teleport or free resources.',seekChests,useRecovery,strategy,focusEvolutions:process.argv.includes('--focus-evolutions'),reports},null,2));
+ await fs.writeFile(process.argv.find(a=>a.startsWith('--out='))?.slice(6)??'.artifacts/survival-simulation.json',JSON.stringify({...sourceMetadata,starterPolicy,maxSteps,acceptChallenge,huntElites,note:'Scripted movement/build/recovery strategy, not human win-rate; no teleport or free resources.',seekChests,useRecovery,strategy,focusEvolutions:process.argv.includes('--focus-evolutions'),reports},null,2));
  if(reports.some(r=>r.failure))process.exitCode=1;
 }finally{await server.close();}
