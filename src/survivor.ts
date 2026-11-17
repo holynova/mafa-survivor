@@ -14,6 +14,7 @@ import type {Game,Enemy,Skill,Upgrade} from './game';
 import {getSkill,SKILLS,MAPS,NATIVE_ELITES,STATIONARY_MONSTERS,CHAPTER_PRESSURE,EXPANSION_RANGED,isBossKind,type StatKey} from './content';
 import type {SkillId} from './spells';
 import {canonicalBonuses,SKILL_GROWTH} from './skill-growth';
+import {SURVIVOR_POISON_COOLDOWN} from './skill-metrics';
 export const SURVIVAL_SECONDS=1200;
 export const FINAL_OVERTIME_SECONDS=120;
 // Temporary open roster requested for scene testing; earned progress remains separate.
@@ -39,6 +40,7 @@ export function survivalDescription(id:SkillId){
  const descriptions:Partial<Record<SkillId,string>>={
   beast:'召唤神兽喷火。在你的侦测范围与视线内，宝宝会优先靠近最终首领，再按实际射程攻击。',
   skeleton:'召唤骷髅近战协助。宝宝会优先靠近你视线与侦测范围内的最终首领。',
+  poison:`绿毒每秒造成持续伤害，红毒降低防御。基础冷却${SURVIVOR_POISON_COOLDOWN}秒，优先覆盖未中毒目标；同种毒不叠加。`,
   cleave:'向附近敌人挥出半月刀光；一个目标即可触发，优先覆盖敌群。',
   invisible:'生命低于60%且120px内有敌人时隐身；移动和自动攻击不解除。普通怪贴身、精英与首领仍可侦测。',
   groupInvisible:'160px内有敌人时，为自身及范围内宝宝隐身；单人也可施放，移动和自动攻击不解除。精英与首领仍可侦测。',
@@ -50,6 +52,7 @@ export function survivalDescription(id:SkillId){
 export function survivalGrowth(id:SkillId){return [...SKILL_GROWTH[id],...survivalLateGrowth(id)].map((step,index)=>{
  const labels:Partial<Record<SkillId,Record<number,string>>>={
   cleave:{0:'正面180°；半径70px；单个近敌即可触发，优先覆盖敌群'},
+  poison:{0:`1目标；持续6秒；基础冷却${SURVIVOR_POISON_COOLDOWN}秒；红毒减防15%`},
   invisible:{0:'隐身6秒；生命低于60%且近处有敌触发；移动/自动攻击不解除'},
   groupInvisible:{0:'自身及72px内友方隐身5秒；近敌触发，单人可用，行动不解除'},
   groupHeal:{0:'半径144px群疗；两名友方受伤或自身生命低于70%触发',4:'自身治疗阈值70%→80%'},

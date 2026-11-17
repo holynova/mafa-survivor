@@ -19,7 +19,7 @@ export function changeSurvivalSkill(g:Game,oldId:SkillId,nextId:SkillId|null){
  g.effects=g.effects.filter(f=>f.kind!==oldId && !(oldId==='beast'&&f.kind==='beastflame') && !(oldId==='talisman'&&f.kind==='talismanHit'));
  g.survival.evolved=g.survival.evolved.filter(id=>id!==oldId);delete g.survival.evoReadyAt[oldId];
  if(g.skillFocus===oldId){g.skillFocus=null;g.focusMisses=0;}
- if(nextId){if(g.mode!=='test')g.survival.respecs--;const next=g.newSkill(nextId);next.cd=skillCooldown(next,g.stats.cooldown_reduction??0);g.skills[index]=next;}
+ if(nextId){if(g.mode!=='test')g.survival.respecs--;const next=g.newSkill(nextId);next.cd=skillCooldown(next,g.stats.cooldown_reduction??0,g.survivorMode);g.skills[index]=next;}
  else g.skills.splice(index,1);
  g.recompute();g.survival.toast=nextId?`已替换为${getSkill(nextId).name} · 1级`:`已移除${getSkill(oldId).name}`;g.emit();return true;
 }

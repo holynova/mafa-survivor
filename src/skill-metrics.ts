@@ -3,11 +3,14 @@ import {getSkill} from "./spells";
 import {cooldownScale} from "./cadence";
 import {skillExtras} from "./skill-growth";
 
-export function skillCooldown(s:Pick<Skill,"id"|"localCDR">,globalCDR=0) {
+/** Frequent coverage in hordes; poison still cannot stack on a target. */
+export const SURVIVOR_POISON_COOLDOWN=1.6;
+export function skillCooldown(s:Pick<Skill,"id"|"localCDR">,globalCDR=0,survivorMode=false) {
   if(getSkill(s.id).passive)return 0;
   const floor=s.id==="shield" ? 8 : ["ghost","armor"].includes(s.id) ? 14 :
     s.id==="invisible" ? 12 : s.id==="groupInvisible" ? 15 : .4*cooldownScale(s.id);
-  return Math.max(floor,getSkill(s.id).cooldown*(1-globalCDR/100)*(1-Math.min(60,s.localCDR)/100));
+  const base=survivorMode&&s.id==='poison'?SURVIVOR_POISON_COOLDOWN:getSkill(s.id).cooldown;
+  return Math.max(floor,base*(1-globalCDR/100)*(1-Math.min(60,s.localCDR)/100));
 }
 const n=(v:number)=>Number(v.toFixed(2));
 /** Effective boundaries, with the same equipment caps and cooldown floor as combat. */
@@ -15,7 +18,7 @@ export function skillMetrics(g:Game,s:Skill):string[] {
   const extra=skillExtras(s),out:string[]=[];
   const rad=(base:number)=>(base+(s.id==="groupInvisible" ? s.range : 0))*(1+s.radius/100)*(1+(g.stats.skill_radius??0)/100);
   const duration=(base:number,cap=Infinity)=>n(Math.min(cap,base*(1+s.duration/100)*(1+(g.stats.duration??0)/100)));
-  out.push(getSkill(s.id).passive ? "常驻" : `实际冷却 ${n(skillCooldown(s,g.stats.cooldown_reduction??0))}秒`);
+  out.push(getSkill(s.id).passive ? "常驻" : `实际冷却 ${n(skillCooldown(s,g.stats.cooldown_reduction??0,g.survivorMode))}秒`);
   if(s.power && !["poison","reveal","ghost","armor"].includes(s.id))out.push(`${["heal","groupHeal"].includes(s.id) ? "治疗量" : "威力"} +${n(s.power)}%`);
   if(["fireball","bigfireball","lightning","talisman","poison","holy","heal","reveal"].includes(s.id))out.push(`最多${Math.min(3,1+s.count)}个不同目标`);
   if(s.id==="firewall")out.push(`每次最多${Math.min(3,1+s.count)}片／同存${Math.min(4,2+s.count)}片`,`半径${n(rad(64))}px／持续${duration(6)}秒`);

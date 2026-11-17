@@ -2113,7 +2113,7 @@ export class Game {
     if (!didCast) return;
     if(s.id==="charm")refreshSummons(this);
     this.sound(s.id);
-    s.cd = skillCooldown(s,this.stats.cooldown_reduction??0);
+    s.cd = skillCooldown(s,this.stats.cooldown_reduction??0,this.survivorMode);
     if (this.classId !== "warrior") this.player.castUntil = this.clock + 0.25;
     if (targets[0] && !this.player.moving && getSkill(s.id).classId !== "warrior")
       this.player.dir = this.direction(
