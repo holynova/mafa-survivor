@@ -1,3 +1,4 @@
+import {rangedTiming} from "./ranged-timing";
 import {runtimeDiagnostics,observeRuntime} from "./runtime-diagnostics";
 import {visualPreferences,DEFAULT_VISUAL,floatingPresentation,effectOpacity} from './visual-settings';
 import {atlasResidency,unusedAtlasPages} from './asset-residency';
@@ -715,7 +716,7 @@ class BattleScene extends Phaser.Scene {
           if(elite){this.bars.lineStyle(1,0xd9b36d,.9).strokeRect(e.x-w/2-2,y-2,w+4,h+4);this.label(-2000000-e.id,'精英 · '+monsterName(e.kind),e.x,y-12,'#ffd398',1,12);}
         }
         if((e.elite||isBossKind(e.kind))&&e.rangedFireAt!==undefined){
-          this.fx('enemy-cast-'+e.id,'cast',e.x,e.y,Math.max(0,t-(e.rangedFireAt-.7)),Math.max(2100,e.y+300));
+          this.fx('enemy-cast-'+e.id,'cast',e.x,e.y,Math.max(0,t-(e.rangedFireAt-rangedTiming(e.kind,game.survivorMode).windup)),Math.max(2100,e.y+300));
           this.bodies.get('enemy-cast-'+e.id)?.setTint(0xff6555);
         }
         if(e.elite||isBossKind(e.kind)){

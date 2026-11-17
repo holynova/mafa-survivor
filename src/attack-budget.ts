@@ -9,7 +9,11 @@ export function majorAttackActive(e:Enemy,clock:number){
 }
 export function canStartMajorAttack(g:Game,e:Enemy){
  if(!g.survivorMode)return true;
- if(majorAttackActive(e,g.clock))return false;
- let active=0;for(const other of g.enemies)if(other.id!==e.id&&majorAttackActive(other,g.clock)&&++active>=MAJOR_ATTACK_LIMIT)return false;
+ // A volley remains committed after its caster recovers or dies. Count the
+ // source once, not each fan projectile, and release only when its shots expire.
+ const sources=new Set(g.projectiles.filter(p=>p.faction==='enemy'&&p.life>0&&p.majorSource!==undefined).map(p=>p.majorSource!));
+ if(majorAttackActive(e,g.clock)||sources.has(e.id))return false;
+ for(const other of g.enemies)if(other.id!==e.id&&majorAttackActive(other,g.clock))sources.add(other.id);
+ if(sources.size>=MAJOR_ATTACK_LIMIT)return false;
  return true;
 }

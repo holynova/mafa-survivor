@@ -1,3 +1,4 @@
+import {rangedTiming} from "./ranged-timing";
 import {isBossKind} from './content';
 import {canStartMajorAttack} from './attack-budget';
 import type {Enemy,Game} from "./game";
@@ -6,6 +7,7 @@ import type {Point} from "./world";
 /** Shared ranged windup: a fixed aim, a visible warning, then a dodgeable shot. */
 export function updateRangedEnemy(g:Game,e:Enemy,dt:number,victim:Point & {visible:boolean}) {
   if(!e.ranged)return false;
+  const timing=rangedTiming(e.kind,g.survivorMode);
   if((e.staggerUntil ?? 0)>g.clock)return true;
   if (e.ranged) {
     e.rangedCD=Math.max(0,(e.rangedCD ?? 1)-dt);
@@ -13,14 +15,14 @@ export function updateRangedEnemy(g:Game,e:Enemy,dt:number,victim:Point & {visib
       if (g.clock>=e.rangedFireAt) {
         g.fireEliteProjectile(e,e.rangedTarget);
         e.rangedTarget=undefined; e.rangedFireAt=undefined;
-        e.rangedCD=e.kind==="zumaArcher" ? 3.2 : e.kind==="flameWoma" ? 2.8 : 2.5;
-        e.windup=0; e.staggerUntil=g.clock+0.35;
+        e.rangedCD=timing.cooldown;
+        e.windup=0; e.staggerUntil=g.clock+timing.recovery;
       }
       return true;
     }
     const d=Math.hypot(victim.x-e.x,victim.y-e.y);
     if ((!(e.elite||isBossKind(e.kind))||canStartMajorAttack(g,e)) && victim.visible && d<420 && e.rangedCD===0 && (!g.navigation || g.navigation.lineClear(e,victim,0))) {
-      e.rangedTarget={x:victim.x,y:victim.y}; e.rangedFireAt=g.clock+0.7;
+      e.rangedTarget={x:victim.x,y:victim.y}; e.rangedFireAt=g.clock+timing.windup;
       g.monsterSound(e,"attack");
       e.dir=g.direction(victim.x-e.x,victim.y-e.y);
       return true;

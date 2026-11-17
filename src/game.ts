@@ -169,6 +169,8 @@ export type Projectile = Entity & {
   targetId?: number;
   hitChance?: number;
   enemyKind?: string;
+  /** One committed major attack per source, shared by every shot in its volley. */
+  majorSource?:number;
   homing?: boolean;
   faction?: "enemy";
   visual?: "poison" | "arrow" | "womaFlame";
@@ -1268,6 +1270,7 @@ export class Game {
         life:3,dir:(((Math.round(a/(Math.PI/8))+4)%16)+16)%16,
         faction:"enemy",visual:poison ? "poison" : arrow ? "arrow" : e.kind==="flameWoma" ? "womaFlame" : undefined,
         damageKind:arrow ? "physical" : "magic",homing:false,hitChance:75,enemyKind:e.kind,
+        ...(this.survivorMode&&(e.elite||isBossKind(e.kind))?{majorSource:e.id}:{}),
       });
     }
     this.effect("cast", e.x, e.y, 0, 0.5);
