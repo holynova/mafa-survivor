@@ -23,3 +23,16 @@ export function enemyDangerZones(e:Enemy,clock:number,survivorMode=false):Danger
  if(e.windup>0&&!e.ranged)return [{id:`${e.id}:melee`,shape:'circle',x:e.x,y:e.y,radius:isBossKind(e.kind)?105:46,until:clock+e.windup,progress:1-e.windup/(isBossKind(e.kind)?.65:.4)}];
  return [];
 }
+
+/** A bearing, not a path: never suggests walking straight through source walls. */
+export function finalBossBearing(g:Game,e:Enemy){
+ if(!g.survivorMode||e.hp<=0||e.id!==g.survival.finalBossId)return null;
+ const dx=e.x-g.player.x,dy=e.y-g.player.y,distance=Math.hypot(dx,dy);
+ const blocked=!g.attackLineClear(g.player,e);
+ if(distance<=80&&!blocked)return null;
+ const directions=['东','东南','南','西南','西','西北','北','东北'];
+ const arrows=['→','↘','↓','↙','←','↖','↑','↗'];
+ const sector=(Math.round(Math.atan2(dy,dx)/(Math.PI/4))+8)%8;
+ return {direction:directions[sector],arrow:arrows[sector],
+   status:blocked?'视线受阻':distance>g.detectionRange?'远处':'',blocked};
+}

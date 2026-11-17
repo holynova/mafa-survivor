@@ -74,3 +74,5 @@
  .mir-hud-frame>progress{grid-column:1/-1;grid-row:2}
 }
 .survivor-start-picker button[aria-pressed=true]{border-color:#d6b46c}.survivor-start-picker button:disabled{opacity:1;color:#c8bba0;border-style:dashed}.survivor-start-picker button:disabled .survivor-choice-title{opacity:.7}.survivor-start-picker small{line-height:1.5}
+
+.boss-health .boss-bearing{margin:5px 0 0;font-size:12px;line-height:1.4;color:#e3cda5;letter-spacing:.3px}.boss-health .boss-bearing span{color:inherit;font-size:15px}
