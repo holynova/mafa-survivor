@@ -100,7 +100,13 @@ export function survivalTick(g:Game){const state=g.survival;g.wave=Math.min(12,1
  if(g.clock>=1080&&!state.finalBossId){const boss=g.spawnEnemy(MAPS[g.mapId].boss);if(STATIONARY_MONSTERS.includes(boss.kind)){const nearby=g.navigation?.reachablePoints(g.player,160,260).filter(p=>g.canStand(p.x,p.y)&&g.attackLineClear(g.player,p));if(nearby?.length)Object.assign(boss,g.rng.pick(nearby));}tuneSurvivalEnemy(g,boss,'boss');boss.hp=boss.maxHp=boss.maxHp*1.5;state.finalBossId=boss.id;state.toast='';announceEncounter(g,boss);}
  if(g.clock<SURVIVAL_SECONDS&&g.clock>=state.spawnAt&&g.enemies.length<220){const e=g.spawnEnemy(survivalSpawnKind(g));tuneSurvivalEnemy(g,e,'normal');state.spawnAt=g.clock+survivorSpawnInterval(g.clock);}
  if(g.clock>=state.eliteAt&&g.clock<1080){const native=MAPS[g.mapId].monsterPool.filter(id=>NATIVE_ELITES.includes(id));const e=g.spawnEnemy(native.length?g.rng.pick(native):survivalSpawnKind(g));if(!e.elite){e.elite=true;e.hp=e.maxHp=e.maxHp*4;}tuneSurvivalEnemy(g,e,'elite');e.exp=Math.max(4,Math.round(e.exp*1.5));state.eliteAt=g.clock+(g.clock>=600?90:120);announceEncounter(g,e);}
- if(g.clock>=state.bossAt&&g.clock<1080){const boss=g.spawnEnemy(MAPS[g.mapId].boss);tuneSurvivalEnemy(g,boss,'boss');state.bossAt=g.clock+300;announceEncounter(g,boss);}
+ // A missed phase kill must not silently multiply chapter bosses. The next
+ // five-minute opportunity is skipped, not banked for an immediate respawn.
+ // The mandatory final boss above remains independent of this phase budget.
+ if(g.clock>=state.bossAt&&g.clock<1080){
+  state.bossAt=g.clock+300;
+  if(!g.enemies.some(e=>e.hp>0&&isBossKind(e.kind))){const boss=g.spawnEnemy(MAPS[g.mapId].boss);tuneSurvivalEnemy(g,boss,'boss');announceEncounter(g,boss);}
+ }
  for(const c of [...state.chests])if(Math.hypot(g.player.x-c.x,g.player.y-c.y)<55){state.chests=state.chests.filter(x=>x.id!==c.id);const candidates=eligibleEvolutions(g);
  if(c.eligible&&candidates.length===1){evolveSkill(g,candidates[0].id);}
  else if(c.eligible&&candidates.length>1){state.choiceChest=true;state.toast='选择进化';g.choices=candidates.map(s=>({id:'evo:'+s.id,kind:'skill',skill:s.id,name:EVOLUTIONS[s.id]!.name,description:EVOLUTIONS[s.id]!.description,value:0}));g.phase='upgrade';}

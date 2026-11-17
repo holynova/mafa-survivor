@@ -39,3 +39,13 @@ it('resume keeps the overtime deadline; legacy overtime receives a single migrat
  expect(restored.resumeSurvival(old)).toBe(true);expect(restored.survival.overtimeEndsAt).toBe(1620);expect(restored.survival.respecs).toBe(2);
  const again=new Game();expect(again.resumeSurvival(restored.snapshotSurvival())).toBe(true);expect(again.survival.overtimeEndsAt).toBe(1620);
 });
+
+it('skips overlapping phase bosses without banking a burst, while keeping the final encounter mandatory',()=>{
+ const g=run();g.survival.spawnAt=2000;g.survival.eliteAt=2000;
+ g.clock=300;survivalTick(g);expect(g.enemies).toHaveLength(1);const first=g.enemies[0];
+ g.clock=600;survivalTick(g);expect(g.enemies).toHaveLength(1);expect(g.survival.bossAt).toBe(900);
+ first.hp=0;g.clock=601;survivalTick(g);expect(g.enemies).toHaveLength(1);
+ g.clock=900;survivalTick(g);expect(g.enemies.filter(e=>e.hp>0)).toHaveLength(1);
+ g.clock=1080;survivalTick(g);expect(g.enemies.filter(e=>e.hp>0)).toHaveLength(2);expect(g.survival.finalBossId).toBe(g.enemies.at(-1)?.id);
+});
+it('keeps the skipped phase opportunity across save and resume',()=>{const g=run();g.clock=300;survivalTick(g);g.clock=600;survivalTick(g);const restored=new Game();expect(restored.resumeSurvival(g.snapshotSurvival())).toBe(true);expect(restored.survival.bossAt).toBe(900);const count=restored.enemies.length;restored.phase='battle';restored.survival.spawnAt=2000;restored.survival.eliteAt=2000;survivalTick(restored);expect(restored.enemies).toHaveLength(count);});

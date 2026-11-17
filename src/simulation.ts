@@ -1,3 +1,4 @@
+import {eligibleEvolutions} from "./survivor-evolutions";
 import { Game, WORLD, type Mode, type Upgrade, type Offer, type Enemy } from "./game";
 import { getItem, isBossKind, type Bonuses, type MapId, type SkillId } from "./content";
 import type { ClassId } from "./classes";
@@ -118,7 +119,7 @@ export function simulateShop(g:Game,trace?:ShopTrace[]) {
 }
 
 /** Observes the same combat state the view consumes; only returns legal input. */
-export function simulationInput(g:Game,previous={x:0,y:0}) {
+export function simulationInput(g:Game,previous={x:0,y:0},options:{seekChests?:boolean}={}) {
   const p=g.player;
   const health=p.hp/g.maxHP;
   const enemies=g.enemies.filter(e=>e.hp>0 && distance(e,p)<650)
@@ -128,9 +129,13 @@ export function simulationInput(g:Game,previous={x:0,y:0}) {
     .sort((a,b)=>(distance(a,p)-(a.heal && health<.7 ? 200*(1-health) : 0))-
       (distance(b,p)-(b.heal && health<.7 ? 200*(1-health) : 0)))[0];
   const emergency=!!drop?.heal && health<.7;
+  const ready=g.survivorMode && eligibleEvolutions(g).length>0;
+  const chest=options.seekChests && g.survivorMode ? g.survival.chests
+    .filter(c=>(!c.eligible || ready) && (!g.navigation || g.navigation.connected(p,c)))
+    .sort((a,b)=>Number(b.eligible)-Number(a.eligible) || distance(p,a)-distance(p,b))[0] : undefined;
   const boss=g.boss;
   const focus=boss ?? (g.classId==="warrior" ? enemies.find(e=>distance(e,p)<48 && g.attackLineClear(p,e)) ?? enemies[0] : undefined);
-  const destination=emergency ? drop : boss ? engagementPoint(g,boss) : drop ?? (focus ? engagementPoint(g,focus) : undefined);
+  const destination=emergency ? drop : chest ?? (boss ? engagementPoint(g,boss) : drop ?? (focus ? engagementPoint(g,focus) : undefined));
   const goal=destination && g.navigation ? g.navigation.waypoint(p,destination) : destination;
   const candidates=[{x:0,y:0},...Array.from({length:8},(_,i)=>({x:Math.cos(i*Math.PI/4),y:Math.sin(i*Math.PI/4)}))];
   if(goal){const dx=goal.x-p.x,dy=goal.y-p.y,d=Math.hypot(dx,dy),scale=Math.min(1,d/(g.moveSpeed/6));if(d>0)candidates.push({x:dx/d*scale,y:dy/d*scale});}
@@ -138,7 +143,7 @@ export function simulationInput(g:Game,previous={x:0,y:0}) {
   // Keep Boss escape priority. For ordinary crowd hits, use the warrior's
   // current health budget; hero hit recovery prevents simultaneous additive
   // damage, so nearby weak enemies must not make every approach impossible.
-  const bossMelee=g.classId==="warrior" && !!boss && !emergency;
+  const bossMelee=g.classId==="warrior" && !!boss && !emergency && !chest;
   let best=candidates[0],bestScore=-Infinity,bestBossDanger=Infinity;
   for(const input of candidates) {
     // The exact waypoint gets a short legal step; other candidates retain full
