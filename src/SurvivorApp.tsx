@@ -1,3 +1,4 @@
+import {ControlSettings} from './ControlSettings';
 import {VisualSettings} from './VisualSettings';
 import {SurvivorEquipment} from './SurvivorEquipment';
 import {SurvivorSupplies} from './SurvivorSupplies';
@@ -66,7 +67,7 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
  {game.skills.some(s=>s.id==='poison')&&<div className="survivor-tabs"><button aria-pressed={game.tao.poisonMode==='green'} onClick={()=>game.setPoisonMode('green')}>绿毒 · 伤害</button><button aria-pressed={game.tao.poisonMode==='red'} onClick={()=>game.setPoisonMode('red')}>红毒 · 减防</button></div>}
  <details className="survivor-more"><summary>被动与属性 · {Object.keys(game.survival.charms).length}/6</summary>{Object.entries(game.survival.charms).map(([id,n])=><p key={id}>{CHARMS.find(c=>c.id===id)?.name} · {n}/5</p>)}<p>侦测 {Math.round(game.detectionRange)} · 移速 +{Math.round(game.stats.move_speed??0)}%</p><p>击败 {game.kills}</p></details>
  <SurvivorSupplies/>
- <VisualSettings/><AudioSettings/><ShareCardButton/>
+ <ControlSettings/><VisualSettings/><AudioSettings/><ShareCardButton/>
  <button className="survivor-secondary" onClick={saveAndLeave}>保存并退出</button>
  <details className="survivor-exit"><summary>放弃本局</summary><p>本局无法继续，已达成的章节进度保留。</p><button onClick={leave}>确认放弃</button></details>
  </section>}
