@@ -80,6 +80,7 @@ describe("portable progress backups", () => {
     const game = new Game(); game.start("trial"); game.finish(false);
     game.result!.healing = { heal: 13.5 }; game.result!.combatHealing = { onKill: .2, lifeSteal: .75 };
     game.result!.damageTaken = {physical:14,magic:3,sources:{"orc:melee":14,"spider:projectile":3}};
+    game.result!.deathSource="spider:projectile";
     await saveRun(game.result!); const text = await exportSave();
     await restoreSave(await prepareRestore(text)); expect((await history())[0]).toMatchObject(game.result!);
   });

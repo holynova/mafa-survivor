@@ -256,6 +256,7 @@ export type RunResult = {
   healing?: Record<string, number>;
   combatHealing?: CombatHealing;
   damageTaken?: DamageTaken;
+  deathSource?: string;
   skills: string[];
   skillBooks?: string[];
   trainingExp?: number;
@@ -2238,7 +2239,7 @@ export class Game {
       color: "#f18779",
       life: 0.9,
     });
-    if (this.player.hp === 0) this.finish(false);
+    if (this.player.hp === 0) this.finish(false,source);
   }
   beginUpgrade() {
     this.exp -= this.experienceRequired;
@@ -2646,7 +2647,7 @@ export class Game {
     this.phase = "battle";
     this.emit();
   }
-  finish(won: boolean) {
+  finish(won: boolean, deathSource?: string) {
     if (this.result) return;
     this.phase = won ? "won" : "dead";
     const runCrystals = !this.survivorMode && this.mode === "normal" && won ? 3 : 0;
@@ -2658,6 +2659,7 @@ export class Game {
       mode: this.mode,
       seed: this.seed,
       won,
+      ...(!won&&deathSource?{deathSource}:{}),
       wave: this.wave,
       kills: this.kills,
       seconds: this.clock,

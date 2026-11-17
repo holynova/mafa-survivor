@@ -29,6 +29,7 @@ const runSchema = z.object({
   skillDamage: totals, purchases: counts.optional(), rerolls: integer.max(100).optional(),
   healing: totals.optional(),
   combatHealing: z.object({ onKill: amount, lifeSteal: amount }).strict().optional(),
+  deathSource: z.string().max(120).optional(),
   damageTaken: z.object({ physical: amount, magic: amount, sources: totals }).strict().optional(),
   trainingExp:integer.max(1000000).optional(),
   skillBooks:z.array(z.string().max(100)).max(2).optional(),
