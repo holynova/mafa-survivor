@@ -1,3 +1,5 @@
+import {OriginalMusic,CHAPTER_MUSIC} from "./music";
+import type {MapId} from "./content";
 import { assetUrl, isGraybox } from "./release";
 import {MONSTER_SOUND_EVENTS,monsterSoundEvent,monsterSoundKey,type MonsterSoundEvent} from "./monster-audio";
 type AudioManifest = {
@@ -7,6 +9,11 @@ type AudioManifest = {
 export class OriginalSounds {
   private context: AudioContext | null = null;
   private gain: GainNode | null = null;
+  private combatGain:GainNode|null=null;
+  private musicGain:GainNode|null=null;
+  private music:OriginalMusic|null=null;
+  musicVolume=.45;
+  combatVolume=1;
   private buffers = new Map<string, AudioBuffer>();
   private baseFiles=new Set<string>();
   private chapterFiles=new Set<string>();
@@ -33,6 +40,7 @@ export class OriginalSounds {
     if(typeof window==="undefined")return;
     try {
       const saved=JSON.parse(window.localStorage?.getItem("mafa-sound-settings-v1")??"null");
+      for(const key of ["volume","musicVolume","combatVolume"] as const)if(typeof saved?.[key]==="number"&&Number.isFinite(saved[key]))this[key]=Math.max(0,Math.min(1,saved[key]));
       if(typeof saved?.muted==="boolean")this.muted=saved.muted;
       for(const event of MONSTER_SOUND_EVENTS)if(typeof saved?.monsters?.[event]==="boolean")this.monsters[event]=saved.monsters[event];
     }catch{/* A storage restriction never prevents playing. */}
@@ -56,7 +64,7 @@ export class OriginalSounds {
   }
   private persist(){
     if(typeof window==="undefined")return;
-    try{window.localStorage?.setItem("mafa-sound-settings-v1",JSON.stringify({muted:this.muted,monsters:this.monsters}));}catch{/* Session controls still work. */}
+    try{window.localStorage?.setItem("mafa-sound-settings-v1",JSON.stringify({muted:this.muted,monsters:this.monsters,volume:this.volume,musicVolume:this.musicVolume,combatVolume:this.combatVolume}));}catch{/* Session controls still work. */}
   }
   get status() {
     if (isGraybox) return "灰盒版不包含原版音效";
@@ -75,8 +83,12 @@ export class OriginalSounds {
         this.gain = this.context.createGain();
         this.gain.gain.value = this.muted ? 0 : this.volume;
         this.gain.connect(this.context.destination);
-        for(const event of MONSTER_SOUND_EVENTS){const gain=this.context.createGain();gain.gain.value=this.monsters[event] ? .65 : 0;gain.connect(this.gain);this.monsterGains.set(event,gain);}
+        this.combatGain=this.context.createGain();this.combatGain.gain.value=this.combatVolume;this.combatGain.connect(this.gain);
+        this.musicGain=this.context.createGain();this.musicGain.gain.value=this.musicVolume;this.musicGain.connect(this.gain);
+        if(typeof this.context.createMediaElementSource==="function")this.music=new OriginalMusic(this.context,this.musicGain);
+        for(const event of MONSTER_SOUND_EVENTS){const gain=this.context.createGain();gain.gain.value=this.monsters[event] ? .65 : 0;gain.connect(this.combatGain);this.monsterGains.set(event,gain);}
       }
+      this.music?.retry();
       const resumed=this.context.resume();
       this.loading ??= this.load();
       await Promise.all([resumed,this.loading]);
@@ -114,6 +126,18 @@ export class OriginalSounds {
       for(let i=0;i<files.length&&generation===this.chapterRequest;i+=6)await Promise.all(files.slice(i,i+6).map(file=>this.loadBuffer(file)));
       this.trimCache();
     }catch{this.error="部分怪物音效未加载，重新开关声音可重试";}
+  }
+  get musicStatus(){return this.music?.status??{track:null,playing:false,decks:0,error:""};}
+  suspendMusic(){this.music?.suspend();}
+  syncMusic(map:MapId,phase:string,boss:boolean,enabled:boolean){
+    this.music?.sync(enabled&&phase!=="lobby"&&phase!=="dead"&&phase!=="won" ? CHAPTER_MUSIC[map] : null,phase==="battle"&&!this.muted&&this.volume>0&&this.musicVolume>0,boss);
+  }
+  setVolume(channel:"master"|"music"|"combat",value:number){
+    if(!Number.isFinite(value))return;value=Math.max(0,Math.min(1,value));
+    if(channel==="master"){this.volume=value;if(this.gain)this.gain.gain.value=this.muted?0:value;}
+    if(channel==="music"){this.musicVolume=value;if(this.musicGain)this.musicGain.gain.value=value;}
+    if(channel==="combat"){this.combatVolume=value;if(this.combatGain)this.combatGain.gain.value=value;}
+    this.persist();
   }
   setMuted(value: boolean) {
     this.muted = value;
@@ -162,7 +186,7 @@ export class OriginalSounds {
     this.buffers.delete(file!);this.buffers.set(file!,buffer);
     this.activeFiles.set(file!,(this.activeFiles.get(file!)??0)+1);
     source.buffer = buffer;
-    source.connect(monster ? this.monsterGains.get(monster)! : this.gain!);
+    source.connect(monster ? this.monsterGains.get(monster)! : this.combatGain!);
     if(monster)this.monsterSources.set(source,monster);
     this.voices++;
     this.played++;
@@ -184,3 +208,5 @@ export class OriginalSounds {
   }
 }
 export const sounds = new OriginalSounds();
+
+if(typeof document!=="undefined"){document.addEventListener("visibilitychange",()=>{if(document.hidden)sounds.suspendMusic();});window.addEventListener("pagehide",()=>sounds.suspendMusic());}

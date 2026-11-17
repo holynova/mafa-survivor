@@ -962,3 +962,14 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 普通怪物死亡替换逻辑不会抢占登场声部。怪物攻击开关和总静音继续有效；关闭攻击立即停止已播放的登场声音。未增加资源或改变攻击/渲染规则。
 - 99文件/1166测试通过，assets:check通过，生产构建通过（保留现有chunk大小告警）。证据：.artifacts/alpha43-encounter-audio-{tests,assets,build}.log。
 - 本步仅离线声音调度验证，没有真实浏览器播放或手机/耳机试听，不称听感已验收；未开启测试空间或服务。候选尚未发布。
+
+
+## alpha.43 候选：原版背景音乐与独立音量
+
+- 原文件3首、16,520,475字节；固定源blob/SHA256、源地图BGM ID关联验证，构建导入与素材检查覆盖音乐。详情及适配边界：SURVIVOR-MUSIC-REVIEW.md。
+- 100文件/1171测试通过，assets:check与生产构建通过；日志 .artifacts/alpha43-music-{tests,assets,build}.log。构建保留已有大chunk警告，无图像素材变化。
+- 独立Ego空间69，5186临时服务。野外/洞窟/神殿各取得真实播放、非零音频输出与有效时长，跨类型后deck回到1，退出回到0；暂停保留播放位置，总静音主Gain=0。浏览器数据 .artifacts/alpha43-music-browser.json。
+- 发现全局Phaser方向捕获阻止range键盘控制，移除冗余捕获后实际ArrowLeft将背景音乐45→40，总量35/战斗100不变；MovementInput继续仅在战斗处理方向。
+- 已查看 .artifacts/alpha43-music-settings-390.png、alpha43-music-settings-320.png、alpha43-music-battle-390.png。设置无横向溢出；战场人物/树冠完整。第一份320截图声音设置折叠，已重新展开覆盖为最终截图；最初滑杆按键失败有对应修复，不掩盖结果。
+- D键CDP试验再次因页面失焦转暂停而未取得位移证据，仍为验收缺口。没有声称手机硬件性能、扬声器/耳机听感或全局音频峰值合格。
+- 仅测试局，不保存普通战绩；声音设置原值精确恢复。空间69和临时5186服务均已关闭。当前仍未发布。

@@ -34,6 +34,8 @@ export function checkReleaseAuthorization() {
     ["docs/asset-manifest.json", ["images", "map"]],
     ["public/assets/mir/manifest.json", ["images", "map"]],
     ["docs/audio-manifest.json", ["audio"]],
+    ["docs/music-manifest.json", ["audio"]],
+    ["public/assets/mir/music/manifest.json", ["audio"]],
     ["public/assets/mir/audio/manifest.json", ["audio"]],
   ]) {
     if (!validateAuthorization(record, read(file), kinds))

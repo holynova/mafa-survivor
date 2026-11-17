@@ -155,21 +155,12 @@ class BattleScene extends Phaser.Scene {
     this.game.events.once(Phaser.Core.Events.DESTROY, () =>
       this.movementInput.destroy(),
     );
-    this.input.keyboard!.addCapture([
-      "W",
-      "A",
-      "S",
-      "D",
-      "UP",
-      "DOWN",
-      "LEFT",
-      "RIGHT",
-      "SPACE",
-      "ALT",
-    ]);
+    // MovementInput consumes directions only during battle. Global Phaser
+    // capture also swallowed arrows on paused range inputs and select controls.
+    const editingControl=(e:KeyboardEvent)=>!!(e.target as Element|null)?.closest?.('input, textarea, select, button, summary, [contenteditable=true]');
     this.input.keyboard!.on("keydown-ESC", () => {if(!document.querySelector("dialog[open]"))game.pause();});
-    this.input.keyboard!.on("keydown-P", () => game.pause());
-    this.input.keyboard!.on("keydown-SPACE", () => game.useManualSkill());
+    this.input.keyboard!.on("keydown-P", (e:KeyboardEvent) => {if(!editingControl(e))game.pause();});
+    this.input.keyboard!.on("keydown-SPACE", (e:KeyboardEvent) => {if(game.phase==="battle"&&!editingControl(e)){e.preventDefault();game.useManualSkill();}});
     this.input.keyboard!.on("keydown-ALT",()=>{this.showLootNames=true;});
     this.input.keyboard!.on("keyup-ALT",()=>{this.showLootNames=false;});
     this.input.keyboard!.on("keydown", (e: KeyboardEvent) => {
@@ -613,6 +604,7 @@ class BattleScene extends Phaser.Scene {
       this.accumulator = 0;
       this.drag = null;
     }
+    sounds.syncMusic(game.mapId,game.phase,game.enemies.some(e=>e.hp>0&&isBossKind(e.kind)),game.survivorMode);
     if (game.phase !== "lobby") {
       const audio=game.audioEvents.splice(0);
       for (const key of audio) sounds.play(key);

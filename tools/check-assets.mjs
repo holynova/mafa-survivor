@@ -8,6 +8,12 @@ const root = new URL("../public/assets/mir/", import.meta.url);
 const manifest = JSON.parse(
   fs.readFileSync(new URL("manifest.json", root), "utf8"),
 );
+const music=JSON.parse(fs.readFileSync(new URL('music/manifest.json',root),'utf8'));
+if(JSON.stringify(music)!==JSON.stringify(JSON.parse(fs.readFileSync(new URL('../docs/music-manifest.json',import.meta.url),'utf8'))))throw new Error('Music provenance manifests differ');
+for(const [name,file] of Object.entries(music.files)){
+ const data=fs.readFileSync(new URL('music/'+name,root));
+ if(createHash('sha256').update(data).digest('hex')!==file.sha256||createHash('sha1').update(`blob ${data.length}\0`).update(data).digest('hex')!==file.sha1)throw new Error('Music hash differs: '+name);
+}
 const frames = {};
 const failures = [];
 try {

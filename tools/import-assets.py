@@ -237,6 +237,7 @@ runpy.run_path(str(ROOT/"tools/write-asset-ledger.py"))
  '\nSource PNG/JSON rectangles and sparse indices retained in manifest.json. Public project distribution follows the recorded owner confirmation; not independent official-client or rights verification. No third-party client/server implementation is incorporated.\n')
 
 runpy.run_path(str(ROOT/"tools/import-audio.py"))
+runpy.run_path(str(ROOT/"tools/import-music.py"),run_name="__main__")
 
 import subprocess
 subprocess.run(['node',str(ROOT/'tools/write-runtime-assets.mjs')],check=True,cwd=ROOT)

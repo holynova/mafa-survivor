@@ -67,3 +67,11 @@ it("reserves one encounter voice under saturation and honors the existing attack
  sounds.setMonsterEnabled("attack",true);sounds.setMuted(true);
  context.currentTime+=1;sounds.play("encounter:orc:attack");expect(sounds.playedByKey["encounter:orc:attack"]).toBe(1);
 });
+it("persists independent volume controls with bounded values and preserves old switch saves",async()=>{
+ const {sounds,stored}=audio();await sounds.unlock();
+ sounds.setVolume("master",.7);sounds.setVolume("music",0);sounds.setVolume("combat",2);
+ const restored=new OriginalSounds();expect([restored.volume,restored.musicVolume,restored.combatVolume]).toEqual([.7,0,1]);
+ sounds.setVolume("master",NaN);expect(sounds.volume).toBe(.7);
+ stored.set("mafa-sound-settings-v1",JSON.stringify({muted:true,monsters:{attack:false}}));
+ const old=new OriginalSounds();expect(old.muted).toBe(true);expect(old.monsters.attack).toBe(false);expect(old.volume).toBe(.35);expect(old.musicVolume).toBe(.45);
+});

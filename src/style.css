@@ -2303,3 +2303,5 @@ body:has(.lobby) .vignette {
 }
 
 .survivor-entry-link{display:block;text-align:center;color:#e1c17d;margin:12px 0;padding:12px;border:1px solid #8b7445;background:#241f17;text-decoration:none}
+
+.audio-settings label.audio-volume{display:grid;grid-template-columns:1fr;gap:0}.audio-settings .audio-volume input[type="range"]{width:100%;min-height:44px;margin:0;accent-color:#c9aa70}
