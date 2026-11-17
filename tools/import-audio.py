@@ -4,7 +4,7 @@ import json,re,urllib.request,hashlib,time
 from concurrent.futures import ThreadPoolExecutor
 from asset_authorization import authorize
 from source_cache import read_source, blob_sha
-from monster_audio import monster_mapping
+from monster_audio import monster_mapping, PET_MODELS
 root=Path(__file__).resolve().parents[1];cache=root/'.cache';out=root/'public/assets/mir/audio';out.mkdir(parents=True,exist_ok=True)
 ref='9e21ea6631317d06e064fbfa7e1ea43af6a2d3e6'
 def request(url):
@@ -42,6 +42,7 @@ for material,left in {'ground':1,'stone':5,'grass':9,'cave':21}.items():
  for side,offset in [('left',0),('right',1)]:
   mapping[f'step:{material}:{side}']=f'{0x01000000+left+offset:08X}.WAV'
 reference_hashes={
+ 'client/src/clienttaodog.cpp':'60e03093537f338e837061a8a33be3cfd07c961244e6f228ca4ed0aefdf24e30',
  'client/src/clientmonster.cpp':'0460baa44df7f2f9f078f01fa6738b1a8cb7f7a3af910da65db90131f95f9765',
  'common/src/sysconst.hpp':'536f549b0448c2cee6d9caf4e0890e81abdcee5fd01f054b240584a904073a4d',
  'common/src/monsterrecord.hpp':'8c104b8e7f0d9caec86812d831a72c832e68f769f952f52ae9caf29b6fb88e51',
@@ -78,7 +79,8 @@ manifest['footstepSoundReference']={'ref':source_ref,'sourcePath':'client/src/so
 manifest['coinSoundReference']={'ref':source_ref,'sourcePath':'client/src/soundeffectdb.cpp','sha256':'c531cfce810fe6f36eb1c59d56a53a35fb65b23646b7a5513e36c31dc721357c','note':'s_money = 106.wav; system sound bank 0x01020000 + 106 = 0102006A.WAV'}
 manifest['monsterSoundReference']={'references':references,'modelsPath':'tools/monster-models.json','modelsSha256':hashlib.sha256(models_path.read_bytes()).hexdigest(),
  'soundFormula':'0x02000000 + raw lookID * 16 + event offset; attack=2, hitted=4, die=5. No sprite lookID-1 adjustment.',
- 'aliases':monster_aliases,'missing':monster_missing}
+ 'aliases':monster_aliases,'missing':monster_missing,'petKinds':sorted(PET_MODELS),
+ 'petNote':'Friendly summons retain original monster attack/hitted/die voices. Beast attack accompanies its flame; this is not a separate magic flame WAV. Missing skeleton attack/hurt are not substituted.'}
 authorize(manifest, ['audio'])
 text=json.dumps(manifest,ensure_ascii=False,indent=2);(out/'manifest.json').write_text(text);(root/'docs/audio-manifest.json').write_text(text)
 print('Original audio:',len(files),'WAV files;',len(mapping),'mappings; missing:',manifest['missing'])

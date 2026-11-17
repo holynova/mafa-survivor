@@ -1,6 +1,6 @@
 from pathlib import Path
 import json,hashlib,wave,array,sys
-from monster_audio import monster_mapping
+from monster_audio import monster_mapping, PET_MODELS
 root=Path(__file__).resolve().parents[1];folder=root/'public/assets/mir/audio'
 m=json.loads((folder/'manifest.json').read_text());errors=[]
 for name,f in m['files'].items():
@@ -19,9 +19,16 @@ models_path=root/'tools/monster-models.json';models=json.loads(models_path.read_
 expected,aliases,missing=monster_mapping(models,m['files'])
 actual={k:v for k,v in m['mapping'].items() if k.startswith('monster:')}
 if expected!=actual:errors.append('monster mapping differs from raw source lookID/event offsets')
-if missing:errors.append('missing monster audio: '+', '.join(missing))
+missing_enemies=[key for key in missing if key.split(':')[1] not in PET_MODELS]
+if missing_enemies:errors.append('missing enemy audio: '+', '.join(missing_enemies))
 reference=m.get('monsterSoundReference',{})
+if sorted(reference.get('missing',[]))!=sorted(missing):errors.append('missing actor voices must be explicitly documented')
+if reference.get('petKinds')!=sorted(PET_MODELS):errors.append('friendly source voice coverage must be documented')
+for key in ['monster:beast:attack','monster:beast:hurt','monster:beast:death','monster:summonedSkeleton:death']:
+ if key not in actual:errors.append(key+': missing verified pet feedback')
 if reference.get('aliases')!=aliases:errors.append('same-family audio reuse must be explicitly documented')
 if reference.get('modelsSha256')!=hashlib.sha256(models_path.read_bytes()).hexdigest():errors.append('monster model reference hash differs')
-print(json.dumps({'originalWavFiles':len(m['files']),'mappedEvents':len(m['mapping']),'monsterKinds':len({k.split(':')[1] for k in actual}),'documentedMonsterAliases':aliases,'unverifiedMappingsNotSubstituted':m['missing'],'failures':errors},indent=2))
+print(json.dumps({'originalWavFiles':len(m['files']),'mappedEvents':len(m['mapping']),'monsterKinds':len({k.split(':')[1] for k in actual}),
+ 'hostileMonsterKinds':len({k.split(':')[1] for k in actual}-PET_MODELS),'documentedMissingPetEvents':[key for key in missing if key.split(':')[1] in PET_MODELS],
+ 'documentedMonsterAliases':aliases,'unverifiedMappingsNotSubstituted':m['missing'],'failures':errors},indent=2))
 sys.exit(bool(errors))

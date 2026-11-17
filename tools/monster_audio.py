@@ -1,12 +1,11 @@
 """Pinned client sound IDs use raw lookID, unlike the sprite index's lookID-1."""
 OFFSETS = {'attack': 2, 'hurt': 4, 'death': 5}
 ALIASES = {'evilSnake': 'scorpionSnake'}
+PET_MODELS = {'beast', 'summonedSkeleton'}
 
 def monster_mapping(models, catalog):
     mapping, aliases, missing = {}, {}, []
     for kind, look in models.items():
-        if kind in {'beast', 'summonedSkeleton'}:
-            continue
         for event, offset in OFFSETS.items():
             key = f'monster:{kind}:{event}'
             requested = f'{0x02000000 + look * 16 + offset:08X}.WAV'

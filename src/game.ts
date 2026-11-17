@@ -391,7 +391,9 @@ export class Game {
       this.audioEvents.unshift(key);this.audioEvents.length=Math.min(24,this.audioEvents.length);
     }else if (this.audioEvents.length < 24) this.audioEvents.push(key);
   }
-  monsterSound(e:Enemy,event:MonsterSoundEvent) {
+  monsterSound(e:Pick<Enemy,"kind"|"x"|"y">,event:MonsterSoundEvent) {
+    // The pinned original pack has only the summoned skeleton's death voice.
+    if(e.kind==="summonedSkeleton" && event!=="death")return;
     if(Math.hypot(e.x-this.player.x,e.y-this.player.y)>this.detectionRange)return;
     const key=monsterSoundKey(e.kind,event);
     if(event==="death")this.audioEvents=this.audioEvents.filter(k=>k!==monsterSoundKey(e.kind,"hurt"));
@@ -1288,7 +1290,9 @@ export class Game {
     // Smaller repeated hits never prolong the window or conceal a heavy attack.
     if(!within)pet.hitUntil=this.clock+PET_HIT_WINDOW;
     pet.hitDamage=Math.max(previous,damage);
+    const hp=pet.hp;
     pet.hp = Math.max(0, pet.hp - Math.max(0,damage-previous));
+    if(pet.hp<hp)this.monsterSound(pet,pet.hp<=0 ? "death" : "hurt");
   }
   private magicDamage(base: number, s: Skill) {
     const mc = this.rollStat("mc") + (this.stats.mc_flat ?? 0);
@@ -1886,6 +1890,11 @@ export class Game {
               (source === "charm" ? 0 : (this.stats.sc_bonus_pct ?? 0) / 100)),
         );
         if (source === "beast") {
+          // Coincident targets have no direction. Keep the source actor's facing
+          // and hit its point of origin instead of dividing the cone by zero.
+          const facing = (p.dir - 2) * Math.PI / 4;
+          const aimX = d > 1 ? dx / d : Math.cos(facing),
+            aimY = d > 1 ? dy / d : Math.sin(facing);
           for (const e of this.enemies) {
             const ex = e.x - p.x,
               ey = e.y - p.y,
@@ -1893,16 +1902,16 @@ export class Game {
             if (
               e.hp > 0 &&
               length <= range && this.attackLineClear(p,e) &&
-              (ex * dx + ey * dy) / Math.max(1, length * d) >=
-                Math.cos(Math.PI / 5*(1+(skill ? skillExtras(skill).flameAngle??0 : 0)/100))
+              (length <= 1 || (ex * aimX + ey * aimY) / length >=
+                Math.cos(Math.PI / 5*(1+(skill ? skillExtras(skill).flameAngle??0 : 0)/100)))
             )
               this.hit(e, damage, source, "magic", "summon");
           }
-          this.sound("beastflame");
           const flame=this.effect("beastflame", p.x, p.y, range, 0.6, p.dir);
-          flame.aimAngle=Math.atan2(dy,dx);
+          flame.aimAngle=Math.atan2(aimY,aimX);
           flame.spread=1+(skill ? skillExtras(skill).flameAngle??0 : 0)/100;
         } else this.hit(target, damage, source, "physical", "summon");
+        this.monsterSound(p,"attack");
         p.cd = (source === "beast" ? 1.6 : 1.1)*ATTACK_CADENCE*(1-(skill ? skillExtras(skill).petHaste??0 : 0)/100);
         p.attackUntil = this.clock + 0.4;
       } else if (!clear || d > (target ? range * 0.75 : 80)) {

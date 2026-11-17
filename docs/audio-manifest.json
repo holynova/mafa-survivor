@@ -82,9 +82,13 @@
     "monster:skeleton:attack": "02000202.WAV",
     "monster:skeleton:hurt": "02000204.WAV",
     "monster:skeleton:death": "02000205.WAV",
+    "monster:summonedSkeleton:death": "02000385.WAV",
     "monster:zombie:attack": "02000302.WAV",
     "monster:zombie:hurt": "02000304.WAV",
     "monster:zombie:death": "02000305.WAV",
+    "monster:beast:attack": "020005A2.WAV",
+    "monster:beast:hurt": "020005A4.WAV",
+    "monster:beast:death": "020005A5.WAV",
     "monster:skeletonWarrior:attack": "02000222.WAV",
     "monster:skeletonWarrior:hurt": "02000224.WAV",
     "monster:skeletonWarrior:death": "02000225.WAV",
@@ -616,6 +620,13 @@
       "bytes": 168120,
       "permissionStatus": "project_owner_authorized"
     },
+    "02000385.WAV": {
+      "sourcePath": "sound/seff/02000385.WAV",
+      "sha1": "eb19892d0d2c6d0b20bcb2965e848e5af535e26c",
+      "sha256": "932641890b2f7df98669a9d1a7aeb324c314dbf264854f66e23b6ac5e94bcb54",
+      "bytes": 226420,
+      "permissionStatus": "project_owner_authorized"
+    },
     "02000402.WAV": {
       "sourcePath": "sound/seff/02000402.WAV",
       "sha1": "b613e856ed4f0a9531cde14bc159b92bf6c7a447",
@@ -887,6 +898,27 @@
       "sha1": "a5b2bf9e52088a50d39995b54131c66d4169d532",
       "sha256": "19178a489acd95a2683a6e6b103c30b109a2c97a92037795691f73ebdfa2858a",
       "bytes": 281174,
+      "permissionStatus": "project_owner_authorized"
+    },
+    "020005A2.WAV": {
+      "sourcePath": "sound/seff/020005A2.WAV",
+      "sha1": "29e6e19a43d9997e7f66131d73f40b8d4b672671",
+      "sha256": "a8b0e2be8707959d2ca96ff40c022c721622c007bf2ad84578f57a02a1fcbadc",
+      "bytes": 88492,
+      "permissionStatus": "project_owner_authorized"
+    },
+    "020005A4.WAV": {
+      "sourcePath": "sound/seff/020005A4.WAV",
+      "sha1": "f4ffd1ee33b2ef3338f098cb5c07fa1461115441",
+      "sha256": "e4c06275f68be8578b055ee528af9271f9aa7b79fc8c1868a241a6606b06fdec",
+      "bytes": 101790,
+      "permissionStatus": "project_owner_authorized"
+    },
+    "020005A5.WAV": {
+      "sourcePath": "sound/seff/020005A5.WAV",
+      "sha1": "c5d060904aac9aff08c9aa48225fa8f2bba6d98f",
+      "sha256": "4a5cd5cde38162557611174de1009ce22afca4bc2c0708f098d1c5d4363a6202",
+      "bytes": 178144,
       "permissionStatus": "project_owner_authorized"
     },
     "02000652.WAV": {
@@ -1202,6 +1234,10 @@
   },
   "monsterSoundReference": {
     "references": {
+      "client/src/clienttaodog.cpp": {
+        "ref": "bb6a22287abcd9f248d2aba755074c254c68787a",
+        "sha256": "60e03093537f338e837061a8a33be3cfd07c961244e6f228ca4ed0aefdf24e30"
+      },
       "client/src/clientmonster.cpp": {
         "ref": "bb6a22287abcd9f248d2aba755074c254c68787a",
         "sha256": "0460baa44df7f2f9f078f01fa6738b1a8cb7f7a3af910da65db90131f95f9765"
@@ -1246,7 +1282,15 @@
         "reason": "Pinned pack lacks this variant; explicitly reuse the same-family original voice."
       }
     },
-    "missing": []
+    "missing": [
+      "monster:summonedSkeleton:attack",
+      "monster:summonedSkeleton:hurt"
+    ],
+    "petKinds": [
+      "beast",
+      "summonedSkeleton"
+    ],
+    "petNote": "Friendly summons retain original monster attack/hitted/die voices. Beast attack accompanies its flame; this is not a separate magic flame WAV. Missing skeleton attack/hurt are not substituted."
   },
   "distribution": "PUBLIC_PROJECT_DISTRIBUTION",
   "authorizationEvidence": "docs/asset-authorization.json"

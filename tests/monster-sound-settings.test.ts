@@ -10,6 +10,8 @@ function audio(budget?:number){
  vi.stubGlobal("AudioContext",class {constructor(){return context;}});
  const mapping:Record<string,string>={attack:"player.wav",hurt:"hurt.wav",death:"death.wav"};
  for(const kind of ["orc","zombie","spider"])for(const event of ["attack","hurt","death"])mapping[`monster:${kind}:${event}`]=`${kind}-${event}.wav`;
+ for(const event of ["attack","hurt","death"])mapping[`monster:beast:${event}`]=`beast-${event}.wav`;
+ mapping['monster:summonedSkeleton:death']='skeleton-death.wav';
  vi.stubGlobal("fetch",vi.fn(async(url:string)=>{requests.push(url);return url.includes("manifest.json") ? {ok:true,json:async()=>({mapping,files:Object.fromEntries(Object.values(mapping).map(f=>[f,{}]))})} : {ok:true,arrayBuffer:async()=>new ArrayBuffer(8)};}));
  return {sounds:new OriginalSounds(budget),context,stored,requests,nodes};
 }
@@ -26,6 +28,18 @@ it("stops a disabled category immediately, keeps other categories audible, and r
  sounds.play("monster:orc:death");expect(sounds.playedByKey["monster:orc:death"]).toBe(1);
  const restored=new OriginalSounds();expect(restored.monsters).toEqual({attack:true,hurt:false,death:true});
  sounds.setMuted(true);expect(new OriginalSounds().muted).toBe(true);context.currentTime+=1;sounds.play("monster:orc:death");expect(sounds.playedByKey["monster:orc:death"]).toBe(1);
+});
+it('loads friendly original voices lazily and applies the same category switches and master mute',async()=>{
+ const {sounds,requests,context,nodes}=audio();await sounds.unlock();expect(requests.some(p=>p.includes('beast-'))).toBe(false);
+ await sounds.preloadMonsters(['beast','summonedSkeleton']);expect(requests.filter(p=>p.includes('beast-'))).toHaveLength(3);
+ sounds.play('monster:beast:attack');expect(sounds.playedByKey['monster:beast:attack']).toBe(1);
+ sounds.setMonsterEnabled('attack',false);expect(nodes[0].stopped).toBe(true);context.currentTime+=1;
+ sounds.play('monster:beast:attack');expect(sounds.playedByKey['monster:beast:attack']).toBe(1);
+ sounds.play('monster:beast:hurt');expect(sounds.playedByKey['monster:beast:hurt']).toBe(1);nodes.at(-1)!.onended?.();
+ sounds.play('monster:summonedSkeleton:death');expect(sounds.playedByKey['monster:summonedSkeleton:death']).toBe(1);
+ sounds.setMonsterEnabled('death',false);expect(nodes.at(-1)!.stopped).toBe(true);
+ sounds.setMuted(true);context.currentTime+=1;sounds.play('monster:beast:hurt');expect(sounds.playedByKey['monster:beast:hurt']).toBe(1);
+ expect(requests.some(p=>p.includes('skeleton-attack')||p.includes('skeleton-hurt'))).toBe(false);
 });
 it("reserves a bounded monster mix alongside saturated spells and gives death priority over hurt",async()=>{
  const {sounds,context,nodes}=audio();await sounds.unlock();await sounds.preloadMonsters(["orc","zombie","spider"]);

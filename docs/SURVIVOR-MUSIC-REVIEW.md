@@ -96,3 +96,16 @@
 静止0.6秒、暂停0.4秒与总静音下移动约164px，播放计数均保持14次；暂停时游戏时钟不变。声音设置仅临时内存修改并恢复，没有写持久偏好。检查四张390px原版场景图，人物/原武器、动作阴影、地图和HUD正常；比奇树冠处显示已有遮挡轮廓，不将其当所有动作/遮挡地点验收。
 
 证据：`.artifacts/alpha52-footsteps-{two-runs,surfaces,controls}.json`、`alpha52-footsteps-{biche,shimu,mine,mengzhong}-390.png`。最早换图脚本在HMR后进入classic默认状态，仅触发旧`step`，修正测试夹具显式设置survivorMode后才取得新映射证据；一次canvas点击被浮动控制层拦截，不将该次计为解锁成功。实际点击升级按钮解锁后继续测试。Ego111与自建5186均已关闭；本轮不是实体安卓、扬声器/耳机听感或实时混音峰值验收。
+
+
+## 原版召唤物事件声音补齐（2026-11-18，未发布）
+
+既有导入脚本跳过beast与summonedSkeleton；固定源客户端ClientMonster在攻击/受击/死亡动作播放对应lookID事件，ClientTaoDog将攻击和神兽_喷火关联。因此按原公式新增神兽攻击020005A2.WAV、受击020005A4.WAV、死亡020005A5.WAV，以及变异骷髅死亡02000385.WAV，逐文件按原Git blob/SHA256校验，不重编码或合成。固定资源仍9e21ea6631317d06e064fbfa7e1ea43af6a2d3e6，客户端仍bb6a22287abcd9f248d2aba755074c254c68787a。新增clienttaodog.cpp参考SHA256=60e03093537f338e837061a8a33be3cfd07c961244e6f228ca4ed0aefdf24e30。
+
+原始参考：[ClientTaoDog](https://raw.githubusercontent.com/etorth/mir2x/bb6a22287abcd9f248d2aba755074c254c68787a/client/src/clienttaodog.cpp)、[ClientMonster](https://raw.githubusercontent.com/etorth/mir2x/bb6a22287abcd9f248d2aba755074c254c68787a/client/src/clientmonster.cpp)。这是神兽原版攻击声音伴随喷火，不把它说成已找到独立魔法喷火WAV。独立beastflame、骷髅攻击/受击仍缺，manifest显式登记，不找同类代用。
+
+实际喷火发攻击声音，真实扣宝宝HP才发受击，被0.3秒合并窗口吸收的轻击不重复发声；死亡替换待播受击且不重复。沿用6项事件队列/3个怪物声部限制、侦测距离、原有三类开关和总静音，不新增默认常驻全库预载。道士章节预载包含已确认宝宝声音，设置重试亦包含。
+
+149原版WAV/154映射、37敌人+2召唤物覆盖，audio-check通过，缺失项目仍明示。Ego115原版资源真实解码并启动上述四声音各至少一次；设置真实点击关闭攻击/受击/死亡均使对应播放计数不变。音频解锁首次从evaluate调用因自动播放限制挂起，已重载停止待完成操作，并通过实际“全部声音”点击成功解锁；不用超时结果作通过证据。
+
+十章含召唤物依次预载均≤16MiB，最高16766904字节，118个buffer累计回收；这是解码缓存而非整个浏览器或游戏内存。声音设置本机键精确恢复为原始null，测试未改普通记录；Ego115与5186服务已清理。不是扬声器/耳机/单声道主观听感或安卓设备验收。证据alpha52-pet-audio-{browser,controls-browser,ten-chapters}.json及原版audio-manifest。

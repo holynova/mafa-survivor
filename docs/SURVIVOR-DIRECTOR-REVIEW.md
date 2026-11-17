@@ -486,3 +486,26 @@ node tools/simulate-survival.mjs --maps=shimu,bairimen --roles=taoist --seeds=17
 修复后的严格不带神兽两章12局0异常、168次恢复检查，石墓1/6胜，白日门0/6；白日门7最终超时剩346.9HP，首领可见样本从15/229变为228/229。导航也影响敌人路径和合法出生点，不将所有结果变化归因于宝宝。非神兽路线和平衡缺口保留，最新干净提交还需完整三策略回归。
 
 证据：alpha52-skeleton-final-windows、alpha52-skeleton-final-damage、alpha52-final-dps-bench-before/after、alpha52-navigation-no-beast，以及alpha52-pet-edge-red.log。隔离脚本保留在.artifacts中，未进入产品规则。
+
+
+## 边界修复后的干净完整矩阵与神兽重叠判定（未发布）
+
+483c655干净提交、rulesSha256=19d940efceca2c7b07e56aa25975db55b10e1eb25ee41f790ec4ad064c069082，三地图×三职业×六种子×三策略162局全部结束，0模拟异常、2651次存档恢复检查，最大145592字符，本机Node快照最慢约14.54ms。所有报告sourceDirty=false。下表是修复移动边界后、修复神兽重叠判定之前的完整结果，不冒作最后定稿。
+
+|地图|职业|双主修|单核优先|均摊|
+|---|---|---:|---:|---:|
+|biche|warrior|6/6|6/6|2/6|
+|biche|wizard|6/6|4/6|5/6|
+|biche|taoist|1/6|0/6|0/6|
+|shimu|warrior|0/6|3/6|0/6|
+|shimu|wizard|5/6|2/6|4/6|
+|shimu|taoist|3/6|0/6|0/6|
+|bairimen|warrior|1/6|4/6|0/6|
+|bairimen|wizard|4/6|5/6|5/6|
+|bairimen|taoist|2/6|0/6|0/6|
+
+相比边界修复前，道士默认双核和部分战士组合明显退步；新导航同时改变敌人路线和出生点，不能仅报告宝宝寻路改善。分析比奇道士42的最终采样，神兽与首领处于完全相同坐标，喷火判定用目标向量与目标距离作分母，零向量使整个扇形都无法命中；有原版喷火动画但伤害为空。这能解释一项真实输出损失，不证明全部退步都由此造成。
+
+新增3项真实Game步进回归：重叠首领受伤、保留宝宝朝向且前后敌人判定正确、非重叠仍保持方向。最初2失败/1通过；修复后3项通过。现在重叠目标使用原朝向构成单位向量，原点1px内仍命中，扇形角度/射程/伤害/CD不增加，原版火焰旋转与同一方向一致。后续须在此新规则上重跑矩阵。
+
+原始数据alpha52-navigation-verified-{dual,single,spread}.json，红绿回归alpha52-beast-overlap-{red,green}.log。真实浏览器重叠目标10000→9989、原版朝向向下喷火可见，390px和桌面截图已查看；明确测试夹具，不是自然胜率证据。

@@ -18,8 +18,18 @@ class MonsterAudioTests(unittest.TestCase):
         self.assertIn('monster:evilSnake:attack', missing)
         self.assertNotIn('monster:evilSnake:attack', mapping)
 
-    def test_own_source_wins_over_alias_and_pet_models_are_not_enemy_voices(self):
+    def test_own_source_wins_over_alias(self):
         mapping, aliases, _ = monster_mapping({'evilSnake': 80, 'scorpionSnake': 79, 'beast': 90, 'summonedSkeleton': 56}, {'02000505.WAV', '020004F5.WAV', '020005A5.WAV'})
         self.assertEqual(mapping['monster:evilSnake:death'], '02000505.WAV')
         self.assertNotIn('monster:evilSnake:death', aliases)
-        self.assertFalse(any(':beast:' in k or ':summonedSkeleton:' in k for k in mapping))
+        self.assertEqual(mapping['monster:beast:death'], '020005A5.WAV')
+
+    def test_verified_pet_voices_use_the_same_raw_model_events_and_record_missing_files(self):
+        files = {'020005A2.WAV', '020005A4.WAV', '020005A5.WAV', '02000385.WAV'}
+        mapping, aliases, missing = monster_mapping({'beast': 90, 'summonedSkeleton': 56}, files)
+        self.assertEqual(mapping, {'monster:beast:attack': '020005A2.WAV',
+                                  'monster:beast:hurt': '020005A4.WAV',
+                                  'monster:beast:death': '020005A5.WAV',
+                                  'monster:summonedSkeleton:death': '02000385.WAV'})
+        self.assertEqual(aliases, {})
+        self.assertEqual(missing, ['monster:summonedSkeleton:attack', 'monster:summonedSkeleton:hurt'])

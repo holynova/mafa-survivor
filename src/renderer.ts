@@ -612,7 +612,8 @@ class BattleScene extends Phaser.Scene {
       this.accumulator = 0;
       this.autopilotClock=-1;this.autopilotAction={x:0,y:0};
       this.heroLook = { body: "dress-1", weapon: "weapon-8" };
-      void sounds.preloadMonsters([...MAPS[game.mapId].monsterPool,MAPS[game.mapId].boss]);
+      void sounds.preloadMonsters([...MAPS[game.mapId].monsterPool,MAPS[game.mapId].boss,
+        ...(game.classId==="taoist"?["beast","summonedSkeleton"]:[])]);
     }
     if (game.phase === "battle") {
       const axes = this.movementInput.axes;
