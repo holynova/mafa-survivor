@@ -1,3 +1,4 @@
+import {enemyActionCue} from "./enemy-action-cue";
 import {rangedTiming} from "./ranged-timing";
 import {runtimeDiagnostics,observeRuntime} from "./runtime-diagnostics";
 import {visualPreferences,DEFAULT_VISUAL,floatingPresentation,effectOpacity} from './visual-settings';
@@ -710,10 +711,29 @@ class BattleScene extends Phaser.Scene {
         const insight=enemyInsight(game,e);
         if(insight&&this.inView(e.x-200,e.y-110,400,120))this.label(-1000000-e.id,insight,e.x,e.y-90,"#e6dfaf",1,11);
         if ((e.elite || e.hp < e.maxHp || insight)&&this.inView(e.x-90,e.y-110,180,120)) {
-          const elite=e.elite&&!isBossKind(e.kind),w=isBossKind(e.kind)?72:elite?64:32,h=elite?8:4,y=elite?(this.bodies.get("enemy-"+e.id)?.getBounds().top??e.y-92)-12:e.y-58;
+          const cue=enemyActionCue(e,t,game.survivorMode);
+          const elite=e.elite&&!isBossKind(e.kind),w=isBossKind(e.kind)?72:elite?64:32,h=elite?8:4,y=elite?(this.bodies.get("enemy-"+e.id)?.getBounds().top??e.y-92)-(game.survivorMode?22:12):e.y-58;
           this.bars.fillStyle(0x100706,.95).fillRect(e.x-w/2-2,y-2,w+4,h+4);
           this.bars.fillStyle(elite?0xe5a248:0xb23832,1).fillRect(e.x-w/2,y,w*Math.max(0,e.hp/e.maxHp),h);
-          if(elite){this.bars.lineStyle(1,0xd9b36d,.9).strokeRect(e.x-w/2-2,y-2,w+4,h+4);this.label(-2000000-e.id,'精英 · '+monsterName(e.kind),e.x,y-12,'#ffd398',1,12);}
+          if(elite){
+            this.bars.lineStyle(1,0xd9b36d,.9).strokeRect(e.x-w/2-2,y-2,w+4,h+4);
+            const label=this.label(-2000000-e.id,cue?.text??'精英 · '+monsterName(e.kind),e.x,y-14,cue?.state==='windup'?'#ffe5ce':'#ffd398',1,cue?14:12);
+            const background=cue?'#21160e':'rgba(0,0,0,0)',padding=cue?4:0;
+            if(label.style.backgroundColor!==background)label.setBackgroundColor(background);
+            if(label.padding.left!==padding)label.setPadding(padding,cue?2:0);
+          }
+          if(cue){
+            if(!elite){
+              const label=this.label(-3000000-e.id,cue.text,e.x,y-14,'#ffe5ce',1,14);
+              if(label.style.backgroundColor!=='#21160e')label.setBackgroundColor('#21160e');
+              if(label.padding.left!==4)label.setPadding(4,2);
+            }
+            const cy=y+h+5;
+            this.bars.fillStyle(0x160e09,.95).fillRect(e.x-w/2-1,cy-1,w+2,6);
+            this.bars.fillStyle(cue.state==='windup'?0xdb5142:0xd4c17f,1).fillRect(e.x-w/2,cy,w*cue.progress,4);
+            // Fixed end marks and text preserve meaning without color or flashing.
+            this.bars.lineStyle(1,0xffe5ce,.95).lineBetween(e.x-w/2,cy-1,e.x-w/2,cy+5).lineBetween(e.x+w/2,cy-1,e.x+w/2,cy+5);
+          }
         }
         if((e.elite||isBossKind(e.kind))&&e.rangedFireAt!==undefined){
           this.fx('enemy-cast-'+e.id,'cast',e.x,e.y,Math.max(0,t-(e.rangedFireAt-rangedTiming(e.kind,game.survivorMode).windup)),Math.max(2100,e.y+300));
