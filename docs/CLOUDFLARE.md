@@ -110,3 +110,15 @@ npm run deploy
 - 首次等待HUD超时因恢复后停在暂停；后续等图阶段推进到了下一次升级。最终对当前HUD图片调用decode并等两帧后截图成功，不将最初缺图截图算作通过。未据此宣称原生D键或全部手机硬件通过。
 - 线上测试前备份run/progress/guide/diagnostics四个键，退出游戏到同源作品集后逐键精确恢复并验证。作品集实际WebP 390×844、Demo链接及卡片截图通过；空间80已关闭，本轮未启动临时dev服务。
 - 本版公开供阶段测试，整体最佳实践目标尚未完成。平衡/实机性能/触控/听感、章节事件、横向解锁及独立环境声继续见OPTIMIZATION-ROADMAP。
+
+
+## alpha.44 阶段测试版发布（2026-11-17）
+
+- 构建源码main `3ad11228526d30968376a44813104935628a596d`，版本v0.1.0-alpha.44/original；作品集master `665d2389fcead3343d4d0f675669a1253defc8e1`，合入最新2ed9181并保留其他项目变化。
+- 共享Worker xiaosang-portfolio，version ID `395653b5-9fdd-40af-aadb-ad943317c5e8`；使用现有锁定Wrangler4.128.0和已验证Node24执行完整共享站点dry-run/deploy，未新建分支或部署Action。图库ee4df095/1.0.2与wujun1897dda/1.0.2发布前后相同。
+- 1216本地测试、素材/类型/生产构建、README及发布版本校验通过。Source checks44068183563首次1215通过/1项长模拟20.9秒超过20秒；本地单worker4项复测通过，原作业attempt2全量测试及构建成功。未放宽断言/超时。
+- 作品集数据源检查通过。check-demo-links因最新上游2ed9181将web-motion-showcase显式恢复GitHub Pages地址而失败；保留这一无关更新，不修改其链接或检查器伪造通过。本次mafa Repo/Demo正确，在线repos.json与发布master逐值完全一致。
+- HTTPS version.json匹配alpha.44/完整SHA/original。真实浏览器恢复17秒旧战士存档、继续战斗、半月1→2、诊断下载、保存退出20秒成功。390px战斗截图alpha44-online-battle-390.png已查看；后续升级/下载调用恢复桌面1920px，不能将全部交互写成390px触摸验收。生产__MAFA__不存在。
+- 下载alpha44-online-diagnostic.json含journalStorage：正常局，4次实际写入/0失败，p95/max0.3ms（短局桌面样本，不是性能预算）。本地悬赏与转角专场见QA；线上未等到2分钟或注入对象强制验证悬赏，不冒称公网全关验收。
+- 作品集首次仅显示12条，等待游戏链接超时后通过现有搜索显示项目；Demo为新版子路径，实际WebP390×844加载成功，素材/二维码/README沿用。备份四个指定存储键，保存退出后导航同源作品集逐键精确还原并核验。空间85已关闭，本轮没有启动本地服务。
+- 本版可供用户阶段测试，石墓/白日门平衡、横向解锁、其他章节事件、独立环境声、实体手机及听感等仍按完整路线图开发。
