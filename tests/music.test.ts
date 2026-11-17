@@ -39,3 +39,13 @@ it('does not retry rejected playback every frame, and ignores stale rejection af
  p.retry();p.sync('field',true,false);p.sync('cave',true,false);await Promise.resolve();await Promise.resolve();expect(p.error).toBe('');
  p.stop();
 });
+
+it('assigns source map-family music to Mengzhong, Woma and Redmoon instead of generic categories',()=>{
+ expect(CHAPTER_MUSIC.mengzhong).toBe('desert');expect(CHAPTER_MUSIC.woma).toBe('woma');expect(CHAPTER_MUSIC.redmoon).toBe('redmoon');
+ expect(manifest.files[MUSIC_TRACKS.desert].sourceMap).toBe('盟重县_74');
+ expect(manifest.files[MUSIC_TRACKS.woma].sourceMap).toBe('沃玛神殿_D024');
+ expect(manifest.files[MUSIC_TRACKS.redmoon].sourceMap).toBe('赤月恶魔洞穴_D10162');
+ const {p,media}=player();for(const track of ['desert','woma','redmoon'] as const){p.sync(track,true,false);vi.advanceTimersByTime(650);expect(p.status).toMatchObject({track,playing:true,decks:1});}
+ expect(media.map(m=>m.src)).toEqual(['desert','woma','redmoon'].map(k=>expect.stringContaining(MUSIC_TRACKS[k as keyof typeof MUSIC_TRACKS])));
+ p.stop();expect(p.status.decks).toBe(0);
+});

@@ -1,9 +1,9 @@
 import {assetUrl} from './release';
 import type {MapId} from './content';
-export const MUSIC_TRACKS={field:'00010001_B000.mp3',cave:'00020008_BD70.mp3',temple:'00020006_BD50.mp3'} as const;
+export const MUSIC_TRACKS={desert:'00010006_B300.mp3',woma:'00020003_BD02.mp3',redmoon:'00020009_BD99.mp3',field:'00010001_B000.mp3',cave:'00020008_BD70.mp3',temple:'00020006_BD50.mp3'} as const;
 export type MusicTrack=keyof typeof MUSIC_TRACKS;
 /** Category reuse, not a claim that each map used this exact track in 1.76. */
-export const CHAPTER_MUSIC:Record<MapId,MusicTrack>={biche:'field',bairimen:'field',mengzhong:'field',mine:'cave',centipede:'cave',stone:'cave',shimu:'cave',woma:'temple',zuma:'temple',redmoon:'temple'};
+export const CHAPTER_MUSIC:Record<MapId,MusicTrack>={biche:'field',bairimen:'field',mengzhong:'desert',mine:'cave',centipede:'cave',stone:'cave',shimu:'cave',woma:'woma',zuma:'temple',redmoon:'redmoon'};
 type Deck={track:MusicTrack;media:HTMLAudioElement;source:MediaElementAudioSourceNode;gain:GainNode;timer?:ReturnType<typeof setTimeout>};
 /** Stream long music through Web Audio. At most two decks exist during a crossfade. */
 export class OriginalMusic {

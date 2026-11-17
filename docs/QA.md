@@ -1166,3 +1166,7 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 已查看alpha45-online-guide-390.png、alpha45-online-battle-390.png。线上repos.json与master完整结构相等，作品卡片currentSrc为390×844 WebP且Demo正确；图库ee4df095/1.0.2和wujun1897dda/1.0.2发布前后完整receipt相同。
 - 五项线上存储在导航退出游戏后精确恢复true，独立Ego89关闭；无遗留测试服务。
 - 仍未完成：后两章/多构筑/真人平衡、物理键盘/实体手机性能与操作、独立环境声与其他章节事件等；完整范围保留在OPTIMIZATION-ROADMAP，不把本次发布当全目标完成。
+
+### alpha.46候选：原版章节配乐扩展
+
+盟重/沃玛/赤月三条独立原轨已固定哈希及客户端映射校验；1227测试、素材、构建和真实浏览器播放/切图/暂停恢复/退出释放通过。390px截图已查看，独立空间90与dev已清理。仅音频状态和数值验证，不冒称主观试听完成。详细结果见SURVIVOR-MUSIC-REVIEW.md。
