@@ -1,6 +1,6 @@
 import {survivorExpNeeded} from './survivor-pacing';
 import {snapshotSurvival,parseSurvivalSave} from './survivor-save';
-import {survivalBonuses,survivalGrowth,tuneSurvivalEnemy,newSurvival,survivalStarter,survivalTick,survivalChoices,chooseSurvival,survivalDeath,survivalSplash} from "./survivor";
+import {survivalBonuses,survivalGrowth,tuneSurvivalEnemy,newSurvival,survivalStarter,survivalTick,survivalChoices,chooseSurvival,survivalDeath,survivalSplash,SURVIVAL_SECONDS,FINAL_OVERTIME_SECONDS} from "./survivor";
 import {
   ITEMS,
   MONSTERS,
@@ -516,6 +516,7 @@ export class Game {
       attackDir: 4,
     };
     this.skills = [this.newSkill(this.survivorMode?survivalStarter(this.classId):this.classInfo.startingSkill)];
+    this.survival.seenSkills=this.skills.map(s=>s.id);
     this.basicCD = 0;
     this.charges = {};
     this.tao = createTaoState();
@@ -595,6 +596,8 @@ export class Game {
     this.survivorMode=true;this.unlockedMaps.add(saved.state.mapId);
     this.start('normal',saved.state.seed,saved.state.classId,false,saved.state.mapId);
     Object.assign(this,saved.state);
+    if(this.clock>=SURVIVAL_SECONDS&&!this.survival.overtimeEndsAt)this.survival.overtimeEndsAt=this.clock+FINAL_OVERTIME_SECONDS;
+    if(!this.survival.seenSkills.length)this.survival.seenSkills=[...new Set([...this.survival.seenSkills,...this.skills.map(s=>s.id),...this.choices.flatMap(c=>c.skill?[c.skill]:[])])];
     this.id=saved.nextId-1;this.rng=new Rng(saved.rngState);
     for(const skill of this.skills)Object.assign(skill,survivalBonuses(skill));
     for(const choice of this.choices)if(choice.skill&&choice.id.startsWith("s:")){const rank=this.skills.find(s=>s.id===choice.skill)?.rank??0;choice.description=survivalGrowth(choice.skill)[rank]?.label??choice.description;}

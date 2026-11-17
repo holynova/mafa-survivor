@@ -8,7 +8,7 @@ import {sellPrice} from '../src/rules';
 import {changeSurvivalSkill} from '../src/survivor-skill-management';
 import {survivalBonuses} from '../src/survivor';
 import {skillCooldown} from '../src/skill-metrics';
-const run=()=>{const g=new Game();g.survivorMode=true;g.start('normal',176,'taoist');return g;};
+const run=()=>{const g=new Game();g.survivorMode=true;g.start('normal',176,'taoist');g.survival.seenSkills=['heal','invisible'];return g;};
 function pickup(g:Game,id:string,count=1){collectLoot(g,{id:g.nextEntityId(),x:g.player.x,y:g.player.y,born:g.clock,itemId:id,count,exp:0,gold:0});}
 it('caps equipment notices without removing unrelated combat feedback',()=>{
  const g=run(),damage={id:g.nextEntityId(),x:0,y:0,text:'20',color:'#ff0000',life:1};g.floating.push(damage);
