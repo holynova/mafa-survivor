@@ -177,3 +177,21 @@ node tools/simulate-survival.mjs --maps=biche,shimu,bairimen --roles=warrior,wiz
 |alpha45-xp-policy-nine|bairimen|2026|dead|1320|21|2846|
 |alpha45-skeleton-support-pilot|biche|42|won|1230|20|2903|
 |alpha45-skeleton-support-pilot|shimu|42|dead|1136|19|2238|
+
+## 辅助路线扩大验证及候选实施
+
+三章三种子完成9局：比奇3/3通关，石墓1/3，白日门0/3（均超时）。这支持替换原来骷髅＋火符的默认推荐，但不证明职业/章节平衡已经完成。特别是石墓176仍在229秒失败，白日门终局输出窗口待继续优化。
+
+候选实现survivorStartGuide：骷髅起手仍只给一个1级骷髅，后续推荐火符与神兽；推荐文字与实际mainSkills共用函数。雷电/刺杀也各显示与实际主修一致的说明，不再一律显示默认起手指导。旧存档自选主修在恢复时保持，不用新推荐覆盖。新增测试明确初始唯一技能与主修不同、存档自选覆盖保留。
+
+|章节|种子|结局|秒|等级|击杀|
+|---|---:|---|---:|---:|---:|
+|biche|176|won|1305|21|2892|
+|biche|42|won|1230|20|2903|
+|biche|2026|won|1250|22|2907|
+|shimu|176|dead|229|7|159|
+|shimu|42|dead|1136|19|2238|
+|shimu|2026|won|1233|24|2857|
+|bairimen|176|dead|1320|23|2834|
+|bairimen|42|dead|1320|13|2803|
+|bairimen|2026|dead|1320|22|2849|

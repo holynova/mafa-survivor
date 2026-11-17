@@ -1,4 +1,4 @@
-import {SURVIVOR_STARTS,START_UNLOCK_SECONDS,START_DESCRIPTIONS,availableSurvivorStarts} from './survivor-starts';
+import {SURVIVOR_STARTS,START_UNLOCK_SECONDS,START_DESCRIPTIONS,survivorStartGuide,availableSurvivorStarts} from './survivor-starts';
 import {ChapterChallenge} from './ChapterChallenge';
 import {TELEMETRY_KEY} from "./survivor-telemetry";
 import {SurvivorDiagnostics} from "./SurvivorDiagnostics";
@@ -25,7 +25,7 @@ import {getSkill,getItem,MAPS,type MapId} from './content';
 import {isReady,readyListeners,setBattleInset} from './renderer';
 import {sounds} from './sound';
 import {AudioSettings} from './AudioSettings';
-import {SURVIVAL_OPEN_MAP_TEST,CHARMS,EVOLUTIONS,survivalChoices,survivalStarter,BUILD_GUIDES} from './survivor';
+import {SURVIVAL_OPEN_MAP_TEST,CHARMS,EVOLUTIONS,survivalChoices,survivalStarter} from './survivor';
 import {releaseVersion,repositoryUrl} from './release';
 import {ShareCardButton} from './ShareCard';
 import './survivor.css';
@@ -61,7 +61,7 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
  {saved&&<button className="survivor-primary" disabled={!ready} onClick={resume}>继续上局 · {clock(saved.state.clock)}</button>}
  <button className={saved?'survivor-secondary':'survivor-primary'} disabled={!ready} onClick={start}>{!ready?'加载中…':saved?'另开新局（覆盖存档）':'开始游戏'}</button>
  <p className="survivor-hint">拖动移动 · 自动攻击 · 自动存档</p>
- <details className="survivor-more"><summary>玩法与图鉴</summary><p>{BUILD_GUIDES[role].text}</p><p>18分钟最终首领登场。生存满20分钟且击败首领即可通关；未击败时停止刷新普通怪，最多再战2分钟。暂停和升级选择不计时。</p><p>最多携带6个技能与6个被动。技能升至8级，搭配被动与精英宝箱完成进化。</p><SurvivorGrowthBook classId={role}/><p>电脑使用 WASD／方向键移动，Q 使用血瓶。</p></details>
+ <details className="survivor-more"><summary>玩法与图鉴</summary><p>{survivorStartGuide(role,starter).text}</p><p>18分钟最终首领登场。生存满20分钟且击败首领即可通关；未击败时停止刷新普通怪，最多再战2分钟。暂停和升级选择不计时。</p><p>最多携带6个技能与6个被动。技能升至8级，搭配被动与精英宝箱完成进化。</p><SurvivorGrowthBook classId={role}/><p>电脑使用 WASD／方向键移动，Q 使用血瓶。</p></details>
  <details className="survivor-more"><summary>章节与战绩</summary>{CHAPTER_PATH.map(id=>{const r=chapterRequirement(id);return <p key={id}>{MAPS[id].name} · {progress.won.includes(id)?'已通关':(SURVIVAL_OPEN_MAP_TEST||chapterUnlocked(progress,id))?`最佳 ${clock(progress.best[id]??0)}`:`需${MAPS[r!.map].name}生存${r!.seconds/60}分钟`}</p>;})}{readSurvivorRecords(localStorage).slice(0,5).map(r=><p key={r.runId}>{CLASSES[r.classId].name} · {MAPS[r.mapId].name} · {clock(r.seconds)} · {r.won?'生还':'倒下'}</p>)}</details>
  <ShareCardButton/><a className="survivor-legacy" href={repositoryUrl} target="_blank" rel="noreferrer">GitHub 源码</a><a className="survivor-legacy" href="?">返回原版</a>
  </section>:<>

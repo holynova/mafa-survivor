@@ -1,6 +1,6 @@
 import {expect,it} from 'vitest';
 import {Game} from '../src/game';
-import {SURVIVOR_STARTS,availableSurvivorStarts} from '../src/survivor-starts';
+import {SURVIVOR_STARTS,availableSurvivorStarts,survivorStartGuide} from '../src/survivor-starts';
 import {SURVIVOR_PROGRESS_KEY,newSurvivorProgress,readSurvivorProgress,updateSurvivorProgress} from '../src/survivor-progress';
 import {recordSurvival,SURVIVOR_RECORD_KEY} from '../src/survivor-records';
 const storage=()=>{const m=new Map<string,string>();return {getItem:(k:string)=>m.get(k)??null,setItem:(k:string,v:string)=>{m.set(k,v);}};};
@@ -23,8 +23,8 @@ it('test and legacy play cannot earn the alternative starts',()=>{
 it('starts with exactly one rank-one class skill, no permanent stats, and preserves it on resume',()=>{
  for(const role of ['wizard','warrior','taoist'] as const){
   const a=new Game(),b=new Game();a.survivorMode=b.survivorMode=true;a.start('normal',7,role);b.start('normal',7,role,false,'biche',SURVIVOR_STARTS[role][1]);
-  expect(b.skills).toHaveLength(1);expect(b.skills[0]).toMatchObject({id:SURVIVOR_STARTS[role][1],rank:1,cd:.3});expect(b.stats).toEqual(a.stats);expect(b.equipment).toEqual(a.equipment);expect(b.level).toBe(1);expect(b.survival.seenSkills).toEqual([b.skills[0].id]);expect(b.survival.mainSkills[0]).toBe(b.skills[0].id);
-  const save=b.snapshotSurvival()!,next=new Game();expect(next.resumeSurvival(save)).toBe(true);expect(next.skills).toEqual(b.skills);
+  expect(b.skills).toHaveLength(1);expect(b.skills[0]).toMatchObject({id:SURVIVOR_STARTS[role][1],rank:1,cd:.3});expect(b.stats).toEqual(a.stats);expect(b.equipment).toEqual(a.equipment);expect(b.level).toBe(1);expect(b.survival.seenSkills).toEqual([b.skills[0].id]);expect(b.survival.mainSkills).toEqual(survivorStartGuide(role,b.skills[0].id).main);
+  const save=b.snapshotSurvival()!,next=new Game();expect(next.resumeSurvival(save)).toBe(true);expect(next.skills).toEqual(b.skills);expect(next.survival.mainSkills).toEqual(b.survival.mainSkills);
  }
 });
 it('rejects foreign/non-preset starts and keeps original mode starting skills',()=>{
@@ -42,4 +42,12 @@ it('each alternative casts through the real combat loop at rank one',()=>{
   expect(g.damageDealt[id]??0,`${role}: ${id} damage`).toBeGreaterThan(0);
   if(role==='taoist')expect(g.pets.some(p=>p.hp>0)).toBe(true);
  }
+});
+
+it('keeps the skeleton as opening support and describes the actual two damage focuses',()=>{
+ const guide=survivorStartGuide('taoist','skeleton');expect(guide.main).toEqual(['talisman','beast']);expect(guide.text).toContain('主修火符与神兽');
+ const g=new Game();g.survivorMode=true;g.start('normal',42,'taoist',false,'biche','skeleton');
+ expect(g.skills.map(s=>s.id)).toEqual(['skeleton']);expect(g.survival.mainSkills).toEqual(['talisman','beast']);
+ // A saved deliberate focus selection wins over a later lobby recommendation.
+ g.survival.mainSkills=['skeleton','poison'];const save=g.snapshotSurvival()!;const next=new Game();expect(next.resumeSurvival(save)).toBe(true);expect(next.survival.mainSkills).toEqual(['skeleton','poison']);
 });

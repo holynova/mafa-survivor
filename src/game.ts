@@ -1,4 +1,4 @@
-import {resolveSurvivorStart} from './survivor-starts';
+import {resolveSurvivorStart,survivorStartGuide} from './survivor-starts';
 import {SurvivorTelemetry} from "./survivor-telemetry";
 import {canStartMajorAttack} from './attack-budget';
 import {survivorExpNeeded} from './survivor-pacing';
@@ -525,7 +525,7 @@ export class Game {
     };
     this.skills = [this.newSkill(this.survivorMode?resolveSurvivorStart(this.classId,survivorStart):this.classInfo.startingSkill)];
     this.survival.seenSkills=this.skills.map(s=>s.id);
-    this.survival.mainSkills=this.survivorMode?[this.skills[0].id,...BUILD_GUIDES[this.classId].main.filter(id=>id!==this.skills[0].id)].slice(0,2):[...BUILD_GUIDES[this.classId].main];
+    this.survival.mainSkills=this.survivorMode?survivorStartGuide(this.classId,this.skills[0].id).main:[...BUILD_GUIDES[this.classId].main];
     this.basicCD = 0;
     this.charges = {};
     this.tao = createTaoState();
