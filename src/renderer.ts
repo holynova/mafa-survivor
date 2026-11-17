@@ -1,3 +1,4 @@
+import {WARD_RADIUS} from './chapter-challenge';
 import {enemyActionCue} from "./enemy-action-cue";
 import {rangedTiming} from "./ranged-timing";
 import {runtimeDiagnostics,observeRuntime} from "./runtime-diagnostics";
@@ -603,9 +604,10 @@ class BattleScene extends Phaser.Scene {
         x = Phaser.Math.Clamp((p.x - this.drag.x) / 45, -1, 1);
         y = Phaser.Math.Clamp((p.y - this.drag.y) / 45, -1, 1);
       }
-      if(game.survivorMode && x===0 && y===0){x=game.touchInput.x;y=game.touchInput.y;}
+      if(x===0 && y===0){x=game.touchInput.x;y=game.touchInput.y;}
       game.input = { x, y };
-      const manual=this.movementInput.held.size>0 || !!(this.drag && p.isDown);
+      const manual = this.movementInput.held.size > 0 || !!(this.drag && p.isDown) ||
+        game.touchInput.x !== 0 || game.touchInput.y !== 0;
       this.accumulator +=
         game.mode === "test" && game.test.pose !== "live"
           ? 0
@@ -626,7 +628,10 @@ class BattleScene extends Phaser.Scene {
       this.accumulator = 0;
       this.drag = null;
     }
-    sounds.syncMusic(game.mapId,game.phase,game.enemies.some(e=>e.hp>0&&isBossKind(e.kind)),game.survivorMode);
+    const finalBossId = game.survival.finalBossId;
+    const finalEncounter = finalBossId > 0 && !game.survival.finalBossDefeated;
+    sounds.syncMusic(game.mapId, game.phase, game.enemies.some(e => e.hp > 0 && isBossKind(e.kind)),
+      game.survivorMode, finalEncounter);
     if (game.phase !== "lobby") {
       const audio=game.audioEvents.splice(0);
       for (const key of audio) sounds.play(key);
@@ -644,6 +649,13 @@ class BattleScene extends Phaser.Scene {
     this.danger.clear();
     this.dangerOutline.clear();
     if(game.survivorMode)for(const chest of game.survival.chests){this.bars.fillStyle(chest.eligible?0xd8b36f:0x94acbb,1);this.bars.fillRect(chest.x-11,chest.y-9,22,18);this.bars.lineStyle(2,0x342718);this.bars.strokeRect(chest.x-11,chest.y-9,22,18);}
+    const challenge = game.survival.challenge;
+    if (game.survivorMode && challenge.status === 'active' && challenge.ward) {
+      const {x, y} = challenge.ward;
+      this.danger.fillStyle(0x80c2a4, .14).fillCircle(x, y, WARD_RADIUS);
+      this.danger.lineStyle(3, 0x19372c, .95).strokeCircle(x, y, WARD_RADIUS);
+      this.danger.lineStyle(1, 0xb1ebd0, 1).strokeCircle(x, y, WARD_RADIUS - 2);
+    }
     const t = game.clock;
     if (game.phase === "lobby") {
       this.centerCamera(WORLD.w / 2 + 70, WORLD.h / 2);

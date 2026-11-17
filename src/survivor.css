@@ -76,3 +76,15 @@
 .survivor-start-picker button[aria-pressed=true]{border-color:#d6b46c}.survivor-start-picker button:disabled{opacity:1;color:#c8bba0;border-style:dashed}.survivor-start-picker button:disabled .survivor-choice-title{opacity:.7}.survivor-start-picker small{line-height:1.5}
 
 .boss-health .boss-bearing{margin:5px 0 0;font-size:12px;line-height:1.4;color:#e3cda5;letter-spacing:.3px}.boss-health .boss-bearing span{color:inherit;font-size:15px}
+
+/* Enlarge reading surfaces without enlarging or covering the battlefield HUD. */
+.survivor-ui[data-text-size=large] .survivor-panel{font-size:17px;line-height:1.65}
+.survivor-ui[data-text-size=large] .survivor-panel :is(p,label,summary,button,legend,li,.survivor-skill-manager span){font-size:16px;line-height:1.65;overflow-wrap:anywhere}
+.survivor-ui[data-text-size=large] .survivor-panel :is(small,.survivor-recipe,.survivor-note){font-size:14px;line-height:1.6;white-space:normal}
+.survivor-ui[data-text-size=large] :is(.survivor-map-picker>div,.survivor-skill-picker,.survivor-skill-manager){grid-template-columns:1fr}
+.survivor-ui[data-text-size=large] .survivor-panel button{height:auto;min-height:44px}
+.survivor-ui[data-text-size=large] .survivor-tabs{flex-wrap:wrap}
+
+.classic-touch-field{display:none}
+@media (any-pointer:coarse){.classic-touch-field{display:block}}
+.survivor-touch-field[data-dragging] .survivor-stick span{transition:none}

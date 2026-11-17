@@ -7,6 +7,8 @@ from asset_authorization import authorize
 ROOT=Path(__file__).resolve().parents[1]
 REF='9e21ea6631317d06e064fbfa7e1ea43af6a2d3e6'
 TRACKS={
+ 'mine':('00020004_BD041.mp3','28045ac1a303ae17aae2a96c89622384a64c5fa3','废矿东部洞穴_D402',0x20004),
+ 'valley':('00020007_BD60.mp3','5ded22704483e4f410e8f0895f86f6d3cb185087','绝命谷1层南部_D60011',0x20007),
  'desert':('00010006_B300.mp3','c518eb2352ba082b0a6eaa028b8f5293241c150f','盟重县_74',0x10006),
  'woma':('00020003_BD02.mp3','61df2755d9aaaba00f1ddf6a0e9bdf7587e39352','沃玛神殿_D024',0x20003),
  'redmoon':('00020009_BD99.mp3','2b2f856c66037682b10046253d2c32761b3b9bb4','赤月恶魔洞穴_D10162',0x20009),
@@ -35,7 +37,7 @@ def main():
   assert data[:3]==b'ID3' or data[0]==255,'Expected source MP3'
   return name,dict(sourcePath='sound/bgm/'+name,sha1=blob_sha(data),sha256=hashlib.sha256(data).hexdigest(),bytes=len(data),sourceMap=source_map,bgmID=bgm)
  files=dict(ThreadPoolExecutor(3).map(load,TRACKS.items()))
- manifest=dict(repository='https://github.com/etorth/mir2x_res',ref=REF,files=files,mapping={k:v[0] for k,v in TRACKS.items()},mappingReference=dict(repository='https://github.com/etorth/mir2x',ref='bb6a22287abcd9f248d2aba755074c254c68787a',sourcePath='common/src/maprecord.inc',sha256='781881a1029da203cbf1aff4cd242ca9496e21ccdb5f3a5a5f198250dee27f67'),note='Pinned client map soundtrack assignments identify source tracks. Mengzhong, Woma and Redmoon use their source map-family assignments; other chapters reuse field/cave/temple categories; these are not claims of exact 1.76 chapter music. No synthesized or re-encoded music.')
+ manifest=dict(repository='https://github.com/etorth/mir2x_res',ref=REF,files=files,mapping={k:v[0] for k,v in TRACKS.items()},mappingReference=dict(repository='https://github.com/etorth/mir2x',ref='bb6a22287abcd9f248d2aba755074c254c68787a',sourcePath='common/src/maprecord.inc',sha256='781881a1029da203cbf1aff4cd242ca9496e21ccdb5f3a5a5f198250dee27f67'),note='Pinned client map soundtrack assignments identify source tracks. Map-family soundtracks and adapted final encounter selections are documented separately; no claim of exact 1.76 assignments for every chapter. No synthesized or re-encoded music.')
  authorize(manifest,['audio'])
  text=json.dumps(manifest,ensure_ascii=False,indent=2)+'\n'
  (out/'manifest.json').write_text(text);(ROOT/'docs/music-manifest.json').write_text(text)

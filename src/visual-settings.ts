@@ -1,9 +1,9 @@
 import type {Floating} from './game';
-export type VisualPreferences={effects:'full'|'reduced';numbers:'full'|'reduced'|'off';reduceFlash:boolean};
+export type VisualPreferences={effects:'full'|'reduced';numbers:'full'|'reduced'|'off';reduceFlash:boolean;textSize:'standard'|'large'};
 export const VISUAL_KEY='mafa-visual-settings-v1';
-export const DEFAULT_VISUAL:VisualPreferences={effects:'full',numbers:'full',reduceFlash:false};
+export const DEFAULT_VISUAL:VisualPreferences={effects:'full',numbers:'full',reduceFlash:false,textSize:'standard'};
 export function readVisual(storage:Pick<Storage,'getItem'>|undefined):VisualPreferences{
- try{const s=JSON.parse(storage?.getItem(VISUAL_KEY)??'{}');return {effects:s?.effects==='reduced'?'reduced':'full',numbers:['reduced','off'].includes(s?.numbers)?s.numbers:'full',reduceFlash:s?.reduceFlash===true};}catch{return {...DEFAULT_VISUAL};}
+ try{const s=JSON.parse(storage?.getItem(VISUAL_KEY)??'{}');return {effects:s?.effects==='reduced'?'reduced':'full',numbers:['reduced','off'].includes(s?.numbers)?s.numbers:'full',reduceFlash:s?.reduceFlash===true,textSize:s?.textSize==='large'?'large':'standard'};}catch{return {...DEFAULT_VISUAL};}
 }
 export const visualPreferences=readVisual(typeof localStorage==='undefined'?undefined:localStorage);
 export function setVisual(patch:Partial<VisualPreferences>,storage:Pick<Storage,'setItem'>|undefined=typeof localStorage==='undefined'?undefined:localStorage){Object.assign(visualPreferences,patch);try{storage?.setItem(VISUAL_KEY,JSON.stringify(visualPreferences));}catch{/* Remain usable when browser storage is unavailable. */}}

@@ -91,14 +91,35 @@ export function survivalSpawnKind(g:Game){
  const meleeWeight=g.clock<300?4:2;
  return g.rng.pick(pool.flatMap(id=>Array((rangedKinds.has(id)?1:meleeWeight)*chapterMonsterWeight(g.mapId,g.clock,id)).fill(id) as string[]));
 }
-export function survivalTick(g:Game){const state=g.survival;tickChapterChallenge(g);g.wave=Math.min(12,1+Math.floor(g.clock/100));
+export function survivalTick(g:Game,dt=0){const state=g.survival;tickChapterChallenge(g,dt);g.wave=Math.min(12,1+Math.floor(g.clock/100));
  if(g.clock>=SURVIVAL_SECONDS&&state.finalBossDefeated){g.finish(true);return;}
  if(g.clock>=SURVIVAL_SECONDS){
   state.overtimeEndsAt ||= SURVIVAL_SECONDS+FINAL_OVERTIME_SECONDS;
   if(g.clock>=state.overtimeEndsAt){state.timedOut=true;g.finish(false);return;}
  }
  // The final encounter is mandatory and cannot be blocked by the ordinary population cap.
- if(g.clock>=1080&&!state.finalBossId){const boss=g.spawnEnemy(MAPS[g.mapId].boss);if(STATIONARY_MONSTERS.includes(boss.kind)){const nearby=g.navigation?.reachablePoints(g.player,160,260).filter(p=>g.canStand(p.x,p.y)&&g.attackLineClear(g.player,p));if(nearby?.length)Object.assign(boss,g.rng.pick(nearby));}tuneSurvivalEnemy(g,boss,'boss');boss.hp=boss.maxHp=boss.maxHp*1.5;state.finalBossId=boss.id;state.toast='';announceEncounter(g,boss);}
+ if(g.clock>=1080&&!state.finalBossId){
+  const boss=g.spawnEnemy(MAPS[g.mapId].boss);
+  if(STATIONARY_MONSTERS.includes(boss.kind)&&g.navigation){
+   const visiblePoints=(min:number,max:number)=>g.navigation!.reachablePoints(g.player,min,max)
+    .filter(p=>g.canStand(p.x,p.y)&&g.attackLineClear(g.player,p));
+   const preferred=visiblePoints(160,260);
+   // On narrow tiles the preferred ring can be completely behind walls.
+   const fallback=preferred.length?undefined:visiblePoints(260,360)[0]??visiblePoints(120,160).at(-1);
+   if(preferred.length)Object.assign(boss,g.rng.pick(preferred));
+   else if(fallback){
+    Object.assign(boss,fallback);
+    // An unusually close arrival leaves time to read the encounter banner.
+    boss.stompCD=4;
+    boss.shockCD=4;
+   }
+  }
+  tuneSurvivalEnemy(g,boss,'boss');
+  boss.hp=boss.maxHp=boss.maxHp*1.5;
+  state.finalBossId=boss.id;
+  state.toast='';
+  announceEncounter(g,boss);
+ }
  if(g.clock<SURVIVAL_SECONDS&&g.clock>=state.spawnAt&&g.enemies.length<220){const e=g.spawnEnemy(survivalSpawnKind(g));tuneSurvivalEnemy(g,e,'normal');state.spawnAt=g.clock+survivorSpawnInterval(g.clock);}
  if(g.clock>=state.eliteAt&&g.clock<1080){const native=MAPS[g.mapId].monsterPool.filter(id=>NATIVE_ELITES.includes(id));const e=g.spawnEnemy(native.length?g.rng.pick(native):survivalSpawnKind(g));if(!e.elite){e.elite=true;e.hp=e.maxHp=e.maxHp*4;}tuneSurvivalEnemy(g,e,'elite');e.exp=Math.max(4,Math.round(e.exp*1.5));state.eliteAt=g.clock+(g.clock>=600?90:120);announceEncounter(g,e);}
  // A missed phase kill must not silently multiply chapter bosses. The next

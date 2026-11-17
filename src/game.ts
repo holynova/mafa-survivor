@@ -770,7 +770,7 @@ export class Game {
     this.telemetry.step(this,dt);
     this.clock += dt;
     this.waveTime += dt;
-    if(this.survivorMode){survivalTick(this);if(this.phase!=="battle")return;}
+    if(this.survivorMode){survivalTick(this,dt);if(this.phase!=="battle")return;}
     this.potions.cd=Math.max(0,this.potions.cd-dt);
     if(this.player.hp/this.maxHP<=.5)useBloodPotion(this);
     const beforeRegen=this.player.hp;

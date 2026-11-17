@@ -176,3 +176,10 @@ npm run deploy
 - 原五项run/progress/records/guide/diagnostics在导航退出游戏后精确恢复true；Ego97已关闭，本轮无临时dev服务。
 - 线上repos.json与发布master完整结构相等；卡片Demo正确、390×844 WebP正常解码，Homepage正确。图库ee4df095/1.0.2、wujun1897dda/1.0.2完整回执前后一致。README、二维码、卡片材料沿用，Profile不在范围，.impeccable保留。
 - 作品集数据源检查通过；check-demo-links保留上游web-motion-showcase旧Pages例外，不改无关项目或弱化检查。此次不改变战斗数值，整体优化目标尚未完成。
+
+## alpha.50发布回执（2026-11-17，补记）
+
+- main `a3eaf09ba72fdf4820b849747f3b785949c44d25`；作品集master `79e7eb883a17a6cfb513bb22bd16d449dabfdc6d`；Worker版本 `fb63837f-8ff6-4198-81f6-33d34c014336`。线上v0.1.0-alpha.50/original，builtAt=2026-11-17T13:49:03.273Z，完整SHA匹配。
+- 1251测试、素材/构建与版本/README校验通过，CI44096499722成功。共享站点5文件上传、19935复用；其他项目回执与repos数据验证不变。既有web-motion-showcase旧Pages链接例外未改。
+- 使用明确生成的正常模式测试快照检查战士双蓄力、圣言/诱惑目标条件；已查看alpha50-online-charge-390.png和alpha50-online-holy-390.png。CDP触摸显示摇杆并使角色x1104→1339.75，不能说明用户安卓拖动问题已修复。
+- 五项survivor存储精确恢复；后续旧版试玩停在升级界面后导航离开，未完成结算。Ego105继续用于合并候选验收后已关闭。线上版本不含之后的十章悬赏与大字菜单候选。

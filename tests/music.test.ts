@@ -1,5 +1,5 @@
 import {afterEach,expect,it,vi} from 'vitest';
-import {OriginalMusic,CHAPTER_MUSIC,MUSIC_TRACKS} from '../src/music';
+import {OriginalMusic,CHAPTER_MUSIC,MUSIC_TRACKS,encounterMusic} from '../src/music';
 import {MAP_IDS} from '../src/content';
 import manifest from '../docs/music-manifest.json';
 afterEach(()=>vi.useRealTimers());
@@ -75,4 +75,13 @@ it('does not let a stale success hide the newest failed retry',async()=>{
  p.sync('field',true,false);p.retry();p.sync('field',true,false);
  await Promise.resolve();await Promise.resolve();expect(p.error).toContain('重试');
  resolveOld();await Promise.resolve();await Promise.resolve();expect(p.error).toContain('重试');
+});
+
+it('changes to an original track during every final encounter and restores the chapter selection afterward',()=>{
+ for(const map of MAP_IDS){
+  expect(encounterMusic(map,false)).toBe(CHAPTER_MUSIC[map]);
+  expect(encounterMusic(map,true)).not.toBe(CHAPTER_MUSIC[map]);
+  expect(manifest.files[MUSIC_TRACKS[encounterMusic(map,true)]]).toBeDefined();
+ }
+ expect(manifest.files[MUSIC_TRACKS.mine].sourceMap).toBe('废矿东部洞穴_D402');
 });

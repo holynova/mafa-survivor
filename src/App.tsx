@@ -1,3 +1,4 @@
+import {SurvivorJoystick} from './SurvivorJoystick';
 import { useEffect, useReducer, useState, useRef, type CSSProperties } from "react";
 import { game, type Mode, type RunResult } from "./game";
 import {
@@ -630,6 +631,7 @@ export function App() {
       )}
       {active && (
         <>
+          {game.phase === "battle" && <SurvivorJoystick classic />}
           <header className="hud">
             <div className="wave-info">
               <span>
@@ -765,7 +767,7 @@ export function App() {
           </div>
           <div className="controls-hint">
             <span>
-              WASD 移动 · Q 血瓶 · Alt 物品名{" "}
+              拖动或 WASD 移动 · Q 血瓶 · Alt 物品名{" "}
               <button
                 className="audio-toggle"
                 disabled={isGraybox}

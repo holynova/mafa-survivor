@@ -1,5 +1,5 @@
 import {connectAudioOutput} from './audio-output';
-import {OriginalMusic,CHAPTER_MUSIC} from "./music";
+import {OriginalMusic,encounterMusic} from "./music";
 import type {MapId} from "./content";
 import { assetUrl, isGraybox } from "./release";
 import {MONSTER_SOUND_EVENTS,monsterSoundEvent,monsterSoundKey,type MonsterSoundEvent} from "./monster-audio";
@@ -130,8 +130,8 @@ export class OriginalSounds {
   }
   get musicStatus(){return this.music?.status??{track:null,playing:false,decks:0,error:""};}
   suspendMusic(){this.music?.suspend();}
-  syncMusic(map:MapId,phase:string,boss:boolean,enabled:boolean){
-    this.music?.sync(enabled&&phase!=="lobby"&&phase!=="dead"&&phase!=="won" ? CHAPTER_MUSIC[map] : null,phase==="battle"&&!this.muted&&this.volume>0&&this.musicVolume>0,boss);
+  syncMusic(map:MapId,phase:string,boss:boolean,enabled:boolean,finalEncounter=false){
+    this.music?.sync(enabled&&phase!=="lobby"&&phase!=="dead"&&phase!=="won" ? encounterMusic(map,finalEncounter) : null,phase==="battle"&&!this.muted&&this.volume>0&&this.musicVolume>0,boss);
   }
   setVolume(channel:"master"|"music"|"combat",value:number){
     if(!Number.isFinite(value))return;value=Math.max(0,Math.min(1,value));

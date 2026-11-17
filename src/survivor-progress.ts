@@ -6,9 +6,9 @@ import {SKILL_IDS} from './spells';
 import {readSurvivorRecords} from './survivor-records';
 export const SURVIVOR_PROGRESS_KEY='mafa-survival-progress-v1';
 export const CHAPTER_PATH:readonly MapId[]=['biche','mine','woma','zuma','mengzhong','centipede','stone','shimu','bairimen','redmoon'];
-const schema=z.object({version:z.literal(1),roleBest:z.partialRecord(z.enum(CLASS_IDS),z.number().finite().min(0).max(1200)).default({}),best:z.partialRecord(z.enum(MAP_IDS),z.number().finite().min(0).max(1200)),visited:z.array(z.enum(MAP_IDS)).max(10),won:z.array(z.enum(MAP_IDS)).max(10),evolved:z.array(z.enum(SKILL_IDS)).max(33)}).strict();
+const schema=z.object({version:z.literal(1),roleBest:z.partialRecord(z.enum(CLASS_IDS),z.number().finite().min(0).max(1200)).default({}),wardUnlocked:z.boolean().default(false),best:z.partialRecord(z.enum(MAP_IDS),z.number().finite().min(0).max(1200)),visited:z.array(z.enum(MAP_IDS)).max(10),won:z.array(z.enum(MAP_IDS)).max(10),evolved:z.array(z.enum(SKILL_IDS)).max(33)}).strict();
 export type SurvivorProgress=z.infer<typeof schema>;
-export const newSurvivorProgress=():SurvivorProgress=>({version:1,roleBest:{},best:{},visited:[],won:[],evolved:[]});
+export const newSurvivorProgress=():SurvivorProgress=>({version:1,roleBest:{},wardUnlocked:false,best:{},visited:[],won:[],evolved:[]});
 export function readSurvivorProgress(storage:Pick<Storage,'getItem'>):SurvivorProgress{
  let progress=newSurvivorProgress();try{const r=schema.safeParse(JSON.parse(storage.getItem(SURVIVOR_PROGRESS_KEY)??'null'));if(r.success)progress=r.data;}catch{/* Keep the game playable when browser storage is unavailable. */}
  // Migrate earned results from the earlier playable branch without relocking visited chapters.
@@ -22,6 +22,7 @@ export function updateSurvivorProgress(g:Game,storage:Pick<Storage,'getItem'|'se
  const progress=readSurvivorProgress(storage);if(!g.survivorMode||g.mode!=='normal'||!['battle','upgrade','paused','won','dead'].includes(g.phase))return progress;
  progress.roleBest[g.classId]=Math.max(progress.roleBest[g.classId]??0,Math.min(1200,g.clock));
  progress.best[g.mapId]=Math.max(progress.best[g.mapId]??0,Math.min(1200,g.clock));if(!progress.visited.includes(g.mapId))progress.visited.push(g.mapId);
+ if(g.survival.challenge.status==='won'&&!g.survival.challenge.ward)progress.wardUnlocked=true;
  if(g.result?.won&&!progress.won.includes(g.mapId))progress.won.push(g.mapId);
  for(const id of g.survival.evolved)if(!progress.evolved.includes(id))progress.evolved.push(id);
  storage.setItem(SURVIVOR_PROGRESS_KEY,JSON.stringify(schema.parse(progress)));return progress;

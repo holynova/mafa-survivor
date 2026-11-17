@@ -1,3 +1,4 @@
+import {WARD_SECONDS} from './chapter-challenge';
 import {EQUIPMENT_PREFERENCES} from './auto-equipment';
 import {z} from 'zod';
 import type {Game} from './game';
@@ -21,7 +22,7 @@ const enemy=entity.extend({kind:monster,hp:n,maxHp:n,speed:n,damage:n,exp:n,dir:
 const projectile=entity.extend({vx:n,vy:n,damage:n,life:n,dir:n,skill:skillId.optional(),targetId:n.optional(),hitChance:n.optional(),enemyKind:monster.optional(),majorSource:id.optional(),homing:z.boolean().optional(),faction:z.literal('enemy').optional(),visual:z.enum(['poison','arrow','womaFlame']).optional(),damageKind:z.enum(['physical','magic']).optional(),height:n.optional()}).strict();
 const effect=entity.extend({kind:z.enum([...SKILL_IDS,'hit','cast','beastflame','talismanHit','womaShock','overlordBlade','overlordDeath']),life:n,total:n,radius:n,dir:n.optional(),targetId:n.optional(),width:n.optional(),spread:n.optional(),aimAngle:n.optional(),alpha:z.number().min(0).max(1).optional()}).strict();
 const charmId=z.string().refine(v=>CHARMS.some(c=>c.id===v));
-const challenge=z.object({status:z.enum(['idle','active','won','expired']),enemyId:z.number().int().nonnegative(),endsAt:z.number().finite().nonnegative()}).strict().default(()=>({status:'idle' as const,enemyId:0,endsAt:0}));
+const challenge=z.object({status:z.enum(['idle','active','won','expired']),enemyId:z.number().int().nonnegative(),endsAt:z.number().finite().nonnegative(),ward:z.object({x:n,y:n,held:z.number().finite().min(0).max(WARD_SECONDS)}).strict().optional()}).strict().default(()=>({status:'idle' as const,enemyId:0,endsAt:0}));
 const survival=z.object({challenge,spawnAt:n,eliteAt:n,bossAt:n,finalBossId:z.number().int().nonnegative().default(0),finalBossDefeated:z.boolean().default(false),overtimeEndsAt:z.number().finite().nonnegative().default(0),timedOut:z.boolean().default(false),respecs:z.number().int().min(0).max(2).default(2),seenSkills:z.array(skillId).max(SKILL_IDS.length).refine(v=>new Set(v).size===v.length).default(()=>[]),supplyBosses:z.array(id).max(3).refine(v=>new Set(v).size===v.length).default(()=>[]),suppliesBought:z.number().int().min(0).max(3).default(0),equipmentPreference:z.enum(EQUIPMENT_PREFERENCES).default('offense'),equipmentLocks:z.array(z.enum(SLOT_KEYS)).max(SLOT_KEYS.length).refine(v=>new Set(v).size===v.length).default(()=>[]),mainSkills:z.array(skillId).max(2).refine(v=>new Set(v).size===v.length).default(()=>[]),focusMisses:z.partialRecord(skillId,z.number().int().min(0).max(2)).default(()=>({})),eliteDefeats:z.number().int().nonnegative().default(0),rerolls:z.number().int().min(0).max(3),charms:z.record(charmId,z.number().int().min(1).max(5)).refine(v=>Object.keys(v).length<=6),evolved:z.array(skillId).max(6).refine(v=>new Set(v).size===v.length&&v.every(id=>!!EVOLUTIONS[id])),evoReadyAt:z.partialRecord(skillId,n).default(()=>({})),chests:z.array(entity.extend({eligible:z.boolean()})).max(1000),nextChest:id,choiceChest:z.boolean(),toast:z.string().max(200),end:z.boolean()}).strict();
 const c=checkpointSchema.shape;
 const stateSchema=z.object({
@@ -37,8 +38,13 @@ const stateSchema=z.object({
 export const survivorSaveSchema=z.object({version:z.literal(1),savedAt:z.number().finite(),nextId:id,rngState:z.number().int(),state:stateSchema}).strict().refine(v=>{
  const actors=[...v.state.enemies,...v.state.pets,...v.state.projectiles,...v.state.drops,...v.state.effects];
  const challenge=v.state.survival.challenge;
- if(challenge.status!=='idle'&&(challenge.enemyId<1||challenge.enemyId>=v.nextId))return false;
- if(challenge.status==='active'&&!v.state.enemies.some(e=>e.id===challenge.enemyId&&e.hp>0))return false;
+ if(challenge.ward){
+  if(challenge.status==='idle'||challenge.enemyId!==0)return false;
+  if((challenge.status==='won')!==(challenge.ward.held===WARD_SECONDS))return false;
+ }else{
+  if(challenge.status!=='idle'&&(challenge.enemyId<1||challenge.enemyId>=v.nextId))return false;
+  if(challenge.status==='active'&&!v.state.enemies.some(e=>e.id===challenge.enemyId&&e.hp>0))return false;
+ }
  return v.state.survival.suppliesBought<=v.state.survival.supplyBosses.length&&actors.every(a=>a.id<v.nextId)&&v.state.projectiles.every(p=>p.majorSource===undefined||p.majorSource<v.nextId)&&new Set(actors.map(a=>a.id)).size===actors.length&&new Set(v.state.skills.map(s=>s.id)).size===v.state.skills.length&&v.state.survival.evolved.every(id=>v.state.skills.some(s=>s.id===id&&s.rank===8));
 });
 export type SurvivorSave=z.infer<typeof survivorSaveSchema>;
