@@ -8,6 +8,8 @@ export type SkillStatus={label:string;detail:string;active:boolean};
 export function skillStatus(g:Game,s:Skill):SkillStatus{
  const state=(label:string,detail=label,active=false)=>({label,detail,active});
  if(getSkill(s.id).passive)return state('常驻','已学习后持续生效');
+ if((s.id==='firesword'||s.id==='powerstrike')&&g.charges[s.id])
+  return state('已蓄力',`附加效果将在下一次近身普攻时释放；普攻未命中也会消耗蓄力。${s.cd>0?` 蓄力技能冷却剩余 ${s.cd.toFixed(1)} 秒。`:''}`,true);
  const buff=g.tao.buffs[0];
  const until=s.id==='shield'?g.player.shieldUntil:s.id==='ghost'?buff?.ghostUntil:s.id==='armor'?buff?.armorUntil:
  ['invisible','groupInvisible'].includes(s.id)&&buff?.invisibleSource===s.id?buff.invisibleUntil:0;
