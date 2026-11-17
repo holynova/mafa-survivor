@@ -1,6 +1,12 @@
 # Cloudflare 子路径发布
 
-## 最新发布：alpha.49（2026-11-17）
+## 最新发布：alpha.51（2026-11-17）
+
+- 游戏main db760ca509b90b35f63f91f24ee2e0851d4d15ea，作品集master 50fccf3639da1d220fbc91f01cfe8319ab0b6dd7。共享Worker xiaosang-portfolio version ID cf3a8d13-392a-4055-867c-a09b887a0b46。线上v0.1.0-alpha.51、original、完整SHA相符。
+- 1256测试、源码CI 44112492732、原素材及构建通过。干净master快照dry-run与发布通过，上传9文件，复用19954。图库、吴军和目录JSON与发布前逐字节相同。两首新增原版音乐线上字节与本地核验一致。
+- 经典试玩线上移动视口可拖动并显示30px摇杆，松手清除。已查看资源加载完成后的 .artifacts/batch51-online-classic-touch-ready-390.png。幸存者入口显示版本和现有继续上局选项。Ego107与本轮自建5186服务关闭，普通局未开启。详见QA.md。
+
+## 历史发布：alpha.49（2026-11-17）
 
 - 游戏main：d6184b62ad94c14bc10e068740317099e9a7e4f8；作品集master：b52d08e92be627e34f8f18cd61dadc88bffa98ab。
 - 共享Worker：xiaosang-portfolio；version ID：6ed3dac0-b0fa-4b91-8974-5a7fde68e36c；地址https://xiaosang.cc/mafa-survivor/?survivor，original，builtAt2026-11-17T13:02:51.886Z。
