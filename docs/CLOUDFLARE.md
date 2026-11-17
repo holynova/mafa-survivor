@@ -79,3 +79,12 @@ npm run deploy
 - 1099测试、素材、类型/构建、README/版本校验、作品集数据校验与GitHub Source checks通过。旧Pages不触发标签部署，域名/二维码/Repo/Demo条目复用。
 - 390×844线上继续已有17秒战士存档，暂停技能管理显示图标、替换为1级/清除进化说明、最后一个技能不可移除；页面宽度390，无调试对象。截图 `.artifacts/alpha40-online-skills.png` 已查看；公网没有注入测试对象强行生成Boss，战斗预警与换装由同源码本地场景验收。
 - 本轮原生D键位移自动断言未通过，完整职业/章节平衡仍需真人反馈，详情见QA。独立Ego测试空间33已finish({keep:[]})关闭，用户原页面保留。
+
+
+## alpha.41 第一批基础优化（2026-11-17）
+- 构建源码 main `9e31033997c6dfdccec75d8d51b904bc1fad17c3`；作品集 master `5c0e1f3a736a15fe19e4ae611e3a1aedf1e85203`。
+- Worker `xiaosang-portfolio` version ID `523caedc-9789-40e4-b51c-abb3f708fce3`。完整共享站点从干净master快照手动dry-run与deploy；图库仍1.0.2/ee4df095，沿用当前staging脚本保留作品集与wujun等项目。
+- 1104测试、资源/类型/生产构建、README/版本校验与Source checks 44033244539成功。HTTPS version.json匹配alpha.41/SHA/original。
+- 390px线上恢复原17秒战士存档、保存并退出均正常，宽度390/viewport390，无调试对象，无存档错误提示；alpha41-online-resume.png已查看。本地十章回收与重载见QA。
+- 独立Ego空间52已关闭，本次5186临时服务已停止，用户页面保留。发现发布暂存目录引起开发HMR风暴，随后仅调整Vite开发监听忽略.artifacts/.cache；该配置不影响已部署生产产物，不因此重部署。
+- 整体最佳实践改版尚未完成；第一批只做资源回收/存档开销，首屏拆包和真机性能仍待办，详见OPTIMIZATION-ROADMAP。
