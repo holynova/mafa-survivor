@@ -1,3 +1,4 @@
+import {footstepKey} from './footsteps';
 import {WARD_RADIUS} from './chapter-challenge';
 import {enemyActionCue} from "./enemy-action-cue";
 import {rangedTiming} from "./ranged-timing";
@@ -84,6 +85,7 @@ class BattleScene extends Phaser.Scene {
   private lastRun = "";
   private testVisualEpoch = 0;
   private nextFootstep = 0;
+  private rightFootstep = false;
   private seen = new Set<string>();
   private drag: { id: number; x: number; y: number } | null = null;
   private corpses: {
@@ -580,6 +582,8 @@ class BattleScene extends Phaser.Scene {
     }
     if (this.lastRun !== game.runId) {
       this.lastRun = game.runId;
+      this.nextFootstep = game.clock;
+      this.rightFootstep = false;
       this.dangerMemory.clear();
       this.clearInput();
       this.corpses = [];
@@ -638,7 +642,8 @@ class BattleScene extends Phaser.Scene {
       if(game.mode==="test" && audio.some(key=>key==="hurt" || key==="death" || key.startsWith("monster:")))game.emit();
       if(game.phase==="battle"){
       if (game.player.moving && game.clock >= this.nextFootstep) {
-        sounds.play("step");
+        sounds.play(game.survivorMode ? footstepKey(game.mapId, this.rightFootstep) : 'step');
+        this.rightFootstep = !this.rightFootstep;
         this.nextFootstep = game.clock + 0.34;
       }
       }

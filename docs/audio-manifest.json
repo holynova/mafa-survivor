@@ -47,6 +47,14 @@
     "unarmed": "01010039.WAV",
     "hurt": "0103008A.WAV",
     "death": "01030090.WAV",
+    "step:ground:left": "01000001.WAV",
+    "step:ground:right": "01000002.WAV",
+    "step:stone:left": "01000005.WAV",
+    "step:stone:right": "01000006.WAV",
+    "step:grass:left": "01000009.WAV",
+    "step:grass:right": "0100000A.WAV",
+    "step:cave:left": "01000015.WAV",
+    "step:cave:right": "01000016.WAV",
     "monster:scarecrow:attack": "02000282.WAV",
     "monster:scarecrow:hurt": "02000284.WAV",
     "monster:scarecrow:death": "02000285.WAV",
@@ -165,6 +173,55 @@
       "sha1": "c38b7a612810bdd0312deda9f843e3cd8748d548",
       "sha256": "c67d3326c0190ed467acfbbb30f99b8b32d3b1f4328afbcfc1b2e97931fb9cf4",
       "bytes": 35328,
+      "permissionStatus": "project_owner_authorized"
+    },
+    "01000002.WAV": {
+      "sourcePath": "sound/seff/01000002.WAV",
+      "sha1": "5cc125f0b2b0d9fb51b89edefa5fdb363b1741d7",
+      "sha256": "970d4cca497676d4fd8c1cadc2f4bc61d273d7f8f72b625bc43b9b3279d3571d",
+      "bytes": 38696,
+      "permissionStatus": "project_owner_authorized"
+    },
+    "01000005.WAV": {
+      "sourcePath": "sound/seff/01000005.WAV",
+      "sha1": "f894c9320bc55d77179758fd095a944601281ab8",
+      "sha256": "6ce4999f406d302b60b7a8d63fc755f6850a23a30e3c7d5e06d80a456c6f5f56",
+      "bytes": 31844,
+      "permissionStatus": "project_owner_authorized"
+    },
+    "01000006.WAV": {
+      "sourcePath": "sound/seff/01000006.WAV",
+      "sha1": "66871cb5397e1a71f85031605c1ea4f95e9afd35",
+      "sha256": "2a8f3a2bf22e2d58164316d019eafa876870255b3d27000c3323ffb78b6ef3e9",
+      "bytes": 33600,
+      "permissionStatus": "project_owner_authorized"
+    },
+    "01000009.WAV": {
+      "sourcePath": "sound/seff/01000009.WAV",
+      "sha1": "6d201c20155d95638742dcdd7e345024f30ed894",
+      "sha256": "c5d24c330dc6913165cffb8be36ba5ff3735b5e4eb9d50e29a0a901a078e01b3",
+      "bytes": 51398,
+      "permissionStatus": "project_owner_authorized"
+    },
+    "0100000A.WAV": {
+      "sourcePath": "sound/seff/0100000A.WAV",
+      "sha1": "201f4c959e99995dfc75594a1795c65c6659c0fe",
+      "sha256": "4a54ba2412fe0613ad86132ae3a9ce848c262991b79cd2179226316942c79c98",
+      "bytes": 50136,
+      "permissionStatus": "project_owner_authorized"
+    },
+    "01000015.WAV": {
+      "sourcePath": "sound/seff/01000015.WAV",
+      "sha1": "777e0d9e326da72e21498829eed4037141d18474",
+      "sha256": "7421cdc3ba42b9cc3d1be45731a742b60d16fb0905698ddbb0418b47e21a317e",
+      "bytes": 58632,
+      "permissionStatus": "project_owner_authorized"
+    },
+    "01000016.WAV": {
+      "sourcePath": "sound/seff/01000016.WAV",
+      "sha1": "70a50327860016798d42d03691e7315517bf1200",
+      "sha256": "252a4ef84f9efc9d8e620e23df12626cbf21a4128ce94d288c007c6379369ae3",
+      "bytes": 58824,
       "permissionStatus": "project_owner_authorized"
     },
     "01010034.WAV": {
@@ -1130,6 +1187,13 @@
   "missing": [
     "beastflame"
   ],
+  "footstepSoundReference": {
+    "ref": "bb6a22287abcd9f248d2aba755074c254c68787a",
+    "sourcePath": "client/src/soundeffectdb.cpp",
+    "sha256": "c531cfce810fe6f36eb1c59d56a53a35fb65b23646b7a5513e36c31dc721357c",
+    "soundFormula": "0x01000000 + source sound number; walk ground=1/2, stone=5/6, lawn=9/10, cave=21/22",
+    "note": "Chapter surface families are an adaptation, not per-cell acoustic materials or ambient loops."
+  },
   "coinSoundReference": {
     "ref": "bb6a22287abcd9f248d2aba755074c254c68787a",
     "sourcePath": "client/src/soundeffectdb.cpp",
@@ -1153,6 +1217,10 @@
       "common/src/monsterrecord.inc": {
         "ref": "bb6a22287abcd9f248d2aba755074c254c68787a",
         "sha256": "2664564923c0e3871b2711f828ec20ce209ed01bd9aa7fbf4a2e16335e89a795"
+      },
+      "client/src/soundeffectdb.cpp": {
+        "ref": "bb6a22287abcd9f248d2aba755074c254c68787a",
+        "sha256": "c531cfce810fe6f36eb1c59d56a53a35fb65b23646b7a5513e36c31dc721357c"
       }
     },
     "modelsPath": "tools/monster-models.json",

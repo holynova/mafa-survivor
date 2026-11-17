@@ -119,7 +119,7 @@ export function simulateShop(g:Game,trace?:ShopTrace[]) {
 }
 
 /** Observes the same combat state the view consumes; only returns legal input. */
-export function simulationInput(g:Game,previous={x:0,y:0},options:{seekChests?:boolean;huntElites?:boolean;pursueChallenge?:boolean;seekExperience?:boolean}={}) {
+export function simulationInput(g:Game,previous={x:0,y:0},options:{seekChests?:boolean;huntElites?:boolean;pursueChallenge?:boolean;pursueWard?:boolean;seekExperience?:boolean}={}) {
   const p=g.player;
   const health=p.hp/g.maxHP;
   const enemies=g.enemies.filter(e=>e.hp>0 && distance(e,p)<650)
@@ -147,8 +147,10 @@ export function simulationInput(g:Game,previous={x:0,y:0},options:{seekChests?:b
     .sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp || distance(a,p)-distance(b,p))[0] : undefined;
   const gear=(options.huntElites||options.pursueChallenge&&g.survival.challenge.status!=='idle')&&g.survivorMode ? g.drops.filter(d=>d.itemId&&(!g.navigation||g.navigation.connected(p,d)))
     .sort((a,b)=>distance(a,p)-distance(b,p))[0] : undefined;
+  const ward = options.pursueWard && g.survivorMode && g.survival.challenge.status === 'active' &&
+    g.clock < g.survival.challenge.endsAt ? g.survival.challenge.ward : undefined;
   const focus=boss ?? challenge ?? elite ?? (g.classId==="warrior" ? enemies.find(e=>distance(e,p)<48 && g.attackLineClear(p,e)) ?? enemies[0] : undefined);
-  const destination=emergency ? drop : chest ?? gear ?? (challenge ? engagementPoint(g,challenge) : elite ? engagementPoint(g,elite) : boss ? engagementPoint(g,boss) : drop ?? (focus ? engagementPoint(g,focus) : undefined));
+  const destination=emergency ? drop : ward ?? chest ?? gear ?? (challenge ? engagementPoint(g,challenge) : elite ? engagementPoint(g,elite) : boss ? engagementPoint(g,boss) : drop ?? (focus ? engagementPoint(g,focus) : undefined));
   const goal=destination && g.navigation ? g.navigation.waypoint(p,destination) : destination;
   // Exact cardinal zeros matter at clamped world edges: cos(3π/2) is
   // slightly negative, which falsely rejects an otherwise legal north step.

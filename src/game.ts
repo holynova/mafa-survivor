@@ -1676,6 +1676,15 @@ export class Game {
       "poison",
       "reveal",
     ].includes(s.id);
+    // Green poison needs a second to tick. Spread it beyond a target already
+    // covered by lethal friendly shots, but retain that target as a fallback:
+    // a shot may still miss. Red poison should support the incoming attack.
+    const incoming = this.survivorMode && s.id === "poison" && this.tao.poisonMode === "green"
+      ? new Map<number, number>() : null;
+    if (incoming)
+      for (const p of this.projectiles)
+        if (p.faction !== "enemy" && p.life > 0 && p.targetId !== undefined)
+          incoming.set(p.targetId, (incoming.get(p.targetId) ?? 0) + p.damage);
     const targets=this.enemies
       .filter(
         (e) =>
@@ -1697,7 +1706,8 @@ export class Game {
                 : s.id === "poison"
                   ? -e.hp * 0.01
                   : 0
-            : 0) + Math.hypot(e.x - this.player.x, e.y - this.player.y);
+            : 0) + ((incoming?.get(e.id) ?? 0) >= e.hp ? 1000 : 0) +
+          Math.hypot(e.x - this.player.x, e.y - this.player.y);
         return priority(a) - priority(b);
       });
     if(["fireball","bigfireball","talisman"].includes(s.id)) {
