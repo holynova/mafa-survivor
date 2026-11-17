@@ -1236,3 +1236,14 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 原五项run/progress/records/guide/diagnostics在导航退出游戏后精确恢复true；Ego97已关闭，本轮无临时dev服务。
 - 线上repos.json与发布master完整结构相等；卡片Demo正确、390×844 WebP正常解码，Homepage正确。图库ee4df095/1.0.2、wujun1897dda/1.0.2完整回执前后一致。README、二维码、卡片材料沿用，Profile不在范围，.impeccable保留。
 - 作品集数据源检查通过；check-demo-links保留上游web-motion-showcase旧Pages例外，不改无关项目或弱化检查。此次不改变战斗数值，整体优化目标尚未完成。
+
+
+### alpha.49候选：树冠遮挡下人物辨识
+
+- 先核验渲染层：比奇开局(1104,768)的英雄/武器/阴影完整，coversActor为空，之前快照不足以证明此处遮挡故障。初次截图/检查读到大厅旧图层；等待battle英雄实际depth>700后才确认。没有据旧画面改树贴图。
+- 原图合法位置(1080,784)有前景条带，(1080,880)深入树冠；后者原来的hero-cover与weapon-cover均实际绘制，但浅填充alpha=.32与背景混杂。原遮挡条带(1056,1280)、绘制深度1248，原图透明采样触发正常。
+- 新表现只复用当前衣服和武器的原动画帧：四个1世界像素偏移暗边，浅金填充alpha=.62；均继续乘角色alpha，保留隐身透明差异。轮廓位于原有4100附近，危险边缘层5200仍更高；原树条带像素、透明度、前后顺序完全不改。每个被遮挡主角最多新增8个边缘绘制对象，不是新增贴图，离开遮挡由现有池回收。
+- Ego98，390×844同位置截图alpha49-deep-cover-{before,after}-390.png已查看；轮廓更清楚，原树冠保持完整。320×740将canvas临时CSS设为grayscale(1) brightness(.55)，截图alpha49-cover-gray-dim-320.png已查看，随后撤回filter；这是显示模拟，不是实体低亮度设备测量。测试使用idle6方向原帧，idle动画仍运行，非逐像素相同帧比较。
+- 回到(1104,768)，covering为空，bodies仅hero/weapon/shadow，附加轮廓退出；图层观测使用临时inspectHeroForQA导出，已从最终源码删除。热更新后第一次误导入了无query的第二个模块实例而超时，随后用performance中实际renderer URL检查，没有创建新空间。
+- 最终1245项测试、assets:check、类型/生产构建及assets:visual-check全部通过；原图校验failures=0。未增加只重复渲染常量的单测，沿用透明条带/前景采样机制测试与真实截图。Ego98及自建5186服务已关闭，普通存储/持久设置未修改。
+- 本次只通过上述原图位置和静态灰度样本。满屏法术、所有职业/装备/动作、完整色觉与设备性能验收仍未完成，不称整项战斗清晰度通过。待阶段发布，线上仍alpha.48。

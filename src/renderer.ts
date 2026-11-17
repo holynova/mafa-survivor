@@ -401,6 +401,16 @@ class BattleScene extends Phaser.Scene {
     if (complete) appearanceStatus.error = "";
     return complete;
   }
+  /** Reuse the exact source silhouette; contrast both light leaves and dark trunks. */
+  private coverSilhouette(key:string,frame:string,x:number,y:number,depth:number,alpha:number){
+    for(const [index,[dx,dy]] of [[-1,0],[1,0],[0,-1],[0,1]].entries()){
+      const edge=`${key}-edge-${index}`;
+      this.draw(edge,frame,x+dx,y+dy,depth-.3,alpha*.85);
+      this.bodies.get(edge)?.setTintFill(0x181509);
+    }
+    this.draw(key,frame,x,y,depth,alpha*.62);
+    this.bodies.get(key)?.setTintFill(0xffe2a0);
+  }
   private hero(motion: string, dir: number, x: number, y: number, time: number, depth: number, alpha: number) {
     const desired = resolveAppearance(game.classId, game.phase === "lobby"
       ? { weapon: { itemId: ITEMS.find((i) => i.name === "木剑")!.id } }
@@ -421,11 +431,9 @@ class BattleScene extends Phaser.Scene {
     if (weapon) this.draw("hero-weapon", weapon, x, y, depth + (weaponBehind(motion, dir, index) ? -0.1 : 0.1), alpha);
     this.draw("hero", frame, x, y, depth, alpha);
     if (game.phase !== "lobby" && this.occluders.some((part) => coversActor(part, { x, y }))) {
-      this.draw("hero-cover", frame, x, y, 4100, alpha * 0.32);
-      this.bodies.get("hero-cover")?.setTintFill(0xe4d5ab);
+      this.coverSilhouette("hero-cover",frame,x,y,4100,alpha);
       if (weapon) {
-        this.draw("weapon-cover", weapon, x, y, 4100 + (weaponBehind(motion, dir, index) ? -0.1 : 0.1), alpha * 0.32);
-        this.bodies.get("weapon-cover")?.setTintFill(0xe4d5ab);
+        this.coverSilhouette("weapon-cover",weapon,x,y,4100+(weaponBehind(motion,dir,index)?-.1:.1),alpha);
       }
     }
   }
