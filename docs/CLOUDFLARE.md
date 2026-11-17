@@ -133,3 +133,14 @@ npm run deploy
 - 已查看alpha45-online-guide-390.png、alpha45-online-battle-390.png。线上repos.json与master完整结构相等，作品卡片currentSrc为390×844 WebP且Demo正确；图库ee4df095/1.0.2和wujun1897dda/1.0.2发布前后完整receipt相同。
 - 五项线上存储在导航退出游戏后精确恢复true，独立Ego89关闭；无遗留测试服务。
 - 仍未完成：后两章/多构筑/真人平衡、物理键盘/实体手机性能与操作、独立环境声与其他章节事件等；完整范围保留在OPTIMIZATION-ROADMAP，不把本次发布当全目标完成。
+
+## alpha.46 阶段测试版发布（2026-11-17）
+
+- 构建源码main `06f9bb4e0287043b43ab08158978819dfaaed599`，v0.1.0-alpha.46/original；作品集master `24e5771ee627379da2dbd87cdc7f48817d4db631`。共享Worker xiaosang-portfolio version ID `b8bb5d09-1883-400d-9b69-b129e09c589c`。
+- 1230测试、素材校验、生产构建与README/版本校验通过；Source checks 44077301005成功。沿用现有Node24/Wrangler4.128.0，完整共享站点dry-run与deploy通过；9文件上传、19931复用，组装文件数19972。新增三MP3来自同一授权固定源，无其他项目改动。
+- 作品集数据源检查通过；check-demo-links保留上游web-motion-showcase Pages例外，没有弱化检查或修改无关链接。.impeccable未动；README/QR/Homepage/作品卡片截图与链接已满足并复用，Profile不在范围。
+- 真实线上版本与SHA匹配。Ego92逐章实际按钮开普通新局：盟重B300时间0.844626秒/时长149.021406，沃玛BD02时间0.823527/190.901875，赤月BD99时间0.838821/146.255469；三者paused=false、readyState=4、URL带本次SHA。以透传原play函数的临时观察器记录真实media，不调用开发game对象或更改播放行为。
+- 三章实际暂停后media全部paused，保存退出后全部src移除；已查看alpha46-online-{mengzhong,woma,redmoon}-390.png。此检查证明部署文件/实际播放链路，不声称耳机/手机/单声道主观听感通过。
+- 六项线上存储（普通局、进度、战绩、引导、诊断、声音）已在退出并导航作品集后精确恢复true；临时play观察器已还原，Ego92已关闭，无临时dev服务。
+- 线上repos.json与发布master完整结构一致；卡片Demo正确、currentSrc为390×844原WebP。图库ee4df095/1.0.2和wujun1897dda/1.0.2前后完整receipt相同。
+- 完整优化目标仍未完成：其他章节事件/平衡、独立环境声、Boss专曲与压力编排、实体设备操作/性能及听感等继续按路线图推进。
