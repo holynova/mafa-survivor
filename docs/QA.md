@@ -1039,3 +1039,16 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - Ego空间77真实原版音频解码/OfflineAudioContext双声道6组前后对照；100%总量处理前峰值1.60/1.94，处理后<0.98，样本超限为零，35%原线性区基本保持；不是物理设备听感认证。详情见SURVIVOR-MUSIC-REVIEW。
 - 真实页面解锁成功、fireball实际调度一次、无错误；390px场景截图alpha43-audio-output-scene-390.png已查看，人物/树冠完整。未在本轮补齐原生D键、树下穿行或实机听感验收。
 - 测试局不写普通战绩；没有更改持久化声音设置。空间77、音频上下文及临时5186服务已关闭。未发布。
+
+
+## alpha.43 阶段测试版发布（2026-11-17）
+
+- 游戏main构建源码：58002165e12348a9b4ea0d8fc856ec1bce17b7e8；作品集master最终来源：ee20ab73ae8a202741f3afcec1217572c3793134。复用子路径https://xiaosang.cc/mafa-survivor/?survivor，无Pages标签或新工作流。
+- 共享Worker xiaosang-portfolio，首轮成功version ID 2cdfaf07-f3c6-4f97-b9ad-53fa18f5158a；补齐作品集实际使用的WebP后最终ID c643b44f-eedf-445a-9d7f-7a50d791295b。游戏产物及版本未因缩略图再变化。
+- 保留并合并作品集并行更新（首次push因远端前进被拒，未强推）。完整共享站点19969源文件/20365扫描文件；画廊1.0.2/ee4df095、wujun1.0.2/1897dda线上版本保持。用户未跟踪.impeccable/未动。
+- Node26下上传报TypeError this._handleRejection is not a function且未退出；中断/TERM无效后仅结束已确认本任务父子PID，确认exit137，线上仍alpha.42。系统Node22缺动态库，未改系统；使用既有ChatGPT内置Node24.22.1运行同一锁定Wrangler4.128.0成功部署。没有升级Wrangler。
+- 1190测试、assets:check/release build、README/版本校验及Source checks 44060417781通过。线上version.json与alpha.43/SHA/original一致；GitHub Homepage正确复用，二维码目标未变，README截图/作品集PNG及WebP同步。
+- 390px生产旧17秒战士存档恢复成功；实际半月1→2→3、保存退出成功，HUD按钮44×44、无横向溢出、无存档错误、无生产__MAFA__调试对象。alpha43-online-resume-390.png已查看，原版人物/半月刀光/树林/HUD完整。
+- 首次等待HUD超时因恢复后停在暂停；后续等图阶段推进到了下一次升级。最终对当前HUD图片调用decode并等两帧后截图成功，不将最初缺图截图算作通过。未据此宣称原生D键或全部手机硬件通过。
+- 线上测试前备份run/progress/guide/diagnostics四个键，退出游戏到同源作品集后逐键精确恢复并验证。作品集实际WebP 390×844、Demo链接及卡片截图通过；空间80已关闭，本轮未启动临时dev服务。
+- 本版公开供阶段测试，整体最佳实践目标尚未完成。平衡/实机性能/触控/听感、章节事件、横向解锁及独立环境声继续见OPTIMIZATION-ROADMAP。

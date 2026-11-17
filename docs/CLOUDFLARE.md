@@ -97,3 +97,16 @@ npm run deploy
 - 一次等待“开始游戏”超时是验收选择器错误：有存档时实际按钮是“另开新局（覆盖存档）”，不是游戏加载失败；纠正后从“继续上局”验收。
 - 原生D键工具未向页面产生可观测keydown事件，仍未宣称原生键盘验收通过。像素预算不是实际手机显存，硬件压力及后续玩法/视听阶段继续待办。
 - Ego测试空间56关闭，临时5186服务停止；域名、二维码、README截图及收录沿用，用户页面保留。
+
+
+## alpha.43 阶段测试版发布（2026-11-17）
+
+- 游戏main构建源码：58002165e12348a9b4ea0d8fc856ec1bce17b7e8；作品集master最终来源：ee20ab73ae8a202741f3afcec1217572c3793134。复用子路径https://xiaosang.cc/mafa-survivor/?survivor，无Pages标签或新工作流。
+- 共享Worker xiaosang-portfolio，首轮成功version ID 2cdfaf07-f3c6-4f97-b9ad-53fa18f5158a；补齐作品集实际使用的WebP后最终ID c643b44f-eedf-445a-9d7f-7a50d791295b。游戏产物及版本未因缩略图再变化。
+- 保留并合并作品集并行更新（首次push因远端前进被拒，未强推）。完整共享站点19969源文件/20365扫描文件；画廊1.0.2/ee4df095、wujun1.0.2/1897dda线上版本保持。用户未跟踪.impeccable/未动。
+- Node26下上传报TypeError this._handleRejection is not a function且未退出；中断/TERM无效后仅结束已确认本任务父子PID，确认exit137，线上仍alpha.42。系统Node22缺动态库，未改系统；使用既有ChatGPT内置Node24.22.1运行同一锁定Wrangler4.128.0成功部署。没有升级Wrangler。
+- 1190测试、assets:check/release build、README/版本校验及Source checks 44060417781通过。线上version.json与alpha.43/SHA/original一致；GitHub Homepage正确复用，二维码目标未变，README截图/作品集PNG及WebP同步。
+- 390px生产旧17秒战士存档恢复成功；实际半月1→2→3、保存退出成功，HUD按钮44×44、无横向溢出、无存档错误、无生产__MAFA__调试对象。alpha43-online-resume-390.png已查看，原版人物/半月刀光/树林/HUD完整。
+- 首次等待HUD超时因恢复后停在暂停；后续等图阶段推进到了下一次升级。最终对当前HUD图片调用decode并等两帧后截图成功，不将最初缺图截图算作通过。未据此宣称原生D键或全部手机硬件通过。
+- 线上测试前备份run/progress/guide/diagnostics四个键，退出游戏到同源作品集后逐键精确恢复并验证。作品集实际WebP 390×844、Demo链接及卡片截图通过；空间80已关闭，本轮未启动临时dev服务。
+- 本版公开供阶段测试，整体最佳实践目标尚未完成。平衡/实机性能/触控/听感、章节事件、横向解锁及独立环境声继续见OPTIMIZATION-ROADMAP。
