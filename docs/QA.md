@@ -1213,3 +1213,14 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 线上repos.json与master完整结构相等；作品卡片Demo正确、390×844 WebP解码成功；图库ee4df095/1.0.2与wujun1897dda/1.0.2回执前后完整相等。Homepage、README、QR与卡片材料已满足并复用，Profile不在范围。.impeccable保留未动。
 - 作品集数据源检查通过；check-demo-links继续报告上游web-motion-showcase的既有Pages例外，未改其他项目或放宽检查。
 - 此次提供首领方位和观测可靠性改进，没有调低敌人生命或宣称章节平衡完成；完整优化清单继续执行。
+
+
+### alpha.48候选：按住移动时的状态切换
+
+- 发现：Game.pause清空向量，但MovementInput仍保存held集合；渲染器非战斗分支仅清drag。快速暂停/继续和升级后可能重用旧方向。clearOnPhaseChange订阅实际Game事件，在任何phase变化时同步清理键盘/拖动/触控向量，销毁渲染器时注销；普通battle emit不清输入。MovementInput拒绝已清理键的重复keydown，需重新按下才接收；已按住的正常连发不受影响。摇杆move在非战斗阶段直接reset，防止React卸载前的事件回填。
+- 113文件/1245测试、assets:check与build通过（现有大包提示保留）。新增实际Game暂停/升级测试覆盖held清零、旧repeat拒绝、新按键恢复、选择/RNG保留、注销与普通emit不清理。
+- Ego96，390×844：CDP实际touchStart/Move使touchInput=(1,0)；测试fixture授予当前所需经验并调用beginUpgrade，立即得到touchInput=(0,0)，三选一保持。touchEnd后实际点击火球术1→2，battle状态touch/input均(0,0)，无data-dragging。不是自然升级速度试验。
+- 再次CDP持指右拖=(1,0)，以Emulation屏幕方向切到844×390/90度，实际orientation事件使phase=paused、input/touch均零；取消触摸后暂停界面可操作。
+- 真实渲染运行后，明确注入的KeyboardEvent D：held=(1,0)→pause=(0,0)→恢复+repeat=(0,0)→fresh=(1,0)→keyup=(0,0)。这是适配器/渲染器链路，不是物理键盘原生投递通过；此前Ego原生键盘事件未投递的缺口仍保留。
+- 已查看alpha48-input-upgrade-390.png、alpha48-input-rotate-844.png、alpha48-input-resume-844.png：升级内容/原版技能图标完整，横屏暂停可滚动，恢复底部HUD对齐。恢复场景人物在树冠遮挡处，不把该截图当人物全动作或遮挡效果重新验收。
+- 本轮使用测试局，不写普通存档/战绩；未修改持久设置。Ego96与自建5186服务已关闭。候选尚未发布，线上保持alpha.47；实体手机、后台返回与混合原生输入仍待补验。

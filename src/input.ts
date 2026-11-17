@@ -45,6 +45,8 @@ export class MovementInput {
     )
       return;
     if(potion){if(!e.repeat)this.onPotion?.();e.preventDefault();return;}
+    // A repeat after pause/focus reset is not a fresh movement gesture.
+    if(e.repeat && !this.held.has(code))return;
     this.held.add(code);
     e.preventDefault();
   };
@@ -71,3 +73,9 @@ export const inputDiagnostics = {
   x: 0,
   y: 0,
 };
+
+/** Clear at the state transition, even if no render frame occurs while paused. */
+export function clearOnPhaseChange(source:{readonly phase:string;subscribe:(listener:()=>void)=>()=>void},clear:()=>void){
+ let phase=source.phase;
+ return source.subscribe(()=>{if(source.phase!==phase){phase=source.phase;clear();}});
+}

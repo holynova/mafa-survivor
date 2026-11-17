@@ -18,7 +18,7 @@ import { mapObjectAlpha, mapObjectDepth, coversActor, type Occluder } from "./ma
 import { assetUrl, isGraybox } from "./release";
 import { sounds } from "./sound";
 import { setWorldLayouts, type WorldLayout } from "./world";
-import { MovementInput, inputDiagnostics } from "./input";
+import { MovementInput, clearOnPhaseChange, inputDiagnostics } from "./input";
 import { SCENERY, ITEMS, MAPS, STATIONARY_MONSTERS, isBossKind, type MapId } from "./content";
 let battleBottomInset=0;
 export function setBattleInset(height:number) {battleBottomInset=Math.max(0,height);}
@@ -153,6 +153,8 @@ class BattleScene extends Phaser.Scene {
       () => game.phase === "battle",
       ()=>game.useBloodPotion(),
     );
+    const stopPhaseInput=clearOnPhaseChange(game,()=>this.clearInput());
+    this.game.events.once(Phaser.Core.Events.DESTROY,stopPhaseInput);
     const stopDiagnostics=observeRuntime(this.game.canvas);
     this.game.events.once(Phaser.Core.Events.DESTROY,stopDiagnostics);
     this.game.canvas.tabIndex = 0;
