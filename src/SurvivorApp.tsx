@@ -19,7 +19,7 @@ import {SurvivorHud,SkillIcon} from './SurvivorHud';
 import {suspendSurvival} from './survivor-lifecycle';
 import {SurvivorJoystick} from './SurvivorJoystick';
 import {SurvivorGrowthBook} from './SurvivorGrowthBook';
-import {useEffect,useReducer,useState} from 'react';
+import {useEffect,useLayoutEffect,useReducer,useRef,useState} from 'react';
 import {game} from './game';
 import {CLASS_IDS,CLASSES,type ClassId} from './classes';
 import {getSkill,getItem,MAPS,type MapId} from './content';
@@ -36,6 +36,14 @@ import {readSurvivorRecords,recordSurvival} from './survivor-records';
 const clock=(n:number)=>`${Math.floor(n/60).toString().padStart(2,'0')}:${Math.floor(n%60).toString().padStart(2,'0')}`;
 export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,setReady]=useState(isReady());const [error,setError]=useState('');const [saved,setSaved]=useState<SurvivorSave|null>(()=>{try{return readSurvivalSave(localStorage);}catch{return null;}});const [progress,setProgress]=useState(()=>{try{return readSurvivorProgress(localStorage);}catch{return newSurvivorProgress();}});const [role,setRole]=useState<ClassId>('wizard');const [map,setMap]=useState<MapId>('biche');
  const [starts,setStarts]=useState<Partial<Record<ClassId,SkillId>>>({});
+ const root=useRef<HTMLDivElement>(null);
+ useLayoutEffect(()=>{
+  const hud=root.current?.querySelector<HTMLElement>('.mir-survival-hud');
+  if(!hud){setBattleInset(0);return;}
+  const measure=()=>setBattleInset(hud.getBoundingClientRect().height);measure();
+  const observer=new ResizeObserver(measure);observer.observe(hud);
+  return()=>{observer.disconnect();setBattleInset(0);};
+ },[game.phase]);
  const starter=availableSurvivorStarts(role,progress.roleBest).includes(starts[role]!)?starts[role]!:survivalStarter(role);
  const [skillPanel,setSkillPanel]=useState<SkillId|null|undefined>(undefined);
  const persist=()=>{try{const cp=writeSurvivalCheckpoint(game,localStorage);if(cp){game.telemetry.persist(game,localStorage);setProgress(updateSurvivorProgress(game,localStorage));setSaved(cp);setError(e=>e.startsWith('存档未保存')?'':e);return true;}return false;}catch{setError('存档未保存：本机存储不可用或已满，请勿刷新。');return false;}};
@@ -45,7 +53,7 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
  const suspend=()=>{suspendSurvival(game);document.dispatchEvent(new Event('clear-game-input'));persist();};
  const saveHidden=()=>{if(document.hidden)suspend();};
  window.addEventListener('pagehide',suspend);window.addEventListener('orientationchange',suspend);screen.orientation?.addEventListener('change',suspend);document.addEventListener('visibilitychange',saveHidden);
- const onReady=()=>setReady(true);const onError=()=>setError('原版素材加载失败，请刷新重试。');readyListeners.add(onReady);document.addEventListener('asset-error',onError);setBattleInset(0);return()=>{unsub();clearInterval(timer);window.removeEventListener('pagehide',suspend);window.removeEventListener('orientationchange',suspend);screen.orientation?.removeEventListener('change',suspend);document.removeEventListener('visibilitychange',saveHidden);readyListeners.delete(onReady);document.removeEventListener('asset-error',onError);};},[]);
+ const onReady=()=>setReady(true);const onError=()=>setError('原版素材加载失败，请刷新重试。');readyListeners.add(onReady);document.addEventListener('asset-error',onError);return()=>{unsub();clearInterval(timer);window.removeEventListener('pagehide',suspend);window.removeEventListener('orientationchange',suspend);screen.orientation?.removeEventListener('change',suspend);document.removeEventListener('visibilitychange',saveHidden);readyListeners.delete(onReady);document.removeEventListener('asset-error',onError);};},[]);
  const start=()=>{if(!SURVIVAL_OPEN_MAP_TEST&&!chapterUnlocked(progress,map)){setError('请先完成前置章节的生存目标。');return;}if(!discard())return;setError('');void sounds.unlock();game.survivorMode=true;game.unlockedMaps.add(map);game.start('normal',Date.now()>>>0,role,false,map,starter);};
  const resume=()=>{if(!saved)return;setRole(saved.state.classId);setMap(saved.state.mapId);setError('');void sounds.unlock();let diagnosticRaw:string|null=null;try{diagnosticRaw=localStorage.getItem(TELEMETRY_KEY);}catch{}if(!game.resumeSurvival(saved))setError('存档无法读取，请另开新局。');else game.telemetry.restore(game,{getItem:()=>diagnosticRaw});};
  const leave=()=>{try{setProgress(updateSurvivorProgress(game,localStorage));}catch{setError('章节进度未保存，请检查浏览器存储后重试。');return;}if(!discard())return;game.touchInput={x:0,y:0};game.phase='lobby';game.emit();};
@@ -53,7 +61,7 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
  const title=(id:typeof game.skills[number]['id'])=>game.survival.evolved.includes(id)?EVOLUTIONS[id]?.name??getSkill(id).name:getSkill(id).name;
  const recentEvolution=game.survival.evolved.at(-1);
  const selectingEvolution=game.phase==='upgrade'&&game.choices.some(c=>c.id.startsWith('evo:'));
- return <div className="survivor-ui" data-text-size={visualPreferences.textSize}>{error&&<p className="survivor-error" role="alert">{error}</p>}{game.phase==='lobby'?<section className="survivor-panel survivor-lobby">
+ return <div ref={root} className="survivor-ui" data-text-size={visualPreferences.textSize}>{error&&<p className="survivor-error" role="alert">{error}</p>}{game.phase==='lobby'?<section className="survivor-panel survivor-lobby">
  <p className="survivor-eyebrow">连续生存 · {releaseVersion}</p><h1>玛法幸存者</h1><p className="survivor-subtitle">生存 20 分钟 · 决战最多加时 2 分钟</p>
  <div className="survivor-tabs" aria-label="选择职业">{CLASS_IDS.map(id=><button key={id} aria-pressed={role===id} onClick={()=>setRole(id)}>{CLASSES[id].name}</button>)}</div>
  <details className="survivor-more survivor-start-picker"><summary>起手 · {getSkill(starter).name}</summary><div className="survivor-choices" aria-label="选择起手技能">{SURVIVOR_STARTS[role].map(id=>{const unlocked=availableSurvivorStarts(role,progress.roleBest).includes(id);return <button className="survivor-choice" key={id} disabled={!unlocked} aria-pressed={starter===id} onClick={()=>setStarts(s=>({...s,[role]:id}))}><span className="survivor-choice-title"><SkillIcon id={id}/><strong>{getSkill(id).name}</strong>{starter===id&&<small>已选</small>}</span><span>{START_DESCRIPTIONS[id]}</span>{!unlocked&&<small>本职业普通局生存5分钟解锁 · 最佳 {clock(progress.roleBest[role]??0)}</small>}</button>;})}</div><p>每局仍从一个1级技能开始，不增加永久属性；不影响继续上局。</p></details>

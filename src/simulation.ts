@@ -1,5 +1,5 @@
 import {eligibleEvolutions} from "./survivor-evolutions";
-import { Game, WORLD, type Mode, type Upgrade, type Offer, type Enemy } from "./game";
+import { Game, WORLD, MOVEMENT_BOUNDS, type Mode, type Upgrade, type Offer, type Enemy } from "./game";
 import { getItem, isBossKind, type Bonuses, type MapId, type SkillId } from "./content";
 import type { ClassId } from "./classes";
 import {isPrimaryWeaponUpgrade,primaryRange} from "./equipment";
@@ -169,7 +169,7 @@ export function simulationInput(g:Game,previous={x:0,y:0},options:{seekChests?:b
     // The exact waypoint gets a short legal step; other candidates retain full
     // speed so a nearby goal never prevents dodging a committed warning.
     const future={x:p.x+input.x*g.moveSpeed/6,y:p.y+input.y*g.moveSpeed/6};
-    if(future.x<35 || future.y<55 || future.x>WORLD.w-35 || future.y>WORLD.h-35 ||
+    if(future.x<MOVEMENT_BOUNDS.left || future.y<MOVEMENT_BOUNDS.top || future.x>MOVEMENT_BOUNDS.right || future.y>MOVEMENT_BOUNDS.bottom ||
       !g.canStand(future.x,future.y) || g.navigation && !g.navigation.lineClear(p,future,12))continue;
     let crowdDanger=0,bossDanger=0,score=(input.x*previous.x+input.y*previous.y)*0.4;
     if(!bossMelee && g.classId==="warrior" && !emergency && !threatened && input.x===0 && input.y===0 && g.basicCD<0.2 && enemies.some(e=>distance(e,p)<48))score+=18;

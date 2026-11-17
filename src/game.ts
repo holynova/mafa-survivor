@@ -76,6 +76,7 @@ import {
   rollRange,
 } from "./rules";
 export const WORLD = { w: 2208, h: 1536 };
+export const MOVEMENT_BOUNDS={left:35,top:55,right:WORLD.w-35,bottom:WORLD.h-35};
 export type Phase =
   | "lobby"
   | "battle"
@@ -269,7 +270,7 @@ export class Game {
   private nav: WorldNavigation | null = null;
   get layout() { return getWorldLayout(this.mapId); }
   get navigation() {
-    if (this.layout !== this.nav?.layout) this.nav = this.layout ? new WorldNavigation(this.layout) : null;
+    if (this.layout !== this.nav?.layout) this.nav = this.layout ? new WorldNavigation(this.layout,MOVEMENT_BOUNDS) : null;
     return this.nav;
   }
   canStand(x: number, y: number, radius = 12) { return canStand(x, y, radius, this.layout); }
@@ -784,10 +785,10 @@ export class Game {
         dy = this.input.y / Math.max(1, mag);
       const nx = clamp(
           this.player.x + dx * this.moveSpeed * dt,
-          35,
-          WORLD.w - 35,
+          MOVEMENT_BOUNDS.left,
+          MOVEMENT_BOUNDS.right,
         ),
-        ny = clamp(this.player.y + dy * this.moveSpeed * dt, 55, WORLD.h - 35);
+        ny = clamp(this.player.y + dy * this.moveSpeed * dt, MOVEMENT_BOUNDS.top, MOVEMENT_BOUNDS.bottom);
       if (
         this.canStand(nx, this.player.y) &&
         this.obstacles.every(
@@ -967,8 +968,8 @@ export class Game {
             ? 1.8
             : 1;
         const sp = e.speed * rush;
-        const nx = clamp(e.x + ((mx / length) * sp + sx) * dt, 35, WORLD.w - 35),
-          ny = clamp(e.y + ((my / length) * sp + sy) * dt, 55, WORLD.h - 35);
+        const nx = clamp(e.x + ((mx / length) * sp + sx) * dt, MOVEMENT_BOUNDS.left, MOVEMENT_BOUNDS.right),
+          ny = clamp(e.y + ((my / length) * sp + sy) * dt, MOVEMENT_BOUNDS.top, MOVEMENT_BOUNDS.bottom);
         if (this.canStand(nx, e.y)) e.x = nx;
         if (this.canStand(e.x, ny)) e.y = ny;
         for (const o of this.obstacles) {
@@ -1748,7 +1749,7 @@ export class Game {
     const origin = { x: e.x, y: e.y };
     for (let travel = 8; travel <= distance + 7; travel += 8) {
       const step = Math.min(travel, distance);
-      const x = clamp(origin.x + dx * step, 35, WORLD.w - 35), y = clamp(origin.y + dy * step, 55, WORLD.h - 35);
+      const x = clamp(origin.x + dx * step, MOVEMENT_BOUNDS.left, MOVEMENT_BOUNDS.right), y = clamp(origin.y + dy * step, MOVEMENT_BOUNDS.top, MOVEMENT_BOUNDS.bottom);
       if (!this.canStand(x, y) || this.obstacles.some((o) => Math.hypot(x-o.x,y-o.y) <= o.r+12)) break;
       e.x=x; e.y=y;
       if (step === distance) break;
@@ -1769,10 +1770,10 @@ export class Game {
     return (
       this.canStand(x, y, radius) &&
       (!this.navigation || this.navigation.connected(this.player, { x, y })) &&
-      x >= 35 &&
-      x <= WORLD.w - 35 &&
-      y >= 55 &&
-      y <= WORLD.h - 35 &&
+      x >= MOVEMENT_BOUNDS.left &&
+      x <= MOVEMENT_BOUNDS.right &&
+      y >= MOVEMENT_BOUNDS.top &&
+      y <= MOVEMENT_BOUNDS.bottom &&
       this.obstacles.every((o) => Math.hypot(x - o.x, y - o.y) > o.r + radius) &&
       this.enemies.every(
         (e) => e.hp <= 0 || Math.hypot(x - e.x, y - e.y) > enemyClearance,
@@ -1790,8 +1791,8 @@ export class Game {
   private teleport(s: Skill) {
     const candidates: Entity[] = [];
     for (let i = 0; i < 96; i++) {
-      const x = 35 + this.rng.next() * (WORLD.w - 70),
-        y = 55 + this.rng.next() * (WORLD.h - 90);
+      const x = MOVEMENT_BOUNDS.left + this.rng.next() * (MOVEMENT_BOUNDS.right-MOVEMENT_BOUNDS.left),
+        y = MOVEMENT_BOUNDS.top + this.rng.next() * (MOVEMENT_BOUNDS.bottom-MOVEMENT_BOUNDS.top);
       if (
         this.freePoint(x, y, 60) &&
         Math.hypot(x - this.player.x, y - this.player.y) >= 200 + s.range
@@ -1910,13 +1911,13 @@ export class Game {
         p.dir = this.direction(mx, my);
         const nx = clamp(
             p.x + (mx / length) * p.speed * dt,
-            35,
-            WORLD.w - 35,
+            MOVEMENT_BOUNDS.left,
+            MOVEMENT_BOUNDS.right,
           ),
           ny = clamp(
             p.y + (my / length) * p.speed * dt,
-            55,
-            WORLD.h - 35,
+            MOVEMENT_BOUNDS.top,
+            MOVEMENT_BOUNDS.bottom,
           );
         if (this.freePoint(nx, p.y, 0, 12)) p.x = nx;
         if (this.freePoint(p.x, ny, 0, 12)) p.y = ny;

@@ -16,3 +16,9 @@ export function alignCameraScroll(scroll:number,zoom:number,origin:number,viewpo
 export function battleViewport(width:number,height:number,bottomInset=0) {
   return {width:Math.max(1,width),height:Math.max(1,height-Math.max(0,Math.ceil(bottomInset)))};
 }
+
+/** Full-screen transparent HUD: pan within verified adjacent source floor. */
+export function survivorCameraPadding(bottomInset:number,zoom:number,availableFloor:number){
+  const bottom=Math.min(Math.max(0,bottomInset)/Math.max(.01,zoom),Math.max(0,availableFloor));
+  return {bottom,centerOffset:bottom/2};
+}

@@ -11,6 +11,14 @@ def fixture(width=8, height=8, overrides=None):
 
 
 class NativeRegionTest(unittest.TestCase):
+    def test_render_padding_reads_real_floor_below_crop_and_keeps_walk_and_spawn(self):
+        config={'x':0,'y':0,'width':6,'height':6};data=fixture(overrides={(2,6):(3,0,0,0,0,0,0,0,0)})
+        base,_=native_region(data,config)
+        padded,refs=native_region(data,config,render_padding_rows=6)
+        self.assertEqual(padded['walk'],base['walk']);self.assertEqual(padded['spawn'],base['spawn'])
+        self.assertEqual(padded['height'],192);self.assertEqual(padded['renderHeight'],256)
+        self.assertIn({'texture':texture_id('Tiles.wil',2),'x':96,'y':192},padded['tiles'])
+        self.assertEqual(refs[texture_id('Tiles.wil',2)],('Tiles.wil',2))
     def test_uses_even_ground_cells_and_bottom_anchors_complete_object_strips(self):
         config={'x':0,'y':0,'width':6,'height':6}
         world,refs=native_region(fixture(overrides={(3,7):(1,0,4,0,0,0,0,4,0)}),config)

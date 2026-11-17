@@ -15,6 +15,7 @@ class SourceMapTests(unittest.TestCase):
   for y in range(8):
    for x in range(8):raw[cell(x,y)+2]=1
   struct.pack_into('<II',raw,block(2,2),1,0x123)
+  struct.pack_into('<II',raw,block(2,6),1,0x789)
   struct.pack_into('<7I',raw,cell(2,3)+7,1,0x456,2,0,1,0,0)
   self.data=zstandard.ZstdCompressor().compress(bytes(raw))
   config={'ref':'test-pin','regions':{'mine':{'file':'mine.bin','sha256':hashlib.sha256(self.data).hexdigest(),'x':2,'y':2,'width':4,'height':4}}}
@@ -35,6 +36,12 @@ class SourceMapTests(unittest.TestCase):
   self.load(request)
   self.assertEqual(len(calls),1);self.assertEqual(p.read_bytes(),self.data)
   self.assertEqual(list(self.root.glob('mine.bin.*')),[])
+ def test_render_padding_uses_adjacent_source_floor_without_expanding_the_playable_grid(self):
+  base=self.load(lambda _:self.data)
+  padded=map_region.load_region(self.root,lambda _:self.data,'test-pin','mine',render_padding_rows=6)
+  self.assertEqual(padded['walk'],base['walk']);self.assertEqual(padded['spawn'],base['spawn'])
+  self.assertEqual(padded['height'],128);self.assertEqual(padded['renderHeight'],192)
+  self.assertIn({'texture':0x789,'x':0,'y':128},padded['tiles'])
  def test_rejects_a_download_that_does_not_match_the_recorded_pin(self):
   with self.assertRaisesRegex(AssertionError,'Source map hash mismatch'):self.load(lambda _:b'wrong source')
   self.assertFalse((self.root/'mine.bin').exists())

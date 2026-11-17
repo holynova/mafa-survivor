@@ -1,9 +1,12 @@
 import type { MapId } from "./content";
 export type Point = { x: number; y: number };
+export type NavigationBounds = {left:number;top:number;right:number;bottom:number};
 export type WorldLayout = {
   spawn?: Point;
   width: number;
   height: number;
+  /** Adjacent original floor for camera overdraw; never expands collision or spawning. */
+  renderHeight?: number;
   cellWidth: number;
   cellHeight: number;
   walk: number[];
@@ -50,21 +53,31 @@ export function canStand(x: number, y: number, radius = 12, m = worldLayout) {
 export class WorldNavigation {
   private fields = new Map<number, Int32Array>();
   private readonly columns: number;
+  private readonly walkable: Uint8Array;
   readonly points: Point[];
-  constructor(readonly layout: WorldLayout) {
+  constructor(readonly layout: WorldLayout,readonly bounds:NavigationBounds={left:12,top:12,right:layout.width-12,bottom:layout.height-12}) {
     this.columns = layout.width / layout.cellWidth;
+    this.walkable = new Uint8Array(layout.walk.length);
     this.points = layout.walk.flatMap((walk, i) => {
       const point = this.center(i);
-      return walk && canStand(point.x, point.y, 12, layout) ? [point] : [];
+      // A cell outside movement limits cannot be used as a shortcut. Partial
+      // edge cells remain useful when a clamped standing point fits inside.
+      const valid=walk && this.cell(point)===i && canStand(point.x, point.y, 12, layout);
+      this.walkable[i]=valid?1:0;
+      return valid ? [point] : [];
     });
+  }
+  private constrained(p:Point):Point {
+    return {x:Math.max(this.bounds.left,Math.min(this.bounds.right,p.x)),
+      y:Math.max(this.bounds.top,Math.min(this.bounds.bottom,p.y))};
   }
   private cell(p: Point) {
     const x = Math.floor(p.x / this.layout.cellWidth), y = Math.floor(p.y / this.layout.cellHeight);
     return x < 0 || y < 0 || x >= this.columns || y >= this.layout.height / this.layout.cellHeight ? -1 : y * this.columns + x;
   }
   private center(i: number): Point {
-    return { x: (i % this.columns + 0.5) * this.layout.cellWidth,
-      y: (Math.floor(i / this.columns) + 0.5) * this.layout.cellHeight };
+    return this.constrained({ x: (i % this.columns + 0.5) * this.layout.cellWidth,
+      y: (Math.floor(i / this.columns) + 0.5) * this.layout.cellHeight });
   }
   private neighbors(i: number) {
     const result = [];
@@ -72,14 +85,14 @@ export class WorldNavigation {
     if (i % this.columns < this.columns - 1) result.push(i + 1);
     if (i >= this.columns) result.push(i - this.columns);
     if (i + this.columns < this.layout.walk.length) result.push(i + this.columns);
-    return result.filter((n) => this.layout.walk[n]);
+    return result.filter((n) => this.walkable[n]);
   }
   private field(target: Point) {
-    const cell = this.cell(target);
+    const cell = this.cell(this.constrained(target));
     const existing = this.fields.get(cell);
     if (existing) return existing;
     const distances = new Int32Array(this.layout.walk.length).fill(-1);
-    if (cell >= 0 && this.layout.walk[cell]) {
+    if (cell >= 0 && this.walkable[cell]) {
       const queue = new Int32Array(distances.length); let start = 0, end = 1;
       queue[0] = cell; distances[cell] = 0;
       while (start < end) {
@@ -102,7 +115,8 @@ export class WorldNavigation {
     return true;
   }
   waypoint(from: Point, target: Point): Point | null {
-    const distances = this.field(target), cell = this.cell(from);
+    target=this.constrained(target);
+    const distances = this.field(target), cell = this.cell(this.constrained(from));
     if (cell < 0 || distances[cell] < 0) return null;
     if (distances[cell] <= 2 && this.lineClear(from, target, 12)) return target;
     const next = this.neighbors(cell).filter((n) => distances[n] >= 0 && distances[n] < distances[cell])
@@ -123,7 +137,7 @@ export class WorldNavigation {
     });
   }
   connected(from: Point, to: Point) {
-    const cell = this.cell(to);
+    const cell = this.cell(this.constrained(to));
     return cell >= 0 && this.field(from)[cell] >= 0;
   }
 }

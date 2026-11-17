@@ -87,6 +87,8 @@ for (const [id, f] of Object.entries(manifest.frames))
 for (const [mapId, m] of Object.entries(manifest.worlds ?? { biche: manifest.world }).filter(([, m]) => m)) {
   if (m.walk.length !== (m.width / m.cellWidth) * (m.height / m.cellHeight))
     failures.push(mapId + ": invalid walk grid");
+  if(m.renderHeight!==m.height+192)
+    failures.push(mapId+": missing verified source floor for transparent-HUD camera overdraw");
   if (m.spawn && !m.walk[Math.floor(m.spawn.y / m.cellHeight) * (m.width / m.cellWidth) + Math.floor(m.spawn.x / m.cellWidth)])
     failures.push(mapId + ": spawn is not walkable");
   for (const part of [...m.tiles, ...m.objects]) {

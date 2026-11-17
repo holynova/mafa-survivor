@@ -24,3 +24,10 @@ export function coversActor(part: Occluder, hero: { x: number; y: number }) {
   }
   return false;
 }
+
+/** A visibility cue from foreground sprite bounds; never fades actors or map strips. */
+export function foregroundCoversActor(bounds:{x:number;y:number;width:number;height:number},depth:number,hero:{x:number;y:number}){
+  if(depth<=hero.y+.5)return false;
+  return [-42,-25,-6].filter(dy=>hero.x>=bounds.x&&hero.x<bounds.x+bounds.width&&
+    hero.y+dy>=bounds.y&&hero.y+dy<bounds.y+bounds.height).length>=2;
+}

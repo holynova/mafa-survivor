@@ -10,13 +10,13 @@ import {drawDanger} from './danger-render';
 import {invisible} from "./taoist";
 import {cameraWorldView,frameBounds,intersectsView,type ViewRect} from './render-visibility';
 import Phaser from "phaser";
-import {alignCameraScroll,battleViewport} from "./camera-grid";
+import {alignCameraScroll,battleViewport,survivorCameraPadding} from "./camera-grid";
 import {heroPose} from "./hero-pose";
 import {enemyInsight} from "./enemy-insight";
 import {effectSprites,poisonTint} from "./effect-visual";
 import {dropVisuals,lootName} from "./loot-visual";
 import {simulationInput} from "./simulation";
-import { mapObjectAlpha, mapObjectDepth, coversActor, type Occluder } from "./map-render";
+import { mapObjectAlpha, mapObjectDepth, coversActor, foregroundCoversActor, type Occluder } from "./map-render";
 import { assetUrl, isGraybox } from "./release";
 import { sounds } from "./sound";
 import { setWorldLayouts, type WorldLayout } from "./world";
@@ -65,7 +65,11 @@ export const isReady = () => rendererReady;
 export let frameMS = 0;
 export const renderMetrics={updateMS:0,drawRequests:0,culled:0,bodies:0,labels:0,pool:0,atlasPages:0,atlasRGBABytes:0,evictedAtlases:0};
 export const appearanceStatus = { loading: false, error: "" };
+export const cameraStatus={height:0,zoom:1,bottomInset:0,worldTop:0,heroFootY:0,heroCrowdCovered:false};
 class BattleScene extends Phaser.Scene {
+  private coverBounds=new Phaser.Geom.Rectangle();
+  private safeBottomWorld=0;
+  private cameraCenterOffset=0;
   private visibleView:ViewRect|null=null;
   private inView(x:number,y:number,width:number,height:number){return !game.survivorMode||game.phase==="lobby"||!this.visibleView||intersectsView({x,y,width,height},this.visibleView);}
   private autopilotClock=-1;
@@ -213,17 +217,22 @@ class BattleScene extends Phaser.Scene {
   private centerCamera(x:number,y:number) {
     this.syncViewport();
     const camera=this.cameras.main;
-    camera.centerOn(x,y);
+    camera.centerOn(x,y+this.cameraCenterOffset);
     camera.scrollX=alignCameraScroll(camera.scrollX,camera.zoomX,camera.width*camera.originX,camera.x,{min:camera.clampX(-Number.MAX_SAFE_INTEGER),max:camera.clampX(Number.MAX_SAFE_INTEGER)});
     camera.scrollY=alignCameraScroll(camera.scrollY,camera.zoomY,camera.height*camera.originY,camera.y,{min:camera.clampY(-Number.MAX_SAFE_INTEGER),max:camera.clampY(Number.MAX_SAFE_INTEGER)});
     this.visibleView=cameraWorldView(camera.scrollX,camera.scrollY,camera.width,camera.height,camera.zoomX,camera.zoomY);
+    if(import.meta.env.DEV)Object.assign(cameraStatus,{height:camera.height,zoom:camera.zoomY,bottomInset:battleBottomInset,
+      worldTop:this.visibleView.y,heroFootY:camera.y+(game.player.y-this.visibleView.y)*camera.zoomY});
   }
   private syncViewport() {
-    const view=battleViewport(this.scale.width,this.scale.height,game.phase==="lobby" ? 0 : battleBottomInset);
-    const key=`${view.width}/${view.height}`;
+    const fullScreen=game.survivorMode&&game.phase!=="lobby",zoom=this.zoom();
+    const view=battleViewport(this.scale.width,this.scale.height,fullScreen||game.phase==="lobby" ? 0 : battleBottomInset);
+    const padding=fullScreen?survivorCameraPadding(battleBottomInset,zoom,(game.layout?.renderHeight??WORLD.h)-WORLD.h):{bottom:0,centerOffset:0};
+    this.safeBottomWorld=padding.bottom;this.cameraCenterOffset=padding.centerOffset;
+    const key=`${view.width}/${view.height}/${zoom}/${this.safeBottomWorld}`;
     if(key===this.viewportKey)return;
     this.viewportKey=key;
-    this.cameras.main.setViewport(0,0,view.width,view.height).setZoom(this.zoom());
+    this.cameras.main.setViewport(0,0,view.width,view.height).setZoom(zoom).setBounds(0,0,WORLD.w,WORLD.h+this.safeBottomWorld);
   }
   private zoom() {
     return this.scale.width < 700 ? 1.15 : 1.5;
@@ -254,11 +263,12 @@ class BattleScene extends Phaser.Scene {
       return;
     }
     const map = game.layout;
-    const texture = this.textures.createCanvas("terrain", WORLD.w, WORLD.h)!;
+    const renderHeight=Math.max(WORLD.h,Math.min(WORLD.h+192,map?.renderHeight??WORLD.h));
+    const texture = this.textures.createCanvas("terrain", WORLD.w, renderHeight)!;
     const context = texture.context;
     context.imageSmoothingEnabled = false;
     context.fillStyle = game.mapId === "biche" ? "#252a1e" : "#11100e";
-    context.fillRect(0, 0, WORLD.w, WORLD.h);
+    context.fillRect(0, 0, WORLD.w, renderHeight);
     const paint = (key: string, x: number, y: number, bottom = false) => {
       const meta = assets.frames[key];
       if (!meta) return;
@@ -414,6 +424,13 @@ class BattleScene extends Phaser.Scene {
     this.draw(key,frame,x,y,depth,alpha*.62,scale);
     this.bodies.get(key)?.setTintFill(tint);
   }
+  private crowdCoversHero(x:number,y:number){
+    for(const [key,image] of this.bodies){
+      if(!this.seen.has(key)||!/^(enemy|pet)-\d+$/.test(key)||image.depth<=y+.5)continue;
+      if(foregroundCoversActor(image.getBounds(this.coverBounds),image.depth,{x,y}))return true;
+    }
+    return false;
+  }
   private hero(motion: string, dir: number, x: number, y: number, time: number, depth: number, alpha: number) {
     const desired = resolveAppearance(game.classId, game.phase === "lobby"
       ? { weapon: { itemId: ITEMS.find((i) => i.name === "木剑")!.id } }
@@ -433,10 +450,14 @@ class BattleScene extends Phaser.Scene {
     const weapon = this.heroLook.weapon && matching(this.heroLook.weapon);
     if (weapon) this.draw("hero-weapon", weapon, x, y, depth + (weaponBehind(motion, dir, index) ? -0.1 : 0.1), alpha);
     this.draw("hero", frame, x, y, depth, alpha);
-    if (game.phase !== "lobby" && this.occluders.some((part) => coversActor(part, { x, y }))) {
-      this.coverSilhouette("hero-cover",frame,x,y,4100,alpha);
+    const environment=game.phase!=="lobby"&&this.occluders.some(part=>coversActor(part,{x,y}));
+    const crowd=game.survivorMode&&game.phase!=="lobby"&&this.crowdCoversHero(x,y);
+    if(import.meta.env.DEV)cameraStatus.heroCrowdCovered=crowd;
+    if (environment||crowd) {
+      const cueAlpha=environment?alpha:alpha*.75;
+      this.coverSilhouette("hero-cover",frame,x,y,5100,cueAlpha);
       if (weapon) {
-        this.coverSilhouette("weapon-cover",weapon,x,y,4100+(weaponBehind(motion,dir,index)?-.1:.1),alpha);
+        this.coverSilhouette("weapon-cover",weapon,x,y,5100+(weaponBehind(motion,dir,index)?-.1:.1),cueAlpha);
       }
     }
   }
@@ -785,6 +806,7 @@ class BattleScene extends Phaser.Scene {
               isBossKind(e.kind) ? 75 : 25,
             );
         }
+        if (!game.survivorMode) {
         if (e.chargeTarget && (e.chargeWindupUntil ?? 0) > game.clock) {
           this.bars.lineStyle(3, 0xe6a754, 0.6)
             .lineBetween(e.x, e.y, e.chargeTarget.x, e.chargeTarget.y)
@@ -805,6 +827,7 @@ class BattleScene extends Phaser.Scene {
           .lineStyle(2,0xffcf81,0.85).lineBetween(e.shock.origin.x,e.shock.origin.y,e.shock.target.x,e.shock.target.y);
         }
         if((e.awakenAt ?? 0)>game.clock) this.bars.lineStyle(3,0xffcc84,0.9).strokeCircle(e.x,e.y,42);
+        }
       }
       const activeZones=new Set(game.enemies.flatMap(e=>enemyDangerZones(e,t,game.survivorMode).map(z=>z.id)));
       for(const [id,zone] of this.dangerMemory){

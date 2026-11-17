@@ -55,12 +55,14 @@ def safe_spawn(walk, width, height):
     return {'x': (x+.5)*48, 'y': (y+.5)*32}
 
 
-def native_region(data, config):
+def native_region(data, config, render_padding_rows=0):
+    if not isinstance(render_padding_rows,int) or not 0<=render_padding_rows<=40:raise ValueError('Invalid render padding')
     width, height, full_walk, _, _ = read_classic(data)
     sx, sy, cw, ch = (config[k] for k in ['x','y','width','height'])
     if sx % 2 or sy % 2 or sx < 0 or sy < 0 or sx+cw > width or sy+ch > height:
         raise ValueError('Native crop is not aligned or exceeds its source map')
     tiles, objects, references = [], [], {}
+    render_rows=min(height-sy,ch+render_padding_rows)
     walk = [full_walk[y*width+x] for y in range(sy,sy+ch) for x in range(sx,sx+cw)]
     def part(library, index, x, y, target, **extra):
         code = texture_id(library, index)
@@ -71,16 +73,16 @@ def native_region(data, config):
             back, middle, front, door, offset, frames, tick, area, light = struct.unpack_from(
                 '<HHH6B', data, 52+(x*height+y)*12)
             px, py = (x-sx)*48, (y-sy)*32
-            if y < sy+ch and x % 2 == y % 2 == 0 and back & 0x7fff:
+            if y < sy+render_rows and x % 2 == y % 2 == 0 and back & 0x7fff:
                 part('Tiles.wil',(back&0x7fff)-1,px,py,tiles)
-            if y < sy+ch and middle:
+            if y < sy+render_rows and middle:
                 part('SmTiles.wil',middle-1,px,py+32,objects,depth=0,alpha=False,animated=False)
             if front & 0x7fff:
                 area = area if area <= MAX_OBJECT_AREA else 0
                 library = 'Objects.wil' if not area else 'Objects'+str(area+1)
                 part(library,(front&0x7fff)-1,px,py+32,objects,depth=2,alpha=False,
                      animated=bool(frames&0x7f))
-    return {'width':cw*48,'height':ch*32,'cellWidth':48,'cellHeight':32,
+    return {'width':cw*48,'height':ch*32,'renderHeight':render_rows*32,'cellWidth':48,'cellHeight':32,
             'walk':walk,'spawn':safe_spawn(walk,cw,ch),'tiles':tiles,'objects':objects,
             'sourceRegion':{k:config[k] for k in ['x','y','width','height']},
             'sourceFormat':'classic-mir2-52-12'}, references
@@ -100,7 +102,7 @@ def load_native_regions(cache, request):
     worlds, references = {}, {}
     for name, config in catalog['regions'].items():
         group = catalog['maps']; data = source(group,config['file'])
-        world, refs = native_region(data,config)
+        world, refs = native_region(data,config,render_padding_rows=6)
         world.update(sourcePath=group['files'][config['file']]['path'],
                      sourceSha256=hashlib.sha256(data).hexdigest(),sourceRepository=group['repository'],
                      sourceRef=group['ref'],sourceId=group['id'])
