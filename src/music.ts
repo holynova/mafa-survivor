@@ -10,6 +10,7 @@ export class OriginalMusic {
  private current?:Deck;
  private outgoing?:Deck;
  private desired='';
+ private playAttempt=0;
  error='';
  constructor(private context:AudioContext,private output:GainNode,private createMedia=()=>new Audio()){}
  get status(){return {track:this.current?.track??null,playing:!!this.current&&!this.current.media.paused,decks:Number(!!this.current)+Number(!!this.outgoing),error:this.error};}
@@ -23,8 +24,10 @@ export class OriginalMusic {
   const desired=`${track}:${active}:${boss}`;
   if(this.desired===desired)return;
   this.desired=desired;
-  if(!track){this.dispose(this.current);this.dispose(this.outgoing);this.current=this.outgoing=undefined;return;}
+  const attempt=++this.playAttempt;
+  if(!track){this.error='';this.dispose(this.current);this.dispose(this.outgoing);this.current=this.outgoing=undefined;return;}
   if(this.current?.track!==track){
+   this.error='';
    this.dispose(this.outgoing);this.outgoing=this.current;
    if(this.outgoing){const old=this.outgoing;clearTimeout(old.timer);this.ramp(old,0);old.timer=setTimeout(()=>{this.dispose(old);if(this.outgoing===old)this.outgoing=undefined;},650);}
    const media=this.createMedia();media.preload='none';media.loop=true;media.src=assetUrl('music/'+MUSIC_TRACKS[track]);
@@ -34,12 +37,12 @@ export class OriginalMusic {
   const deck=this.current;clearTimeout(deck.timer);
   if(active){
    this.ramp(deck,boss?.65:1);
-   void deck.media.play().then(()=>{if(this.current===deck)this.error='';}).catch(()=>{if(this.current===deck)this.error='音乐未播放，请在声音设置中重试';});
+   void deck.media.play().then(()=>{if(this.current===deck&&this.playAttempt===attempt)this.error='';}).catch(()=>{if(this.current===deck&&this.playAttempt===attempt)this.error='音乐未播放，请在声音设置中重试';});
   }else{
    this.ramp(deck,0,.25);deck.timer=setTimeout(()=>deck.media.pause(),300);
   }
  }
- suspend(){this.desired='';if(this.current){clearTimeout(this.current.timer);this.current.media.pause();this.current.gain.gain.cancelScheduledValues(this.context.currentTime);this.current.gain.gain.value=0;}this.dispose(this.outgoing);this.outgoing=undefined;}
+ suspend(){this.playAttempt++;this.desired='';if(this.current){clearTimeout(this.current.timer);this.current.media.pause();this.current.gain.gain.cancelScheduledValues(this.context.currentTime);this.current.gain.gain.value=0;}this.dispose(this.outgoing);this.outgoing=undefined;}
  retry(){this.desired='';}
  stop(){this.sync(null,false,false);}
 }

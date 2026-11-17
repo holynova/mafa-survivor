@@ -49,3 +49,30 @@ it('assigns source map-family music to Mengzhong, Woma and Redmoon instead of ge
  expect(media.map(m=>m.src)).toEqual(['desert','woma','redmoon'].map(k=>expect.stringContaining(MUSIC_TRACKS[k as keyof typeof MUSIC_TRACKS])));
  p.stop();expect(p.status.decks).toBe(0);
 });
+it('does not let a stale play rejection overwrite a successful retry on the same track',async()=>{
+ const {p,media}=player();p.sync('field',false,false);
+ let rejectOld!:(reason:Error)=>void;
+ media[0].play=vi.fn().mockImplementationOnce(()=>new Promise<void>((_,reject)=>{rejectOld=reject;})).mockResolvedValue(undefined);
+ p.sync('field',true,false);p.retry();p.sync('field',true,false);
+ await Promise.resolve();await Promise.resolve();expect(p.error).toBe('');
+ rejectOld(new Error('superseded autoplay request'));
+ await Promise.resolve();await Promise.resolve();expect(p.error).toBe('');
+});
+it('ignores an outstanding rejection after suspend and clears errors when leaving music',async()=>{
+ const {p,media}=player();p.sync('field',false,false);
+ let rejectOld!:(reason:Error)=>void;
+ media[0].play=vi.fn(()=>new Promise<void>((_,reject)=>{rejectOld=reject;}));
+ p.sync('field',true,false);p.suspend();rejectOld(new Error('aborted'));
+ await Promise.resolve();await Promise.resolve();expect(p.error).toBe('');
+ media[0].play=vi.fn().mockRejectedValue(new Error('failed'));
+ p.sync('field',true,false);await Promise.resolve();await Promise.resolve();expect(p.error).not.toBe('');
+ p.stop();expect(p.error).toBe('');expect(p.status.decks).toBe(0);
+});
+it('does not let a stale success hide the newest failed retry',async()=>{
+ const {p,media}=player();p.sync('field',false,false);
+ let resolveOld!:()=>void;
+ media[0].play=vi.fn().mockImplementationOnce(()=>new Promise<void>(resolve=>{resolveOld=resolve;})).mockRejectedValue(new Error('current failure'));
+ p.sync('field',true,false);p.retry();p.sync('field',true,false);
+ await Promise.resolve();await Promise.resolve();expect(p.error).toContain('重试');
+ resolveOld();await Promise.resolve();await Promise.resolve();expect(p.error).toContain('重试');
+});
