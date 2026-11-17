@@ -15,7 +15,9 @@ jobs:
           node-version: "22"
           cache: npm
       - run: npm ci
-      - run: npm test
+      # Full-run deterministic probes retain their 20s bound; avoid CPU contention
+      # with other test files on shared CI runners. No tests are skipped.
+      - run: npm test -- --maxWorkers=1
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.12"
