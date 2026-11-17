@@ -88,3 +88,12 @@ npm run deploy
 - 390px线上恢复原17秒战士存档、保存并退出均正常，宽度390/viewport390，无调试对象，无存档错误提示；alpha41-online-resume.png已查看。本地十章回收与重载见QA。
 - 独立Ego空间52已关闭，本次5186临时服务已停止，用户页面保留。发现发布暂存目录引起开发HMR风暴，随后仅调整Vite开发监听忽略.artifacts/.cache；该配置不影响已部署生产产物，不因此重部署。
 - 整体最佳实践改版尚未完成；第一批只做资源回收/存档开销，首屏拆包和真机性能仍待办，详见OPTIMIZATION-ROADMAP。
+
+## alpha.42 资源拆包与音频预算（2026-11-17）
+- 构建源码main `8175ae8da853e0e5bc9ba66925214bb8982a448d`；作品集master `7a79cfa026a6e0ad1e46f7ed347efe168d307c72`。
+- 共享Worker xiaosang-portfolio，Cloudflare version ID `70be5e69-d6e2-4d9a-b9e4-d835c5d561ab`；完整共享站点干净快照dry-run/deploy通过，画廊仍1.0.2/ee4df095，wujun仍1897dda，其他作品集条目未改。
+- 1107项测试、原版像素/素材校验、类型/生产构建、README/版本校验及Source checks 44035991845通过。
+- HTTPS version.json对应alpha.42/SHA/original；390px生产恢复原17秒战士存档，保存退出正常，无横向溢出、无生产调试对象；alpha42-online-resume.png已查看。
+- 一次等待“开始游戏”超时是验收选择器错误：有存档时实际按钮是“另开新局（覆盖存档）”，不是游戏加载失败；纠正后从“继续上局”验收。
+- 原生D键工具未向页面产生可观测keydown事件，仍未宣称原生键盘验收通过。像素预算不是实际手机显存，硬件压力及后续玩法/视听阶段继续待办。
+- Ego测试空间56关闭，临时5186服务停止；域名、二维码、README截图及收录沿用，用户页面保留。
