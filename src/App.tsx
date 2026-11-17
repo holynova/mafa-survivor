@@ -81,7 +81,7 @@ export async function loadArtPositions() {
     framePositions = {};
     return;
   }
-  const r = await fetch(assetUrl("manifest.json"));
+  const r = await fetch(assetUrl("runtime.json"));
   if (!r.ok) throw new Error("无法读取素材清单");
   const manifest = await r.json();
   setAssetManifest(manifest);

@@ -14,6 +14,7 @@ const run = (command, args, env = process.env) => {
   if (result.status !== 0) process.exit(result.status ?? 1);
 };
 if (profile === "original") {
+  run("node", ["tools/write-runtime-assets.mjs"]);
   run("node", ["tools/check-assets.mjs", "--release"]);
   run("python3", ["tools/check-audio.py"]);
 }

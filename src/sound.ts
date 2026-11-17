@@ -8,6 +8,11 @@ export class OriginalSounds {
   private context: AudioContext | null = null;
   private gain: GainNode | null = null;
   private buffers = new Map<string, AudioBuffer>();
+  private baseFiles=new Set<string>();
+  private chapterFiles=new Set<string>();
+  private activeFiles=new Map<string,number>();
+  private evictedBuffers=0;
+  private chapterRequest=0;
   private manifest: AudioManifest | null = null;
   private loading: Promise<void> | null = null;
   private voices = 0;
@@ -23,13 +28,30 @@ export class OriginalSounds {
   played = 0;
   error = "";
   private last = new Map<string, number>();
-  constructor(){
+  constructor(private readonly cacheBudgetBytes=16*1024*1024){
     if(typeof window==="undefined")return;
     try {
       const saved=JSON.parse(window.localStorage?.getItem("mafa-sound-settings-v1")??"null");
       if(typeof saved?.muted==="boolean")this.muted=saved.muted;
       for(const event of MONSTER_SOUND_EVENTS)if(typeof saved?.monsters?.[event]==="boolean")this.monsters[event]=saved.monsters[event];
     }catch{/* A storage restriction never prevents playing. */}
+  }
+  get cacheMetrics(){
+    const decodedBytes=[...this.buffers.values()].reduce((sum,b)=>sum+(b.length||0)*(b.numberOfChannels||0)*4,0);
+    return {buffers:this.buffers.size,decodedBytes,budgetBytes:this.cacheBudgetBytes,overBudgetBytes:Math.max(0,decodedBytes-this.cacheBudgetBytes),evicted:this.evictedBuffers};
+  }
+  private trimCache(protectedFile?:string){
+    let bytes=this.cacheMetrics.decodedBytes;
+    // LRU within each tier; old chapters go first. Playing sources and player
+    // feedback remain resident even if their protected working set exceeds budget.
+    const candidates=[...this.buffers.keys()].sort((a,b)=>Number(this.chapterFiles.has(a))-Number(this.chapterFiles.has(b)));
+    for(const file of candidates){
+      if(bytes<=this.cacheBudgetBytes)break;
+      if(file===protectedFile||this.baseFiles.has(file)||this.activeFiles.has(file))continue;
+      const b=this.buffers.get(file)!;
+      bytes-=(b.length||0)*(b.numberOfChannels||0)*4;
+      this.buffers.delete(file);this.evictedBuffers++;
+    }
   }
   private persist(){
     if(typeof window==="undefined")return;
@@ -65,25 +87,31 @@ export class OriginalSounds {
     const r = await fetch(assetUrl("audio/manifest.json"));
     if (!r.ok) throw new Error("audio manifest");
     this.manifest = await r.json();
+    this.baseFiles=new Set(Object.entries(this.manifest!.mapping).filter(([key])=>!monsterSoundEvent(key)).map(([,file])=>file));
     // Keep the existing player/spell sounds ready. Monster voices are loaded
     // by chapter, rather than delaying startup on the complete 13MB library.
     await Promise.all(
-      [...new Set(Object.entries(this.manifest!.mapping).filter(([key])=>!monsterSoundEvent(key)).map(([,file])=>file))].map(file=>this.loadBuffer(file)),
+      [...this.baseFiles].map(file=>this.loadBuffer(file)),
     );
   }
   private async loadBuffer(file:string){
-    if(this.buffers.has(file))return;
+    const cached=this.buffers.get(file);
+    if(cached){this.buffers.delete(file);this.buffers.set(file,cached);return;}
     let request=this.requests.get(file);
     if(!request){request=(async()=>{const r=await fetch(assetUrl("audio/"+file));if(!r.ok)throw new Error(file);this.buffers.set(file,await this.context!.decodeAudioData(await r.arrayBuffer()));})();this.requests.set(file,request);}
-    try{await request;}finally{this.requests.delete(file);}
+    try{await request;this.trimCache(file);}finally{this.requests.delete(file);}
   }
   async preloadMonsters(kinds:readonly string[]){
     if(!this.context)return;
+    const generation=++this.chapterRequest;
     try{
       await this.loading;
       const files=[...new Set(kinds.flatMap(kind=>MONSTER_SOUND_EVENTS.filter(event=>this.monsters[event]).map(event=>this.manifest?.mapping[monsterSoundKey(kind,event)]).filter((file):file is string=>!!file)))];
+      if(generation!==this.chapterRequest)return;
+      this.chapterFiles=new Set(files);
       // Bound chapter requests; repeated calls share the same decode promise.
-      for(let i=0;i<files.length;i+=6)await Promise.all(files.slice(i,i+6).map(file=>this.loadBuffer(file)));
+      for(let i=0;i<files.length&&generation===this.chapterRequest;i+=6)await Promise.all(files.slice(i,i+6).map(file=>this.loadBuffer(file)));
+      this.trimCache();
     }catch{this.error="部分怪物音效未加载，重新开关声音可重试";}
   }
   setMuted(value: boolean) {
@@ -127,6 +155,8 @@ export class OriginalSounds {
     this.last.set(key, now);
     if(critical)this.feedback?.stop();
     const source = this.context.createBufferSource();
+    this.buffers.delete(file!);this.buffers.set(file!,buffer);
+    this.activeFiles.set(file!,(this.activeFiles.get(file!)??0)+1);
     source.buffer = buffer;
     source.connect(monster ? this.monsterGains.get(monster)! : this.gain!);
     if(monster)this.monsterSources.set(source,monster);
@@ -139,6 +169,10 @@ export class OriginalSounds {
       this.monsterSources.delete(source);
       if(this.feedback===source)this.feedback=null;
       source.disconnect();
+      const count=(this.activeFiles.get(file!)??1)-1;
+      if(count)this.activeFiles.set(file!,count);else this.activeFiles.delete(file!);
+      source.buffer=null;
+      this.trimCache();
     };
     source.start();
   }

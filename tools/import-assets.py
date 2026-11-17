@@ -181,6 +181,7 @@ for id,world in world_layouts.items():
  if id in ['biche','mine','woma','zuma']:continue
  for part in world['tiles']+world['objects']:
   if part['texture'] not in old_ids:new_map_groups.setdefault(f'map/{part["texture"]:08X}','world-'+id)
+animated_models={key.split('/')[0] for key in animations}
 for record in loaded:
  name=record[0].split('/')[0]
  group=name.replace('-shadow','') if name.startswith(('dress-','weapon-')) and name not in ['dress-1','dress-1-shadow','weapon-8'] else 'core'
@@ -189,6 +190,9 @@ for record in loaded:
  if name.removesuffix('-shadow') in monster_models['expansionModels']:group='monster-'+name.removesuffix('-shadow')
  if name in ['overlordBlade','overlordDeath']:group='monster-overlord'
  if record[0] in new_map_groups:group=new_map_groups[record[0]]
+ # Shared source pixels remain identical; do not mix every spell/actor into startup pages.
+ if group=='core' and name in animated_models and name not in ['dress-1','dress-1-shadow','weapon-8']:
+  group='model-'+name.removesuffix('-shadow')
  groups.setdefault(group,[]).append(record)
 page=0
 for group in sorted(groups, key=lambda g:(g!='core',g)):
@@ -233,3 +237,6 @@ runpy.run_path(str(ROOT/"tools/write-asset-ledger.py"))
  '\nSource PNG/JSON rectangles and sparse indices retained in manifest.json. Public project distribution follows the recorded owner confirmation; not independent official-client or rights verification. No third-party client/server implementation is incorporated.\n')
 
 runpy.run_path(str(ROOT/"tools/import-audio.py"))
+
+import subprocess
+subprocess.run(['node',str(ROOT/'tools/write-runtime-assets.mjs')],check=True,cwd=ROOT)

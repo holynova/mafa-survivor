@@ -351,6 +351,9 @@ class BattleScene extends Phaser.Scene {
       return;
     }
     if (!assets.frames[frame]) return;
+    if(!this.textures.exists(assets.frames[frame].texture)){
+      this.requireModels([frame.split('/')[0]]);return;
+    }
     if(cull&&game.survivorMode&&game.phase!=="lobby"&&this.visibleView&&!intersectsView(frameBounds(assets.frames[frame],x,y,scale,offset),this.visibleView)){if(import.meta.env.DEV)renderMetrics.culled++;return;}
     this.seen.add(key);
     let image = this.bodies.get(key);
@@ -537,7 +540,14 @@ class BattleScene extends Phaser.Scene {
     if(import.meta.env.DEV){renderMetrics.drawRequests=0;renderMetrics.culled=0;}
     if (!isGraybox) {
       const kinds = [...new Set([...MAPS[game.mapId].monsterPool, MAPS[game.mapId].boss, ...game.enemies.map((e) => e.kind)])];
-      const models = ["world-" + game.mapId, ...(game.mapId === "woma" || game.mapId === "zuma" ? ["womaFlame", "womaShock", "arrow"] : []),...(kinds.includes("overlord") ? ["overlordBlade","overlordDeath"] : []), ...kinds.flatMap((kind) => [kind, kind + "-shadow"])];
+      const look=resolveAppearance(game.classId,game.equipment);
+      const skillModels=game.skills.flatMap(s=>s.id==='skeleton'?['skeleton','summonedSkeleton','summonedSkeleton-shadow']:s.id==='beast'?['beast','beast-shadow','beastflame']:[s.id]);
+      const models = [look.body,look.body+'-shadow',...(look.weapon?[look.weapon]:[]),
+        'hit','cast','heal','explosion','talismanHit','poison',
+        ...skillModels,...game.effects.map(f=>f.kind),...game.projectiles.map(p=>p.visual??p.skill??'fireball'),
+        ...game.pets.flatMap(p=>[p.kind,p.kind+'-shadow']),...this.corpses.flatMap(c=>[c.kind,c.kind+'-shadow']),
+        ...(game.phase==='lobby'?['scarecrow','scarecrow-shadow','cat','cat-shadow','orc','orc-shadow','rakecat','rakecat-shadow']:[]),
+        "world-" + game.mapId, ...(game.mapId === "woma" || game.mapId === "zuma" ? ["womaFlame", "womaShock", "arrow"] : []),...(kinds.includes("overlord") ? ["overlordBlade","overlordDeath"] : []), ...kinds.flatMap((kind) => [kind, kind + "-shadow"])];
       const missing = models.some((name) => [...(this.modelPages.get(name) ?? [])].some((key) => !this.textures.exists(key)));
       // Retain chapter pages even when already loaded.
       for(const model of models)for(const key of this.modelPages.get(model)??[])this.retainedPages.add(key);

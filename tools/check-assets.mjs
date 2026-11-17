@@ -3,12 +3,17 @@ import {createHash} from "node:crypto";
 import appearance from "./equipment-appearance.json" with { type: "json" };
 import monsters from "./monster-models.json" with { type: "json" };
 import { checkReleaseAuthorization } from "./asset-authorization.mjs";
+import {runtimeManifest} from './write-runtime-assets.mjs';
 const root = new URL("../public/assets/mir/", import.meta.url);
 const manifest = JSON.parse(
   fs.readFileSync(new URL("manifest.json", root), "utf8"),
 );
 const frames = {};
 const failures = [];
+try {
+  const runtime=JSON.parse(fs.readFileSync(new URL('runtime.json',root),'utf8'));
+  if(JSON.stringify(runtime)!==JSON.stringify(runtimeManifest(manifest))) failures.push('runtime manifest is stale; regenerate original assets');
+} catch { failures.push('runtime manifest missing or invalid'); }
 const iconCatalog = JSON.parse(fs.readFileSync(new URL("./skill-icon-sources.json", import.meta.url), "utf8"));
 for (const [id, source] of Object.entries(iconCatalog.frames)) {
   const icon = manifest.skillIcons?.frames[id];
