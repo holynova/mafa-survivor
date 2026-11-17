@@ -576,3 +576,40 @@ d7cb286干净提交、rulesSha256=b31279f1e8a5c07b4d96ab4030300ff8fac6a7c708de04
 严格火符/骷髅主修、优先施毒/治疗且排除神兽的独立探针，只把新召唤骷髅的damage从11设为16，保留真实升级/攻击/走位/存档。旧规则文件未改，JSON明确experimentalOverride，不能将该探针报告标为已发布源码。原六种子12局：石墓1/6、白日门0/6，185次恢复；新六种子控制12局：石墓0/6、白日门1/6，162次恢复；候选12局：石墓0/6、白日门3/6，194次恢复。新样本石墓时长中位561→678秒、白日门1159.5→1286.5秒；有退步，不能说所有种子改善或非神兽路线已调平。新种子为13/31/73/117/271/409。原六种子严格控制已有白野猪窗口报告石墓0/6；白日门历史严格报告0/6早于白野猪窗口，后者无该Boss，但仍不把它称为本节重跑的配对控制。
 
 保留+5固定基础物理伤害候选：在幸存者骷髅实际命中边界加成，再经过既有道术、技能、装备、护甲结算；存档pet.damage仍11，现有宝宝不必死亡重召即可应用，不额外回血。神兽、诱惑宝宝、经典模式、射程、数量、补召和攻击CD不改。原始探针alpha52-skeleton-strike-{trial,holdout,control}.json及独立脚本有明确覆盖声明。实际代码回归须随后从新干净提交运行。
+
+
+## 骷髅伤害候选：实际代码最终冻结回归（2026-11-18，未发布）
+
+fbf670b95f7ecdf24b3009e6e9fb1c1fa098ad14干净提交；九份报告均sourceDirty=false、rulesSha256=785a4f631e4f1353224aca4f5ba2f8250e2c20629ae8e6e3ce934fa855c38450。三策略162局、严格不带神兽24局、石阁道士6局、事件36局、白日门事件新种子对照36局，合计264局、0模拟异常、4755次快照解析/恢复检查。不是264局全部同一种构筑或真人胜率；真实代码没有探针覆盖。
+
+|地图|职业|双主修|单核优先|均摊|
+|---|---|---:|---:|---:|
+|biche|warrior|6/6|6/6|2/6|
+|biche|wizard|6/6|4/6|5/6|
+|biche|taoist|6/6|1/6|0/6|
+|shimu|warrior|6/6|4/6|2/6|
+|shimu|wizard|5/6|4/6|3/6|
+|shimu|taoist|3/6|1/6|0/6|
+|bairimen|warrior|4/6|4/6|0/6|
+|bairimen|wizard|4/6|5/6|5/6|
+|bairimen|taoist|3/6|0/6|0/6|
+
+战士/法师108行与伤害候选前565b8d1的终态、时长、等级、击杀、成长时刻、技能/进化、输出/承伤、装备、金币、恢复、首领、遭遇与检查点逐项一致。严格火符/骷髅24行与独立16伤害探针在上述字段全部一致（存储damage保持11的实现不同，但有效攻击一致）；实际代码379次恢复通过，全部确认无神兽。石阁道士6/6，123次恢复。默认道士双核石墓4→3/6、白日门2→3/6，比奇6/6不变；没有把严格路线改善写成默认路线所有章都改善。
+
+每份数据的本地文件哈希：
+
+|报告|局数|恢复次数|文件SHA256|
+|---|---:|---:|---|
+|alpha52-skeleton-verified-dual.json|54|1046|fd2586ce45b0ecd18027227e2a5c2f4c6562ababa7ef55d7810159e4102b2838|
+|alpha52-skeleton-verified-single.json|54|932|667c4fcbb706e56b18535d46716682b1dff9df69e24d6a9f9941fc360b0d3b8e|
+|alpha52-skeleton-verified-spread.json|54|830|c06172dccfaace65af34dba19fdf82eee203a568fadf92774621a552726c6018|
+|alpha52-skeleton-verified-strict.json|24|379|1faf72187f0b077601546ae2d82c460518d3af142f32b72f56cf2660729f3ea8|
+|alpha52-skeleton-verified-stone.json|6|123|adaa16d6ad1650fe8c282f407eb29f11d09db87fecadf16fe15095205c4bdfdb|
+|alpha52-skeleton-event-bounty.json|18|346|2781f162e82dfe442c0a69ee93d5188a3bcdc77905fa6e1028433e4f0eaa5442|
+|alpha52-skeleton-event-ward.json|18|363|20cdcb0f678689459b52e63da76ff9d042062d41fec83697b2d6774694efba13|
+|alpha52-bounty-holdout-base.json|18|365|af90dc283118d04026752b809d10a70c0e5ac4f8a591c2488b62b6d325199628|
+|alpha52-bounty-holdout-bounty.json|18|371|65419077d83986ae33152db2f3e18715a4daf0f8658117de59afe12af6f19ca1|
+
+按同一固定源布局/控制器/升级和有限采购策略执行，命令参数均在各JSON内记录。主矩阵命令为`node tools/simulate-survival.mjs --maps=biche,shimu,bairimen --seeds=176,42,2026,7,991,6003 --strategy=dual --seek-chests --use-recovery --trace-final-boss --check-save`，另以single/spread分别运行。严格组加`--roles=taoist --main-skills=talisman,skeleton --support-skills=poison,heal --exclude-skills=beast`，种子额外加入13/31/73/117/271/409。快照最大144372字符、本机Node测量最慢15.77ms（多进程负载下），不代表浏览器落盘或手机性能。全部进程已终结，SSR服务按finally关闭；未部署，源码和规则保持冻结。
+
+默认双主修的机制回归完成，但弱势烈火、严格非神兽、单核/均摊道士及真人难度仍保留。无需假设所有技能组合都必须通关，也不因此把已有弱势组合标为已调平。事件配对见CHAPTER-EVENTS最新节；下一步属于具体弱势路线策略与真人/设备验收，不能用更多相同矩阵重复代替。
