@@ -1264,3 +1264,13 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - alpha49-pets-normal-320.png与alpha49-pets-invisible-gray-320.png已查看：正常与显式测试隐身状态透明度不同；后者CSS灰度brightness(.55)中轮廓较弱，保留隐身差异，不冒称真实屏幕可见性全部通过。临时filter随后撤回。
 - 测试移除pets/effects/enemies后，alpha49-pets-removed-390.png确认原树冠及主角保留、召唤物轮廓无残影；未加入临时渲染器导出。所有场景为冻结时钟的测试fixture，不写普通战绩或修改持久选项。
 - 最终113文件/1245测试和类型/生产构建通过；本轮assets:check与assets:visual-check通过（failures=0，随后仅下调轮廓alpha，未改素材）。Ego100和自建5186服务已关闭。仍待阶段发布与真机/动态密度验证。
+
+## alpha.49阶段测试版发布（2026-11-17）
+
+- 源码main d6184b62ad94c14bc10e068740317099e9a7e4f8，作品集master b52d08e92be627e34f8f18cd61dadc88bffa98ab；共享Worker xiaosang-portfolio版本6ed3dac0-b0fa-4b91-8974-5a7fde68e36c。线上v0.1.0-alpha.49/original，builtAt=2026-11-17T13:02:51.886Z，完整SHA匹配。
+- 1245测试、素材与原图校验、类型/构建已通过；README/版本校验通过，Source checks44088827056成功。dry-run及部署成功，19972组装文件，5文件上传、19935复用。沿用main/master手动子路径发布，不新增Action/分支/Pages标签。
+- Ego101线上恢复实际战士比奇17.7667秒旧存档；继续后自然触发升级，实际选择半月1→2、2→3，随后暂停并保存退出。保存状态25.75秒/等级3/半月3级、角色(1104,768)、HP161。没有生产开发对象注入或人工授予经验；production __MAFA__为undefined。
+- alpha49-online-battle-390.png及alpha49-online-upgraded-390.png已查看：原版人物、树木、地面及半月刀光可见，无横向溢出。首次尝试按可见文本寻找“暂停”未命中，重读发现已进入升级；之后使用真实aria-label“暂停游戏”并顺序完成升级/暂停/退出，不将未命中记作游戏故障。截图不覆盖线上召唤物或全套遮挡动作，后者已有明确本地fixture证据。
+- 本次触及的run/progress/records/guide/diagnostics五项在导航退出游戏后精确恢复true，Ego101已关闭，无本轮临时dev服务。独立空间最初大厅出现20:01文案，正式导航新版本后为备份中的00:17；兼容验证以实际存档state与新版本读取为准。
+- 线上作品集游戏卡片Demo正确，WebP390×844正常解码；完整repos.json与master结构相等，图库ee4df095/1.0.2及wujun1897dda/1.0.2回执前后相等。Homepage正确；README/二维码/截图材料复用，Profile不在范围，.impeccable保留。
+- 作品集数据源检查通过；check-demo-links仍报告既有web-motion-showcase旧Pages例外，未改无关项目或弱化检查。本次不改变战斗数值，整体优化目标继续。

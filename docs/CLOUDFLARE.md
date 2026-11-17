@@ -1,5 +1,14 @@
 # Cloudflare 子路径发布
 
+## 最新发布：alpha.49（2026-11-17）
+
+- 游戏main：d6184b62ad94c14bc10e068740317099e9a7e4f8；作品集master：b52d08e92be627e34f8f18cd61dadc88bffa98ab。
+- 共享Worker：xiaosang-portfolio；version ID：6ed3dac0-b0fa-4b91-8974-5a7fde68e36c；地址https://xiaosang.cc/mafa-survivor/?survivor，original，builtAt2026-11-17T13:02:51.886Z。
+- 1245测试、构建/原图校验、版本/README及Source checks44088827056通过；dry-run与部署通过，5文件上传/19935复用，完整共享项目产物保留。
+- 线上旧存档恢复、自然升级、战斗原图与半月刀光截图、暂停保存退出通过；五项存储恢复、Ego101关闭。完整作品集JSON及图库/吴军回执匹配，卡片截图和Demo正确，Homepage/README/二维码沿用。作品集旧Pages例外仍保留，详见QA.md。
+
+以下为发布约定与历史记录。
+
 用户于2026-11-02调用 hn-project-publisher，随后明确选择子路径。最终入口为 **https://xiaosang.cc/mafa-survivor/**，复用已有 `xiaosang-portfolio` Worker，不创建游戏独立 Worker，不新增域名、发布分支、Cloudflare Action 或 Workers Builds/Git 集成。旧 GitHub Pages 作为回退，本次不触发 Pages 标签发布。
 
 ## 来源与边界
