@@ -843,3 +843,5 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 连续装备提示最多保留3条，并确保不删除无关伤害浮字；新增回归通过。
 - 同种子176、同控制器三职业×比奇/祖玛/白日门前后各9局均5胜4负；比奇三职业均完成，祖玛近战更吃力，白日门有胜负变化。自动换装加强战士，不能宣称总体胜率下降或职业平衡完成。原始结果 .artifacts/alpha40-baseline.json / alpha40-after.json。
 - 截图：.artifacts/alpha40-encounter-mobile.png、alpha40-skill-confirm.png、alpha40-auto-equip.png、alpha40-delete-320.png、alpha40-lane-desktop.png。
+
+- alpha.40线上390px技能管理截图已查看；保留既有存档，最后技能移除禁用，替换入口与图标正常、无横溢出。独立Ego空间33已关闭。发布凭据见CLOUDFLARE.md。

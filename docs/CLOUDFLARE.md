@@ -71,3 +71,11 @@ npm run deploy
 - 全量1087项中1084通过、3项长模拟并发超时；针对这3个文件单worker复测82项全部通过，未调整测试超时或跳过断言。新增技能审计315项通过；资源检查、类型检查/生产构建、版本验证、作品集校验、GitHub Source checks通过。既有大包提示保留。
 - 新入口仍为 https://xiaosang.cc/mafa-survivor/?survivor，原版入口保留。线上390×844真实浏览器查看alpha.39大厅与群体治疗成长图鉴，70%/80%条件已同步，宽度390，无调试对象；截图 `.artifacts/skill-audit/online-alpha39-growth.png` 已查看。
 - 逐技能施法截图与行为断言在本地相同源码完成；线上没有强行注入生产存档或调试对象来伪造技能解锁，不宣称已在公网正常局逐项随机抽到33技能。完整结果见 SKILL-AUDIT.md。
+
+
+## alpha.40 精英首领与构筑管理（2026-11-17）
+- 构建源码 main `326e00f045c576c6fe7e9d24ad241254ab226631`；作品集 master `b3feca0d245dad33a9dd06b1217170a208f68d12`，保留其上其他项目的最新提交。
+- Worker `xiaosang-portfolio`，version ID `571733c2-f66b-47b9-aa9b-99c77dca23f4`；同一干净主分支快照的 detached worktree 手动 dry-run/deploy 成功。线上 version.json 为alpha.40、对应SHA、original素材。图库release.json仍为1.0.2/ee4df095。
+- 1099测试、素材、类型/构建、README/版本校验、作品集数据校验与GitHub Source checks通过。旧Pages不触发标签部署，域名/二维码/Repo/Demo条目复用。
+- 390×844线上继续已有17秒战士存档，暂停技能管理显示图标、替换为1级/清除进化说明、最后一个技能不可移除；页面宽度390，无调试对象。截图 `.artifacts/alpha40-online-skills.png` 已查看；公网没有注入测试对象强行生成Boss，战斗预警与换装由同源码本地场景验收。
+- 本轮原生D键位移自动断言未通过，完整职业/章节平衡仍需真人反馈，详情见QA。独立Ego测试空间33已finish({keep:[]})关闭，用户原页面保留。
