@@ -1880,8 +1880,11 @@ export class Game {
       if (target && d < range && clear && p.cd === 0) {
         revealOnAction(this, p.id);
         const sc = source === "charm" ? 0 : this.rollStat("sc") * 0.8;
+        // Survivor skeletons provide sustained physical single-target damage.
+        // Apply at the hit boundary so existing saved summons receive the same tuning.
+        const skeletonBonus = this.survivorMode && source === "skeleton" ? 5 : 0;
         const damage = Math.round(
-          (p.damage + sc) *
+          (p.damage + sc + skeletonBonus) *
             outputScale(source) *
             (1 + (skill?.summonPower ?? 0) / 100) *
             (1 + (this.stats.summon_damage ?? 0) / 100) *
