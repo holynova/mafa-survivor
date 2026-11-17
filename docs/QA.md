@@ -1012,3 +1012,11 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 实际CLI校验：无效role、seed、未知参数分别非零拒绝；max-steps=1输出step-limit且battle未被伪造为胜负，JSON保留失败记录。该检查未通过注入强制触发空选项分支。
 - 石墓战士3种子与原报告比较时间/终局/输出/承伤/击杀/技能完全一致；完整发现见SURVIVOR-DIRECTOR-REVIEW。104文件/1185测试、assets:check、build通过，日志alpha43-pressure-{tests,assets,build}.log；保留既存大chunk告警。
 - 本次只修改离线模拟工具，无运行时视觉/交互改动，未开启浏览器或dev服务。一次SSR库存查询出现受限WebSocket绑定错误，但完成输出并关闭Vite；无保留服务。未发布。
+
+
+## alpha.43候选：精英挑战测试路线与装备复盘建议
+
+- 可选模拟策略只产生输入；新增覆盖默认路线不变、快照/RNG/奖励不变、低血退出、实物装备优先、旧模式忽略新选项。初版快照比较误包含savedAt墙钟，改为仅统一保存时间，仍比较其余全部字段。严格构建又发现快照可空类型，已修正测试断言。
+- 105文件/1189测试通过，assets:check和生产build通过（已有chunk告警）；日志 .artifacts/alpha43-elite-hunt-{tests,assets,build}.log。石墓3种子对照及默认复跑见DIRECTOR-REVIEW，不以两次胜利声称平衡完成。
+- 独立Ego空间75，320×740测试局结果；展开复盘、截图alpha43-weapon-recap-320.png已查看，页面宽320无横溢，建议完整换行；实际状态切换weapon锁后显示解锁建议。该测试为合成结算fixture，未冒充真实375秒实玩，不保存普通战绩。
+- 本轮仅结算建议显示变化，未重新跑战场动作/树林遮挡/原生键盘验收，既有缺口继续保留。空间75及5186临时服务已关闭，尚未发布。

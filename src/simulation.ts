@@ -119,7 +119,7 @@ export function simulateShop(g:Game,trace?:ShopTrace[]) {
 }
 
 /** Observes the same combat state the view consumes; only returns legal input. */
-export function simulationInput(g:Game,previous={x:0,y:0},options:{seekChests?:boolean}={}) {
+export function simulationInput(g:Game,previous={x:0,y:0},options:{seekChests?:boolean;huntElites?:boolean}={}) {
   const p=g.player;
   const health=p.hp/g.maxHP;
   const enemies=g.enemies.filter(e=>e.hp>0 && distance(e,p)<650)
@@ -134,8 +134,15 @@ export function simulationInput(g:Game,previous={x:0,y:0},options:{seekChests?:b
     .filter(c=>(!c.eligible || ready) && (!g.navigation || g.navigation.connected(p,c)))
     .sort((a,b)=>Number(b.eligible)-Number(a.eligible) || distance(p,a)-distance(p,b))[0] : undefined;
   const boss=g.boss;
-  const focus=boss ?? (g.classId==="warrior" ? enemies.find(e=>distance(e,p)<48 && g.attackLineClear(p,e)) ?? enemies[0] : undefined);
-  const destination=emergency ? drop : chest ?? (boss ? engagementPoint(g,boss) : drop ?? (focus ? engagementPoint(g,focus) : undefined));
+  // Optional deliberate loot route: challenge a visible, reachable elite before
+  // the phase boss. Recovery and actual dropped equipment still take priority.
+  const elite=options.huntElites&&g.survivorMode&&!boss&&health>=.5 ? enemies
+    .filter(e=>e.elite&&!isBossKind(e.kind)&&(!g.navigation||g.navigation.connected(p,e)))
+    .sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp || distance(a,p)-distance(b,p))[0] : undefined;
+  const gear=options.huntElites&&g.survivorMode ? g.drops.filter(d=>d.itemId&&(!g.navigation||g.navigation.connected(p,d)))
+    .sort((a,b)=>distance(a,p)-distance(b,p))[0] : undefined;
+  const focus=boss ?? elite ?? (g.classId==="warrior" ? enemies.find(e=>distance(e,p)<48 && g.attackLineClear(p,e)) ?? enemies[0] : undefined);
+  const destination=emergency ? drop : chest ?? gear ?? (elite ? engagementPoint(g,elite) : boss ? engagementPoint(g,boss) : drop ?? (focus ? engagementPoint(g,focus) : undefined));
   const goal=destination && g.navigation ? g.navigation.waypoint(p,destination) : destination;
   const candidates=[{x:0,y:0},...Array.from({length:8},(_,i)=>({x:Math.cos(i*Math.PI/4),y:Math.sin(i*Math.PI/4)}))];
   if(goal){const dx=goal.x-p.x,dy=goal.y-p.y,d=Math.hypot(dx,dy),scale=Math.min(1,d/(g.moveSpeed/6));if(d>0)candidates.push({x:dx/d*scale,y:dy/d*scale});}
