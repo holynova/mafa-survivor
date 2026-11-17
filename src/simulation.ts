@@ -133,7 +133,9 @@ export function simulationInput(g:Game,previous={x:0,y:0},options:{seekChests?:b
   const chest=options.seekChests && g.survivorMode ? g.survival.chests
     .filter(c=>(!c.eligible || ready) && (!g.navigation || g.navigation.connected(p,c)))
     .sort((a,b)=>Number(b.eligible)-Number(a.eligible) || distance(p,a)-distance(p,b))[0] : undefined;
-  const boss=g.boss;
+  // Match the final-objective HUD: an older stationary phase boss must not
+  // pull the test controller away from the mandatory final kill.
+  const boss=(g.survivorMode?g.enemies.find(e=>e.id===g.survival.finalBossId&&e.hp>0):undefined)??g.boss;
   // Explicit opt-in only: pursue the accepted target during its actual deadline.
   // Emergency recovery and dropped equipment keep priority; never change state.
   const challenge=options.pursueChallenge&&g.survivorMode&&g.survival.challenge.status==='active'&&g.clock<g.survival.challenge.endsAt

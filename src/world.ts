@@ -108,7 +108,12 @@ export class WorldNavigation {
     const next = this.neighbors(cell).filter((n) => distances[n] >= 0 && distances[n] < distances[cell])
       .sort((a, b) => distances[a] - distances[b] ||
         Math.hypot(this.center(a).x - from.x, this.center(a).y - from.y) - Math.hypot(this.center(b).x - from.x, this.center(b).y - from.y))[0];
-    return next === undefined ? this.center(cell) : this.center(next);
+    const point = this.center(next ?? cell);
+    if (this.lineClear(from, point, 12)) return point;
+    // Grid connectivity does not imply a diagonal segment from an off-center
+    // actor fits around an inside corner. Align before turning; never clip walls.
+    const center = this.center(cell);
+    return this.lineClear(from, center, 12) ? center : null;
   }
   reachablePoints(from: Point, minDistance = 0, maxDistance = Infinity) {
     const field = this.field(from);
