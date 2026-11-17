@@ -31,6 +31,16 @@ export function skillStatus(g:Game,s:Skill):SkillStatus{
  if(['ghost','armor','heal','groupHeal'].includes(s.id))return state('等待施放');
  if(s.id==='teleport')return state('等待脱险','可点击瞬息移动主动施放；生命低于30%且敌人贴近时自动脱险。');
  if(s.id==='dash')return state('等待突围','自动突围需要低生命和近身敌群；也可手动触发。');
+ if(s.id==='holy'){
+  if(!targets.some(e=>g.isUndead(e)))return state('等待不死系目标','只对侦测范围内、视线可达的不死系敌人生效；其他敌人不会触发。');
+  return state('等待圣言施放','普通不死系敌人有概率被消灭；合格精英和首领只受有限伤害，不保证秒杀。');
+ }
+ if(s.id==='charm'){
+  const cap=Math.min(5,2+s.count);
+  if(g.pets.length>=cap)return state('诱惑名额已满',`当前召唤物 ${g.pets.length}/${cap}；已有伙伴占用诱惑名额。`);
+  if(!targets.some(e=>g.canTame(e)))return state('等待可诱惑目标','仅尝试招募可诱惑的普通怪；精英和首领不能招募，目标须在侦测范围内且视线可达。');
+  return state('等待诱惑尝试','招募有概率失败；失败也会播放效果并进入冷却。');
+ }
  if(!targets.length)return state('附近无可用目标',s.id==='poison'?'没有可重新施毒的目标；目标需在侦测范围内且不被地形阻挡。':'敌人必须在侦测范围内且不被地形阻挡。');
  if(s.id==='reveal'&&!targets.some(e=>e.elite||isBossKind(e.kind)))return state('等待精英或首领');
  return state('等待触发','冷却已结束；满足技能的距离、目标类型或敌人数要求后自动施放。');

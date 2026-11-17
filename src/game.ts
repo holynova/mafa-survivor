@@ -1732,10 +1732,11 @@ export class Game {
       if (step === distance) break;
     }
   }
-  private isUndead(e: Enemy) {
+  /** Read-only eligibility shared by casting and the skill explanation. */
+  isUndead(e: Enemy) {
     return ["scarecrow", "zombie", "skeleton", "skeletonWarrior", "skeletonArcher", "boss", "corpseKing", "womaWarrior", "womaBrave", "flameWoma", "womaLord", "zumaGuard", "zumaStatue", "zumaLord"].includes(e.kind);
   }
-  private canTame(e: Enemy) {
+  canTame(e: Enemy) {
     return (
       !e.elite &&
       !isBossKind(e.kind) &&
