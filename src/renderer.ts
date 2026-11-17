@@ -1,6 +1,7 @@
 import {footstepKey} from './footsteps';
 import {WARD_RADIUS} from './chapter-challenge';
 import {enemyActionCue} from "./enemy-action-cue";
+import {ordinaryHealthBarIds} from './health-bar-visibility';
 import {rangedTiming} from "./ranged-timing";
 import {runtimeDiagnostics,observeRuntime} from "./runtime-diagnostics";
 import {visualPreferences,DEFAULT_VISUAL,floatingPresentation,effectOpacity} from './visual-settings';
@@ -63,7 +64,7 @@ let rendererReady = false;
 export const readyListeners = new Set<() => void>();
 export const isReady = () => rendererReady;
 export let frameMS = 0;
-export const renderMetrics={updateMS:0,drawRequests:0,culled:0,bodies:0,labels:0,pool:0,atlasPages:0,atlasRGBABytes:0,evictedAtlases:0};
+export const renderMetrics={updateMS:0,drawRequests:0,culled:0,bodies:0,labels:0,pool:0,atlasPages:0,atlasRGBABytes:0,evictedAtlases:0,ordinaryHealthBars:0};
 export const appearanceStatus = { loading: false, error: "" };
 export const cameraStatus={height:0,zoom:1,bottomInset:0,worldTop:0,heroFootY:0,heroCrowdCovered:false};
 class BattleScene extends Phaser.Scene {
@@ -78,6 +79,7 @@ class BattleScene extends Phaser.Scene {
   private pool: Phaser.GameObjects.Image[] = [];
   private labels = new Map<number, Phaser.GameObjects.Text>();
   private seenLabels=new Set<number>();
+  private ordinaryBars=new Set<number>();
   private showLootNames=false;
   private deathStartedAt:number|null=null;
   private bars!: Phaser.GameObjects.Graphics;
@@ -577,7 +579,7 @@ class BattleScene extends Phaser.Scene {
     if (!rendererReady) return;
     const measuredStart=import.meta.env.DEV?performance.now():0;
     this.retainedPages.clear();
-    if(import.meta.env.DEV){renderMetrics.drawRequests=0;renderMetrics.culled=0;}
+    if(import.meta.env.DEV){renderMetrics.drawRequests=0;renderMetrics.culled=0;renderMetrics.ordinaryHealthBars=0;}
     if (!isGraybox) {
       const kinds = [...new Set([...MAPS[game.mapId].monsterPool, MAPS[game.mapId].boss, ...game.enemies.map((e) => e.kind)])];
       const look=resolveAppearance(game.classId,game.equipment);
@@ -606,6 +608,7 @@ class BattleScene extends Phaser.Scene {
       this.nextFootstep = game.clock;
       this.rightFootstep = false;
       this.dangerMemory.clear();
+      this.ordinaryBars.clear();
       this.clearInput();
       this.corpses = [];
       this.lastEnemies.clear();
@@ -715,6 +718,9 @@ class BattleScene extends Phaser.Scene {
       );
     } else {
       this.centerCamera(game.player.x, game.player.y);
+      this.ordinaryBars=game.survivorMode
+        ?ordinaryHealthBarIds(game.enemies,game.player,this.visibleView??undefined,visualPreferences.effects,this.ordinaryBars)
+        :new Set();
       const liveIds=new Set(game.enemies.map(e=>e.id));
       for (const [id, e] of this.lastEnemies)
         if (!liveIds.has(id) && e.hp <= 0)
@@ -765,8 +771,10 @@ class BattleScene extends Phaser.Scene {
         if(tint!==undefined)this.bodies.get("enemy-"+e.id)?.setTint(tint);
         const insight=enemyInsight(game,e);
         if(insight&&this.inView(e.x-200,e.y-110,400,120))this.label(-1000000-e.id,insight,e.x,e.y-90,"#e6dfaf",1,11);
-        if ((e.elite || e.hp < e.maxHp || insight)&&this.inView(e.x-90,e.y-110,180,120)) {
-          const cue=enemyActionCue(e,t,game.survivorMode);
+        const cue=enemyActionCue(e,t,game.survivorMode);
+        const ordinaryBar=e.hp<e.maxHp&&(!game.survivorMode||isBossKind(e.kind)||this.ordinaryBars.has(e.id));
+        if ((e.elite || ordinaryBar || insight || cue)&&this.inView(e.x-90,e.y-110,180,120)) {
+          if(import.meta.env.DEV&&!e.elite&&!isBossKind(e.kind))renderMetrics.ordinaryHealthBars++;
           const elite=e.elite&&!isBossKind(e.kind),w=isBossKind(e.kind)?72:elite?64:32,h=elite?8:4,y=elite?(this.bodies.get("enemy-"+e.id)?.getBounds().top??e.y-92)-(game.survivorMode?22:12):e.y-58;
           this.bars.fillStyle(0x100706,.95).fillRect(e.x-w/2-2,y-2,w+4,h+4);
           this.bars.fillStyle(elite?0xe5a248:0xb23832,1).fillRect(e.x-w/2,y,w*Math.max(0,e.hp/e.maxHp),h);

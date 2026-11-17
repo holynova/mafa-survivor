@@ -6,7 +6,7 @@ export function stompWindup(kind:string,survivorMode:boolean){
  return .9;
 }
 export function stompRecovery(kind:string,survivorMode:boolean){
- return survivorMode&&kind==='redMoon'?2.2:survivorMode&&kind==='whiteBoar'?1.3:1;
+ return survivorMode&&(kind==='redMoon'||kind==='whiteBoar')?2.2:1;
 }
 
 /** Radius in world pixels, shared by warnings and the resolved hit. */
