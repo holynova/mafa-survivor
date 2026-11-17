@@ -1,6 +1,6 @@
 import {it,expect} from 'vitest';
 import {Game} from '../src/game';
-import {enemyDangerZones,eliteScale,activeBosses} from '../src/encounters';
+import {enemyDangerZones,eliteScale,activeBosses,announceEncounter} from '../src/encounters';
 import {survivalTick} from '../src/survivor';
 import {survivalThreatScale,survivorSpawnInterval} from '../src/survivor-pacing';
 const run=()=>{const g=new Game();g.survivorMode=true;g.start('normal');return g;};
@@ -17,4 +17,12 @@ it('uses the locked damage center, radius, width and cast time for warnings',()=
 it('retains dodge windows while growing fixed-time pressure and shortening late elite cadence',()=>{
  expect(survivalThreatScale(0,'normal').hp).toBeGreaterThan(1);expect(survivalThreatScale(1200,'normal').hp).toBeGreaterThan(survivalThreatScale(0,'normal').hp);expect(survivalThreatScale(0,'boss').damage).toBe(1.25);
  expect(survivorSpawnInterval(600)).toBeGreaterThanOrEqual(.14);const g=run();g.clock=600;survivalTick(g);expect(g.survival.eliteAt).toBe(690);
+});
+
+it('keeps offscreen encounter audio in a saturated queue without losing player death',()=>{
+ const g=run(),e=g.spawnEnemy('boss');e.x=g.player.x+5000;
+ for(let i=0;i<30;i++)g.sound(`skill-${i}`);
+ g.sound('death');announceEncounter(g,e);
+ expect(g.audioEvents).toContain('encounter:boss:attack');expect(g.audioEvents).toContain('death');
+ expect(g.audioEvents).toHaveLength(24);
 });

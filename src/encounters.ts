@@ -8,7 +8,7 @@ export function announceEncounter(g:Game,e:Enemy){
  const boss=isBossKind(e.kind),current=g.encounterAlert;
  if(!boss&&current&&current.boss&&current.until>g.clock)return;
  g.encounterAlert={name:monsterName(e.kind),boss,final:e.id===g.survival.finalBossId,until:g.clock+(boss?4:3)};
- g.monsterSound(e,'attack');g.emit();
+ g.sound(`encounter:${e.kind}:attack`);g.emit();
 }
 export type DangerZone={id:string;shape:'circle';x:number;y:number;radius:number;progress:number;until:number}|{id:string;shape:'lane';x:number;y:number;toX:number;toY:number;width:number;progress:number;until:number};
 /** Derive warnings from the actual locked attack state, never cosmetic random circles. */

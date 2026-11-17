@@ -380,7 +380,7 @@ export class Game {
   sound(key: string) {
     if(key==="hurt" && this.audioEvents.includes("death"))return;
     if(key==="death")this.audioEvents=this.audioEvents.filter(event=>event!=="hurt");
-    if(key==="hurt" || key==="death") {
+    if(key==="hurt" || key==="death" || key.startsWith("encounter:")) {
       this.audioEvents.unshift(key);this.audioEvents.length=Math.min(24,this.audioEvents.length);
     }else if (this.audioEvents.length < 24) this.audioEvents.push(key);
   }

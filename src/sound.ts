@@ -21,6 +21,7 @@ export class OriginalSounds {
   private requests=new Map<string,Promise<void>>();
   private queued=new Set<string>();
   private feedback:AudioBufferSourceNode|null=null;
+  private encounter:AudioBufferSourceNode|null=null;
   playedByKey:Record<string,number>={};
   muted = false;
   monsters:Record<MonsterSoundEvent,boolean>={attack:true,hurt:true,death:true};
@@ -126,7 +127,9 @@ export class OriginalSounds {
     this.persist();
   }
   play(key: string) {
-    const monster=monsterSoundEvent(key);
+    const alert=key.startsWith("encounter:");
+    const resourceKey=alert ? key.replace(/^encounter:/,"monster:") : key;
+    const monster=monsterSoundEvent(resourceKey);
     const critical=key==="hurt" || key==="death";
     if (
       !this.context ||
@@ -136,7 +139,7 @@ export class OriginalSounds {
       (!critical && !monster && this.voices-this.monsterSources.size >= 8)
     )
       return;
-    const file = this.manifest?.mapping[key],
+    const file = this.manifest?.mapping[resourceKey],
       buffer = file ? this.buffers.get(file) : undefined;
     if (!buffer) {
       if(monster && file && !this.queued.has(key)){
@@ -147,13 +150,14 @@ export class OriginalSounds {
     }
     const now = this.context.currentTime;
     if (now - (this.last.get(key) ?? -10) < (key==="coin" ? .16 : monster==="attack" ? .28 : monster ? .16 : .09)) return;
-    if(monster && this.monsterSources.size>=3){
-      const replace=monster==="death" ? [...this.monsterSources].find(([,event])=>event!=="death")?.[0] : undefined;
+    if(monster && !alert && this.monsterSources.size-Number(!!this.encounter)>=3){
+      const replace=monster==="death" ? [...this.monsterSources].find(([source,event])=>source!==this.encounter&&event!=="death")?.[0] : undefined;
       if(!replace)return;
       replace.stop();
     }
     this.last.set(key, now);
     if(critical)this.feedback?.stop();
+    if(alert)this.encounter?.stop();
     const source = this.context.createBufferSource();
     this.buffers.delete(file!);this.buffers.set(file!,buffer);
     this.activeFiles.set(file!,(this.activeFiles.get(file!)??0)+1);
@@ -164,10 +168,12 @@ export class OriginalSounds {
     this.played++;
     this.playedByKey[key]=(this.playedByKey[key]??0)+1;
     if(critical)this.feedback=source;
+    if(alert)this.encounter=source;
     source.onended = () => {
       this.voices--;
       this.monsterSources.delete(source);
       if(this.feedback===source)this.feedback=null;
+      if(this.encounter===source)this.encounter=null;
       source.disconnect();
       const count=(this.activeFiles.get(file!)??1)-1;
       if(count)this.activeFiles.set(file!,count);else this.activeFiles.delete(file!);

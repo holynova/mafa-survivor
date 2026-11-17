@@ -54,3 +54,16 @@ it("reports protected working-set overage rather than dropping player feedback",
  expect(sounds.cacheMetrics.decodedBytes).toBe(3*1024);expect(sounds.cacheMetrics.overBudgetBytes).toBe(2*1024);
  sounds.play("death");expect(sounds.playedByKey.death).toBe(1);
 });
+
+it("reserves one encounter voice under saturation and honors the existing attack switch",async()=>{
+ const {sounds,context,nodes}=audio();await sounds.unlock();await sounds.preloadMonsters(["orc","zombie","spider"]);
+ for(let i=0;i<8;i++){sounds.play("attack");context.currentTime+=.1;}
+ for(const kind of ["orc","zombie","spider"])sounds.play(`monster:${kind}:hurt`);
+ sounds.play("encounter:orc:attack");expect(sounds.played).toBe(12);
+ sounds.play("monster:orc:death");expect(nodes[11].stopped).toBe(false);
+ sounds.play("encounter:zombie:attack");expect(nodes[11].stopped).toBe(true);
+ sounds.setMonsterEnabled("attack",false);expect(nodes.at(-1)!.stopped).toBe(true);
+ sounds.play("encounter:spider:attack");expect(sounds.playedByKey["encounter:spider:attack"]).toBeUndefined();
+ sounds.setMonsterEnabled("attack",true);sounds.setMuted(true);
+ context.currentTime+=1;sounds.play("encounter:orc:attack");expect(sounds.playedByKey["encounter:orc:attack"]).toBe(1);
+});
