@@ -109,3 +109,21 @@
 149原版WAV/154映射、37敌人+2召唤物覆盖，audio-check通过，缺失项目仍明示。Ego115原版资源真实解码并启动上述四声音各至少一次；设置真实点击关闭攻击/受击/死亡均使对应播放计数不变。音频解锁首次从evaluate调用因自动播放限制挂起，已重载停止待完成操作，并通过实际“全部声音”点击成功解锁；不用超时结果作通过证据。
 
 十章含召唤物依次预载均≤16MiB，最高16766904字节，118个buffer累计回收；这是解码缓存而非整个浏览器或游戏内存。声音设置本机键精确恢复为原始null，测试未改普通记录；Ego115与5186服务已清理。不是扬声器/耳机/单声道主观听感或安卓设备验收。证据alpha52-pet-audio-{browser,controls-browser,ten-chapters}.json及原版audio-manifest。
+
+
+## 2026-11-18 独立环境音候选复核（未导入新声音）
+
+固定资源仓库9e21ea6631317d06e064fbfa7e1ea43af6a2d3e6的缓存目录清单包含848个seff条目和25个bgm条目。seff按文件名前4位分别为0001:12、0100:36、0101:22、0102:20、0103:4、0200:647、0400:107。此为固定版本的清单统计，不声称全网/所有原客户端都没有环境音。
+
+12个0001开头WAV尚无确定调用映射，不凭文件大小或听起来相似将其当作风声/鸟鸣；25个bgm含地区与登录/建角等内容，也不能把名字里的ambient或现有场景配乐重新包装成独立环境循环。网络补查没有取得可核验的原版独立循环文件和映射，因此未增加环境开关或导入未知/通用音库。独立环境音接入仍未完成。
+
+为追踪未映射声音，进一步读取同一客户端bb6a22287abcd9f248d2aba755074c254c68787a的hero.cpp、myhero.cpp、processrun.cpp及clientnpc.cpp，下载内容逐个核验缓存Git tree中的blob SHA1。它们确认现有移动、武器、受击、装备点击和位置播放等调用边界；本次所查路径未建立12个未知WAV到独立环境循环的映射，不据此断言其他路径也不存在。原始源码仅缓存，不执行、不加入项目实现。
+
+|一手源码（固定提交）|SHA256|
+|---|---|
+|[hero.cpp](https://github.com/etorth/mir2x/blob/bb6a22287abcd9f248d2aba755074c254c68787a/client/src/hero.cpp)|eacf661e1679723c41ccbf9545aa92e963736b59a71b5abb7e416475df77519c|
+|[myhero.cpp](https://github.com/etorth/mir2x/blob/bb6a22287abcd9f248d2aba755074c254c68787a/client/src/myhero.cpp)|bbc51942e1f20239319581a4fa5c2d13d2133551ee9cfea45f15dd589a33b56c|
+|[processrun.cpp](https://github.com/etorth/mir2x/blob/bb6a22287abcd9f248d2aba755074c254c68787a/client/src/processrun.cpp)|2cb33647441f3108586423560b487d1547b984dfd0c3defae2432313ad80623a|
+|[clientnpc.cpp](https://github.com/etorth/mir2x/blob/bb6a22287abcd9f248d2aba755074c254c68787a/client/src/clientnpc.cpp)|a4798554f42258a597d0091ec7abae969d3d32c98f947c751979bfbfc50211b1|
+
+缓存证据alpha52-audio-trace-{hero,myhero,processrun,clientnpc}.cpp、sound-{root,seff,bgm}.json；公开内容以固定源码和Git blob核验为准。没有修改授权来源、音频文件、运行映射或游戏数值；149WAV/154映射保持。仍需可确认原版文件/映射才能完成该缺项。
