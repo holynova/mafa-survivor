@@ -22,6 +22,16 @@ export class SurvivorTelemetry {
  private version=0;
  private written=-1;
  persistenceError='';
+ private persistenceSamples:{totalMS:number;observeMS:number;serializeMS:number;writeMS:number;bytes:number;success:boolean}[]=[];
+ private persistenceCount=0;
+ private persistenceFailures=0;
+ private persistenceMaxMS=0;
+ persistenceSnapshot(){
+  const sorted=this.persistenceSamples.map(s=>s.totalMS).sort((a,b)=>a-b);
+  const percentile=(p:number)=>sorted.length?sorted[Math.ceil(sorted.length*p)-1]:null;
+  const last=this.persistenceSamples.at(-1);
+  return {scope:'current telemetry instance; last 120 attempted normal-journal writes; skipped unchanged/test/legacy calls excluded; total includes observation, JSON encoding, UTF-8 size check and storage write',attempts:this.persistenceCount,failures:this.persistenceFailures,samples:sorted.length,p95MS:percentile(.95),p99MS:percentile(.99),maxMS:this.persistenceMaxMS,last:last?{...last}:null};
+ }
  private ensure(g:Game){
   if(!g.survivorMode||!g.runId)return false;
   if(this.report?.runId===g.runId)return true;
@@ -73,8 +83,20 @@ export class SurvivorTelemetry {
  }
  persist(g:Game,storage:Pick<Storage,'setItem'>){
   if(!g.survivorMode||g.mode!=='normal')return;
-  this.observe(g);if(!this.report||this.report.mode!=='normal'||this.written===this.version)return;
-  try{const text=JSON.stringify(this.report);if(new TextEncoder().encode(text).byteLength>MAX_BYTES)throw new Error('size');storage.setItem(TELEMETRY_KEY,text);this.written=this.version;this.persistenceError='';}catch{this.persistenceError='本机诊断未保存，当前页面仍可导出。';}
+  const start=performance.now();this.observe(g);const observeMS=performance.now()-start;
+  if(!this.report||this.report.mode!=='normal'||this.written===this.version)return;
+  const sample={totalMS:0,observeMS,serializeMS:0,writeMS:0,bytes:0,success:false};
+  try{
+   const encode=performance.now();let text:string;
+   try{text=JSON.stringify(this.report);sample.bytes=new TextEncoder().encode(text).byteLength;}finally{sample.serializeMS=performance.now()-encode;}
+   if(sample.bytes>MAX_BYTES)throw new Error('size');
+   const write=performance.now();try{storage.setItem(TELEMETRY_KEY,text);}finally{sample.writeMS=performance.now()-write;}
+   this.written=this.version;this.persistenceError='';sample.success=true;
+  }catch{this.persistenceFailures++;this.persistenceError='本机诊断未保存，当前页面仍可导出。';}
+  finally{
+   sample.totalMS=performance.now()-start;this.persistenceCount++;this.persistenceMaxMS=Math.max(this.persistenceMaxMS,sample.totalMS);
+   this.persistenceSamples.push(sample);if(this.persistenceSamples.length>120)this.persistenceSamples.shift();
+  }
  }
  restore(g:Game,storage:Pick<Storage,'getItem'>){
   if(!g.survivorMode||g.mode!=='normal')return false;

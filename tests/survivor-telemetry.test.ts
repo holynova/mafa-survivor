@@ -52,3 +52,26 @@ it('does not log rejected max-rank choices as accepted upgrades',()=>{
  const g=run();g.skills[0].rank=8;g.phase='upgrade';g.choices=[{id:'s:cleave',kind:'skill',skill:g.skills[0].id,name:'满级',description:'',value:0}];g.emit();g.choose('s:cleave');
  expect(g.telemetry.snapshot(g)!.events.filter(e=>e.type==='choice')).toHaveLength(0);
 });
+it('measures the actual journal write including failed writes, without persisting metrics or changing the journal schema',()=>{
+ const g=run(),store=storage();let now=0;const clock=vi.spyOn(performance,'now').mockImplementation(()=>now);
+ try{
+  const slowStore={setItem(k:string,v:string){now+=7;store.setItem(k,v);}};
+  g.telemetry.persist(g,slowStore);
+  const raw=store.getItem(TELEMETRY_KEY)!;
+  expect(g.telemetry.persistenceSnapshot()).toMatchObject({attempts:1,failures:0,samples:1,p95MS:7,p99MS:7,maxMS:7,last:{success:true,writeMS:7,totalMS:7,bytes:new TextEncoder().encode(raw).byteLength}});
+  expect(JSON.parse(raw)).not.toHaveProperty('journalStorage');
+  g.telemetry.persist(g,slowStore);expect(g.telemetry.persistenceSnapshot().attempts).toBe(1);
+  g.telemetry.event(g,'probe');g.telemetry.persist(g,{setItem(){now+=13;throw new Error('quota');}});
+  expect(g.telemetry.persistenceSnapshot()).toMatchObject({attempts:2,failures:1,maxMS:13,last:{success:false,writeMS:13,totalMS:13}});
+  expect(store.getItem(TELEMETRY_KEY)).toBe(raw);
+  g.telemetry.persist(g,slowStore);expect(g.telemetry.persistenceSnapshot()).toMatchObject({attempts:3,failures:1,last:{success:true}});expect(g.telemetry.persistenceError).toBe('');
+ }finally{clock.mockRestore();}
+});
+it('bounds timing samples and keeps returned metrics detached, excluding test and legacy writes',()=>{
+ const g=run(),store=storage();
+ for(let i=0;i<125;i++){g.telemetry.event(g,'probe',{i});g.telemetry.persist(g,store);}
+ const report=g.telemetry.persistenceSnapshot();expect(report.attempts).toBe(125);expect(report.samples).toBe(120);
+ report.last!.bytes=-1;expect(g.telemetry.persistenceSnapshot().last!.bytes).toBeGreaterThan(0);
+ const test=run('test');test.telemetry.persist(test,store);expect(test.telemetry.persistenceSnapshot().samples).toBe(0);
+ g.survivorMode=false;g.telemetry.persist(g,store);expect(g.telemetry.persistenceSnapshot().attempts).toBe(125);
+});

@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {game} from './game';
 import {runtimeDiagnostics} from './runtime-diagnostics';
 import {saveMetrics} from './survivor-persistence';
-export function diagnosticExport(){return JSON.stringify({run:game.telemetry.snapshot(game),runtime:runtimeDiagnostics.snapshot(),save:{...saveMetrics,scope:'current browser session; last write timings'}},null,2);}
+export function diagnosticExport(){return JSON.stringify({run:game.telemetry.snapshot(game),runtime:runtimeDiagnostics.snapshot(),journalStorage:game.telemetry.persistenceSnapshot(),save:{...saveMetrics,scope:'current browser session; last write timings'}},null,2);}
 export function SurvivorDiagnostics(){
  const [status,setStatus]=useState('');
  const download=()=>{
