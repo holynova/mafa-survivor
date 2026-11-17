@@ -1,4 +1,5 @@
-import {EVOLUTION_CHEST_AFTER,survivorSpawnInterval} from './survivor-pacing';
+import {announceEncounter} from './encounters';
+import {EVOLUTION_CHEST_AFTER,survivorSpawnInterval,survivalThreatScale} from './survivor-pacing';
 import {SURVIVAL_LATE_GROWTH} from './survivor-growth';
 import {EVOLUTIONS,eligibleEvolutions,evolveSkill} from './survivor-evolutions';
 export {EVOLUTIONS,survivalSplash,evolutionReadiness} from './survivor-evolutions';
@@ -64,8 +65,10 @@ export function chooseSurvival(g:Game,id:string){const c=g.choices.find(x=>x.id=
 export function tuneSurvivalEnemy(g:Game,e:Enemy,tier:'normal'|'elite'|'boss'){
  const pressure=g.mapId==='bairimen'?2:CHAPTER_PRESSURE[g.mapId];
  const hp=tier==='boss'?(.7+g.clock/1200)/Math.sqrt(pressure):(tier==='normal'?.65:1)/pressure;
- e.hp=e.maxHp=Math.max(8,e.maxHp*hp);
- e.damage*=(tier==='normal'?.7:1)/Math.sqrt(pressure);
+ const threat=survivalThreatScale(g.clock,tier);
+ e.hp=e.maxHp=Math.max(8,e.maxHp*hp*threat.hp);
+ e.speed*=threat.speed;
+ e.damage*=(tier==='normal'?.7:1)/Math.sqrt(pressure)*threat.damage;
  e.defense=(e.defense??0)/pressure;e.magicDefense=(e.magicDefense??0)/pressure;
  if(tier==='normal')e.exp=Math.max(2,Math.round(e.exp*1.5/Math.sqrt(pressure)));
 }
@@ -83,10 +86,10 @@ export function survivalSpawnKind(g:Game){
 export function survivalTick(g:Game){const state=g.survival;g.wave=Math.min(12,1+Math.floor(g.clock/100));
  if(g.clock>=SURVIVAL_SECONDS&&state.finalBossDefeated){g.finish(true);return;}
  // The final encounter is mandatory and cannot be blocked by the ordinary population cap.
- if(g.clock>=1080&&!state.finalBossId){const boss=g.spawnEnemy(MAPS[g.mapId].boss);if(STATIONARY_MONSTERS.includes(boss.kind)){const nearby=g.navigation?.reachablePoints(g.player,160,260).filter(p=>g.canStand(p.x,p.y)&&g.attackLineClear(g.player,p));if(nearby?.length)Object.assign(boss,g.rng.pick(nearby));}tuneSurvivalEnemy(g,boss,'boss');boss.hp=boss.maxHp=boss.maxHp*1.5;state.finalBossId=boss.id;state.toast='最终首领现身';}
+ if(g.clock>=1080&&!state.finalBossId){const boss=g.spawnEnemy(MAPS[g.mapId].boss);if(STATIONARY_MONSTERS.includes(boss.kind)){const nearby=g.navigation?.reachablePoints(g.player,160,260).filter(p=>g.canStand(p.x,p.y)&&g.attackLineClear(g.player,p));if(nearby?.length)Object.assign(boss,g.rng.pick(nearby));}tuneSurvivalEnemy(g,boss,'boss');boss.hp=boss.maxHp=boss.maxHp*1.5;state.finalBossId=boss.id;state.toast='';announceEncounter(g,boss);}
  if(g.clock>=state.spawnAt&&g.enemies.length<220){const e=g.spawnEnemy(survivalSpawnKind(g));tuneSurvivalEnemy(g,e,'normal');state.spawnAt=g.clock+survivorSpawnInterval(g.clock);}
- if(g.clock>=state.eliteAt&&g.clock<1080){const native=MAPS[g.mapId].monsterPool.filter(id=>NATIVE_ELITES.includes(id));const e=g.spawnEnemy(native.length?g.rng.pick(native):survivalSpawnKind(g));if(!e.elite){e.elite=true;e.hp=e.maxHp=e.maxHp*4;}tuneSurvivalEnemy(g,e,'elite');e.exp=Math.max(4,Math.round(e.exp*1.5));state.eliteAt=g.clock+120;}
- if(g.clock>=state.bossAt&&g.clock<1080){const boss=g.spawnEnemy(MAPS[g.mapId].boss);tuneSurvivalEnemy(g,boss,'boss');state.bossAt=g.clock+300;}
+ if(g.clock>=state.eliteAt&&g.clock<1080){const native=MAPS[g.mapId].monsterPool.filter(id=>NATIVE_ELITES.includes(id));const e=g.spawnEnemy(native.length?g.rng.pick(native):survivalSpawnKind(g));if(!e.elite){e.elite=true;e.hp=e.maxHp=e.maxHp*4;}tuneSurvivalEnemy(g,e,'elite');e.exp=Math.max(4,Math.round(e.exp*1.5));state.eliteAt=g.clock+(g.clock>=600?90:120);announceEncounter(g,e);}
+ if(g.clock>=state.bossAt&&g.clock<1080){const boss=g.spawnEnemy(MAPS[g.mapId].boss);tuneSurvivalEnemy(g,boss,'boss');state.bossAt=g.clock+300;announceEncounter(g,boss);}
  for(const c of [...state.chests])if(Math.hypot(g.player.x-c.x,g.player.y-c.y)<55){state.chests=state.chests.filter(x=>x.id!==c.id);const candidates=eligibleEvolutions(g);
  if(c.eligible&&candidates.length===1){evolveSkill(g,candidates[0].id);}
  else if(c.eligible&&candidates.length>1){state.choiceChest=true;state.toast='选择进化';g.choices=candidates.map(s=>({id:'evo:'+s.id,kind:'skill',skill:s.id,name:EVOLUTIONS[s.id]!.name,description:EVOLUTIONS[s.id]!.description,value:0}));g.phase='upgrade';}

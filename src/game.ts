@@ -321,6 +321,7 @@ export class Game {
   focusMisses = 0;
   training=newTraining();
   legacyGrowth: RunCheckpoint["legacyGrowth"] = null;
+  encounterAlert: {name:string;boss:boolean;final:boolean;until:number}|null = null;
   automaticTeleport = false;
   automaticDash = true;
   warriorFourSlot = false;
@@ -476,6 +477,7 @@ export class Game {
     this.classId = classId;
     this.mapId = mapId;
     this.mode = mode;
+    this.encounterAlert = null;
     this.survival = newSurvival();
     this.touchInput={x:0,y:0};
     this.warriorFourSlot = warriorFourSlot;

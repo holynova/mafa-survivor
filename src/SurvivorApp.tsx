@@ -1,3 +1,5 @@
+import {EncounterHud} from './EncounterHud';
+import {SurvivorSkillManager} from './SurvivorSkillManager';
 import {SurvivorHud,SkillIcon} from './SurvivorHud';
 import {suspendSurvival} from './survivor-lifecycle';
 import {SurvivorJoystick} from './SurvivorJoystick';
@@ -5,7 +7,7 @@ import {SurvivorGrowthBook} from './SurvivorGrowthBook';
 import {useEffect,useReducer,useState} from 'react';
 import {game} from './game';
 import {CLASS_IDS,CLASSES,type ClassId} from './classes';
-import {getSkill,MAPS,type MapId} from './content';
+import {getSkill,getItem,MAPS,type MapId} from './content';
 import {isReady,readyListeners,setBattleInset} from './renderer';
 import {sounds} from './sound';
 import {EvolutionBook} from './EvolutionBook';
@@ -47,12 +49,13 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
  <details className="survivor-more"><summary>章节与战绩</summary>{CHAPTER_PATH.map(id=>{const r=chapterRequirement(id);return <p key={id}>{MAPS[id].name} · {progress.won.includes(id)?'已通关':(SURVIVAL_OPEN_MAP_TEST||chapterUnlocked(progress,id))?`最佳 ${clock(progress.best[id]??0)}`:`需${MAPS[r!.map].name}生存${r!.seconds/60}分钟`}</p>;})}{readSurvivorRecords(localStorage).slice(0,5).map(r=><p key={r.runId}>{CLASSES[r.classId].name} · {MAPS[r.mapId].name} · {clock(r.seconds)} · {r.won?'生还':'倒下'}</p>)}</details>
  <ShareCardButton/><a className="survivor-legacy" href={repositoryUrl} target="_blank" rel="noreferrer">GitHub 源码</a><a className="survivor-legacy" href="?">返回原版</a>
  </section>:<>
- {game.phase==='battle'&&<SurvivorHud/>}
+ {game.phase==='battle'&&<><SurvivorHud/><EncounterHud/></>}
  {game.phase==='battle'&&<><SurvivorJoystick/><div className="survivor-controls"><div>{game.survival.chests.length>0&&<p>宝箱 {game.survival.chests.length} · 靠近拾取</p>}{game.skills.some(s=>s.id==='teleport')&&<button onClick={()=>game.useManualSkill()}>瞬息移动</button>}<button aria-label={`使用血瓶，剩余${game.potions.reserve.length}瓶`} disabled={!game.potions.reserve.length} onClick={()=>game.useBloodPotion()}>血瓶 ×{game.potions.reserve.length}</button></div></div></>}
  {game.phase==='upgrade'&&<section className="survivor-panel survivor-upgrade"><h2>{selectingEvolution?'选择武器进化':game.survival.choiceChest?'宝箱强化':'选择强化'}</h2><p>Lv.{game.level} · 选择后继续</p><div className="survivor-choices">{game.choices.map(c=><button className="survivor-choice" key={c.id} onClick={()=>game.choose(c.id)}><span className="survivor-choice-title">{c.skill?<SkillIcon id={c.skill}/>:<span className="mir-passive-icon" aria-label="被动属性">{c.name.slice(0,1)}</span>}<strong>{c.name}</strong></span><span>{c.description}</span>{!selectingEvolution&&c.skill&&BUILD_GUIDES[game.classId].main.some(id=>id===c.skill)&&<small className="survivor-recipe">推荐主力</small>}</button>)}</div>{!game.choices.length&&<button onClick={()=>{game.player.hp=game.maxHP;game.phase='battle';game.emit();}}>恢复生命并继续</button>}{!selectingEvolution&&<button disabled={game.survival.rerolls<=0} onClick={()=>{if(game.survival.rerolls>0){game.survival.rerolls--;game.choices=survivalChoices(game);game.emit();}}}>重掷 · 剩余 {game.survival.rerolls}</button>}</section>}
  {game.phase==='paused'&&<section className="survivor-panel survivor-pause"><p className="survivor-eyebrow">{MAPS[game.mapId].name} · {clock(game.clock)}</p><h2>{game.survival.toast||'已暂停'}</h2>{game.survival.toast.startsWith('进化完成')&&recentEvolution&&<p>{EVOLUTIONS[recentEvolution]?.description}</p>}
  <button className="survivor-primary" onClick={()=>{game.survival.toast='';game.pause();}}>继续战斗</button>
- <h3>本局技能 <small>{game.skills.length}/6</small></h3><div className="survivor-build">{game.skills.map(s=><div key={s.id}><span>{title(s.id)}</span><small>{game.survival.evolved.includes(s.id)?'已进化':`${s.rank}/8`}</small></div>)}</div>
+ <SurvivorSkillManager/>
+ <details className="survivor-more"><summary>当前装备</summary>{Object.entries(game.equipment).map(([slot,e])=><p key={slot}>{getItem(e.itemId).name} · {getItem(e.itemId).tier}阶</p>)}<p>自动穿戴更高品质装备，同品质优先职业属性；较差与替下的装备自动出售。武器和衣服改变外观。</p></details>
  {game.skills.some(s=>s.id==='poison')&&<div className="survivor-tabs"><button aria-pressed={game.tao.poisonMode==='green'} onClick={()=>game.setPoisonMode('green')}>绿毒 · 伤害</button><button aria-pressed={game.tao.poisonMode==='red'} onClick={()=>game.setPoisonMode('red')}>红毒 · 减防</button></div>}
  <details className="survivor-more"><summary>被动与属性 · {Object.keys(game.survival.charms).length}/6</summary>{Object.entries(game.survival.charms).map(([id,n])=><p key={id}>{CHARMS.find(c=>c.id===id)?.name} · {n}/5</p>)}<p>侦测 {Math.round(game.detectionRange)} · 移速 +{Math.round(game.stats.move_speed??0)}%</p><p>击败 {game.kills}</p></details>
  <details className="survivor-more"><summary>成长与进化</summary><EvolutionBook/><SurvivorGrowthBook classId={game.classId} skills={game.skills}/></details>

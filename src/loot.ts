@@ -1,4 +1,5 @@
 import {getItem,SLOT_KEYS,isBossKind} from "./content";
+import {autoEquipSlot} from './auto-equipment';
 import {sellPrice} from "./rules";
 import type {Drop,Enemy,Game} from "./game";
 import {collectPotion} from "./potions";
@@ -42,11 +43,13 @@ export function collectLoot(g:Game,d:Drop) {
   if(d.itemId) {
     const item=getItem(d.itemId),count=d.count??1;let sold=0,equipped=false;
     for(let i=0;i<count;i++) {
-      const slot=SLOT_KEYS.find(s=>(s===item.slot || s.startsWith(item.slot==="bracelet" ? "bracelet" : item.slot==="ring" ? "ring" : "~")) && !g.equipment[s]);
-      if(slot){g.equipment[slot]={itemId:item.id,paid:0};g.recompute();equipped=true;}
+      const slot=autoEquipSlot(g,item);
+      if(slot){const old=g.equipment[slot];if(old){const value=sellPrice(old.paid,getItem(old.itemId).price);gold(g,value);sold+=value;}g.equipment[slot]={itemId:item.id,paid:0};g.recompute();equipped=true;}
       else{const value=sellPrice(0,item.price);gold(g,value);sold+=value;}
     }
-    g.floating.push({id:g.nextEntityId(),x:g.player.x,y:g.player.y-70,text:equipped ? `拾取 ${item.name}` : `售出 ${item.name} +${sold}`,color:"#ecd087",life:1.3});
+    const notices=g.floating.filter(f=>f.color==="#ecd087"&&f.life>0);
+    if(notices.length>=3){const oldest=notices.shift();g.floating=g.floating.filter(f=>f!==oldest);}
+    g.floating.push({id:g.nextEntityId(),x:g.player.x,y:g.player.y-70-notices.length*18,text:equipped ? `装备 ${item.name}${sold ? ` · 回收 +${sold}` : ""}` : `售出 ${item.name} +${sold}`,color:"#ecd087",life:1.3});
   }
   return true;
 }

@@ -1,3 +1,5 @@
+import {eliteScale,monsterName,enemyDangerZones,type DangerZone} from './encounters';
+import {drawDanger} from './danger-render';
 import {invisible} from "./taoist";
 import {cameraWorldView,frameBounds,intersectsView,type ViewRect} from './render-visibility';
 import Phaser from "phaser";
@@ -68,6 +70,8 @@ class BattleScene extends Phaser.Scene {
   private showLootNames=false;
   private deathStartedAt:number|null=null;
   private bars!: Phaser.GameObjects.Graphics;
+  private danger!: Phaser.GameObjects.Graphics;
+  private dangerMemory = new Map<string,DangerZone>();
   private movementInput!: MovementInput;
   private accumulator = 0;
   private lastRun = "";
@@ -134,6 +138,7 @@ class BattleScene extends Phaser.Scene {
       appearanceStatus.error = "";
     });
     this.bars = this.add.graphics().setDepth(5000);
+    this.danger = this.add.graphics().setDepth(1900);
     this.movementInput = new MovementInput(
       window,
       () => game.phase === "battle",
@@ -541,6 +546,7 @@ class BattleScene extends Phaser.Scene {
     }
     if (this.lastRun !== game.runId) {
       this.lastRun = game.runId;
+      this.dangerMemory.clear();
       this.clearInput();
       this.corpses = [];
       this.lastEnemies.clear();
@@ -601,6 +607,7 @@ class BattleScene extends Phaser.Scene {
     this.seen.clear();
     this.seenLabels.clear();
     this.bars.clear();
+    this.danger.clear();
     if(game.survivorMode)for(const chest of game.survival.chests){this.bars.fillStyle(chest.eligible?0xd8b36f:0x94acbb,1);this.bars.fillRect(chest.x-11,chest.y-9,22,18);this.bars.lineStyle(2,0x342718);this.bars.strokeRect(chest.x-11,chest.y-9,22,18);}
     const t = game.clock;
     if (game.phase === "lobby") {
@@ -666,7 +673,7 @@ class BattleScene extends Phaser.Scene {
         const jumpHeight=airborne ? Math.sin(Math.PI*Math.max(0,Math.min(1,(game.clock-(e.bossJumpWindupUntil ?? 0))/0.6)))*75 : 0;
         const motion =
           e.dormant ? "stone" : (e.awakenAt ?? 0)>game.clock ? "awaken" : e.windup > 0 || e.shock || e.rangedFireAt !== undefined || e.stompAt !== undefined || (e.chargeWindupUntil ?? 0) > game.clock ? "attack" : t - e.hitAt < 0.17 ? "hurt" : "walk";
-        const scale = e.elite ? 1.15 : 1;
+        const scale = eliteScale(e);
         this.actor(
           "enemy-" + e.id,
           e.kind,
@@ -684,20 +691,19 @@ class BattleScene extends Phaser.Scene {
         if(tint!==undefined)this.bodies.get("enemy-"+e.id)?.setTint(tint);
         const insight=enemyInsight(game,e);
         if(insight&&this.inView(e.x-200,e.y-110,400,120))this.label(-1000000-e.id,insight,e.x,e.y-90,"#e6dfaf",1,11);
-        if ((e.elite || e.hp < e.maxHp || insight)&&this.inView(e.x-40,e.y-65,80,10)) {
-          const w = isBossKind(e.kind) ? 64 : 32;
-          this.bars
-            .fillStyle(0x150c09, 0.85)
-            .fillRect(e.x - w / 2, e.y - 58, w, 4);
-          this.bars
-            .fillStyle(e.elite ? 0xd3af59 : 0x9e503b, 1)
-            .fillRect(
-              e.x - w / 2,
-              e.y - 58,
-              w * Math.max(0, e.hp / e.maxHp),
-              4,
-            );
+        if ((e.elite || e.hp < e.maxHp || insight)&&this.inView(e.x-90,e.y-110,180,120)) {
+          const elite=e.elite&&!isBossKind(e.kind),w=isBossKind(e.kind)?72:elite?64:32,h=elite?8:4,y=elite?(this.bodies.get("enemy-"+e.id)?.getBounds().top??e.y-92)-12:e.y-58;
+          this.bars.fillStyle(0x100706,.95).fillRect(e.x-w/2-2,y-2,w+4,h+4);
+          this.bars.fillStyle(elite?0xe5a248:0xb23832,1).fillRect(e.x-w/2,y,w*Math.max(0,e.hp/e.maxHp),h);
+          if(elite){this.bars.lineStyle(1,0xd9b36d,.9).strokeRect(e.x-w/2-2,y-2,w+4,h+4);this.label(-2000000-e.id,'精英 · '+monsterName(e.kind),e.x,y-12,'#ffd398',1,12);}
         }
+        if((e.elite||isBossKind(e.kind))&&e.rangedFireAt!==undefined){
+          this.fx('enemy-cast-'+e.id,'cast',e.x,e.y,Math.max(0,t-(e.rangedFireAt-.7)),Math.max(2100,e.y+300));
+          this.bodies.get('enemy-cast-'+e.id)?.setTint(0xff6555);
+        }
+        if(e.elite||isBossKind(e.kind)){
+          for(const zone of enemyDangerZones(e,t)){drawDanger(this.danger,zone,t);this.dangerMemory.set(zone.id,zone);}
+        }else {
         if (e.windup > 0) {
           this.bars
             .lineStyle(2, 0xf1b070, 0.6)
@@ -726,7 +732,15 @@ class BattleScene extends Phaser.Scene {
         if(e.shock) this.bars.lineStyle(76,0xd18a4c,0.17)
           .lineBetween(e.shock.origin.x,e.shock.origin.y,e.shock.target.x,e.shock.target.y)
           .lineStyle(2,0xffcf81,0.85).lineBetween(e.shock.origin.x,e.shock.origin.y,e.shock.target.x,e.shock.target.y);
+        }
         if((e.awakenAt ?? 0)>game.clock) this.bars.lineStyle(3,0xffcc84,0.9).strokeCircle(e.x,e.y,42);
+      }
+      const activeZones=new Set(game.enemies.flatMap(e=>enemyDangerZones(e,t).map(z=>z.id)));
+      for(const [id,zone] of this.dangerMemory){
+        if(activeZones.has(id))continue;
+        const living=game.enemies.some(e=>e.id===Number(id.split(':')[0])&&e.hp>0);
+        if(living&&t>=zone.until&&t-zone.until<.25)drawDanger(this.danger,zone,t,1-(t-zone.until)/.25);
+        else this.dangerMemory.delete(id);
       }
       for (const p of game.pets) {
         const hurt=t<(p.hitUntil ?? 0);

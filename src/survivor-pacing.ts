@@ -7,5 +7,13 @@ export function survivorSpawnInterval(seconds:number){
  if(seconds<120)return base;
  const cycle=seconds%120;
  const multiplier=seconds>=300&&seconds%300<30?1.4:cycle<30?1.25:cycle>=90?.85:1;
- return Math.max(.14,base*multiplier);
+ const pressure=1-Math.min(.14,Math.max(0,seconds-120)/480*.14);
+ return Math.max(.14,base*multiplier*pressure);
+}
+
+/** Fixed time curve, never reactive to player DPS; retain every dodge window. */
+export function survivalThreatScale(seconds:number,tier:'normal'|'elite'|'boss'){
+ const progress=Math.min(1,Math.max(0,seconds)/1200);
+ return tier==='normal'?{hp:1.2+.25*progress,damage:1.1+.15*progress,speed:1+.12*progress}:
+   tier==='elite'?{hp:1.5,damage:1.25,speed:1.12}:{hp:1.6,damage:1.25,speed:1.08};
 }
