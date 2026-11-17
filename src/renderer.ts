@@ -717,7 +717,7 @@ class BattleScene extends Phaser.Scene {
           this.bars.fillStyle(elite?0xe5a248:0xb23832,1).fillRect(e.x-w/2,y,w*Math.max(0,e.hp/e.maxHp),h);
           if(elite){
             this.bars.lineStyle(1,0xd9b36d,.9).strokeRect(e.x-w/2-2,y-2,w+4,h+4);
-            const label=this.label(-2000000-e.id,cue?.text??'精英 · '+monsterName(e.kind),e.x,y-14,cue?.state==='windup'?'#ffe5ce':'#ffd398',1,cue?14:12);
+            const label=this.label(-2000000-e.id,cue?.text??(game.survivorMode&&game.survival.challenge.status==='active'&&game.survival.challenge.enemyId===e.id?'悬赏 · ':'精英 · ')+monsterName(e.kind),e.x,y-14,cue?.state==='windup'?'#ffe5ce':'#ffd398',1,cue?14:12);
             const background=cue?'#21160e':'rgba(0,0,0,0)',padding=cue?4:0;
             if(label.style.backgroundColor!==background)label.setBackgroundColor(background);
             if(label.padding.left!==padding)label.setPadding(padding,cue?2:0);

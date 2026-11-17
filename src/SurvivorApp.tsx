@@ -1,3 +1,4 @@
+import {ChapterChallenge} from './ChapterChallenge';
 import {TELEMETRY_KEY} from "./survivor-telemetry";
 import {SurvivorDiagnostics} from "./SurvivorDiagnostics";
 import {SurvivorGuide} from './SurvivorGuide';
@@ -62,7 +63,7 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
  <ShareCardButton/><a className="survivor-legacy" href={repositoryUrl} target="_blank" rel="noreferrer">GitHub 源码</a><a className="survivor-legacy" href="?">返回原版</a>
  </section>:<>
  {game.phase==='battle'&&<><SurvivorHud onSkillClick={id=>{game.pause();setSkillPanel(id);}}/><EncounterHud/></>}
- {game.phase==='battle'&&<><SurvivorGuide place="battle"/><SurvivorJoystick/><div className="survivor-controls"><div>{game.survival.chests.length>0&&<p>宝箱 {game.survival.chests.length} · 靠近拾取</p>}{game.skills.some(s=>s.id==='teleport')&&<button onClick={()=>game.useManualSkill()}>瞬息移动</button>}<button aria-label={`使用血瓶，剩余${game.potions.reserve.length}瓶`} disabled={!game.potions.reserve.length} onClick={()=>game.useBloodPotion()}>血瓶 ×{game.potions.reserve.length}</button></div></div></>}
+ {game.phase==='battle'&&<><SurvivorGuide place="battle"/><SurvivorJoystick/><div className="survivor-controls"><div><ChapterChallenge compact/>{game.survival.chests.length>0&&<p>宝箱 {game.survival.chests.length} · 靠近拾取</p>}{game.skills.some(s=>s.id==='teleport')&&<button onClick={()=>game.useManualSkill()}>瞬息移动</button>}<button aria-label={`使用血瓶，剩余${game.potions.reserve.length}瓶`} disabled={!game.potions.reserve.length} onClick={()=>game.useBloodPotion()}>血瓶 ×{game.potions.reserve.length}</button></div></div></>}
  {game.phase==='upgrade'&&<section className="survivor-panel survivor-upgrade"><h2>{selectingEvolution?'选择武器进化':game.survival.choiceChest?'宝箱强化':'选择强化'}</h2><p>Lv.{game.level} · 选择后继续</p><SurvivorGuide place="upgrade"/><div className="survivor-choices">{game.choices.map(c=><button className="survivor-choice" key={c.id} onClick={()=>game.choose(c.id)}><span className="survivor-choice-title">{c.skill?<SkillIcon id={c.skill}/>:<span className="mir-passive-icon" aria-label="被动属性">{c.name.slice(0,1)}</span>}<strong>{c.name}</strong></span><span>{c.description}</span>{!selectingEvolution&&c.skill&&game.survival.mainSkills.includes(c.skill)&&<small className="survivor-recipe">主修技能</small>}{!selectingEvolution&&mainRecipeForChoice(game,c).length>0&&<small className="survivor-recipe">{mainRecipeForChoice(game,c).map(id=>getSkill(id).name).join('／')}的进化配方</small>}</button>)}</div>{!game.choices.length&&<button onClick={()=>{game.player.hp=game.maxHP;game.phase='battle';game.emit();}}>恢复生命并继续</button>}{!selectingEvolution&&<button disabled={game.survival.rerolls<=0} onClick={()=>{if(game.survival.rerolls>0){game.survival.rerolls--;game.choices=survivalChoices(game);game.emit();}}}>重掷 · 剩余 {game.survival.rerolls}</button>}</section>}
  {game.phase==='paused'&&skillPanel!==undefined&&<SurvivorSkillPanel initialSelected={skillPanel} onBack={()=>setSkillPanel(undefined)}/>}
  {game.phase==='paused'&&skillPanel===undefined&&<section className="survivor-panel survivor-pause"><p className="survivor-eyebrow">{MAPS[game.mapId].name} · {clock(game.clock)}</p><h2>{game.survival.toast||'已暂停'}</h2>{game.survival.toast.startsWith('进化完成')&&recentEvolution&&<p>{EVOLUTIONS[recentEvolution]?.description}</p>}
@@ -71,7 +72,7 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
  <SurvivorEquipment/>
  {game.skills.some(s=>s.id==='poison')&&<div className="survivor-tabs"><button aria-pressed={game.tao.poisonMode==='green'} onClick={()=>game.setPoisonMode('green')}>绿毒 · 伤害</button><button aria-pressed={game.tao.poisonMode==='red'} onClick={()=>game.setPoisonMode('red')}>红毒 · 减防</button></div>}
  <details className="survivor-more"><summary>被动与属性 · {Object.keys(game.survival.charms).length}/6</summary>{Object.entries(game.survival.charms).map(([id,n])=><p key={id}>{CHARMS.find(c=>c.id===id)?.name} · {n}/5</p>)}<p>侦测 {Math.round(game.detectionRange)} · 移速 +{Math.round(game.stats.move_speed??0)}%</p><p>击败 {game.kills}</p></details>
- <SurvivorSupplies/>
+ <ChapterChallenge/><SurvivorSupplies/>
  <ControlSettings/><button className="survivor-guide-reset" onClick={()=>{survivorGuide.reset();game.emit();}}>重新查看新手提示</button><VisualSettings/><AudioSettings/><SurvivorDiagnostics/><ShareCardButton/>
  <button className="survivor-secondary" onClick={saveAndLeave}>保存并退出</button>
  <details className="survivor-exit"><summary>放弃本局</summary><p>本局无法继续，已达成的章节进度保留。</p><button onClick={leave}>确认放弃</button></details>

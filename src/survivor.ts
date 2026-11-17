@@ -1,3 +1,4 @@
+import {newChapterChallenge,tickChapterChallenge,completeChapterChallenge} from './chapter-challenge';
 import {chapterMonsterWeight,chapterRangedLimit} from './survivor-director';
 import type {EquipmentPreference} from './auto-equipment';
 import type {Slot} from './content';
@@ -31,7 +32,7 @@ export const CHARMS=[
  {id:'swift',name:'疾行靴',stat:'move_speed',value:4},
  {id:'recovery',name:'回春戒指',stat:'hp_regen',value:.5},
 ] as const;
-export function newSurvival(){return {spawnAt:0,eliteAt:120,bossAt:300,finalBossId:0,finalBossDefeated:false,overtimeEndsAt:0,timedOut:false,respecs:2,supplyBosses:[] as number[],suppliesBought:0,equipmentPreference:'offense' as EquipmentPreference,equipmentLocks:[] as Slot[],seenSkills:[] as SkillId[],mainSkills:[] as SkillId[],focusMisses:{} as Partial<Record<SkillId,number>>,eliteDefeats:0,rerolls:3,charms:{} as Record<string,number>,evolved:[] as SkillId[],evoReadyAt:{} as Partial<Record<SkillId,number>>,chests:[] as {id:number;x:number;y:number;eligible:boolean}[],nextChest:1,choiceChest:false,toast:'',end:false};}
+export function newSurvival(){return {challenge:newChapterChallenge(),spawnAt:0,eliteAt:120,bossAt:300,finalBossId:0,finalBossDefeated:false,overtimeEndsAt:0,timedOut:false,respecs:2,supplyBosses:[] as number[],suppliesBought:0,equipmentPreference:'offense' as EquipmentPreference,equipmentLocks:[] as Slot[],seenSkills:[] as SkillId[],mainSkills:[] as SkillId[],focusMisses:{} as Partial<Record<SkillId,number>>,eliteDefeats:0,rerolls:3,charms:{} as Record<string,number>,evolved:[] as SkillId[],evoReadyAt:{} as Partial<Record<SkillId,number>>,chests:[] as {id:number;x:number;y:number;eligible:boolean}[],nextChest:1,choiceChest:false,toast:'',end:false};}
 /** Rank 1–6 retain verified effects; the last two ranks specialize by skill role. */
 export const survivalLateGrowth=(id:SkillId)=>SURVIVAL_LATE_GROWTH[id];
 export function survivalDescription(id:SkillId){
@@ -90,7 +91,7 @@ export function survivalSpawnKind(g:Game){
  const meleeWeight=g.clock<300?4:2;
  return g.rng.pick(pool.flatMap(id=>Array((rangedKinds.has(id)?1:meleeWeight)*chapterMonsterWeight(g.mapId,g.clock,id)).fill(id) as string[]));
 }
-export function survivalTick(g:Game){const state=g.survival;g.wave=Math.min(12,1+Math.floor(g.clock/100));
+export function survivalTick(g:Game){const state=g.survival;tickChapterChallenge(g);g.wave=Math.min(12,1+Math.floor(g.clock/100));
  if(g.clock>=SURVIVAL_SECONDS&&state.finalBossDefeated){g.finish(true);return;}
  if(g.clock>=SURVIVAL_SECONDS){
   state.overtimeEndsAt ||= SURVIVAL_SECONDS+FINAL_OVERTIME_SECONDS;
@@ -113,6 +114,7 @@ export function survivalTick(g:Game){const state=g.survival;g.wave=Math.min(12,1
  else{g.choices=survivalChoices(g);if(g.choices.length){state.choiceChest=true;g.phase='upgrade';}else g.player.hp=g.maxHP;state.toast='宝箱强化';}g.input={x:0,y:0};g.emit();break;}
 }
 export function survivalDeath(g:Game,e:Enemy){
+ completeChapterChallenge(g,e);
  awardSupply(g,e);
  if(e.id===g.survival.finalBossId)g.survival.finalBossDefeated=true;
  if(e.summoned)return;
