@@ -1,3 +1,4 @@
+import {SurvivorSupplies} from './SurvivorSupplies';
 import {SurvivorBuildFocus} from './SurvivorBuildFocus';
 import {mainRecipeForChoice} from './survivor-focus';
 import {writeSurvivalCheckpoint} from './survivor-persistence';
@@ -61,7 +62,7 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
  <details className="survivor-more"><summary>当前装备</summary>{Object.entries(game.equipment).map(([slot,e])=><p key={slot}>{getItem(e.itemId).name} · {getItem(e.itemId).tier}阶</p>)}<p>自动穿戴更高品质装备，同品质优先职业属性；较差与替下的装备自动出售。武器和衣服改变外观。</p></details>
  {game.skills.some(s=>s.id==='poison')&&<div className="survivor-tabs"><button aria-pressed={game.tao.poisonMode==='green'} onClick={()=>game.setPoisonMode('green')}>绿毒 · 伤害</button><button aria-pressed={game.tao.poisonMode==='red'} onClick={()=>game.setPoisonMode('red')}>红毒 · 减防</button></div>}
  <details className="survivor-more"><summary>被动与属性 · {Object.keys(game.survival.charms).length}/6</summary>{Object.entries(game.survival.charms).map(([id,n])=><p key={id}>{CHARMS.find(c=>c.id===id)?.name} · {n}/5</p>)}<p>侦测 {Math.round(game.detectionRange)} · 移速 +{Math.round(game.stats.move_speed??0)}%</p><p>击败 {game.kills}</p></details>
- <SurvivorBuildFocus/><details className="survivor-more"><summary>成长与进化</summary><EvolutionBook/><SurvivorGrowthBook classId={game.classId} skills={game.skills}/></details>
+ <SurvivorSupplies/><SurvivorBuildFocus/><details className="survivor-more"><summary>成长与进化</summary><EvolutionBook/><SurvivorGrowthBook classId={game.classId} skills={game.skills}/></details>
  <AudioSettings/><ShareCardButton/>
  <button className="survivor-secondary" onClick={saveAndLeave}>保存并退出</button>
  <details className="survivor-exit"><summary>放弃本局</summary><p>本局无法继续，已达成的章节进度保留。</p><button onClick={leave}>确认放弃</button></details>

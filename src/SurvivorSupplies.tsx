@@ -1,0 +1,3 @@
+import {game} from './game';
+import {SUPPLIES,supplyCredits,supplyUnavailable,buySupply,type SupplyId} from './survivor-supplies';
+export function SurvivorSupplies(){return <details className="survivor-more"><summary>战利补给 · {supplyCredits(game)} 次 · {Math.floor(game.gold)} 金币</summary><p>每击败一位阶段首领获得一次采购机会，本局最多三次。机会可保留；每次任选一件，不出售技能。</p>{(Object.keys(SUPPLIES) as SupplyId[]).map(id=>{const reason=supplyUnavailable(game,id),offer=SUPPLIES[id];return <div className="survivor-rule" key={id}><button disabled={!!reason} onClick={()=>buySupply(game,id)}>{offer.name} · {offer.cost} 金币</button><p>{reason||(id==='potion'?'储备一瓶，恢复35点生命；战斗中手动使用。':'补充一次重掷，最多持有3次。')}</p></div>;})}</details>;}
