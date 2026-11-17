@@ -40,7 +40,7 @@ export type SurvivorSave=z.infer<typeof survivorSaveSchema>;
 export function snapshotSurvival(g:Game,nextId:number):SurvivorSave|null{
  if(!g.survivorMode||g.mode!=='normal'||!['battle','upgrade','paused'].includes(g.phase)||g.result)return null;
  const state=Object.fromEntries(Object.keys(stateSchema.shape).map(k=>[k,g[k as keyof Game]]));
- return survivorSaveSchema.parse(JSON.parse(JSON.stringify({version:1,savedAt:Date.now(),nextId,rngState:g.rng.seed,state})));
+ return survivorSaveSchema.parse({version:1,savedAt:Date.now(),nextId,rngState:g.rng.seed,state});
 }
 export function parseSurvivalSave(raw:unknown):SurvivorSave|null{const r=survivorSaveSchema.safeParse(raw);return r.success?r.data:null;}
 export function readSurvivalSave(storage:Pick<Storage,'getItem'>):SurvivorSave|null{try{return parseSurvivalSave(JSON.parse(storage.getItem(SURVIVOR_SAVE_KEY)??'null'));}catch{return null;}}

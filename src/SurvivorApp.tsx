@@ -1,3 +1,4 @@
+import {writeSurvivalCheckpoint} from './survivor-persistence';
 import {EncounterHud} from './EncounterHud';
 import {SurvivorSkillManager} from './SurvivorSkillManager';
 import {SurvivorHud,SkillIcon} from './SurvivorHud';
@@ -21,7 +22,7 @@ import {CHAPTER_PATH,chapterRequirement,chapterUnlocked,chapterGoal,newSurvivorP
 import {readSurvivorRecords,recordSurvival} from './survivor-records';
 const clock=(n:number)=>`${Math.floor(n/60).toString().padStart(2,'0')}:${Math.floor(n%60).toString().padStart(2,'0')}`;
 export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,setReady]=useState(isReady());const [error,setError]=useState('');const [saved,setSaved]=useState<SurvivorSave|null>(()=>{try{return readSurvivalSave(localStorage);}catch{return null;}});const [progress,setProgress]=useState(()=>{try{return readSurvivorProgress(localStorage);}catch{return newSurvivorProgress();}});const [role,setRole]=useState<ClassId>('wizard');const [map,setMap]=useState<MapId>('biche');
- const persist=()=>{try{const cp=game.snapshotSurvival();if(cp){setProgress(updateSurvivorProgress(game,localStorage));localStorage.setItem(SURVIVOR_SAVE_KEY,JSON.stringify(cp));setSaved(cp);setError(e=>e.startsWith('存档未保存')?'':e);return true;}return false;}catch{setError('存档未保存：本机存储不可用或已满，请勿刷新。');return false;}};
+ const persist=()=>{try{const cp=writeSurvivalCheckpoint(game,localStorage);if(cp){setProgress(updateSurvivorProgress(game,localStorage));setSaved(cp);setError(e=>e.startsWith('存档未保存')?'':e);return true;}return false;}catch{setError('存档未保存：本机存储不可用或已满，请勿刷新。');return false;}};
  const discard=()=>{try{localStorage.removeItem(SURVIVOR_SAVE_KEY);setSaved(null);return true;}catch{setError('无法清除本机存档，请检查浏览器存储。');return false;}};
  useEffect(()=>{let phase=game.phase;const unsub=game.subscribe(()=>{if(game.result&&game.mode==='normal')try{setProgress(updateSurvivorProgress(game,localStorage));recordSurvival(game,localStorage);localStorage.removeItem(SURVIVOR_SAVE_KEY);setSaved(null);}catch{setError('本机存储不可用，本局战绩未保存。');}else if(game.phase!==phase)persist();phase=game.phase;update();});
  const timer=window.setInterval(persist,5000);

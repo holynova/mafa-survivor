@@ -1,3 +1,4 @@
+import {atlasResidency,unusedAtlasPages} from './asset-residency';
 import {eliteScale,monsterName,enemyDangerZones,type DangerZone} from './encounters';
 import {drawDanger} from './danger-render';
 import {invisible} from "./taoist";
@@ -56,7 +57,7 @@ let rendererReady = false;
 export const readyListeners = new Set<() => void>();
 export const isReady = () => rendererReady;
 export let frameMS = 0;
-export const renderMetrics={updateMS:0,drawRequests:0,culled:0,bodies:0,labels:0,pool:0};
+export const renderMetrics={updateMS:0,drawRequests:0,culled:0,bodies:0,labels:0,pool:0,atlasPages:0,atlasRGBABytes:0,evictedAtlases:0};
 export const appearanceStatus = { loading: false, error: "" };
 class BattleScene extends Phaser.Scene {
   private visibleView:ViewRect|null=null;
@@ -96,6 +97,8 @@ class BattleScene extends Phaser.Scene {
   private failedPages = new Set<string>();
   private heroLook: { body: string; weapon: string | null } = { body: "dress-1", weapon: "weapon-8" };
   private viewportKey="";
+  private retainedPages=new Set<string>();
+  private nextResourceSweep=0;
   constructor() {
     super("battle");
   }
@@ -376,6 +379,7 @@ class BattleScene extends Phaser.Scene {
     const needed = new Set<string>();
     for (const name of names)
       for (const texture of this.modelPages.get(name) ?? []) needed.add(texture);
+    for(const key of needed)this.retainedPages.add(key);
     let complete = true;
     for (const page of assets.pages.filter((p) => needed.has(p.key))) {
       if (this.textures.exists(page.key)) continue;
@@ -529,11 +533,14 @@ class BattleScene extends Phaser.Scene {
   update(_time: number, delta: number) {
     if (!rendererReady) return;
     const measuredStart=import.meta.env.DEV?performance.now():0;
+    this.retainedPages.clear();
     if(import.meta.env.DEV){renderMetrics.drawRequests=0;renderMetrics.culled=0;}
     if (!isGraybox) {
       const kinds = [...new Set([...MAPS[game.mapId].monsterPool, MAPS[game.mapId].boss, ...game.enemies.map((e) => e.kind)])];
       const models = ["world-" + game.mapId, ...(game.mapId === "woma" || game.mapId === "zuma" ? ["womaFlame", "womaShock", "arrow"] : []),...(kinds.includes("overlord") ? ["overlordBlade","overlordDeath"] : []), ...kinds.flatMap((kind) => [kind, kind + "-shadow"])];
       const missing = models.some((name) => [...(this.modelPages.get(name) ?? [])].some((key) => !this.textures.exists(key)));
+      // Retain chapter pages even when already loaded.
+      for(const model of models)for(const key of this.modelPages.get(model)??[])this.retainedPages.add(key);
       if (missing && !this.requireModels(models)) { this.accumulator = 0; return; }
     }
     if (this.paintedMap !== game.mapId) {
@@ -871,6 +878,23 @@ class BattleScene extends Phaser.Scene {
         if(game.survivorMode&&this.pool.length>=512)image.destroy();else this.pool.push(image);
         this.bodies.delete(key);
       }
+    // Sweep only between loader batches, after dead sprites have left the display list.
+    // Visible actors, retained corpses, current equipment and the whole current chapter
+    // stay pinned. Hidden pooled Images must release their Frame before its Texture.
+    if(!this.load.isLoading()&&performance.now()>=this.nextResourceSweep){
+      this.nextResourceSweep=performance.now()+5000;
+      for(const sprite of this.bodies.values())this.retainedPages.add(sprite.texture.key);
+      const loaded=new Set(assets.pages.filter(p=>this.textures.exists(p.key)).map(p=>p.key));
+      const unused=unusedAtlasPages(assets.pages,loaded,this.retainedPages);
+      if(unused.length){
+        const retiring=new Set(unused);
+        for(const sprite of this.pool)if(retiring.has(sprite.texture.key))sprite.setTexture('__DEFAULT');
+        for(const key of unused){this.textures.remove(key);this.cache.json.remove(key);this.queuedPages.delete(key);loaded.delete(key);}
+        renderMetrics.evictedAtlases+=unused.length;
+      }
+      const residency=atlasResidency(assets.pages,loaded);
+      renderMetrics.atlasPages=residency.pages;renderMetrics.atlasRGBABytes=residency.rgbaBytes;
+    }
     if(import.meta.env.DEV){renderMetrics.updateMS=performance.now()-measuredStart;renderMetrics.bodies=this.bodies.size;renderMetrics.labels=this.labels.size;renderMetrics.pool=this.pool.length;}
   }
 }
