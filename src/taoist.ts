@@ -147,14 +147,18 @@ export function refreshSummons(g: Game) {
     p.hp = Math.max(0, Math.min(p.maxHp, p.maxHp * ratio));
   }
 }
-function summon(g: Game, s: Skill) {
-  const source = s.id === "skeleton" ? "skeleton" : "beast";
+export function summonCapacity(g: Game, s: Skill) {
+  const source: "skeleton" | "beast" = s.id === "skeleton" ? "skeleton" : "beast";
   const owned = g.pets.filter((p) => p.hp > 0 && p.source === source);
   const all = g.pets.filter(
     (p) => p.hp > 0 && ["skeleton", "beast"].includes(p.source ?? ""),
   );
   const cap = source === "skeleton" ? Math.min(g.survivorMode?3:2, 1 + s.count) : 1;
-  if (owned.length >= cap || all.length >= (g.survivorMode?4:3)) return false;
+  return {source,cap,owned:owned.length,full:owned.length >= cap || all.length >= (g.survivorMode?4:3)};
+}
+function summon(g: Game, s: Skill) {
+  const {source,full}=summonCapacity(g,s);
+  if(full)return false;
   let point: { x: number; y: number } | undefined;
   for (let i = 0; i < 16; i++) {
     const a = (i * Math.PI) / 8,
@@ -201,19 +205,19 @@ function hide(g: Game, id: number, s: Skill) {
   buff.detectionRadius = Math.max(8, 28 - s.chance);
   return true;
 }
+export function healingCandidates(g:Game,s:Skill){
+ const near=friends(g).filter(f=>distance(f.actor,g.player)<=radius(g,s,s.id==='heal'?180:144));
+ const injured=near.filter(f=>f.actor.hp<f.maxHp);
+ const needed=injured.filter(f=>f.actor.hp/f.maxHp<(f.id===0?.7:.5));
+ const triggered=s.id==='heal'?needed.length>0:injured.length>0&&(injured.length>=2||g.player.hp/g.maxHP<(g.survivorMode?.7:.35)+(skillExtras(s).triggerHP??0)/100);
+ return {injured,needed,triggered};
+}
 export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
   if (s.id === "skeleton" || s.id === "beast") return summon(g, s);
   if (s.id === "heal" || s.id === "groupHeal") {
-    const near = friends(g).filter(
-      (f) =>
-        distance(f.actor, g.player) <=
-        radius(g, s, s.id === "heal" ? 180 : 144),
-    );
-    const injured = near.filter((f) => f.actor.hp < f.maxHp);
+    const {injured,needed,triggered}=healingCandidates(g,s);
+    if(!triggered)return false;
     if (s.id === "heal") {
-      const needed = injured.filter(
-        (f) => f.actor.hp / f.maxHp < (f.id === 0 ? 0.7 : 0.5),
-      );
       needed.sort(
         (a, b) =>
           (g.tao.healPriority === "self"
@@ -236,8 +240,6 @@ export function castTaoist(g: Game, s: Skill, targets: Enemy[]) {
         (1 + (g.stats.sc_bonus_pct ?? 0) / 100);
       for (const f of selected) heal(g, f.id, amount, s.id);
     } else {
-      if (injured.length < 2 && g.player.hp / g.maxHP >= (g.survivorMode ? 0.7 : 0.35)+(skillExtras(s).triggerHP??0)/100) return false;
-      if (!injured.length) return false;
       const amount =
         (14 + g.rollStat("sc")) *
         (1 + s.power / 100) *

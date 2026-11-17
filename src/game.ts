@@ -1652,7 +1652,7 @@ export class Game {
     );
     return Math.hypot(point.x - a.x - dx * u, point.y - a.y - dy * u);
   }
-  private targetList(s: Skill) {
+  targetList(s: Skill, updateFocus = true) {
     const weighted = [
       "lightning",
       "bigfireball",
@@ -1690,7 +1690,7 @@ export class Game {
         Math.hypot(focus.x-this.player.x,focus.y-this.player.y)<=Math.hypot(first.x-this.player.x,first.y-this.player.y)+150) {
         targets.splice(targets.indexOf(focus),1);targets.unshift(focus);
       }
-      s.focusTarget=targets[0]?.id;
+      if(updateFocus)s.focusTarget=targets[0]?.id;
     }
     return targets;
   }

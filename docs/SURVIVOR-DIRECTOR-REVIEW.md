@@ -122,3 +122,30 @@
 阶段首领候选规则：到5/10/15分钟检查时若仍有存活首领，则跳过该次阶段首领；不积存补刷。18分钟最终首领始终独立生成，已有首领保留，危险招式仍共用并发预算。存档保存下一次节点，读档不重新补刷。完整对照另存 `alpha43-phase-budget.json`，验收完成后再汇总。
 
 阶段首领预算对照已完成：相同9局的终局状态与用时全部不变。防叠加是边界规则修复，不是当前样本近战压力的有效解释，不宣称改善胜率。
+
+## 补充种子42/2026（18局）
+
+与种子176使用相同双核、回血/补给与宝箱策略，产物 `alpha43-phase-multiseed.json`。
+
+|章节|职业|种子|结果|秒|
+|---|---|---:|---|---:|
+|biche|wizard|42|won|1211|
+|biche|warrior|42|won|1200|
+|biche|taoist|42|won|1234|
+|biche|wizard|2026|won|1200|
+|biche|warrior|2026|won|1203|
+|biche|taoist|2026|dead|1320|
+|shimu|wizard|42|won|1200|
+|shimu|warrior|42|dead|485|
+|shimu|taoist|42|dead|1248|
+|shimu|wizard|2026|won|1200|
+|shimu|warrior|2026|dead|396|
+|shimu|taoist|2026|dead|1239|
+|bairimen|wizard|42|won|1320|
+|bairimen|warrior|42|dead|1320|
+|bairimen|taoist|42|dead|1320|
+|bairimen|wizard|2026|dead|1320|
+|bairimen|warrior|2026|dead|1320|
+|bairimen|taoist|2026|dead|1167|
+
+石墓战士三个种子均在359–485秒失败；白日门存在大量决战超时。优先检查石墓远程压制和战士构筑/回血机会，再检查白日门最终输出与路径。继续保留真人、硬件测试缺口，不把机器人结果称为玩家胜率。
