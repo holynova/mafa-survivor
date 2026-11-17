@@ -37,3 +37,39 @@
 .survivor-guide{position:absolute;left:12px;right:12px;top:max(12px,env(safe-area-inset-top));z-index:2;max-width:400px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid #8c7447;background:#211a10e8;box-sizing:border-box;pointer-events:none}.survivor-guide p{margin:0;flex:1;font-size:13px;line-height:1.5;color:#e3d3b4}.survivor-guide button{pointer-events:auto;white-space:nowrap;flex:none;padding:7px;min-height:44px}.survivor-guide.is-inline{position:static;max-width:none;margin:10px 0;background:#30271a88}.survivor-ui .survivor-guide-reset{font-size:12px;width:100%;margin:8px 0}
 
 .survivor-ui .audio-settings label.audio-volume{display:grid;grid-template-columns:1fr;gap:0}.survivor-ui .audio-volume input[type="range"]{width:100%;min-height:44px;margin:0;accent-color:#c9aa70}
+/* Keep real, non-overlapping touch targets; narrow screens put skills below
+   the orb/readout instead of shrinking six buttons beside the orb. */
+.survivor-ui{--survivor-hud-height:124px}
+.mir-survival-hud{height:calc(var(--survivor-hud-height) + env(safe-area-inset-bottom))}
+.mir-hud-frame{height:124px;grid-template-rows:44px 44px 5px;gap:3px}
+.mir-hud-readout{height:44px}
+.survivor-ui .mir-hud-readout button{min-height:44px;min-width:44px}
+.mir-skill-dock{grid-template-columns:repeat(6,minmax(44px,1fr));gap:3px}
+.survivor-ui .mir-skill-slot{width:44px;height:44px;min-height:44px;max-width:44px;max-height:44px;box-sizing:border-box}
+.survivor-controls{bottom:calc(var(--survivor-hud-height) + env(safe-area-inset-bottom) + 16px)}
+@media(max-width:439px){
+ .survivor-ui{--survivor-hud-height:132px}
+ .mir-survival-hud{display:grid;grid-template-columns:82px minmax(0,1fr);grid-template-rows:68px 44px 5px;gap:4px;padding-top:3px;align-content:start;align-items:center}
+ .mir-vital{grid-column:1;grid-row:1;width:82px;height:68px}
+ .mir-orb-art{transform:scale(.49);top:0;left:5px}
+ .mir-vital>span{top:49px;left:2px;width:78px;font-size:11px}
+ .mir-vital-bars{left:4px;right:4px;bottom:0}
+ .mir-hud-frame{display:contents}
+ .mir-hud-readout{grid-column:2;grid-row:1;height:68px;box-sizing:border-box;padding:0 7px;border:solid transparent;border-width:7px 6px;border-image:var(--mir-chat) 14 9 31 9 fill / 7px 6px stretch;background:#100c08cf;gap:4px}
+ .mir-hud-readout strong{font-size:17px;letter-spacing:0}
+ .mir-skill-dock{grid-column:1/-1;grid-row:2;margin:0}
+ .mir-hud-frame>progress{grid-column:1/-1;grid-row:3}
+}
+.survivor-touch-field.is-fixed .survivor-stick{bottom:calc(var(--survivor-hud-height) + 22px + env(safe-area-inset-bottom))}
+/* Short landscape screens share one row so large targets do not consume a
+   third of the battlefield. Portrait keeps the full-width skill row. */
+@media(min-width:700px) and (max-height:500px){
+ .survivor-ui{--survivor-hud-height:80px}
+ .mir-vital{height:80px}
+ .mir-orb-art{transform:scale(.55);left:14px;top:0}
+ .mir-vital>span{top:59px}
+ .mir-hud-frame{height:80px;grid-template-columns:220px minmax(0,1fr);grid-template-rows:44px 5px}
+ .mir-hud-readout{grid-column:1;grid-row:1}
+ .mir-skill-dock{grid-column:2;grid-row:1}
+ .mir-hud-frame>progress{grid-column:1/-1;grid-row:2}
+}

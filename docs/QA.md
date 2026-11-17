@@ -1020,3 +1020,14 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 105文件/1189测试通过，assets:check和生产build通过（已有chunk告警）；日志 .artifacts/alpha43-elite-hunt-{tests,assets,build}.log。石墓3种子对照及默认复跑见DIRECTOR-REVIEW，不以两次胜利声称平衡完成。
 - 独立Ego空间75，320×740测试局结果；展开复盘、截图alpha43-weapon-recap-320.png已查看，页面宽320无横溢，建议完整换行；实际状态切换weapon锁后显示解锁建议。该测试为合成结算fixture，未冒充真实375秒实玩，不保存普通战绩。
 - 本轮仅结算建议显示变化，未重新跑战场动作/树林遮挡/原生键盘验收，既有缺口继续保留。空间75及5186临时服务已关闭，尚未发布。
+
+
+## alpha.43候选：HUD实际触摸区域与横竖屏布局
+
+- CSS调整技能/暂停按钮至44×44真实边界，没有叠加透明扩展层。小于440px时血球/读数上排、六技能全宽底排；一般布局124px高；700px以上且500px以下短横屏合为单行，80px高。保留原版像素、红蓝透明图和CD效果。
+- HUD高度变量同步血瓶区与固定摇杆，避免旧126px定位压住新布局；未修改输入/战斗规则。
+- Ego空间76，320/360/390/439/440竖屏，700/844横屏及1280桌面共8组真实DOM测量：7个按钮均44×44，无两两重叠、无横向溢出，左上角内4px的elementFromPoint均命中对应按钮。记录.artifacts/alpha43-touch-hud-geometry.json。
+- 已查看320、390、440和最终landscape-844截图（.artifacts/alpha43-touch-hud-*.png）；最终横屏HUD80/390高。早期844截图HUD124px过高，检查后收紧并另存最终版本；不将旧图作最终验收。原版人物/树冠完整，无所见地面黑缝；未覆盖所有遮挡地点。
+- 原生page.click受失焦暂停影响，首次按钮不存在、第二次只进入暂停，未虚报成功。随后Page.bringToFront、恢复测试battle状态，CDP touchStart/touchEnd点第六技能左上内4px，真实打开技能面板并选中“基本剑术”。未禁用自动暂停；这是浏览器触摸事件验证，不是实体手机手指或原生D键验收。
+- 105文件/1189测试、assets:check、最终生产build通过；日志alpha43-touch-hud-{tests,assets,build}.log。保留原有chunk警告。
+- 测试局未写普通战绩；固定摇杆只改内存并恢复。空间76关闭，临时5186服务停止。当前候选未发布。
