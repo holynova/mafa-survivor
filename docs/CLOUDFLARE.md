@@ -144,3 +144,14 @@ npm run deploy
 - 六项线上存储（普通局、进度、战绩、引导、诊断、声音）已在退出并导航作品集后精确恢复true；临时play观察器已还原，Ego92已关闭，无临时dev服务。
 - 线上repos.json与发布master完整结构一致；卡片Demo正确、currentSrc为390×844原WebP。图库ee4df095/1.0.2和wujun1897dda/1.0.2前后完整receipt相同。
 - 完整优化目标仍未完成：其他章节事件/平衡、独立环境声、Boss专曲与压力编排、实体设备操作/性能及听感等继续按路线图推进。
+
+
+## alpha.47 阶段测试版发布（2026-11-17）
+
+- 构建源码main `a08127694052e3637cd15dd89bddf08c9b4dc69e`，v0.1.0-alpha.47/original；作品集master `1701c3fe593fdc64e8338232e7720d72145acf81`。共享Worker xiaosang-portfolio version ID `4ef5f62f-11f9-42f8-ad33-e48fbbb02554`。
+- 1242本地测试、素材/类型/生产构建与README/版本校验通过；Source checks44081158258成功。完整共享站点dry-run/deploy成功，6文件上传、19934复用，组装19972文件。沿用Node24/Wrangler4.128.0及main/master手动子路径流程。
+- 线上version.json完整SHA匹配，production __MAFA__不存在。Ego95通过实际继续上局/继续战斗按钮恢复白日门最终首领存档夹具，390px显示“北 · 视线受阻”，无横向溢出，暂停与保存退出通过。夹具明确是离线真实Game生成的合法恢复状态，不是自然20分钟通关或平衡证据。首次截图HUD图片尚未解码，等待实际img.decode与两帧后重拍alpha47-online-bearing-390.png并查看，原版人物/首领/地貌/HUD完整。
+- 退出并导航同源作品集后，五项run/progress/records/guide/diagnostics原始存储精确恢复true。Ego95已关闭，无临时开发服务。
+- 线上repos.json与master完整结构相等；作品卡片Demo正确、390×844 WebP解码成功；图库ee4df095/1.0.2与wujun1897dda/1.0.2回执前后完整相等。Homepage、README、QR与卡片材料已满足并复用，Profile不在范围。.impeccable保留未动。
+- 作品集数据源检查通过；check-demo-links继续报告上游web-motion-showcase的既有Pages例外，未改其他项目或放宽检查。
+- 此次提供首领方位和观测可靠性改进，没有调低敌人生命或宣称章节平衡完成；完整优化清单继续执行。
