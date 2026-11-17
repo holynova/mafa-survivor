@@ -1,56 +1,39 @@
 # 开发路线与进度管理
 
-本项目的进度由 git 仓库、阶段标签、GitHub 预发布、文档证据与 GitHub Issues 共同管理；本文件是总入口。
+## 当前目标
 
-## 进度载体
+按用户最新要求集中完成最佳实践优化，先处理后两章难度和构筑平衡，移动端问题最后处理，全部验收后统一发布。线上版本alpha.51，生产入口为https://xiaosang.cc/mafa-survivor/?survivor，经典入口保留。当前本地改动尚未发布；最新细节见[STATUS](STATUS.md)。
 
-| 载体 | 用途 |
-|---|---|
-| git 提交 | 每次功能／修复／文档单独提交，提交信息说明动机与验证 |
-| 阶段标签 | 每个已验收阶段打递增 `v0.1.0-alpha.N`，标签指向包含文档的最终提交 |
-| GitHub 预发布 | 每个标签生成预发布，附截图与 JSON 证据；在线版本为 GitHub Pages |
-| `CHANGELOG.md` | 面向玩家的阶段变更 |
-| `docs/STATUS.md` | 当前公开版本、阶段增量与剩余缺口 |
-| `docs/ACCEPTANCE.md` | GDD 验收项逐条状态（已验／部分／未完成） |
-| `docs/QA.md` | 每阶段实机步骤、截图与失败记录 |
-| `docs/SIMULATION.md` | 同策略矩阵与逐局对照，禁止把36局当10k |
-| GitHub Issues + 里程碑 | 未完成工作的可分配条目；里程碑「后续阶段」为候选池 |
+## 当前收尾清单
 
-## 已发布阶段
-
-全部标签：`v0.1.0-alpha.1` … `v0.1.0-alpha.17`（alpha.18本地已验收，待部署）。
-
-| 阶段 | 提交 | 主要内容 |
+|事项|当前状态|证据与下一步|
 |---|---|---|
-| alpha.13 | `98434ee` | 击杀回复／生命偷取两类续航道具与同策略对照 |
-| alpha.14 | `98db73e` | 存档完整导出、文件／粘贴导入预览、原子恢复与撤回 |
-| alpha.15 | `06f5fd2` | 承伤归因、敌对穿墙拦截、玛法天赋、波次边界续玩 |
-| alpha.16 | `adb2d99` | 技能／装备统计面板：DPS／占比、购买件数、刷新次数、属性标签、战绩展开 |
+|三章遭遇、成长及经济|规则已实施，平衡未通过|[构筑/导演对照](SURVIVOR-DIRECTOR-REVIEW.md)：默认及明确构筑保留失败，继续弱势战士/非神兽路线和真人体验|
+|有限换技、双主修、补给、换装偏好|已实施并阶段验证|[优化清单](OPTIMIZATION-ROADMAP.md)；保留自由选择、测试无限与旧存档|
+|十章悬赏、守阵与横向起手解锁|已实施，实际收益仍需反馈|[章节事件](SURVIVOR-CHAPTER-EVENTS.md)、[起手](SURVIVOR-START-UNLOCKS.md)|
+|原版画面与清晰度|多尺寸/动态/灰度样本已验，完整设备矩阵仍缺|[QA](QA.md)；不把桌面移动视口称真机|
+|原版声音、音乐与缓存|已实施并验证播放/开关/缓存，仍有缺音与听感验收|[音乐/声音](SURVIVOR-MUSIC-REVIEW.md)、[音源账本](audio-manifest.json)|
+|战士新推荐半月/刺杀|本地规则/构筑测试通过，UI与实际默认入口待验|旧存档主修不覆盖，烈火路线仍保留弱势缺口|
+|安卓Chrome拖动无摇杆|浏览器路径修复，用户实际设备仍未确认|按用户要求最后处理；原生D键当前补验也未通过|
+|设备性能与可靠性|诊断/缓存/恢复工具已实施，物理设备预算仍未验|[诊断](SURVIVOR-DIAGNOSTICS.md)、[QA](QA.md)|
+|最终交付|待全部门禁完成|更新版本/CHANGELOG后手动Cloudflare部署与线上试玩，不先发半成品|
 
-在线版本：<https://holynova.github.io/mafa-survivor/>（页脚显示版本与提交号）。
+完整最佳实践项目逐条状态见[OPTIMIZATION-ROADMAP](OPTIMIZATION-ROADMAP.md)，原始审查与验收目标见[SURVIVOR-BEST-PRACTICES-AUDIT](SURVIVOR-BEST-PRACTICES-AUDIT.md)。历史经典模式GDD审计保留于[ACCEPTANCE](ACCEPTANCE.md)，不把它与新版幸存者验收混为一张完成表。
 
-## 待办（GitHub Issues）
+## 验证与发布门禁
 
-| 优先级 | 事项 | Issue |
-|---|---|---|
-| P0 | 战士与矿洞／沃玛／祖玛通关平衡（当前2／36，均为比奇法师） | [#1](https://github.com/holynova/mafa-survivor/issues/1) |
-| P1 | 300敌人性能专项与对象池收益 | [#2](https://github.com/holynova/mafa-survivor/issues/2) |
-| P1 | 装备使用率与跨局汇总 | [#3](https://github.com/holynova/mafa-survivor/issues/3) |
-| P2 | 头发／头盔与6件高级装备外观缺口 | [#4](https://github.com/holynova/mafa-survivor/issues/4) |
-| P2 | 公网商店锁／刷新与续玩实操 | [#5](https://github.com/holynova/mafa-survivor/issues/5) |
-| P2 | 移动端与窄屏矩阵 | [#6](https://github.com/holynova/mafa-survivor/issues/6) |
+1. npm test、npm run assets:check、npm run build；涉及原图/声音时补对应逐像素/音频工具校验。
+2. 真实浏览器交互与截图查看，记录实际视口、测试夹具和未覆盖范围。测试模式不污染正常记录，完成后关闭自建空间和临时服务。
+3. 战斗或成长改动使用固定原图、多职业/多种子/多构筑回归，记录源码SHA/哈希及是否干净；模拟胜负不是玩家胜率。冻结测试期间不修改源码。
+4. 未通过的平衡、物理设备、操作或听感验收继续保留，不能以单测数量抵消。
+5. 全部验收后，按AGENTS.md最新发布方式，从干净游戏main构建；产物和收录写入作品集master，再手动发布共用xiaosang-portfolio Worker。目标为xiaosang.cc/mafa-survivor/，不新建发布分支、Action或Pages标签。
+6. 验证线上version.json、原版资源、游戏与作品集入口及实际交互/截图，再更新发布回执。旧Pages、旧工作流和已发布版本保留回退。
 
-新增工作先建 Issue 并挂到「后续阶段」里程碑，再进入阶段开发；完成一项就在对应阶段关闭并附证据链接。
+## 记录入口
 
-## 阶段验收门禁
+- [CHANGELOG](../CHANGELOG.md)：已发布玩家可见变更。
+- [STATUS](STATUS.md)、[QA](QA.md)：最新实现与实际验证范围。
+- [CLOUDFLARE](CLOUDFLARE.md)：现行子路径部署回执。
+- [SIMULATION](SIMULATION.md)、[SAVES](SAVES.md)：历史机制矩阵与存档兼容。
 
-1. `npm test`、`npx tsc --noEmit`、`npm run build` 通过；改画面时另跑 `assets:check`、`assets:visual-check`、`assets:audio-check`。
-2. 真实浏览器验证并查看截图（ego-browser 独立任务空间），记录到 `docs/QA.md`。
-3. 影响战斗时重跑同策略36局，逐局对照写入 `docs/SIMULATION.md`；只增加展示的阶段需说明为何结果应一致。
-4. 更新 `CHANGELOG.md`、`docs/STATUS.md`、`docs/ACCEPTANCE.md`、`docs/SAVES.md`（如涉及存档）与版本号。
-5. 提交 → 推送 `main` → 打标签 → Actions 的 build／deploy／release 成功。
-6. 核对公网 `version.json`、素材哈希与入口 JS，实机试玩并截图，再补写 `docs/RELEASES.md`。
-7. 上传截图与 JSON 到预发布，报告版本链接与已知缺口。
-
-
-2026-10-29扩充：alpha.17已发布技能节奏／侦测／特效；alpha.18原版UI、15个新源模型、四张新源地图本地已验收。当前新增四项回血／落地物品／金币分档／受击死亡反馈进入后续阶段；白日门与1.76石墓原图仍待核实，不能以石阁改名替代。
+本文件原有alpha.17/18与默认Pages阶段流程已过时，现以最新状态和仓库AGENTS.md为准；历史记录保留于CHANGELOG和发布文档，不再将旧流程列作当前发布步骤。
