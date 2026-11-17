@@ -1,3 +1,4 @@
+import {SurvivorTelemetry} from "./survivor-telemetry";
 import {canStartMajorAttack} from './attack-budget';
 import {survivorExpNeeded} from './survivor-pacing';
 import {snapshotSurvival,parseSurvivalSave} from './survivor-save';
@@ -277,6 +278,7 @@ export class Game {
   potions=newPotionState();
   test = newTestSettings();
   audioEvents: string[] = [];
+  telemetry=new SurvivorTelemetry();
   survivorMode = false;
   survival = newSurvival();
   touchInput = {x:0,y:0};
@@ -366,6 +368,7 @@ export class Game {
     };
   };
   emit() {
+    this.telemetry.observe(this);
     for (const f of this.listeners) f();
   }
   get maxHP() {
@@ -761,15 +764,15 @@ export class Game {
   useBloodPotion() {const used=useBloodPotion(this);if(used)this.emit();return used;}
   step(dt: number) {
     if (this.phase !== "battle") return;
+    this.telemetry.step(this,dt);
     this.clock += dt;
     this.waveTime += dt;
     if(this.survivorMode){survivalTick(this);if(this.phase!=="battle")return;}
     this.potions.cd=Math.max(0,this.potions.cd-dt);
     if(this.player.hp/this.maxHP<=.5)useBloodPotion(this);
-    this.player.hp = Math.min(
-      this.maxHP,
-      this.player.hp + (this.stats.hp_regen ?? 0) * dt,
-    );
+    const beforeRegen=this.player.hp;
+    this.player.hp = Math.min(this.maxHP,this.player.hp + (this.stats.hp_regen ?? 0) * dt);
+    this.telemetry.regeneration(this,this.player.hp-beforeRegen);
     const mag = Math.hypot(this.input.x, this.input.y);
     this.player.moving = mag > 0.01;
     if (mag > 0.01) {
@@ -2129,6 +2132,7 @@ export class Game {
         life: 0.7,
       });
     if (e.hp <= 0) {
+      if(e.elite||isBossKind(e.kind))this.telemetry.event(this,"elite-kill",{id:e.id,kind:e.kind,boss:isBossKind(e.kind),summoned:!!e.summoned,aliveSeconds:this.clock-e.born});
       if(this.survivorMode)survivalDeath(this,e);
       this.kills++;
       this.waveKills++;

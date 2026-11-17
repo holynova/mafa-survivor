@@ -1,3 +1,4 @@
+import {runtimeDiagnostics,observeRuntime} from "./runtime-diagnostics";
 import {visualPreferences,DEFAULT_VISUAL,floatingPresentation,effectOpacity} from './visual-settings';
 import {atlasResidency,unusedAtlasPages} from './asset-residency';
 import {eliteScale,monsterName,enemyDangerZones,type DangerZone} from './encounters';
@@ -150,6 +151,8 @@ class BattleScene extends Phaser.Scene {
       () => game.phase === "battle",
       ()=>game.useBloodPotion(),
     );
+    const stopDiagnostics=observeRuntime(this.game.canvas);
+    this.game.events.once(Phaser.Core.Events.DESTROY,stopDiagnostics);
     this.game.canvas.tabIndex = 0;
     this.game.canvas.setAttribute("aria-label", "游戏战场");
     this.game.events.once(Phaser.Core.Events.DESTROY, () =>
@@ -528,6 +531,7 @@ class BattleScene extends Phaser.Scene {
     return label;
   }
   update(_time: number, delta: number) {
+    runtimeDiagnostics.timestamp(performance.now(),game.phase==="battle");
     if (!rendererReady) return;
     const measuredStart=import.meta.env.DEV?performance.now():0;
     this.retainedPages.clear();

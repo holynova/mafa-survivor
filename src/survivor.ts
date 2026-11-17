@@ -63,9 +63,9 @@ export function survivalChoices(g:Game):Upgrade[]{const pool:Upgrade[]=[];
  g.survival.seenSkills=[...new Set([...g.survival.seenSkills,...g.skills.map(s=>s.id),...choices.flatMap(c=>c.skill?[c.skill]:[])])];return choices;
 }
 export function chooseSurvival(g:Game,id:string){const c=g.choices.find(x=>x.id===id);if(!c)return;
- if(c.id.startsWith('evo:')){if(c.skill&&eligibleEvolutions(g).some(s=>s.id===c.skill))evolveSkill(g,c.skill);return;}
- if(c.skill){let s=g.skills.find(x=>x.id===c.skill);if(s){if(s.rank>=8)return;s.rank++;}else{if(g.skills.length>=6)return;s=g.newSkill(c.skill);g.skills.push(s);}Object.assign(s,survivalBonuses(s));g.recompute();}
- else{const key=id.slice(2),n=g.survival.charms[key]??0;if(n>=5||(!n&&Object.keys(g.survival.charms).length>=6))return;g.survival.charms[key]=n+1;g.upgrades[c.stat!]=(g.upgrades[c.stat!]??0)+c.value;g.recompute();if(c.stat==='hp_max')g.player.hp=Math.min(g.maxHP,g.player.hp+c.value);}
+ if(c.id.startsWith('evo:')){if(c.skill&&eligibleEvolutions(g).some(s=>s.id===c.skill)){g.telemetry.event(g,'choice',{id,level:g.level});evolveSkill(g,c.skill);}return;}
+ if(c.skill){let s=g.skills.find(x=>x.id===c.skill);if(s){if(s.rank>=8)return;g.telemetry.event(g,'choice',{id,level:g.level});s.rank++;}else{if(g.skills.length>=6)return;g.telemetry.event(g,'choice',{id,level:g.level});s=g.newSkill(c.skill);g.skills.push(s);}Object.assign(s,survivalBonuses(s));g.recompute();}
+ else{const key=id.slice(2),n=g.survival.charms[key]??0;if(n>=5||(!n&&Object.keys(g.survival.charms).length>=6))return;g.telemetry.event(g,'choice',{id,level:g.level});g.survival.charms[key]=n+1;g.upgrades[c.stat!]=(g.upgrades[c.stat!]??0)+c.value;g.recompute();if(c.stat==='hp_max')g.player.hp=Math.min(g.maxHP,g.player.hp+c.value);}
  g.choices=[];g.phase='battle';g.survival.choiceChest=false;g.emit();
 }
 /** Every chapter starts at level one in this mode; legacy chapter stats assumed prior equipment. */

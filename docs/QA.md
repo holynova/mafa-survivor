@@ -973,3 +973,13 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 - 已查看 .artifacts/alpha43-music-settings-390.png、alpha43-music-settings-320.png、alpha43-music-battle-390.png。设置无横向溢出；战场人物/树冠完整。第一份320截图声音设置折叠，已重新展开覆盖为最终截图；最初滑杆按键失败有对应修复，不掩盖结果。
 - D键CDP试验再次因页面失焦转暂停而未取得位移证据，仍为验收缺口。没有声称手机硬件性能、扬声器/耳机听感或全局音频峰值合格。
 - 仅测试局，不保存普通战绩；声音设置原值精确恢复。空间69和临时5186服务均已关闭。当前仍未发布。
+
+
+## alpha.43候选：本地对局记录、导出与恢复观测
+
+- 实现细节与限制见SURVIVOR-DIAGNOSTICS.md。102文件/1179测试、assets:check和生产build通过，日志 .artifacts/alpha43-telemetry-{tests,assets,build}.log。最终追加了拒绝满级选项不记作有效选择的回归。
+- 浏览器空间72、390/320视口，真实规则步进65秒得到真实账本分钟增量；原生下载成功，随后从磁盘读取4494字节JSON验证mode/区间/事件。普通局诊断未被测试局覆盖。
+- 已查看 alpha43-diagnostics-390.png、alpha43-diagnostics-320.png、alpha43-diagnostics-result-390.png；下载按钮44px，无横向溢出。
+- 真实渲染采样及WEBGL_lose_context丢失/恢复各一次，恢复截图alpha43-webgl-restored-390.png人物/地面/树冠完整，战斗继续；不据此声称全部设备恢复或手机性能合格。受控测试的419ms长任务/704ms恢复间隔保留，不滤掉冒充好性能。
+- 同种子离线对照确认记录无RNG/战斗改变；日志schema、绑定同局恢复、上限、存储失败、测试隔离通过。日志不包含完整输入轨迹，不称可确定性重放。
+- 空间72已关闭，自建5186服务已停止；未改用户普通存档，无待清理浏览器资源。

@@ -20,6 +20,7 @@ export function supplyUnavailable(g:Game,id:SupplyId){
 }
 export function buySupply(g:Game,id:SupplyId){
  if(supplyUnavailable(g,id))return false;
+ g.telemetry.event(g,"supply",{id,cost:supplyCost(g,id)});
  g.gold-=supplyCost(g,id);g.survival.suppliesBought++;
  if(id==='potion')g.potions.reserve.push(35);else g.survival.rerolls++;
  g.sound('coin');g.emit();return true;

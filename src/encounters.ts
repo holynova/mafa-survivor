@@ -7,6 +7,7 @@ export function activeBosses(g:Game){return g.enemies.filter(e=>e.hp>0&&isBossKi
 export function announceEncounter(g:Game,e:Enemy){
  const boss=isBossKind(e.kind),current=g.encounterAlert;
  if(!boss&&current&&current.boss&&current.until>g.clock)return;
+ g.telemetry.event(g,"encounter",{id:e.id,kind:e.kind,boss,final:e.id===g.survival.finalBossId});
  g.encounterAlert={name:monsterName(e.kind),boss,final:e.id===g.survival.finalBossId,until:g.clock+(boss?4:3)};
  g.sound(`encounter:${e.kind}:attack`);g.emit();
 }

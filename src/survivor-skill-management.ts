@@ -10,6 +10,7 @@ export function changeSurvivalSkill(g:Game,oldId:SkillId,nextId:SkillId|null){
  if(nextId&&!replacementSkills(g).some(s=>s.id===nextId))return false;
  g.survival.seenSkills=[...new Set([...g.survival.seenSkills,oldId])];
  if(g.survival.mainSkills.includes(oldId)){g.survival.mainSkills=[...new Set(g.survival.mainSkills.flatMap(id=>id===oldId?(nextId?[nextId]:[]):[id]))];delete g.survival.focusMisses[oldId];if(nextId)delete g.survival.focusMisses[nextId];}
+ g.telemetry.event(g,"respec",{from:oldId,rank:g.skills[index].rank,to:nextId});
  clearTaoSkill(g,oldId);
  if(oldId==='charm')g.pets=g.pets.filter(p=>p.source!=='charm');
  if(oldId==='shield')g.player.shieldUntil=0;

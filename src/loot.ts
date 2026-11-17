@@ -44,7 +44,7 @@ export function collectLoot(g:Game,d:Drop) {
     const item=getItem(d.itemId),count=d.count??1;let sold=0,equipped=false;
     for(let i=0;i<count;i++) {
       const slot=autoEquipSlot(g,item);
-      if(slot){const old=g.equipment[slot];if(old){const value=sellPrice(old.paid,getItem(old.itemId).price);gold(g,value);sold+=value;}g.equipment[slot]={itemId:item.id,paid:0};g.recompute();equipped=true;}
+      if(slot){const old=g.equipment[slot];if(old){const value=sellPrice(old.paid,getItem(old.itemId).price);gold(g,value);sold+=value;}g.telemetry.event(g,"equipment",{slot,from:old?.itemId??null,to:item.id});g.equipment[slot]={itemId:item.id,paid:0};g.recompute();equipped=true;}
       else{const value=sellPrice(0,item.price);gold(g,value);sold+=value;}
     }
     const notices=g.floating.filter(f=>f.color==="#ecd087"&&f.life>0);
