@@ -1155,3 +1155,14 @@ Source checks 40920798531、Pages／Release 40920806165全部成功；公开vers
 3. 对照合成window KeyboardEvent：捕获trusted=false的KeyD，held=KeyD、输入(1,0)，角色x移动至1125.5；keyup后输入(0,0)。已查看alpha45-keyboard-probe.png桌面截图。
 
 结论：当前观察到的失败发生在浏览器投递/页面事件观测边界，不能据此宣称游戏D键逻辑有错，也不能证明真人物理键盘通过。没有修改游戏去绕过工具限制。具体阻断来自浏览器、自动化或扩展尚无证据区分，保留实体键盘验收项。临时探针已移除，导航退出测试；空间88已关闭，dev94416已停止。
+
+## alpha.45 阶段测试版发布（2026-11-17）
+
+- 构建源码main `41fd6411b03913a7cb7cbf7daa309a2c37aa1163`，v0.1.0-alpha.45/original；作品集master `4c21a5fe77a7340f899b0e84af04ee53b824d84e`。
+- 共享Worker xiaosang-portfolio，version ID `7425bbf4-d40f-4be8-b8bf-530cc2c5afa3`。现有Node24/Wrangler4.128.0，完整共享站点dry-run与deploy通过；上传6文件，19931复用。保持既有main/master手动子路径发布。
+- 本地111文件/1226测试、素材与构建、README与版本校验通过。首个CI44074182558道士长局超20秒（其余1225通过）；改既有Source checks为maxWorkers=1，保留全部断言和20秒限制，CI44074633842全部成功。该CI四项长局合计12.671秒，本地串行完整23.77秒；不将测试执行时间当游戏性能预算。
+- 作品集check-demo-links仍报告上游web-motion-showcase既有Pages例外，保持2ed9181决定，没有改链接或放宽检查；verify-data-source通过。未改其他项目或.impeccable。README、QR、作品卡片截图/链接和Homepage已满足并复用；Profile不在本次范围。
+- 线上HTTPS版本与完整SHA一致，页面可见alpha.45，production __MAFA__为undefined。390px实际选择道士/骷髅，开局唯一1级技能、16秒召唤已满，管理面板显示火符与神兽两项主修且均0/8，说明没有免费赠送；保存退出通过。解锁是roleBest=300界面夹具，不冒称自然5分钟测试。
+- 已查看alpha45-online-guide-390.png、alpha45-online-battle-390.png。线上repos.json与master完整结构相等，作品卡片currentSrc为390×844 WebP且Demo正确；图库ee4df095/1.0.2和wujun1897dda/1.0.2发布前后完整receipt相同。
+- 五项线上存储在导航退出游戏后精确恢复true，独立Ego89关闭；无遗留测试服务。
+- 仍未完成：后两章/多构筑/真人平衡、物理键盘/实体手机性能与操作、独立环境声与其他章节事件等；完整范围保留在OPTIMIZATION-ROADMAP，不把本次发布当全目标完成。
