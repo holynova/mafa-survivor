@@ -1,3 +1,9 @@
+# alpha.54 已上线
+
+生产入口为 https://xiaosang.cc/mafa-survivor/?survivor。连续生存界面去掉蓝条，使用原版血瓶图标与库存数字，悬赏入口直达说明。连续生存与经典模式的游戏弹窗新增右上角关闭按钮，收起待选强化保留返回入口。
+
+本地 1,321 项测试与 17 个浏览器截图通过。线上 390 × 844 已试玩，版本、资源、作品集截图均已核对。安卓真机专项待测。发布回执见 CLOUDFLARE.md。
+
 # alpha.53 已上线
 
 生产入口为 https://xiaosang.cc/mafa-survivor/?survivor。线上回读确认 v0.1.0-alpha.53、original 和游戏源提交 `7a6aae0f06fab6cb4621c5c485e4b2c3badfca66`。方案 1「旧城铜铸」覆盖大厅、章节、战斗、首领、三选一、技能与装备、暂停和结算，保留实际数据和原版战场。

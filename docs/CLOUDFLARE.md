@@ -1,6 +1,12 @@
 # Cloudflare 子路径发布
 
-## 最新发布 alpha.53（2026-11-18）
+## 最新发布 alpha.54（2026-11-18）
+
+- 游戏 main `e3de5f4d721a11346055c859ed7c5948a7d16183`，作品集 master `e27d16605d68ad4afc07ea73b25778a27c30f0ed`。共享 Worker `xiaosang-portfolio` 版本 `8ef962c4-5763-4eee-98b8-603ac004b89e`，已回读生产版本与五项关键文件。
+- 1,321 项游戏测试，原版素材与图集校验，原版和灰盒构建，以及 [GitHub 源码检查](https://github.com/holynova/mafa-survivor/actions/runs/44298966000) 均通过。Wrangler 预检为 19,993 个文件。作品集截图已更换，现有图库、吴军和植物幸存者回执均已核对。
+- 390 × 844 线上实测选章关闭、出战拖动、无蓝条、血瓶图标、暂停、装备及返回。线上测试空间 138 已关闭。完整本地测试见 QA.md，截图与回执在 `.artifacts/alpha54-ui/`。
+
+## 历史发布 alpha.53（2026-11-18）
 
 - 游戏 main `7a6aae0f06fab6cb4621c5c485e4b2c3badfca66`，作品集 master `66ffaae5d62b354ade362735628ee5fe99fcd85e`。共享 Worker `xiaosang-portfolio` 版本 `1f3260fc-2493-451a-b980-11286715992d`，生产入口 https://xiaosang.cc/mafa-survivor/?survivor。
 - 原版素材模式的版本回执、入口与五项关键资源逐字节一致。入口的自动注入仅为 Cloudflare Web Analytics。作品集沿用原 Demo 与 Repo，更新卡片与分享实拍。图库和吴军挂载回执、植物幸存者 0.13.0 回执均与发布来源一致。
