@@ -1,3 +1,4 @@
+import {GamePopupClose} from './GamePopupClose';
 import {SurvivorJoystick} from './SurvivorJoystick';
 import { useEffect, useReducer, useState, useRef, type CSSProperties } from "react";
 import { game, type Mode, type RunResult } from "./game";
@@ -142,6 +143,8 @@ export function App() {
     "play" | "guide" | "talents" | "records" | "skills"
   >("play");
   const [inventory, setInventory] = useState(false);
+  const [hiddenPopup,setHiddenPopup]=useState<"upgrade"|"replace"|"shop"|null>(null);
+  useEffect(()=>{setHiddenPopup(null);},[game.phase]);
   const [seed, setSeed] = useState("176");
   const [saveError, setSaveError] = useState("");
   const [saveStatus, setSaveStatus] = useState("");
@@ -823,7 +826,10 @@ export function App() {
           </section>
         </>
       )}
-      {game.phase === "upgrade" && (
+      {hiddenPopup===game.phase&&<button className="game-popup-reopen" autoFocus data-pending-popup={hiddenPopup} onClick={()=>setHiddenPopup(null)}>
+        {hiddenPopup==="shop"?"继续查看行商":hiddenPopup==="replace"?"继续选替换技能":"继续选强化"}
+      </button>}
+      {game.phase === "upgrade" && hiddenPopup!=="upgrade" && (
         <div className="modal-backdrop">
           <section
             className="upgrade modal"
@@ -831,6 +837,7 @@ export function App() {
             aria-modal="true"
             aria-labelledby="upgrade-title"
           >
+            <GamePopupClose label="收起强化面板" onClose={()=>setHiddenPopup("upgrade")}/>
             <div className="eyebrow">新的力量</div>
             <h2 id="upgrade-title">
               修行精进 <small>Lv.{game.level}</small>
@@ -867,7 +874,7 @@ export function App() {
           </section>
         </div>
       )}
-      {game.phase === "replace" && game.pendingSkill && (
+      {game.phase === "replace" && hiddenPopup!=="replace" && game.pendingSkill && (
         <div className="modal-backdrop">
           <section
             className="modal replacement"
@@ -875,6 +882,7 @@ export function App() {
             aria-modal="true"
             aria-label="替换技能"
           >
+            <GamePopupClose label="收起替换技能" onClose={()=>setHiddenPopup("replace")}/>
             <div className="eyebrow">六槽取舍</div>
             <h2>习得{getSkill(game.pendingSkill).name}</h2>
             <p className="muted">替换会失去旧技能的等级和强化。{game.pendingBook!==null ? `确认后支付${game.bookOffer?.price}金币；取消不扣钱。` : "保留的技能不受影响。"}</p>
@@ -898,7 +906,7 @@ export function App() {
           </section>
         </div>
       )}
-      {game.phase === "shop" && (
+      {game.phase === "shop" && hiddenPopup!=="shop" && (
         <div className="modal-backdrop shop-backdrop">
           <section
             className="shop modal"
@@ -906,6 +914,7 @@ export function App() {
             aria-modal="true"
             aria-labelledby="shop-title"
           >
+            <GamePopupClose label="收起行商" onClose={()=>setHiddenPopup("shop")}/>
             <header>
               <div>
                 <div className="eyebrow">荒野行商</div>
@@ -1046,6 +1055,7 @@ export function App() {
             aria-modal="true"
             aria-label="战斗已暂停"
           >
+            <GamePopupClose label="关闭暂停菜单，继续战斗" onClose={()=>game.pause()}/>
             <div className="eyebrow">稍歇片刻</div>
             <h2>战斗已暂停</h2>
             <p>你的征途，会在这里等你。</p>
@@ -1071,12 +1081,8 @@ export function App() {
             aria-modal="true"
             aria-label="装备与属性"
           >
-            <header>
-              <h2>装备与修为</h2>
-              <button onClick={closeInventory} aria-label="关闭装备面板">
-                关闭 ×
-              </button>
-            </header>
+            <GamePopupClose label="关闭装备面板" onClose={closeInventory}/>
+            <header><h2>装备与修为</h2></header>
             <Equipment sell={game.phase === "shop"} />
             <SkillGuide />
             <div className="stat-grid">
@@ -1188,6 +1194,7 @@ export function App() {
             aria-modal="true"
             aria-labelledby="result-title"
           >
+            <GamePopupClose label="关闭结算，返回营地" onClose={()=>game.lobby()}/>
             <div className="eyebrow">
               {game.mode === "trial" ? "短局试玩结束" : "本次征途已结束"}
             </div>

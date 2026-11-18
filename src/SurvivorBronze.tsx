@@ -1,3 +1,4 @@
+import {GamePopupClose} from './GamePopupClose';
 import {useState} from 'react';
 import type {ReactNode} from 'react';
 import {game} from './game';
@@ -25,7 +26,8 @@ export function ChapterPicker({map,progress,onChange,onClose}: {
   onClose: () => void;
 }) {
   const [selected,setSelected] = useState(map);
-  return <section className="survivor-panel survivor-chapters" aria-labelledby="chapter-picker-title">
+  return <section className="survivor-panel survivor-chapters" role="dialog" aria-modal="true" aria-labelledby="chapter-picker-title">
+    <GamePopupClose label="关闭章节选择" onClose={onClose}/>
     <h2 className="bronze-plaque" id="chapter-picker-title">选择章节</h2>
     <div className="bronze-chapter-list" aria-label="章节">
       {CHAPTER_PATH.map(id => <button className="bronze-chapter" key={id} type="button" aria-pressed={selected===id}

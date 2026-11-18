@@ -1,3 +1,4 @@
+import {GamePopupClose} from './GamePopupClose';
 import {useState} from 'react';
 import {SurvivorEquipment} from './SurvivorEquipment';
 import {game} from './game';
@@ -10,7 +11,8 @@ export function SurvivorSkillPanel({initialSelected,initialTab,onBack}: {
  initialSelected:SkillId|null; initialTab:'skills'|'equipment'; onBack:()=>void;
 }){
  const [tab,setTab]=useState(initialTab);
- return <section className="survivor-panel survivor-skill-panel" aria-labelledby="bronze-build-title">
+ return <section className="survivor-panel survivor-skill-panel" role="dialog" aria-modal="true" aria-labelledby="bronze-build-title">
+    <GamePopupClose label="关闭技能与装备" onClose={onBack}/>
   <h2 className="bronze-plaque" id="bronze-build-title">技能与装备</h2>
   <div className="survivor-tabs bronze-build-tabs" aria-label="技能与装备">
    <button aria-pressed={tab==='equipment'} onClick={()=>setTab('equipment')}>装备</button>

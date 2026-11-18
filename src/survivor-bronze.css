@@ -6,7 +6,7 @@
   --bronze-title:"Songti SC","Noto Serif CJK SC",SimSun,serif;
   --bronze-bottom:max(24px,env(safe-area-inset-bottom));
   --bronze-orb:88px;
-  --survivor-hud-height:117px;
+  --survivor-hud-height:112px;
   color:var(--bronze-ink);
   font:15px/1.5 var(--bronze-title);
 }
@@ -240,7 +240,7 @@
   height:var(--survivor-hud-height);
   display:grid;
   grid-template-columns:var(--bronze-orb) minmax(0,1fr);
-  grid-template-rows:14px 1fr 20px;
+  grid-template-rows:minmax(var(--bronze-orb),1fr) 20px;
   gap:4px 5px;
   align-items:center;
   align-content:stretch;
@@ -253,7 +253,7 @@
   filter:drop-shadow(0 2px 2px #030201a0);
 }
 .survivor-bronze .mir-vital {
-  grid-area:1 / 1 / 3 / 2;
+  grid-area:1 / 1;
   position:relative;
   width:var(--bronze-orb);
   height:var(--bronze-orb);
@@ -269,7 +269,6 @@
   font-variant-numeric:tabular-nums;
   text-shadow:0 2px 3px #000,1px 1px #120904;
 }
-.survivor-bronze .mir-ready-bar,
 .survivor-bronze .mir-experience progress {
   display:block;
   box-sizing:border-box;
@@ -279,12 +278,9 @@
   box-shadow:inset 0 0 0 1px #332618;
   background:#100a05;
 }
-.survivor-bronze .mir-ready-bar { grid-area:1 / 2; height:12px; border-radius:4px; }
 .survivor-bronze progress::-webkit-progress-bar { background:#1a1109; }
-.survivor-bronze .mir-ready-bar::-webkit-progress-value { background:linear-gradient(#78a9f4,#215eb6); }
-.survivor-bronze .mir-ready-bar::-moz-progress-bar { background:#397bd4; }
 .survivor-bronze .mir-skill-dock {
-  grid-area:2 / 2;
+  grid-area:1 / 2;
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
   justify-items:stretch;
@@ -314,7 +310,7 @@
 .survivor-bronze .bronze-item-slot[aria-pressed=true] { border-color:#f4d68f; box-shadow:inset 0 0 0 2px #73552c; }
 .survivor-bronze .mir-cooldown-number { font-family:var(--bronze-title); font-size:17px; }
 .mir-experience {
-  grid-area:3 / 1 / 4 / 3;
+  grid-area:2 / 1 / 3 / 3;
   display:flex;
   align-items:center;
   gap:8px;
@@ -494,14 +490,14 @@
   .survivor-bronze .survivor-chapters { padding-inline:15px; }
   .bronze-lobby-menu,.survivor-bronze .bronze-lobby-more { width:calc(100% - 40px); }
   .survivor-bronze .mir-survival-hud:is([data-skills="5"],[data-skills="6"]) {
-    grid-template-rows:14px 36px 44px 20px;
-    height:calc(var(--survivor-hud-height) + 17px);
+    grid-template-rows:54px 44px 20px;
+    height:calc(var(--survivor-hud-height) + 14px);
   }
   .survivor-bronze .mir-survival-hud:is([data-skills="5"],[data-skills="6"]) .mir-vital { height:54px; width:54px; }
   .survivor-bronze .mir-survival-hud:is([data-skills="5"],[data-skills="6"]) .mir-vital > span { font-size:12px; }
-  .survivor-bronze .mir-survival-hud:is([data-skills="5"],[data-skills="6"]) .mir-skill-dock { grid-area:3 / 1 / 4 / 3; }
-  .survivor-bronze .mir-survival-hud:is([data-skills="5"],[data-skills="6"]) .mir-experience { grid-area:4 / 1 / 5 / 3; }
-  .survivor-bronze:has(.mir-survival-hud:is([data-skills="5"],[data-skills="6"])) .survivor-controls { transform:translateY(-17px); }
+  .survivor-bronze .mir-survival-hud:is([data-skills="5"],[data-skills="6"]) .mir-skill-dock { grid-area:2 / 1 / 3 / 3; }
+  .survivor-bronze .mir-survival-hud:is([data-skills="5"],[data-skills="6"]) .mir-experience { grid-area:3 / 1 / 4 / 3; }
+  .survivor-bronze:has(.mir-survival-hud:is([data-skills="5"],[data-skills="6"])) .survivor-controls { transform:translateY(-14px); }
 }
 @media (max-height:640px) {
   .survivor-bronze .bronze-lobby-hero { height:42dvh; }
@@ -513,9 +509,8 @@
   }
 }
 @media (orientation:landscape) and (max-height:500px) {
-  .survivor-bronze { --survivor-hud-height:83px; --bronze-orb:58px; --bronze-bottom:max(8px,env(safe-area-inset-bottom)); }
-  .survivor-bronze .mir-survival-hud { max-width:545px; grid-template-rows:9px 46px 18px; }
-  .survivor-bronze .mir-ready-bar { height:8px; }
+  .survivor-bronze { --survivor-hud-height:80px; --bronze-orb:58px; --bronze-bottom:max(8px,env(safe-area-inset-bottom)); }
+  .survivor-bronze .mir-survival-hud { max-width:545px; grid-template-rows:58px 18px; }
   .survivor-bronze .mir-skill-dock { grid-template-columns:repeat(4,44px); justify-content:start; }
   .survivor-bronze .mir-survival-hud[data-skills="5"] .mir-skill-dock { grid-template-columns:repeat(5,44px); }
   .survivor-bronze .mir-survival-hud[data-skills="6"] .mir-skill-dock { grid-template-columns:repeat(6,44px); }
@@ -609,3 +604,28 @@
 .survivor-bronze[data-graybox=true] .mir-vital {background-color:#331b17;}
 .survivor-bronze[data-graybox=true] .mir-orb-fill {background-color:#a43932;}
 .survivor-bronze[data-graybox=true] .bronze-pause-button::after { content:"暂停"; }
+
+.survivor-bronze .survivor-challenge h2 {
+  margin:0 0 12px;
+}
+.bronze-challenge-details p { margin:8px 0; }
+.bronze-challenge-details h3 { margin:12px 0 4px; }
+
+.survivor-bronze .survivor-controls .bronze-potion {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  min-width:64px;
+  min-height:46px;
+  border:1px solid #967d4f;
+  border-image:none;
+  padding:2px 6px;
+  background:#251b11e8;
+  box-shadow:inset 0 0 0 2px #493722;
+  font-variant-numeric:tabular-nums;
+}
+.bronze-potion .bronze-item-art {
+  width:29px;
+  height:29px;
+}

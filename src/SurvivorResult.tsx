@@ -1,3 +1,4 @@
+import {GamePopupClose} from './GamePopupClose';
 import {game} from './game';
 import {CLASSES} from './classes';
 import {ITEMS,MAPS,getSkill} from './content';
@@ -18,7 +19,8 @@ export function SurvivorResult({progress,clock,onRetry,onLeave}: {
   const loot=findIds.flatMap(id=>ITEMS.find(item=>item.id===id)??[]);
   const won=game.phase==='won';
   const boss=monsterName(MAPS[game.mapId].boss);
-  return <section className="survivor-panel survivor-result" aria-labelledby="bronze-result-title">
+  return <section className="survivor-panel survivor-result" role="dialog" aria-modal="true" aria-labelledby="bronze-result-title">
+    <GamePopupClose label="关闭结算，返回大厅" onClose={onLeave}/>
     <h1 className="bronze-plaque" id="bronze-result-title">{won?'击败首领':'本局结束'}</h1>
     <p className="bronze-result-time">生存时间 <strong>{clock}</strong></p>
     <dl className="bronze-result-ledger">

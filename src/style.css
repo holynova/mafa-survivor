@@ -2305,3 +2305,56 @@ body:has(.lobby) .vignette {
 .survivor-entry-link{display:block;text-align:center;color:#e1c17d;margin:12px 0;padding:12px;border:1px solid #8b7445;background:#241f17;text-decoration:none}
 
 .audio-settings label.audio-volume{display:grid;grid-template-columns:1fr;gap:0}.audio-settings .audio-volume input[type="range"]{width:100%;min-height:44px;margin:0;accent-color:#c9aa70}
+
+/* The right-hand control stays available while long popups scroll. */
+#root button.game-popup-close {
+  position:sticky;
+  z-index:8;
+  top:0;
+  display:grid;
+  place-items:center;
+  width:44px;
+  height:44px;
+  min-height:44px;
+  margin:0 0 -44px auto;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:#231a10f2;
+  border-image:none;
+  box-shadow:inset 0 0 0 1px #8b7047;
+  color:#f8e7bc;
+  cursor:pointer;
+  flex:none;
+  font:24px/1 system-ui,sans-serif;
+}
+.game-popup-close img {
+  width:24px;
+  height:23px;
+  object-fit:contain;
+  image-rendering:pixelated;
+}
+.game-popup-close:focus-visible { outline:2px solid #ffe198; outline-offset:2px; }
+.game-popup-close + .survivor-share-heading { padding-right:50px; min-height:44px; }
+.survivor-panel > .game-popup-close + h2:not(.bronze-plaque) { padding-inline:47px; }
+.survivor-panel > .game-popup-close + .bronze-plaque { width:min(calc(100% - 88px),242px);padding-inline:8px; }
+@media (max-width:360px) {
+  .survivor-bronze .survivor-panel > .game-popup-close + h2 {font-size:24px;}
+}
+.survivor-panel > .game-popup-close + #bronze-result-title { margin-top:0; }
+.modal > .game-popup-close + header { padding-right:50px; }
+
+#root .game-popup-reopen {
+  position:absolute;
+  z-index:6;
+  top:max(18px,env(safe-area-inset-top));
+  left:50%;
+  transform:translateX(-50%);
+  min-height:44px;
+  padding:8px 16px;
+  background:#241a10;
+  border:1px solid #9d8459;
+  border-image:none;
+  color:#fae7b8;
+  white-space:nowrap;
+}

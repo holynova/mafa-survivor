@@ -180,7 +180,8 @@ class BattleScene extends Phaser.Scene {
     this.input.keyboard!.on("keydown-ALT",()=>{this.showLootNames=true;});
     this.input.keyboard!.on("keyup-ALT",()=>{this.showLootNames=false;});
     this.input.keyboard!.on("keydown", (e: KeyboardEvent) => {
-      if (game.phase === "upgrade" && ["1", "2", "3"].includes(e.key)) {
+      if (game.phase === "upgrade" && ["1", "2", "3"].includes(e.key) &&
+          !document.querySelector('[data-pending-popup="upgrade"]')) {
         const c = game.choices[Number(e.key) - 1];
         if (c) game.choose(c.id);
       }

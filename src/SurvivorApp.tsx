@@ -1,3 +1,5 @@
+import {GamePopupClose} from './GamePopupClose';
+import {SurvivorArt} from './SurvivorArt';
 import {SURVIVOR_STARTS,START_UNLOCK_SECONDS,START_DESCRIPTIONS,survivorStartGuide,availableSurvivorStarts} from './survivor-starts';
 import {ChapterChallenge} from './ChapterChallenge';
 import {TELEMETRY_KEY} from "./survivor-telemetry";
@@ -43,6 +45,8 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
  const root=useRef<HTMLDivElement>(null);
  const [choosingMap,setChoosingMap]=useState(false);
  const [choosingRole,setChoosingRole]=useState(false);
+ const [showChallenge,setShowChallenge]=useState(false);
+ const [upgradeHidden,setUpgradeHidden]=useState(false);
  useLayoutEffect(()=>{
   const hud=root.current?.querySelector<HTMLElement>('.mir-survival-hud');
   if(!hud){setBattleInset(0);return;}
@@ -54,7 +58,7 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
  const [skillPanel,setSkillPanel]=useState<{tab:'skills'|'equipment';skill:SkillId|null}>();
  const persist=()=>{try{const cp=writeSurvivalCheckpoint(game,localStorage);if(cp){game.telemetry.persist(game,localStorage);setProgress(updateSurvivorProgress(game,localStorage));setSaved(cp);setError(e=>e.startsWith('存档未保存')?'':e);return true;}return false;}catch{setError('存档未保存：本机存储不可用或已满，请勿刷新。');return false;}};
  const discard=()=>{try{localStorage.removeItem(SURVIVOR_SAVE_KEY);setSaved(null);return true;}catch{setError('无法清除本机存档，请检查浏览器存储。');return false;}};
- useEffect(()=>{let phase=game.phase;const unsub=game.subscribe(()=>{survivorGuide.observe(game);if(game.phase!=='paused')setSkillPanel(undefined);if(game.result&&game.mode==='normal')try{setProgress(updateSurvivorProgress(game,localStorage));recordSurvival(game,localStorage);game.telemetry.persist(game,localStorage);localStorage.removeItem(SURVIVOR_SAVE_KEY);setSaved(null);}catch{setError('本机存储不可用，本局战绩未保存。');}else if(game.phase!==phase)persist();phase=game.phase;update();});
+ useEffect(()=>{let phase=game.phase;const unsub=game.subscribe(()=>{survivorGuide.observe(game);if(game.phase!=='paused'){setSkillPanel(undefined);setShowChallenge(false);}if(game.phase!=='upgrade')setUpgradeHidden(false);if(game.result&&game.mode==='normal')try{setProgress(updateSurvivorProgress(game,localStorage));recordSurvival(game,localStorage);game.telemetry.persist(game,localStorage);localStorage.removeItem(SURVIVOR_SAVE_KEY);setSaved(null);}catch{setError('本机存储不可用，本局战绩未保存。');}else if(game.phase!==phase)persist();phase=game.phase;update();});
  const timer=window.setInterval(persist,5000);
  const suspend=()=>{suspendSurvival(game);document.dispatchEvent(new Event('clear-game-input'));persist();};
  const saveHidden=()=>{if(document.hidden)suspend();};
@@ -71,6 +75,7 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
   setSkillPanel({tab:'skills',skill:id});
  };
  const continueBattle=()=>{game.survival.toast='';game.pause();};
+ const potionCount=game.potions.reserve.length;
  return <div ref={root} className="survivor-ui survivor-bronze" data-text-size={visualPreferences.textSize} data-phase={game.phase}
   data-building={game.phase==='paused'&&!!skillPanel} data-graybox={isGraybox}>
   {error&&<p className="survivor-error" role="alert">{error}</p>}
@@ -134,15 +139,20 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
    {game.phase==='battle'&&<>
     <EncounterHud/><SurvivorGuide place="battle"/><SurvivorJoystick/>
     <div className="survivor-controls"><div>
-     <ChapterChallenge compact wardUnlocked={progress.wardUnlocked}/>
+     <ChapterChallenge wardUnlocked={progress.wardUnlocked} onOpen={()=>{game.pause();setShowChallenge(true);}}/>
      {game.survival.chests.length>0&&<p>宝箱 {game.survival.chests.length} · 靠近拾取</p>}
      {game.skills.some(s=>s.id==='teleport')&&<button onClick={()=>game.useManualSkill()}>瞬息移动</button>}
-     <button aria-label={`使用血瓶，剩余${game.potions.reserve.length}瓶`} disabled={!game.potions.reserve.length} onClick={()=>game.useBloodPotion()}>
-      血瓶 ×{game.potions.reserve.length}
+     <button className="bronze-potion" aria-label={`使用血瓶，剩余${potionCount}瓶`}
+      disabled={!potionCount||game.player.hp<=0||game.player.hp>=game.maxHP||game.potions.cd>0} onClick={()=>game.useBloodPotion()}>
+      {isGraybox?<span aria-hidden="true">血瓶</span>:<SurvivorArt name="item/金创药（小）"/>}
+      <span aria-hidden="true">×{potionCount}</span>
      </button>
     </div></div>
    </>}
-   {game.phase==='upgrade'&&<section className="survivor-panel survivor-upgrade" aria-labelledby="bronze-upgrade-title">
+   {game.phase==='upgrade'&&(upgradeHidden
+    ? <button className="game-popup-reopen" autoFocus data-pending-popup="upgrade" onClick={()=>setUpgradeHidden(false)}>继续选强化</button>
+    : <section className="survivor-panel survivor-upgrade" role="dialog" aria-modal="true" aria-labelledby="bronze-upgrade-title">
+    <GamePopupClose label="收起强化面板" onClose={()=>setUpgradeHidden(true)}/>
     <h2 id="bronze-upgrade-title">{selectingEvolution?'选择武器进化':game.survival.choiceChest?'宝箱强化':'选择强化'}</h2>
     <SurvivorGuide place="upgrade"/>
     <div className="survivor-choices">{game.choices.map(c=>{
@@ -159,9 +169,15 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
     {!selectingEvolution&&<button className="bronze-reroll" disabled={game.survival.rerolls<=0} onClick={()=>{
      if(game.survival.rerolls>0){game.survival.rerolls--;game.choices=survivalChoices(game);game.emit();}
     }}>重掷 <small>剩余 {game.survival.rerolls}</small></button>}
+   </section>)}
+   {game.phase==='paused'&&showChallenge&&<section className="survivor-panel survivor-challenge" role="dialog" aria-modal="true" aria-labelledby="bronze-challenge-title">
+    <GamePopupClose label="关闭章节悬赏" onClose={continueBattle}/>
+    <h2 id="bronze-challenge-title">{progress.wardUnlocked?'章节事件':'章节悬赏'}</h2>
+    <ChapterChallenge inline wardUnlocked={progress.wardUnlocked}/>
    </section>}
    {game.phase==='paused'&&skillPanel&&<SurvivorSkillPanel initialSelected={skillPanel.skill} initialTab={skillPanel.tab} onBack={()=>setSkillPanel(undefined)}/>}
-   {game.phase==='paused'&&!skillPanel&&<section className="survivor-panel survivor-pause" aria-labelledby="bronze-pause-title">
+   {game.phase==='paused'&&!skillPanel&&!showChallenge&&<section className="survivor-panel survivor-pause" role="dialog" aria-modal="true" aria-labelledby="bronze-pause-title">
+    <GamePopupClose label="关闭暂停菜单，继续战斗" onClose={continueBattle}/>
     <h2 id="bronze-pause-title">{game.survival.toast||'暂停'}</h2>
     {game.survival.toast.startsWith('进化完成')&&recentEvolution&&<p>{EVOLUTIONS[recentEvolution]?.description}</p>}
     <button className="survivor-primary" onClick={continueBattle}>继续</button>

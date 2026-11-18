@@ -1,7 +1,7 @@
 import {expect,it} from 'vitest';
 import {Game} from '../src/game';
 import {skillCooldown,skillMetrics} from '../src/skill-metrics';
-import {skillCooldownView,skillReadiness} from '../src/SurvivorHud';
+import {skillCooldownView} from '../src/SurvivorHud';
 import {changeSurvivalSkill} from '../src/survivor-skill-management';
 import {survivalBonuses} from '../src/survivor';
 
@@ -18,10 +18,10 @@ it('covers a second enemy within 1.7 seconds while keeping one-second ticks and 
  expect(g.enemies.filter(e=>e.greenPoison)).toHaveLength(2);
  expect(first.greenPoison!.tickAt).toBeCloseTo(tick+1);expect(first.greenPoison!.until).toBeCloseTo(6);
 });
-it('uses the same total in real casts, HUD cooldown, readiness and effective metrics',()=>{
+it('uses the same total in real casts, HUD cooldown and effective metrics',()=>{
  const {g,s}=arena();g.cast(s);expect(s.cd).toBeCloseTo(1.6);expect(skillCooldown(s,0,true)).toBe(s.cd);
  expect(skillCooldownView(s,0,true).ratio).toBe(1);s.cd=.8;
- expect(skillReadiness([s],0,true)).toBeCloseTo(.5);expect(skillMetrics(g,s)).toContain('实际冷却 1.6秒');
+ expect(skillCooldownView(s,0,true).ratio).toBeCloseTo(.5);expect(skillMetrics(g,s)).toContain('实际冷却 1.6秒');
 });
 it('retains classic four-second casts and a single poisoned target before that cooldown ends',()=>{
  const {g,s}=arena(false);g.cast(s);expect(s.cd).toBe(4);
