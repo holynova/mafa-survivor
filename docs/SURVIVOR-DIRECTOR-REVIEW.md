@@ -613,3 +613,8 @@ fbf670b95f7ecdf24b3009e6e9fb1c1fa098ad14干净提交；九份报告均sourceDirt
 按同一固定源布局/控制器/升级和有限采购策略执行，命令参数均在各JSON内记录。主矩阵命令为`node tools/simulate-survival.mjs --maps=biche,shimu,bairimen --seeds=176,42,2026,7,991,6003 --strategy=dual --seek-chests --use-recovery --trace-final-boss --check-save`，另以single/spread分别运行。严格组加`--roles=taoist --main-skills=talisman,skeleton --support-skills=poison,heal --exclude-skills=beast`，种子额外加入13/31/73/117/271/409。快照最大144372字符、本机Node测量最慢15.77ms（多进程负载下），不代表浏览器落盘或手机性能。全部进程已终结，SSR服务按finally关闭；未部署，源码和规则保持冻结。
 
 默认双主修的机制回归完成，但弱势烈火、严格非神兽、单核/均摊道士及真人难度仍保留。无需假设所有技能组合都必须通关，也不因此把已有弱势组合标为已调平。事件配对见CHAPTER-EVENTS最新节；下一步属于具体弱势路线策略与真人/设备验收，不能用更多相同矩阵重复代替。
+
+
+## alpha.52 烈火路线的发版前对照
+
+对照同一批半月／烈火构筑，测试基础距离从48增至64像素。石墓两组种子合计通关4→3/12，白日门5→6/12，总通关均为9/24。首批石墓中位生存时间888.5→518秒，既有证据不支持保留改动。上线版本复用已经冻结回归的伤害和距离规则。报告见本地 alpha52-flame-{baseline,holdout-base,candidate,holdout}.json。烈火及不带神兽路线有实战成型路径，通关稳定性仍适合用真人反馈继续校准。
