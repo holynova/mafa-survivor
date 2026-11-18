@@ -1,6 +1,13 @@
 # Cloudflare 子路径发布
 
-## 最新发布 alpha.54（2026-11-18）
+## 最新发布 alpha.55（2026-11-19）
+
+- 游戏 main `e4a977f55e61a096efa61eedf7e73bf575eb83f9`，作品集 master `d28e3e19d06fec9959baffed5ea311275422d195`。共享 Worker `xiaosang-portfolio` 版本 `45ab28fa-a2fd-4809-bcd0-2c68aa6b6507`。
+- 1,323 项游戏测试、22 项工具测试、素材像素与原音检查、原版及灰盒构建通过。[GitHub 源码检查](https://github.com/holynova/mafa-survivor/actions/runs/44374438034)通过。Wrangler 预检为 19,995 个文件。
+- 已核对线上版本、原版模式与五项关键文件。作品集卡片沿用现有入口，已更新并验证实拍。图库、吴军与植物幸存者线上回执均与暂存来源一致。
+- 390 × 844 线上确认所选资源预加载、原版比奇大厅、出战、拖动、装备、保存退出与恢复战斗。线上测试空间 147 已关闭。截图及回执在 `.artifacts/alpha55-ui/`。
+
+## 历史发布 alpha.54（2026-11-18）
 
 - 游戏 main `e3de5f4d721a11346055c859ed7c5948a7d16183`，作品集 master `e27d16605d68ad4afc07ea73b25778a27c30f0ed`。共享 Worker `xiaosang-portfolio` 版本 `8ef962c4-5763-4eee-98b8-603ac004b89e`，已回读生产版本与五项关键文件。
 - 1,321 项游戏测试，原版素材与图集校验，原版和灰盒构建，以及 [GitHub 源码检查](https://github.com/holynova/mafa-survivor/actions/runs/44298966000) 均通过。Wrangler 预检为 19,993 个文件。作品集截图已更换，现有图库、吴军和植物幸存者回执均已核对。
