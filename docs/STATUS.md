@@ -1,3 +1,9 @@
+# alpha.53 已上线
+
+生产入口为 https://xiaosang.cc/mafa-survivor/?survivor。线上回读确认 v0.1.0-alpha.53、original 和游戏源提交 `7a6aae0f06fab6cb4621c5c485e4b2c3badfca66`。方案 1「旧城铜铸」覆盖大厅、章节、战斗、首领、三选一、技能与装备、暂停和结算，保留实际数据和原版战场。
+
+1321 项游戏测试、GitHub 源码检查、原版素材及音效验证、原版与灰盒构建通过。390 × 844 线上实测出战、拖动、暂停和当前角色装备，独立测试空间已关闭。安卓真机专项待测。部署与作品集记录见 CLOUDFLARE.md。
+
 # alpha.52 已上线
 
 生产入口为 https://xiaosang.cc/mafa-survivor/?survivor。线上回读确认 alpha.52、原版素材和构建提交 ac137588e20e5eed569a8b78b1f17fb4695ce18b。战场清晰度、后两章首领节奏、施毒、骷髅、神兽寻路及原版原声增量已随此版本集中上线。

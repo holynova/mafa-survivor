@@ -1,6 +1,13 @@
 # Cloudflare 子路径发布
 
-## 最新发布：alpha.51（2026-11-17）
+## 最新发布 alpha.53（2026-11-18）
+
+- 游戏 main `7a6aae0f06fab6cb4621c5c485e4b2c3badfca66`，作品集 master `66ffaae5d62b354ade362735628ee5fe99fcd85e`。共享 Worker `xiaosang-portfolio` 版本 `1f3260fc-2493-451a-b980-11286715992d`，生产入口 https://xiaosang.cc/mafa-survivor/?survivor。
+- 原版素材模式的版本回执、入口与五项关键资源逐字节一致。入口的自动注入仅为 Cloudflare Web Analytics。作品集沿用原 Demo 与 Repo，更新卡片与分享实拍。图库和吴军挂载回执、植物幸存者 0.13.0 回执均与发布来源一致。
+- Wrangler 预检确认阶段目录为 19,985 个文件。生产部署上传 7 个新增或变动资源，复用 19,946 个哈希。README、版本校验、二维码原入口和 [GitHub 源码检查](https://github.com/holynova/mafa-survivor/actions/runs/44255531684) 均通过。
+- 390 × 844 实际线上浏览器确认大厅、十章列表、比奇出战与拖动、暂停及装备人物。截图与 HTTP 证据保存在 `.artifacts/alpha53-bronze/`，本次独立空间 127 已关闭。安卓真机专项另验。
+
+## 历史发布：alpha.51（2026-11-17）
 
 - 游戏main db760ca509b90b35f63f91f24ee2e0851d4d15ea，作品集master 50fccf3639da1d220fbc91f01cfe8319ab0b6dd7。共享Worker xiaosang-portfolio version ID cf3a8d13-392a-4055-867c-a09b887a0b46。线上v0.1.0-alpha.51、original、完整SHA相符。
 - 1256测试、源码CI 44112492732、原素材及构建通过。干净master快照dry-run与发布通过，上传9文件，复用19954。图库、吴军和目录JSON与发布前逐字节相同。两首新增原版音乐线上字节与本地核验一致。
