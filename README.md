@@ -1,20 +1,20 @@
+<p align="right"><a href="README.en.md">English</a></p>
+
 <p align="center">
   <img src="./assets/readme/hero.svg" width="100%" alt="玛法幸存者 — 战法道三张职业牌：红色战士、蓝色法师、绿色道士，下方写着 20:00 · 12 波 · 最终首领">
 </p>
 
 <p align="center">
-  <a href="https://xiaosang.cc/mafa-survivor/?survivor">▶ 在线玩 · 幸存者模式 Play Survivor Mode</a>
+  <a href="https://xiaosang.cc/mafa-survivor/?survivor">▶ 在线玩 · 幸存者模式</a>
   ·
-  <a href="https://xiaosang.cc/mafa-survivor/">原版入口 Original Mode</a>
+  <a href="https://xiaosang.cc/mafa-survivor/">原版入口</a>
   ·
   <a href="https://github.com/holynova/mafa-survivor">GitHub 仓库</a>
 </p>
 
 玛法幸存者是一款手机优先的网页幸存者游戏：战法道三职业、33 种技能八级成长、10 张地图、技能进化与装备构筑。一局 20 分钟、12 波怪潮，撑到最后迎战最终首领。当前版本 v0.1.0-alpha.42，仍为 Alpha：完整职业 / 章节平衡与设备性能待完善。
 
-Mafa Survivor is a mobile-first browser survivor game: three classes (Warrior, Wizard, Taoist), 33 skills with 8 ranks of growth, 10 maps, skill evolutions and equipment builds. Each run lasts 20 minutes across 12 waves, ending with a final boss. Current version is v0.1.0-alpha.42 — still alpha: full class/chapter balance and device performance are unfinished.
-
-## 截图 / Screenshots
+## 截图
 
 <p align="center">
   <img src="./assets/readme/screenshot-desktop.jpg" width="600" alt="桌面端实机：比奇荒野第 1 波，战士 Lv.1 在林地中，周围是稻草人、半兽人、毒蜘蛛，底部是技能栏与血蓝球">
@@ -23,7 +23,7 @@ Mafa Survivor is a mobile-first browser survivor game: three classes (Warrior, W
 
 > 截图为 alpha.36 版本实机画面，当前版本为 alpha.42，界面细节可能有变化。
 
-## 玩法 / How to Play
+## 玩法
 
 - **一局 20 分钟**：1200 秒、12 波怪潮（每 100 秒一波）；精英从第 2 分钟起出现，首领在第 5 分钟登场，最终首领在最后阶段。
 - **三职业**：法师（HP 100，远程施法 · 范围压制，起始火球）、道士（HP 135，符毒牵制 · 治疗召唤，起始火符）、战士（HP 185，近身挥砍 · 强韧突围，幸存者模式起始半月）。
@@ -34,7 +34,7 @@ Mafa Survivor is a mobile-first browser survivor game: three classes (Warrior, W
 - **装备构筑**：局内掉落与商店装备、药水（红蓝药、太阳水），搭配技能与护符成型。
 - **双模式**：幸存者模式（`?survivor`）与原版入口并存，存档相互独立；另有快速测试模式与测试工具面板。
 
-## 地图 / Maps
+## 地图
 
 | 地图 | 首领 | 解锁（玛法水晶） |
 | :--- | :--- | :---: |
@@ -49,13 +49,13 @@ Mafa Survivor is a mobile-first browser survivor game: three classes (Warrior, W
 | 白日门 | 赤月恶魔 | 24 |
 | 石墓一层 | 白野猪 | 27 |
 
-## 技能（33 种，按职业）/ Skills
+## 技能（33 种，按职业）
 
 - **法师（14）**：火球术、雷电术、火墙、魔法盾、抗拒火环、地狱火、大火球、瞬息移动、爆裂火焰、疾光电影、地狱雷光、圣言术、冰咆哮、诱惑之光。
 - **战士（6）**：基本剑术、攻杀剑术、刺杀剑术、半月弯刀、野蛮冲撞、烈火剑法。
 - **道士（13）**：治愈术、精神力战法、施毒术、灵魂火符、召唤骷髅、隐身术、集体隐身术、幽灵盾、神圣战甲术、心灵启示、困魔咒、群体治疗术、召唤神兽。
 
-## 本地运行 / Run Locally
+## 本地运行
 
 Phaser + React + TypeScript + Vite；素材需先导入（原版图片、地图及 WAV，来源已登记）：
 
@@ -69,7 +69,7 @@ npm run dev
 
 检查与测试：`npm test`（vitest）、`npm run build`（类型检查 + 构建）。开发说明见 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)，进度见 [docs/STATUS.md](docs/STATUS.md)，验收标准见 [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md)。
 
-## 技术 / Tech
+## 技术
 
 - Phaser 3.90（游戏渲染）+ React 19（UI）+ TypeScript 5.9 + Vite 7 + zod（数据校验）+ idb（存档）。
 - 数值与内容集中在 `src/content.ts`（地图 / 装备 / 怪物）、`src/spells.ts`（33 技能定义）、`src/skill-growth.ts`（1–6 级成长）、`src/survivor-growth.ts`（7–8 级特化）、`src/survivor-evolutions.ts`（9 条进化配方）。
@@ -91,18 +91,3 @@ src/survivor.ts             幸存者模式规则（20 分钟 / 12 波 / 精英�
 src/classes.ts              三职业数值
 tools/import-assets.py      素材导入脚本
 ```
-
-## English
-
-**Mafa Survivor** is a mobile-first browser survivor game: 3 classes, 33 skills with 8 ranks, 10 maps, evolutions and equipment builds. Runs last 20 minutes over 12 waves, ending in a final boss. Currently v0.1.0-alpha.42.
-
-- **Classes**: Wizard (100 HP, ranged AoE, starts with Fireball), Taoist (135 HP, poison/control + healing/summons, starts with Talisman), Warrior (185 HP, melee tank, starts with Cleave in survivor mode).
-- **33 skills, 8 ranks**: ranks 1–6 are base growth, ranks 7–8 specialize per skill (e.g. Fireball rank 7: +20% projectile speed; rank 8: up to 4 projectiles). The final rank unlocks from wave 6.
-- **9 evolutions**: a skill at rank 8 + its matching charm + an evolution chest evolves it (Fireball → Burst Fireball with splash; Lightning → Chain Lightning jumping up to 4 enemies). Chests drop from elites/bosses after minute 8; every 2 elite kills grants a chest, stage bosses always drop one.
-- **10 charms** double as stat boosts and evolution ingredients; **10 maps** unlock out-of-run with Mafa Crystals (0–27), each with its own monster pool and boss (from Orc Brave in Biche to the Red Moon Demon).
-- **Two modes**: survivor mode (`?survivor`) and the original mode, with separate saves; a fast test mode and test-tools panel are included.
-- **Run it**: `npm ci`, import assets with `tools/import-assets.py` (original Mir2 art/maps/WAV, sources recorded), then `npm run dev`. **Tech**: Phaser 3.90 + React 19 + TypeScript 5.9 + Vite 7 + zod; tests via vitest (`npm test`).
-
-## 许可 / License
-
-仓库内暂无 LICENSE 文件。游戏素材为已登记的原版图片、地图及 WAV，来源与授权见 `docs/asset-authorization.json`。
