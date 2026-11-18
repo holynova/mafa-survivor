@@ -22,7 +22,29 @@ describe('survival director and role-specific growth',()=>{
  it('lightning evolution jumps beyond the first target radius',()=>{const g=run();g.survival.evolved=['lightning'];const a=g.spawnEnemy('scarecrow'),b=g.spawnEnemy('scarecrow'),c=g.spawnEnemy('scarecrow');[a,b,c].forEach((e,i)=>{e.x=800+i*150;e.y=700;e.hp=100;});g.hit(a,30,'lightning');expect(b.hp).toBeLessThan(100);expect(c.hp).toBeLessThan(b.hp+5);expect(c.hp).toBeGreaterThan(b.hp);});
 });
 
-it('chapter tuning makes late-map starting enemies beatable without changing legacy spawns',async()=>{const {tuneSurvivalEnemy}=await import('../src/survivor');const g=run();g.mapId='zuma';const e=g.spawnEnemy('zumaGuard');const originalHP=e.hp,originalDefense=e.defense!;tuneSurvivalEnemy(g,e,'normal');expect(e.hp).toBeCloseTo(originalHP*.65/3.8*1.2);expect(e.defense).toBeCloseTo(originalDefense/3.8);const old=new Game();old.mapId='zuma';const original=old.spawnEnemy('zumaGuard');expect(original.hp).toBe(originalHP);expect(original.defense).toBe(originalDefense);});
+it('doubles survivor ordinary HP with a three-minute ramp in harder chapters',async()=>{
+ const {tuneSurvivalEnemy}=await import('../src/survivor');
+ const g=run();
+ const forest=g.spawnEnemy('scarecrow');
+ const forestHP=forest.hp;
+ tuneSurvivalEnemy(g,forest,'normal');
+ expect(forest.hp).toBeCloseTo(Math.max(8,forestHP*.65*1.2)*2);
+
+ g.mapId='zuma';
+ const early=g.spawnEnemy('zumaGuard');
+ const originalHP=early.hp,originalDefense=early.defense!;
+ tuneSurvivalEnemy(g,early,'normal');
+ expect(early.hp).toBeCloseTo(Math.max(8,originalHP*.65/3.8*1.2)*1.05);
+ expect(early.defense).toBeCloseTo(originalDefense/3.8);
+
+ g.clock=180;
+ const late=g.spawnEnemy('zumaGuard');
+ tuneSurvivalEnemy(g,late,'normal');
+ expect(late.hp).toBeCloseTo(Math.max(8,originalHP*.65/3.8*(1.2+.25*180/1200))*2);
+ const legacy=new Game();
+ legacy.mapId='zuma';
+ expect(legacy.spawnEnemy('zumaGuard').hp).toBe(originalHP);
+});
 
 describe('survival passive tradeoffs',()=>{
  it('offers detection and movement passives without using extra slots',()=>{const g=run(),seen=new Set<string>();for(let i=0;i<300;i++)survivalChoices(g).forEach(c=>{if(c.id.startsWith('p:'))seen.add(c.id);});expect(seen.size).toBe(8);expect(seen.has('p:eagle')).toBe(true);expect(seen.has('p:swift')).toBe(true);});

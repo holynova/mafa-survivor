@@ -1,0 +1,35 @@
+{
+  "indexReference": "https://www.thelegendofmir2.com/item/",
+  "items": {
+    "罗刹": 40,
+    "怒斩": 70,
+    "天魔神甲（男）": 85,
+    "圣战宝甲（男）": 88,
+    "天尊道袍（男）": 87,
+    "天师长袍（男）": 90,
+    "六角戒指": 144,
+    "玻璃戒指": 143
+  },
+  "files": {
+    "DnItems.wil.json": {
+      "path": "res/item/DnItems.wil.json",
+      "sha1": "90f46144e2e408a34fde21aa3eb2e101b3287ca3",
+      "sha256": "29f3f30b8a3f6f56203ad56e7df7c93bfe7bc8ef84c576fcdf1bd09569d8f09a"
+    },
+    "DnItems.wil.png": {
+      "path": "res/item/DnItems.wil.png",
+      "sha1": "77253390fa912856272075567636d2045916fe70",
+      "sha256": "bd2c764acd1bc1ffcf3a9ef487eb274e9ca224f0022e944873d64295e2e421eb"
+    },
+    "Items.wil.json": {
+      "path": "res/item/Items.wil.json",
+      "sha1": "c08978553a957d56095451d5579e2b0e007c9009",
+      "sha256": "628239d0d7c4c3e761e5bba21880c34c7333b49d8c2314cad97795ddd4d2afdd"
+    },
+    "Items.wil.png": {
+      "path": "res/item/Items.wil.png",
+      "sha1": "7c1a859465db43766cecb6b98d996e5b016a9b2b",
+      "sha256": "ea78dfead71532d46ebecac3001c2fd21fe510b697030ddd46364ad3101a8b15"
+    }
+  }
+}

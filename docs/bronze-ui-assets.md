@@ -8,7 +8,7 @@
 
 | 文件 | 用途 |
 | --- | --- |
-| `lobby-gate.webp`、`lobby-title.webp`、`lobby-floor.webp` | 大厅背景、题字与地面 |
+| `lobby-title.webp` | 大厅题字。首屏背景由当前章节的原版游戏场景实时渲染。 |
 | `panel-frame.webp`、`panel-surface.webp`、`entry-frame.webp` | 弹窗铜框、内底及列表铜边 |
 | `button-gold.webp`、`button-dark.webp` | 主操作与次级操作的按钮材质 |
 | `clock-plaque.webp`、`title-plaque.webp`、`result-plaque.webp`、`boss-frame.webp`、`pause.webp` | HUD 和页面标题铭牌、首领框与暂停按钮 |
@@ -31,3 +31,5 @@
 装备页角色正面站姿、武器层及装备槽图标通过 `drawSurvivorArt` 读取当前 Phaser 已加载图集。角色外观与装备来自游戏状态，其来源沿用项目的 [原版素材清单](asset-manifest.json) 和 [授权记录](asset-authorization.json)。
 
 章节页全高底图 `chapter-background.webp` 来自同一组 alpha.52 实拍中的比奇郊外截图。裁下原场景并以附近地面像素覆盖角色、触控圈和浏览器浮标，独立保存为 390 × 708 WebP 供菜单使用。
+
+52 件装备的地面和背包图均有来源。补齐的 8 件使用已固定提交的客户端原版 `DnItems.wil` 与 `Items.wil` 图集，索引核对及源文件哈希记录在 `tools/native-equipment-icons.json`。

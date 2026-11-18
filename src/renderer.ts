@@ -20,14 +20,15 @@ import {simulationInput} from "./simulation";
 import { mapObjectAlpha, mapObjectDepth, coversActor, foregroundCoversActor, type Occluder } from "./map-render";
 import { assetUrl, isGraybox } from "./release";
 import { sounds } from "./sound";
-import { setWorldLayouts, type WorldLayout } from "./world";
+import { getWorldLayout, setWorldLayouts, type WorldLayout } from "./world";
 import { MovementInput, clearOnPhaseChange, inputDiagnostics } from "./input";
-import { SCENERY, ITEMS, MAPS, STATIONARY_MONSTERS, isBossKind, type MapId } from "./content";
+import { SCENERY, MAPS, STATIONARY_MONSTERS, isBossKind, type MapId } from "./content";
 let battleBottomInset=0;
 export function setBattleInset(height:number) {battleBottomInset=Math.max(0,height);}
 import { resolveAppearance, weaponBehind } from "./appearance";
 import { game, WORLD, type Enemy } from "./game";
 import {PET_HIT_WINDOW} from "./rules";
+import {indexSceneAssets,sceneMonsterKinds,skillAssetModels,startingAppearance,type SceneSelection} from "./scene-assets";
 export type Manifest = {
   world?: WorldLayout;
   worlds?: Partial<Record<MapId, WorldLayout>>;
@@ -65,7 +66,50 @@ export const readyListeners = new Set<() => void>();
 export const isReady = () => rendererReady;
 export let frameMS = 0;
 export const renderMetrics={updateMS:0,drawRequests:0,culled:0,bodies:0,labels:0,pool:0,atlasPages:0,atlasRGBABytes:0,evictedAtlases:0,ordinaryHealthBars:0};
-export const appearanceStatus = { loading: false, error: "" };
+export const appearanceStatus = { loading: true, error: "", loaded: 0, total: 0, selection: "" };
+let lobbySelection:SceneSelection;
+const selectionKey=({classId,mapId}:SceneSelection)=>classId+'/'+mapId;
+export function setLobbyAssetSelection(classId:SceneSelection['classId'],mapId:MapId) {
+  lobbySelection={classId,mapId};
+}
+export function sceneAssetsReady(classId:SceneSelection['classId'],mapId:MapId) {
+  return !appearanceStatus.loading&&!appearanceStatus.error&&appearanceStatus.selection===selectionKey({classId,mapId});
+}
+let initializeRequest:Promise<void>|undefined;
+let manifestError=false;
+export function initializeGameAssets() {
+  if(prepareEngine()) return;
+  initializeRequest??=fetch(assetUrl("runtime.json"),{signal:AbortSignal.timeout(20000)}).then(async response=>{
+    if(!response.ok) throw new Error("无法读取素材清单");
+    setAssetManifest(await response.json());
+    manifestError=false;
+    boot();
+  }).catch(error=>{
+    console.error("Asset manifest failed",error);
+    manifestError=true;
+    appearanceStatus.error="无法读取素材清单，请重试";
+    appearanceStatus.loading=false;
+    game.emit();
+  }).finally(()=>{initializeRequest=undefined;});
+}
+export function retryGameAssets() {
+  if(!manifestError) {
+    engine?.scene.getScene<BattleScene>("battle").retryAssets();
+    return;
+  }
+  manifestError=false;
+  appearanceStatus.error="";
+  appearanceStatus.loading=true;
+  game.emit();
+  initializeGameAssets();
+}
+function prepareEngine() {
+  if(engine) return true;
+  if(!isGraybox) return false;
+  setAssetManifest({pages:[],animations:{},frames:{},rightsStatus:"NO_THIRD_PARTY_ASSETS"});
+  boot();
+  return true;
+}
 export const cameraStatus={height:0,zoom:1,bottomInset:0,worldTop:0,heroFootY:0,heroCrowdCovered:false};
 class BattleScene extends Phaser.Scene {
   private coverBounds=new Phaser.Geom.Rectangle();
@@ -84,7 +128,6 @@ class BattleScene extends Phaser.Scene {
   private deathStartedAt:number|null=null;
   private bars!: Phaser.GameObjects.Graphics;
   private danger!: Phaser.GameObjects.Graphics;
-  private dangerOutline!: Phaser.GameObjects.Graphics;
   private dangerMemory = new Map<string,DangerZone>();
   private movementInput!: MovementInput;
   private accumulator = 0;
@@ -102,12 +145,12 @@ class BattleScene extends Phaser.Scene {
     at: number;
   }[] = [];
   private lastEnemies = new Map<number, Enemy>();
-  private failed = false;
   private occluders: Occluder[] = [];
   private worldObjects: Phaser.GameObjects.GameObject[] = [];
   private paintedMap: MapId | null = null;
-  private modelPages = new Map<string, Set<string>>();
-  private queuedPages = new Set<string>();
+  private assetIndex!:ReturnType<typeof indexSceneAssets>;
+  private pageIndex=new Map<string,Manifest["pages"][number]>();
+  private audioSelection?:{key:string;ready:boolean};
   private failedPages = new Set<string>();
   private heroLook: { body: string; weapon: string | null } = { body: "dress-1", weapon: "weapon-8" };
   private viewportKey="";
@@ -116,47 +159,21 @@ class BattleScene extends Phaser.Scene {
   constructor() {
     super("battle");
   }
-  preload() {
-    for (const page of assets.pages.filter((p) => !p.lazy))
-      this.load.atlas(page.key, assetUrl(page.image), assetUrl(page.data));
-    this.load.on("loaderror", (file: Phaser.Loader.File) => {
-      console.error("Asset loading failed",file.key,file.src);
-      if (!rendererReady) {
-        this.failed = true;
-        document.dispatchEvent(new CustomEvent("asset-error"));
-      } else {
-        this.failedPages.add(file.key);
-        appearanceStatus.error = "原版素材加载失败，请重试";
-        game.emit();
-      }
-    });
+  retryAssets() {
+    this.failedPages.clear();
   }
   create() {
-    if (this.failed) return;
     this.cameras.main.setBounds(0, 0, WORLD.w, WORLD.h);
     this.syncViewport();
     this.cameras.main.roundPixels=false;
-    this.paintGround();
-    for (const [name, sequence] of Object.entries(assets.animations)) {
-      const model = name.split("/")[0];
-      const pages = this.modelPages.get(model) ?? new Set<string>();
-      for (const frame of sequence) if (assets.frames[frame]) pages.add(assets.frames[frame].texture);
-      this.modelPages.set(model, pages);
-    }
-    for (const [id, world] of Object.entries(assets.worlds ?? { biche: assets.world })) {
-      if (!world) continue;
-      this.modelPages.set("world-" + id, new Set([...world.tiles, ...world.objects].map((part) =>
-        assets.frames["map/" + part.texture.toString(16).toUpperCase().padStart(8, "0")]?.texture).filter((v): v is string => !!v)));
-    }
-    this.load.on("complete", () => game.emit());
-    document.addEventListener("retry-appearance", () => {
-      this.failedPages.clear();
-      this.queuedPages.clear();
-      appearanceStatus.error = "";
+    this.assetIndex=indexSceneAssets(assets);
+    this.pageIndex=new Map(assets.pages.map(page=>[page.key,page]));
+    this.load.on("loaderror",(file:Phaser.Loader.File)=>{
+      this.failedPages.add(file.multiFile?.key??file.key);
+      console.error("Asset loading failed",file.key,file.src);
     });
     this.bars = this.add.graphics().setDepth(5000);
     this.danger = this.add.graphics().setDepth(1900);
-    this.dangerOutline = this.add.graphics().setDepth(5200);
     this.movementInput = new MovementInput(
       window,
       () => game.phase === "battle",
@@ -248,11 +265,11 @@ class BattleScene extends Phaser.Scene {
     this.input.keyboard?.resetKeys();
     this.movementInput?.clear();
   }
-  private paintGround() {
+  private paintGround(mapId:MapId) {
     for (const object of this.worldObjects) object.destroy();
     this.worldObjects = [];
     this.occluders = [];
-    this.paintedMap = game.mapId;
+    this.paintedMap = mapId;
     if (this.textures.exists("terrain")) this.textures.remove("terrain");
     if (isGraybox) {
       const g = this.add.graphics().setDepth(-100);
@@ -265,12 +282,12 @@ class BattleScene extends Phaser.Scene {
         g.fillStyle(0x63715c, 1).fillCircle(object.x, object.y, object.r + 8);
       return;
     }
-    const map = game.layout;
+    const map = getWorldLayout(mapId);
     const renderHeight=Math.max(WORLD.h,Math.min(WORLD.h+192,map?.renderHeight??WORLD.h));
     const texture = this.textures.createCanvas("terrain", WORLD.w, renderHeight)!;
     const context = texture.context;
     context.imageSmoothingEnabled = false;
-    context.fillStyle = game.mapId === "biche" ? "#252a1e" : "#11100e";
+    context.fillStyle = mapId === "biche" ? "#252a1e" : "#11100e";
     context.fillRect(0, 0, WORLD.w, renderHeight);
     const paint = (key: string, x: number, y: number, bottom = false) => {
       const meta = assets.frames[key];
@@ -369,7 +386,7 @@ class BattleScene extends Phaser.Scene {
     }
     if (!assets.frames[frame]) return;
     if(!this.textures.exists(assets.frames[frame].texture)){
-      this.requireModels([frame.split('/')[0]]);return;
+      this.queuePages([assets.frames[frame].texture]);return;
     }
     if(cull&&game.survivorMode&&game.phase!=="lobby"&&this.visibleView&&!intersectsView(frameBounds(assets.frames[frame],x,y,scale,offset),this.visibleView)){if(import.meta.env.DEV)renderMetrics.culled++;return;}
     this.seen.add(key);
@@ -395,27 +412,39 @@ class BattleScene extends Phaser.Scene {
       .setRotation(0)
       .clearTint();
   }
-  private requireModels(names: string[]) {
-    const needed = new Set<string>();
-    for (const name of names)
-      for (const texture of this.modelPages.get(name) ?? []) needed.add(texture);
-    for(const key of needed)this.retainedPages.add(key);
-    let complete = true;
-    for (const page of assets.pages.filter((p) => needed.has(p.key))) {
-      if (this.textures.exists(page.key)) continue;
-      complete = false;
-      if (this.queuedPages.has(page.key) || this.failedPages.has(page.key)) continue;
-      this.queuedPages.add(page.key);
-      this.load.atlas(page.key, assetUrl(page.image), assetUrl(page.data));
+  private queuePages(missing:Iterable<string>) {
+    // Finish the in-flight batch first. A changed selection never queues a second obsolete batch.
+    if(this.load.isLoading()) return;
+    for(const key of missing) {
+      const page=this.pageIndex.get(key);
+      if(page&&!this.failedPages.has(key)&&!this.textures.exists(key)) {
+        this.load.atlas(key,assetUrl(page.image),assetUrl(page.data));
+      }
     }
-    const loading = !complete && !appearanceStatus.error;
-    if (appearanceStatus.loading !== loading) {
-      appearanceStatus.loading = loading;
+    if(this.load.list.size) this.load.start();
+  }
+  private prepareScene(selection:SceneSelection,live:ReadonlySet<string>) {
+    const key=selectionKey(selection);
+    if(this.audioSelection?.key!==key) {
+      const audio={key,ready:isGraybox||sounds.muted};
+      this.audioSelection=audio;
+      void sounds.preloadScene(selection).finally(()=>{audio.ready=true;});
+    }
+    const needed=new Set([...this.assetIndex.selectionPages(selection),...live]);
+    const missing=[...needed].filter(key=>!this.textures.exists(key));
+    for(const key of needed) this.retainedPages.add(key);
+
+    const error=missing.some(key=>this.failedPages.has(key))?"游戏资源加载失败，请重试":"";
+    const audioReady=this.audioSelection.ready||sounds.muted;
+    const progress={selection:key,total:needed.size+Number(!isGraybox),
+      loaded:needed.size-missing.length+Number(!isGraybox&&audioReady),loading:missing.length>0||!audioReady,error};
+    if(progress.selection!==appearanceStatus.selection||progress.loaded!==appearanceStatus.loaded||
+      progress.total!==appearanceStatus.total||progress.loading!==appearanceStatus.loading||error!==appearanceStatus.error) {
+      Object.assign(appearanceStatus,progress);
       game.emit();
     }
-    if (!this.load.isLoading() && this.load.list.size) this.load.start();
-    if (complete) appearanceStatus.error = "";
-    return complete;
+    this.queuePages(missing);
+    return !progress.loading;
   }
   /** Reuse the exact source silhouette; contrast both light leaves and dark trunks. */
   private coverSilhouette(key:string,frame:string,x:number,y:number,depth:number,alpha:number,scale=1,tint=0xffe2a0){
@@ -435,11 +464,12 @@ class BattleScene extends Phaser.Scene {
     return false;
   }
   private hero(motion: string, dir: number, x: number, y: number, time: number, depth: number, alpha: number) {
-    const desired = resolveAppearance(game.classId, game.phase === "lobby"
-      ? { weapon: { itemId: ITEMS.find((i) => i.name === "木剑")!.id } }
-      : game.equipment);
-    const needed = [desired.body, desired.body + "-shadow", ...(desired.weapon ? [desired.weapon] : [])];
-    if (this.requireModels(needed)) this.heroLook = desired;
+    const desired=game.phase==="lobby"?startingAppearance:resolveAppearance(game.classId,game.equipment);
+    const needed=this.assetIndex.pagesFor([desired.body,desired.body+'-shadow',...(desired.weapon?[desired.weapon]:[])]);
+    for(const key of needed) this.retainedPages.add(key);
+    const missing=[...needed].filter(key=>!this.textures.exists(key));
+    if(!missing.length) this.heroLook=desired;
+    else this.queuePages(missing);
     const body = assets.animations[`${this.heroLook.body}/${motion}/${dir}`];
     if (!body?.length) return;
     const terminalDeath=motion==="death" && !(game.mode==="test" && game.test.pose==="death");
@@ -568,10 +598,17 @@ class BattleScene extends Phaser.Scene {
       }
     }
   }
-  private label(id:number,text:string,x:number,y:number,color:string,alpha=1,size=12) {
+  private label(id:number,text:string,x:number,y:number,color:string,alpha=1,size=12,loot=false) {
     this.seenLabels.add(id);
     let label=this.labels.get(id);
-    if(!label){label=this.add.text(0,0,"",{fontFamily:"SimSun, Songti SC, serif",fontSize:`${size}px`,stroke:"#16130b",strokeThickness:3}).setOrigin(.5).setDepth(6000);this.labels.set(id,label);}
+    if(!label){
+      label=this.add.text(0,0,"",loot?
+        {fontFamily:"system-ui, sans-serif",fontStyle:"600",resolution:3,backgroundColor:"#171109e6",
+          padding:{x:5,y:2},stroke:"#171109",strokeThickness:1}:
+        {fontFamily:"SimSun, Songti SC, serif",stroke:"#16130b",strokeThickness:3}).setOrigin(.5).setDepth(6000);
+      if(loot) label.texture.setFilter(Phaser.Textures.FilterMode.LINEAR);
+      this.labels.set(id,label);
+    }
     label.setPosition(x,y).setText(text).setColor(color).setAlpha(alpha).setFontSize(size);
     return label;
   }
@@ -581,23 +618,19 @@ class BattleScene extends Phaser.Scene {
     const measuredStart=import.meta.env.DEV?performance.now():0;
     this.retainedPages.clear();
     if(import.meta.env.DEV){renderMetrics.drawRequests=0;renderMetrics.culled=0;renderMetrics.ordinaryHealthBars=0;}
-    if (!isGraybox) {
-      const kinds = [...new Set([...MAPS[game.mapId].monsterPool, MAPS[game.mapId].boss, ...game.enemies.map((e) => e.kind)])];
+    const selection=game.phase==="lobby"?(lobbySelection??game):game;
+    let live=new Set<string>();
+    if(!isGraybox&&game.phase!=="lobby") {
       const look=resolveAppearance(game.classId,game.equipment);
-      const skillModels=game.skills.flatMap(s=>s.id==='skeleton'?['skeleton','summonedSkeleton','summonedSkeleton-shadow']:s.id==='beast'?['beast','beast-shadow','beastflame']:[s.id]);
-      const models = [look.body,look.body+'-shadow',...(look.weapon?[look.weapon]:[]),
-        'hit','cast','heal','explosion','talismanHit','poison',
-        ...skillModels,...game.effects.map(f=>f.kind),...game.projectiles.map(p=>p.visual??p.skill??'fireball'),
-        ...game.pets.flatMap(p=>[p.kind,p.kind+'-shadow']),...this.corpses.flatMap(c=>[c.kind,c.kind+'-shadow']),
-        ...(game.phase==='lobby'?['scarecrow','scarecrow-shadow','cat','cat-shadow','orc','orc-shadow','rakecat','rakecat-shadow']:[]),
-        "world-" + game.mapId, ...(game.mapId === "woma" || game.mapId === "zuma" ? ["womaFlame", "womaShock", "arrow"] : []),...(kinds.includes("overlord") ? ["overlordBlade","overlordDeath"] : []), ...kinds.flatMap((kind) => [kind, kind + "-shadow"])];
-      const missing = models.some((name) => [...(this.modelPages.get(name) ?? [])].some((key) => !this.textures.exists(key)));
-      // Retain chapter pages even when already loaded.
-      for(const model of models)for(const key of this.modelPages.get(model)??[])this.retainedPages.add(key);
-      if (missing && !this.requireModels(models)) { this.accumulator = 0; return; }
+      const kinds=new Set([...game.enemies,...game.pets,...this.corpses].map(actor=>actor.kind));
+      live=this.assetIndex.pagesFor([look.body,look.body+'-shadow',...(look.weapon?[look.weapon]:[]),
+        ...game.skills.flatMap(skill=>skillAssetModels(skill.id)),
+        ...game.effects.map(effect=>effect.kind),...game.projectiles.map(p=>p.visual??p.skill??'fireball'),
+        ...[...kinds].flatMap(kind=>[kind,kind+'-shadow'])]);
     }
-    if (this.paintedMap !== game.mapId) {
-      this.paintGround(); this.corpses = []; this.lastEnemies.clear(); this.clearInput();
+    if(!this.prepareScene(selection,live)) {this.accumulator=0;return;}
+    if (this.paintedMap !== selection.mapId) {
+      this.paintGround(selection.mapId); this.corpses = []; this.lastEnemies.clear(); this.clearInput();
     }
     frameMS = frameMS * 0.95 + delta * 0.05;
     if (this.testVisualEpoch !== game.test.visualEpoch) {
@@ -678,7 +711,6 @@ class BattleScene extends Phaser.Scene {
     this.seenLabels.clear();
     this.bars.clear();
     this.danger.clear();
-    this.dangerOutline.clear();
     if(game.survivorMode)for(const chest of game.survival.chests){this.bars.fillStyle(chest.eligible?0xd8b36f:0x94acbb,1);this.bars.fillRect(chest.x-11,chest.y-9,22,18);this.bars.lineStyle(2,0x342718);this.bars.strokeRect(chest.x-11,chest.y-9,22,18);}
     const challenge = game.survival.challenge;
     if (game.survivorMode && challenge.status === 'active' && challenge.ward) {
@@ -689,34 +721,33 @@ class BattleScene extends Phaser.Scene {
     }
     const t = game.clock;
     if (game.phase === "lobby") {
-      this.centerCamera(WORLD.w / 2 + 70, WORLD.h / 2);
+      const preview=game.survivorMode?getWorldLayout(selection.mapId)?.spawn:null;
+      const x=preview?.x??WORLD.w/2+80,y=preview?.y??WORLD.h/2;
+      this.centerCamera(x-10,y+(preview?this.scale.height*.25/this.zoom():0));
       this.actor(
         "hero",
-        game.classId,
+        selection.classId,
         "idle",
         5,
-        WORLD.w / 2 + 80,
-        WORLD.h / 2,
+        x,
+        y,
         _time / 1000,
         100,
       );
-      [
-        ["scarecrow", 230, -150],
-        ["cat", 310, 100],
-        ["orc", -110, 170],
-        ["rakecat", -220, -140],
-      ].forEach(([name, x, y], i) =>
+      const previewOffsets=[[230,-150],[310,100],[-110,170],[-220,-140]];
+      MAPS[selection.mapId].monsterPool.slice(0,previewOffsets.length).forEach((kind,i) => {
+        const [dx,dy]=previewOffsets[i];
         this.actor(
           "lobby-" + i,
-          String(name),
+          kind,
           "idle",
           i,
-          WORLD.w / 2 + Number(x),
-          WORLD.h / 2 + Number(y),
+          x + dx,
+          y + dy,
           _time / 1000,
-          Number(y) + 100,
-        ),
-      );
+          y + dy,
+        );
+      });
     } else {
       this.centerCamera(game.player.x, game.player.y);
       this.ordinaryBars=game.survivorMode
@@ -804,7 +835,7 @@ class BattleScene extends Phaser.Scene {
           this.bodies.get('enemy-cast-'+e.id)?.setTint(0xff6555);
         }
         if(e.elite||isBossKind(e.kind)){
-          for(const zone of enemyDangerZones(e,t,game.survivorMode)){drawDanger(this.danger,zone,t,0,game.survivorMode&&visualPreferences.reduceFlash,this.dangerOutline);this.dangerMemory.set(zone.id,zone);}
+          for(const zone of enemyDangerZones(e,t,game.survivorMode)){drawDanger(this.danger,zone,0,game.survivorMode&&visualPreferences.reduceFlash);this.dangerMemory.set(zone.id,zone);}
         }else {
         if (e.windup > 0) {
           this.bars
@@ -836,14 +867,14 @@ class BattleScene extends Phaser.Scene {
           .lineBetween(e.shock.origin.x,e.shock.origin.y,e.shock.target.x,e.shock.target.y)
           .lineStyle(2,0xffcf81,0.85).lineBetween(e.shock.origin.x,e.shock.origin.y,e.shock.target.x,e.shock.target.y);
         }
-        if((e.awakenAt ?? 0)>game.clock) this.bars.lineStyle(3,0xffcc84,0.9).strokeCircle(e.x,e.y,42);
+        if((e.awakenAt ?? 0)>game.clock) this.danger.fillStyle(0xe7803e,.28).fillCircle(e.x,e.y,42);
         }
       }
       const activeZones=new Set(game.enemies.flatMap(e=>enemyDangerZones(e,t,game.survivorMode).map(z=>z.id)));
       for(const [id,zone] of this.dangerMemory){
         if(activeZones.has(id))continue;
         const living=game.enemies.some(e=>e.id===Number(id.split(':')[0])&&e.hp>0);
-        if(living&&t>=zone.until&&t-zone.until<.25)drawDanger(this.danger,zone,t,1-(t-zone.until)/.25,game.survivorMode&&visualPreferences.reduceFlash,this.dangerOutline);
+        if(living&&t>=zone.until&&t-zone.until<.25)drawDanger(this.danger,zone,1-(t-zone.until)/.25,game.survivorMode&&visualPreferences.reduceFlash);
         else this.dangerMemory.delete(id);
       }
       for (const p of game.pets) {
@@ -879,7 +910,7 @@ class BattleScene extends Phaser.Scene {
           this.draw(key,part.frame,d.x+part.dx,d.y+part.dy,-30,1,1,false);
         }
         if(this.showLootNames || game.mode==="test" && game.test.lootLabels || d.itemId || d.heal || Math.hypot(mouse.x-d.x,mouse.y-d.y)<24) {
-          const label=this.label(-d.id,lootName(d),d.x,d.y-23,d.heal ? "#f0a78c" : "#f5db79");
+          const label=this.label(-d.id,lootName(d),d.x,d.y-23,d.heal ? "#ffc5a7" : "#ffe3a0",1,13,true);
           let bounds=label.getBounds();
           for(let shift=0;shift<9 && lootLabels.some(old=>Phaser.Geom.Intersects.RectangleToRectangle(old,bounds));shift++) {
             label.y-=19;bounds=label.getBounds();
@@ -987,7 +1018,7 @@ class BattleScene extends Phaser.Scene {
       if(unused.length){
         const retiring=new Set(unused);
         for(const sprite of this.pool)if(retiring.has(sprite.texture.key))sprite.setTexture('__DEFAULT');
-        for(const key of unused){this.textures.remove(key);this.cache.json.remove(key);this.queuedPages.delete(key);loaded.delete(key);}
+        for(const key of unused){this.textures.remove(key);this.cache.json.remove(key);loaded.delete(key);}
         renderMetrics.evictedAtlases+=unused.length;
       }
       const residency=atlasResidency(assets.pages,loaded);
@@ -1034,7 +1065,13 @@ export function drawSurvivorArt(ctx: CanvasRenderingContext2D, name: string, por
   }
   return true;
 }
-export function boot() {
+export function liveFramePosition(frame:string) {
+  const meta=assets?.frames[frame];
+  if(!meta||!engine?.textures.exists(meta.texture)) return;
+  const found=engine.textures.getFrame(meta.texture,frame);
+  if(found) return {x:found.cutX,y:found.cutY};
+}
+function boot() {
   if (engine) return;
   engine = new Phaser.Game({
     type: Phaser.AUTO,

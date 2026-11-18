@@ -28,7 +28,8 @@ import {useEffect,useLayoutEffect,useReducer,useRef,useState} from 'react';
 import {game} from './game';
 import {CLASS_IDS,CLASSES,type ClassId} from './classes';
 import {getSkill,MAPS,type MapId} from './content';
-import {isReady,readyListeners,setBattleInset} from './renderer';
+import {isReady,readyListeners,sceneAssetsReady,setBattleInset,setLobbyAssetSelection} from './renderer';
+import {AssetProgress} from './AssetProgress';
 import {sounds} from './sound';
 import {AudioSettings} from './AudioSettings';
 import {SURVIVAL_OPEN_MAP_TEST,CHARMS,EVOLUTIONS,survivalChoices,survivalStarter} from './survivor';
@@ -54,6 +55,11 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
   const observer=new ResizeObserver(measure);observer.observe(hud);
   return()=>{observer.disconnect();setBattleInset(0);};
  },[game.phase]);
+ const inLobby=game.phase==='lobby';
+ const resourcesReady=ready&&sceneAssetsReady(role,map);
+ useLayoutEffect(()=>{
+  if(inLobby) setLobbyAssetSelection(role,map);
+ },[inLobby,role,map]);
  const starter=availableSurvivorStarts(role,progress.roleBest).includes(starts[role]!)?starts[role]!:survivalStarter(role);
  const [skillPanel,setSkillPanel]=useState<{tab:'skills'|'equipment';skill:SkillId|null}>();
  const persist=()=>{try{const cp=writeSurvivalCheckpoint(game,localStorage);if(cp){game.telemetry.persist(game,localStorage);setProgress(updateSurvivorProgress(game,localStorage));setSaved(cp);setError(e=>e.startsWith('存档未保存')?'':e);return true;}return false;}catch{setError('存档未保存：本机存储不可用或已满，请勿刷新。');return false;}};
@@ -63,8 +69,8 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
  const suspend=()=>{suspendSurvival(game);document.dispatchEvent(new Event('clear-game-input'));persist();};
  const saveHidden=()=>{if(document.hidden)suspend();};
  window.addEventListener('pagehide',suspend);window.addEventListener('orientationchange',suspend);screen.orientation?.addEventListener('change',suspend);document.addEventListener('visibilitychange',saveHidden);
- const onReady=()=>setReady(true);const onError=()=>setError('原版素材加载失败，请刷新重试。');readyListeners.add(onReady);document.addEventListener('asset-error',onError);return()=>{unsub();clearInterval(timer);window.removeEventListener('pagehide',suspend);window.removeEventListener('orientationchange',suspend);screen.orientation?.removeEventListener('change',suspend);document.removeEventListener('visibilitychange',saveHidden);readyListeners.delete(onReady);document.removeEventListener('asset-error',onError);};},[]);
- const start=()=>{if(!SURVIVAL_OPEN_MAP_TEST&&!chapterUnlocked(progress,map)){setError('请先完成前置章节的生存目标。');return;}if(!discard())return;setError('');void sounds.unlock();game.survivorMode=true;game.unlockedMaps.add(map);game.start('normal',Date.now()>>>0,role,false,map,starter);};
+ const onReady=()=>setReady(true);readyListeners.add(onReady);if(isReady()) onReady();return()=>{unsub();clearInterval(timer);window.removeEventListener('pagehide',suspend);window.removeEventListener('orientationchange',suspend);screen.orientation?.removeEventListener('change',suspend);document.removeEventListener('visibilitychange',saveHidden);readyListeners.delete(onReady);};},[]);
+ const start=()=>{if(!resourcesReady&&inLobby)return;if(!SURVIVAL_OPEN_MAP_TEST&&!chapterUnlocked(progress,map)){setError('请先完成前置章节的生存目标。');return;}if(!discard())return;setError('');void sounds.unlock();game.survivorMode=true;game.unlockedMaps.add(map);game.start('normal',Date.now()>>>0,role,false,map,starter);};
  const resume=()=>{if(!saved)return;setRole(saved.state.classId);setMap(saved.state.mapId);setError('');void sounds.unlock();let diagnosticRaw:string|null=null;try{diagnosticRaw=localStorage.getItem(TELEMETRY_KEY);}catch{}if(!game.resumeSurvival(saved))setError('存档无法读取，请另开新局。');else game.telemetry.restore(game,{getItem:()=>diagnosticRaw});};
  const leave=()=>{try{setProgress(updateSurvivorProgress(game,localStorage));}catch{setError('章节进度未保存，请检查浏览器存储后重试。');return;}if(!discard())return;game.touchInput={x:0,y:0};game.phase='lobby';game.emit();};
  const saveAndLeave=()=>{if(!persist())return;game.touchInput={x:0,y:0};game.phase='lobby';game.emit();};
@@ -78,6 +84,7 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
  const potionCount=game.potions.reserve.length;
  return <div ref={root} className="survivor-ui survivor-bronze" data-text-size={visualPreferences.textSize} data-phase={game.phase}
   data-building={game.phase==='paused'&&!!skillPanel} data-graybox={isGraybox}>
+  {!inLobby&&<AssetProgress classId={game.classId} mapId={game.mapId} inBattle/>}
   {error&&<p className="survivor-error" role="alert">{error}</p>}
   {game.phase==='lobby'?(choosingMap
    ?<ChapterPicker map={map} progress={progress} onChange={id=>{setMap(id);setChoosingMap(false);}} onClose={()=>setChoosingMap(false)}/>
@@ -110,9 +117,10 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
        <ChapterThumbnail map={map}/><span>{MAPS[map].name}</span><i className="bronze-chevron" aria-hidden="true"/>
       </button>
       {!SURVIVAL_OPEN_MAP_TEST&&<p className="survivor-goal">{chapterGoal(progress,map)}</p>}
-      {saved&&<button className="survivor-primary" disabled={!ready} onClick={resume}>继续上局 · {clock(saved.state.clock)}</button>}
-      <button className={saved?'survivor-secondary':'survivor-primary'} disabled={!ready} onClick={start}>
-       {!ready?'加载中…':saved?'另开新局（覆盖存档）':'出战'}
+      <AssetProgress classId={role} mapId={map}/>
+      {saved&&<button className="survivor-secondary bronze-resume" disabled={!ready} onClick={resume}>继续上局 · {clock(saved.state.clock)}</button>}
+      <button className={saved?'survivor-secondary':'survivor-primary'} disabled={!resourcesReady} onClick={start}>
+       {!resourcesReady?'加载中…':saved?'另开新局（覆盖存档）':'出战'}
       </button>
      </div>
      <details className="bronze-lobby-more">

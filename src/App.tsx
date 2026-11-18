@@ -1,6 +1,7 @@
+import {AssetProgress} from "./AssetProgress";
 import {GamePopupClose} from './GamePopupClose';
 import {SurvivorJoystick} from './SurvivorJoystick';
-import { useEffect, useReducer, useState, useRef, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useReducer, useState, useRef, type CSSProperties } from "react";
 import { game, type Mode, type RunResult } from "./game";
 import {
   SKILLS,
@@ -16,8 +17,9 @@ import {
   assets,
   isReady,
   readyListeners,
-  appearanceStatus,
-  setAssetManifest,
+  liveFramePosition,
+  sceneAssetsReady,
+  setLobbyAssetSelection,
   setBattleInset,
 } from "./renderer";
 import { CLASSES, CLASS_IDS } from "./classes";
@@ -52,7 +54,8 @@ function Art({
   className?: string;
 }) {
   const f = frame && assets?.frames[frame];
-  if (!f)
+  const position=frame&&liveFramePosition(frame);
+  if (!f||!position)
     return (
       <span className={"art-empty " + className} aria-hidden="true">
         ◇
@@ -66,47 +69,15 @@ function Art({
         width: f.width,
         height: f.height,
         backgroundImage: `url(${assetUrl(assets.pages.find((p) => p.key === f.texture)!.image)})`,
-        backgroundPosition: `-${atlasPosition(frame!).x}px -${atlasPosition(frame!).y}px`,
+        backgroundPosition: `-${position.x}px -${position.y}px`,
       }}
     />
   );
 }
-let framePositions: Record<string, { x: number; y: number }> = {};
-export async function loadArtPositions() {
-  if (isGraybox) {
-    setAssetManifest({
-      pages: [],
-      animations: {},
-      frames: {},
-      rightsStatus: "NO_THIRD_PARTY_ASSETS",
-    });
-    framePositions = {};
-    return;
-  }
-  const r = await fetch(assetUrl("runtime.json"));
-  if (!r.ok) throw new Error("无法读取素材清单");
-  const manifest = await r.json();
-  setAssetManifest(manifest);
-  framePositions = {};
-  await Promise.all(
-    manifest.pages.filter((page: { lazy?: boolean }) => !page.lazy).map(async (page: { data: string }) => {
-      const response = await fetch(assetUrl(page.data));
-      if (!response.ok) throw new Error("无法读取素材图集");
-      const atlas = await response.json();
-      for (const [key, value] of Object.entries(atlas.frames))
-        framePositions[key] = (
-          value as { frame: { x: number; y: number } }
-        ).frame;
-    }),
-  );
-}
-function atlasPosition(frame: string) {
-  return framePositions[frame] ?? { x: 0, y: 0 };
-}
 function Icon({ frame }: { frame?: string }) {
   if(frame?.startsWith("item/") && assets?.frames[frame.replace("item/","package/")])frame=frame.replace("item/","package/");
   const f = frame && assets?.frames[frame],
-    position = frame && framePositions[frame];
+    position = frame && liveFramePosition(frame);
   const page = f && assets.pages.find((p) => p.key === f.texture);
   return (
     <span className="icon-box" aria-hidden="true">
@@ -137,7 +108,7 @@ function Icon({ frame }: { frame?: string }) {
 export function App() {
   const [, refresh] = useReducer((x) => x + 1, 0);
   const [ready, setReady] = useState(isReady());
-  const [assetError, setAssetError] = useState(false);
+
   const [records, setRecords] = useState<RunResult[]>([]);
   const [tab, setTab] = useState<
     "play" | "guide" | "talents" | "records" | "skills"
@@ -157,6 +128,10 @@ export function App() {
   const checkpointKey = useRef("");
   const battleConsole = useRef<HTMLElement|null>(null);
   const inLobby=game.phase==="lobby";
+  const resourcesReady=ready&&sceneAssetsReady(game.classId,game.mapId);
+  useLayoutEffect(()=>{
+    if(inLobby) setLobbyAssetSelection(game.classId,game.mapId);
+  },[inLobby,game.classId,game.mapId]);
   useEffect(()=>{
     const console=battleConsole.current;
     if(!console){setBattleInset(0);return;}
@@ -191,8 +166,6 @@ export function App() {
     readyListeners.add(f);
     // An asset-free build may finish Phaser initialization before React effects subscribe.
     if (isReady()) f();
-    const fail = () => setAssetError(true);
-    document.addEventListener("asset-error", fail);
     history()
       .then(setRecords)
       .catch(() => setSaveError("无法读取本地记录，当前仍可正常试玩。"));
@@ -209,7 +182,6 @@ export function App() {
       .finally(() => setProgressBusy(false));
     return () => {
       readyListeners.delete(f);
-      document.removeEventListener("asset-error", fail);
     };
   }, []);
   useEffect(() => {
@@ -297,12 +269,7 @@ export function App() {
       {game.player.hitUntil>game.clock && game.phase!=="lobby" && <div key={game.runId+game.player.hitUntil} className="damage-flash" aria-hidden="true" />}
       {game.phase==="dead" && game.player.hp<=0 && settledRun!==game.runId && <div className="death-cue" role="status">魂归玛法</div>}
       <TestTools />
-      {(appearanceStatus.loading || appearanceStatus.error) && (
-        <div className="appearance-notice" role="status">
-          {appearanceStatus.error || "正在加载游戏资源…"}
-          {appearanceStatus.error && <button onClick={() => document.dispatchEvent(new Event("retry-appearance"))}>重试</button>}
-        </div>
-      )}
+      {!inLobby&&<AssetProgress classId={game.classId} mapId={game.mapId} inBattle/>}
       <div className="release-badge">
         <span>
           {releaseVersion} · {releaseCommit}
@@ -320,13 +287,6 @@ export function App() {
           反馈问题
         </a>
       </div>
-      {assetError && (
-        <div className="asset-error" role="alert">
-          <h2>游戏素材没能加载出来</h2>
-          <p>请检查网络连接，然后点「重新加载」再试一次。</p>
-          <button onClick={() => location.reload()}>重新加载</button>
-        </div>
-      )}
       {game.phase === "lobby" && (
         <>
           <div className="edition">
@@ -367,7 +327,7 @@ export function App() {
             {tab === "play" && (
               <div className="journey">
                 <div className="class-picker chapter-picker" role="group" aria-label="选择章节">
-                  {PLAYABLE_MAP_IDS.map((id) => <button key={id} disabled={!ready}
+                  {PLAYABLE_MAP_IDS.map((id) => <button key={id}
                     aria-pressed={game.mapId === id} onClick={() => { game.selectMap(id); setChapterError(""); }}>
                     {id === "biche" ? "比奇荒野" : MAPS[id].name}
                   </button>)}
@@ -403,7 +363,7 @@ export function App() {
                       <small>刷新只回到本波起点；已保存金币、装备、技能与升级。</small>
                     </div>
                     <div>
-                      <button className="primary" disabled={progressBusy} onClick={resumeRun}>
+                      <button className="primary" disabled={!ready||progressBusy} onClick={resumeRun}>
                         继续
                       </button>
                       <button className={`secondary${confirmDiscardRun ? " confirming" : ""}`} disabled={progressBusy} onClick={discardRun}>
@@ -412,18 +372,19 @@ export function App() {
                     </div>
                   </div>
                 )}
+                <AssetProgress classId={game.classId} mapId={game.mapId}/>
                 <div className="mode-buttons">
                   <button
                     className="primary"
-                    disabled={!ready || assetError || progressBusy || !chapterUnlocked}
+                    disabled={!resourcesReady || progressBusy || !chapterUnlocked}
                     onClick={() => start("normal")}
                   >
-                    {ready ? chapterUnlocked ? game.mapId === "biche" ? "进入荒野" : game.mapId === "mine" ? "进入矿洞" : "开始远征" : "标准远征尚未解锁" : "正在加载游戏资源…"}
+                    {resourcesReady ? chapterUnlocked ? game.mapId === "biche" ? "进入荒野" : game.mapId === "mine" ? "进入矿洞" : "开始远征" : "标准远征尚未解锁" : "正在加载游戏资源…"}
                     <span>12 波 · 每波 75 秒</span>
                   </button>
                   <button
                     className="secondary"
-                    disabled={!ready || assetError}
+                    disabled={!resourcesReady}
                     onClick={() => start("trial")}
                   >
                     短局试玩<span>3 波 · 每波 35 秒 · 不发放结晶</span>
@@ -445,7 +406,7 @@ export function App() {
                 </div>
                 <button
                   className="test-entry"
-                  disabled={!ready || assetError}
+                  disabled={!resourcesReady}
                   onClick={() => start("test")}
                 >
                   快速测试模式 <small>无敌 · 刷怪 · 换技能 · 动作检查</small>

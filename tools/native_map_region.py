@@ -143,3 +143,41 @@ def load_native_regions(cache, request):
             if sizes[obj['texture']] in [(48,32),(96,64)]:obj['depth']=0
     sources=[{k:g[k] for k in ['id','repository','ref','assetKinds']} for g in [catalog['maps'],catalog['images']]]
     return worlds, loaded, sources
+
+
+def load_native_equipment(cache, request):
+    group = json.loads(CATALOG.read_text())['images']
+    catalog = json.loads(Path(__file__).with_name('native-equipment-icons.json').read_text())
+    folder = cache / 'native-map-images'
+    folder.mkdir(exist_ok=True)
+
+    def fetch(name):
+        entry = catalog['files'][name]
+        url = group['repository'].replace('https://github.com/', 'https://raw.githubusercontent.com/')
+        url += '/' + group['ref'] + '/' + entry['path']
+        data = read_source(folder / name, url, entry['sha1'], request)
+        if hashlib.sha256(data).hexdigest() != entry['sha256']:
+            raise ValueError('Native equipment source hash mismatch: ' + name)
+        return data
+
+    frames = []
+    for prefix, library in [('item', 'DnItems.wil'), ('package', 'Items.wil')]:
+        meta_name, png_name = library + '.json', library + '.png'
+        lookup = {int(k): box for entry in json.loads(fetch(meta_name))['frames']
+                  for k, box in entry.items() if k.isdecimal()}
+        fetch(png_name)
+        with reviewed_atlas(folder / png_name) as sheet:
+            for name, index in catalog['items'].items():
+                x, y, w, h = (lookup[index][key] for key in ['x', 'y', 'w', 'h'])
+                if min(x, y) < 0 or min(w, h) <= 0 or x + w > sheet.width or y + h > sheet.height:
+                    raise ValueError('Invalid equipment crop: ' + name)
+                frame = sheet.crop((x, y, x + w, y + h)).convert('RGBA')
+                entry = catalog['files'][png_name]
+                info = {'sourceId': group['id'], 'sourceRepository': group['repository'],
+                        'sourceRef': group['ref'], 'sourcePath': entry['path'],
+                        'sha1': entry['sha1'], 'sha256': entry['sha256'],
+                        'sourceCrop': [x, y, w, h], 'sourceIndex': index, 'sourceLibrary': library,
+                        'sourceMetadata': catalog['files'][meta_name],
+                        'dx': 0, 'dy': 0, 'width': w, 'height': h}
+                frames.append((prefix + '/' + name, frame, info))
+    return frames

@@ -105,14 +105,13 @@
   background:#21190e;
 }
 .survivor-bronze .survivor-lobby {
-  background:url('./assets/bronze/lobby-floor.webp') center bottom/100% auto no-repeat,
-    url('./assets/bronze/panel-surface.webp') repeat,#21190e;
+  backdrop-filter:none;
+  background:linear-gradient(180deg,#120c073b 0%,transparent 24%,transparent 40dvh,#21190eea 55dvh,#21190ef7 100%);
 }
 .bronze-lobby-hero {
   height:49dvh;
   min-height:212px;
   max-height:459px;
-  background:url('./assets/bronze/lobby-gate.webp') center 59%/cover no-repeat;
   position:relative;
 }
 .bronze-lobby-hero::after {
@@ -181,6 +180,14 @@
 .bronze-lobby-map > i { margin-right:7px; }
 .bronze-chapter-thumb { align-self:stretch; width:100%; height:100%; min-height:40px; object-fit:cover; }
 .bronze-lobby-menu .survivor-primary { justify-self:center; width:90%; min-height:69px; margin:13px 0 0; font-size:29px; }
+.survivor-bronze .bronze-lobby-menu .bronze-resume {
+  justify-self:center;
+  width:max-content;
+  max-width:100%;
+  min-height:44px;
+  margin:3px 0 0;
+  font-size:14px;
+}
 .bronze-lobby-menu .bronze-role-options { margin:0; }
 .survivor-bronze .bronze-lobby-more {
   margin:8px auto max(12px,env(safe-area-inset-bottom));

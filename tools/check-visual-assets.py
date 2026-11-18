@@ -55,7 +55,8 @@ for source in sorted({f['sourcePath'] for _,f in native}):
    rect=atlases[f['texture']]['frames'][key]['frame']
    actual=images[f['texture']].crop((rect['x'],rect['y'],rect['x']+rect['w'],rect['y']+rect['h']))
    if actual.size!=expected.size or actual.tobytes()!=expected.tobytes():errors.append(key+': native atlas pixels differ from source rectangle')
-   terrain+=1
+   if key.startswith("map/"):terrain+=1
+   else:items+=1
 for name,part in m.get('uiFiles',{}).items():
  source=m['frames'][part['frame']]['sourcePath']
  expected=Image.open(root/'.cache/raw/proguse'/Path(source).name).convert('RGBA')
@@ -63,5 +64,5 @@ for name,part in m.get('uiFiles',{}).items():
   x,y,w,h=part['crop'];expected=expected.crop((x,y,x+w,y+h))
  actual=Image.open(root/'public/assets/mir'/part['file']).convert('RGBA')
  if actual.size!=expected.size or actual.tobytes()!=expected.tobytes():errors.append(name+': UI pixels differ from source rectangle')
-print(json.dumps({'verifiedHeroComposites':composites,'verifiedWeaponFrames':weapons,'verifiedMonsterFrames':monsters,'verifiedShadowFrames':shadows,'verifiedUIFrames':ui,'verifiedTerrainFrames':terrain,'verifiedNativeTerrainFrames':len(native),'verifiedMagicFrames':magic,'verifiedItemFrames':items,'failures':len(errors),'examples':errors[:5]},indent=2))
+print(json.dumps({'verifiedHeroComposites':composites,'verifiedWeaponFrames':weapons,'verifiedMonsterFrames':monsters,'verifiedShadowFrames':shadows,'verifiedUIFrames':ui,'verifiedTerrainFrames':terrain,'verifiedNativeTerrainFrames':sum(key.startswith('map/') for key,_ in native),'verifiedMagicFrames':magic,'verifiedItemFrames':items,'failures':len(errors),'examples':errors[:5]},indent=2))
 sys.exit(bool(errors))

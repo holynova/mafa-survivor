@@ -2358,3 +2358,34 @@ body:has(.lobby) .vignette {
   color:#fae7b8;
   white-space:nowrap;
 }
+
+.game-preload {
+  margin:6px 0;
+  padding:10px 12px;
+  border:1px solid #85693f;
+  background:#241b11f5;
+  color:#f0dfb5;
+  font-size:14px;
+  text-align:left;
+}
+.game-preload > div { display:flex; justify-content:space-between; gap:8px; margin-bottom:6px; }
+.game-preload progress {
+  display:block;
+  width:100%;
+  height:9px;
+  border:1px solid #a1844e;
+  background:#140e08;
+  accent-color:#dfba69;
+}
+.game-preload progress::-webkit-progress-bar { background:#140e08; }
+.game-preload progress::-webkit-progress-value { background:#dfba69; }
+.game-preload button { margin-top:6px; min-height:44px; }
+.game-preload-floating {
+  position:absolute;
+  z-index:35;
+  top:max(70px,env(safe-area-inset-top));
+  left:50%;
+  transform:translateX(-50%);
+  width:min(380px,calc(100vw - 32px));
+  pointer-events:auto;
+}

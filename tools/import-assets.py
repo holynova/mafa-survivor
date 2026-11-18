@@ -164,9 +164,10 @@ def load(t):
    info['assembledPixelSha256']=hashlib.sha256(im.tobytes()).hexdigest()
  return key,im,info
 with ThreadPoolExecutor(max_workers=16) as ex:loaded=list(ex.map(load,selected))
-from native_map_region import load_native_regions
+from native_map_region import load_native_equipment, load_native_regions
 native_worlds,native_frames,native_sources=load_native_regions(CACHE,request)
 world_layouts.update(native_worlds);loaded.extend(native_frames)
+loaded.extend(load_native_equipment(CACHE,request))
 # Separate optional equipment models into independently loadable atlas pages.
 # Packing order is deterministic; source pixels and anchors are unchanged.
 meta={};pages=[]

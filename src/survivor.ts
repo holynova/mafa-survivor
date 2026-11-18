@@ -83,7 +83,9 @@ export function tuneSurvivalEnemy(g:Game,e:Enemy,tier:'normal'|'elite'|'boss'){
   ? bossHealth * (.7 + g.clock / 1200) / Math.sqrt(pressure)
   : (tier === 'normal' ? .65 : 1) / pressure;
  const threat=survivalThreatScale(g.clock,tier);
- e.hp=e.maxHp=Math.max(8,e.maxHp*hp*threat.hp);
+ // Give harder chapters time to earn their opening upgrades before reaching double HP.
+ const ordinaryHP=CHAPTER_PRESSURE[g.mapId]>=2.8?1.05+.95*Math.min(1,g.clock/180):2;
+ e.hp=e.maxHp=Math.max(8,e.maxHp*hp*threat.hp)*(tier==='normal'?ordinaryHP:1);
  e.speed*=threat.speed;
  e.damage*=(tier==='normal'?.7:1)/Math.sqrt(pressure)*threat.damage;
  e.defense=(e.defense??0)/pressure;e.magicDefense=(e.magicDefense??0)/pressure;

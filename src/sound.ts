@@ -1,6 +1,8 @@
 import {connectAudioOutput} from './audio-output';
 import {OriginalMusic,encounterMusic} from "./music";
 import type {MapId} from "./content";
+import {SKILLS} from "./spells";
+import {sceneClassSkills,sceneMonsterKinds,type SceneSelection} from "./scene-assets";
 import { assetUrl, isGraybox } from "./release";
 import {MONSTER_SOUND_EVENTS,monsterSoundEvent,monsterSoundKey,type MonsterSoundEvent} from "./monster-audio";
 type AudioManifest = {
@@ -23,6 +25,12 @@ export class OriginalSounds {
   private chapterRequest=0;
   private manifest: AudioManifest | null = null;
   private loading: Promise<void> | null = null;
+  private manifestRequest?:Promise<AudioManifest>;
+  private rawRequests=new Map<string,Promise<ArrayBuffer>>();
+  private rawBuffers=new Map<string,ArrayBuffer>();
+  private selection?:SceneSelection;
+  private prefetchGeneration=0;
+  private wantedRaw=new Set<string>();
   private voices = 0;
   private monsterSources=new Map<AudioBufferSourceNode,MonsterSoundEvent>();
   private monsterGains=new Map<MonsterSoundEvent,GainNode>();
@@ -91,28 +99,83 @@ export class OriginalSounds {
       }
       this.music?.retry();
       const resumed=this.context.resume();
-      this.loading ??= this.load();
+      this.loading ??= this.load().catch(error=>{this.loading=null;throw error;});
       await Promise.all([resumed,this.loading]);
     } catch {
       this.error = "音效加载失败，请刷新重试";
     }
   }
+  private readManifest() {
+    if(this.manifest) return Promise.resolve(this.manifest);
+    return this.manifestRequest??=(async()=>{
+      const r=await fetch(assetUrl("audio/manifest.json"),{signal:AbortSignal.timeout(12000)});
+      if(!r.ok) throw new Error("audio manifest");
+      return this.manifest=await r.json();
+    })().finally(()=>{this.manifestRequest=undefined;});
+  }
+  private sceneFiles(selection=this.selection) {
+    const allSkills=new Set<string>(SKILLS.map(skill=>skill.id));
+    const classSkills=new Set<string>(selection?sceneClassSkills(selection.classId):[]);
+    const base=Object.entries(this.manifest!.mapping)
+      .filter(([key])=>!monsterSoundEvent(key)&&(!selection||!allSkills.has(key)||classSkills.has(key)||key==="heal"))
+      .map(([,file])=>file);
+    const kinds=selection?sceneMonsterKinds(selection.mapId,selection.classId):[];
+    return {base,monsters:this.monsterFiles(kinds)};
+  }
+  private monsterFiles(kinds:readonly string[]) {
+    return [...new Set(kinds.flatMap(kind=>MONSTER_SOUND_EVENTS
+      .filter(event=>this.monsters[event]).map(event=>this.manifest?.mapping[monsterSoundKey(kind,event)])
+      .filter((file):file is string=>!!file)))];
+  }
+  private readSound(file:string) {
+    const cached=this.rawBuffers.get(file);
+    if(cached) return Promise.resolve(cached);
+    let request=this.rawRequests.get(file);
+    if(!request){
+      request=fetch(assetUrl("audio/"+file),{signal:AbortSignal.timeout(12000)}).then(response=>{
+        if(!response.ok) throw new Error(file);
+        return response.arrayBuffer();
+      }).finally(()=>this.rawRequests.delete(file));
+      this.rawRequests.set(file,request);
+    }
+    return request;
+  }
+  async preloadScene(selection:SceneSelection) {
+    this.selection={classId:selection.classId,mapId:selection.mapId};
+    const generation=++this.prefetchGeneration;
+    if(isGraybox||this.muted) return;
+    try {
+      await this.readManifest();
+      if(generation!==this.prefetchGeneration) return;
+      const {base,monsters}=this.sceneFiles(selection);
+      this.baseFiles=new Set(base);
+      const files=[...new Set([...base,...monsters])];
+      this.wantedRaw=new Set(files);
+      for(const file of this.rawBuffers.keys()) if(!this.wantedRaw.has(file)) this.rawBuffers.delete(file);
+      for(let i=0;i<files.length&&generation===this.prefetchGeneration;i+=6){
+        await Promise.allSettled(files.slice(i,i+6).map(async file=>{
+          if(this.buffers.has(file)||this.rawBuffers.has(file)) return;
+          const data=await this.readSound(file);
+          if(this.wantedRaw.has(file)&&!this.buffers.has(file)) this.rawBuffers.set(file,data);
+        }));
+      }
+      if(this.context&&generation===this.prefetchGeneration) {
+        await Promise.allSettled(base.map(file=>this.loadBuffer(file)));
+      }
+    } catch {
+      if(generation===this.prefetchGeneration) this.error="部分音效未加载";
+    }
+  }
   private async load() {
-    const r = await fetch(assetUrl("audio/manifest.json"));
-    if (!r.ok) throw new Error("audio manifest");
-    this.manifest = await r.json();
-    this.baseFiles=new Set(Object.entries(this.manifest!.mapping).filter(([key])=>!monsterSoundEvent(key)).map(([,file])=>file));
-    // Keep the existing player/spell sounds ready. Monster voices are loaded
-    // by chapter, rather than delaying startup on the complete 13MB library.
-    await Promise.all(
-      [...this.baseFiles].map(file=>this.loadBuffer(file)),
-    );
+    await this.readManifest();
+    this.baseFiles=new Set(this.sceneFiles().base);
+    await Promise.all([...this.baseFiles].map(file=>this.loadBuffer(file)));
   }
   private async loadBuffer(file:string){
     const cached=this.buffers.get(file);
     if(cached){this.buffers.delete(file);this.buffers.set(file,cached);return;}
     let request=this.requests.get(file);
-    if(!request){request=(async()=>{const r=await fetch(assetUrl("audio/"+file));if(!r.ok)throw new Error(file);this.buffers.set(file,await this.context!.decodeAudioData(await r.arrayBuffer()));})();this.requests.set(file,request);}
+    if(!request){request=(async()=>{const data=await this.readSound(file);this.rawBuffers.delete(file);this.buffers.set(file,await this.context!.decodeAudioData(data.slice(0)));})();this.requests.set(file,request);}
     try{await request;this.trimCache(file);}finally{this.requests.delete(file);}
   }
   async preloadMonsters(kinds:readonly string[]){
@@ -120,7 +183,7 @@ export class OriginalSounds {
     const generation=++this.chapterRequest;
     try{
       await this.loading;
-      const files=[...new Set(kinds.flatMap(kind=>MONSTER_SOUND_EVENTS.filter(event=>this.monsters[event]).map(event=>this.manifest?.mapping[monsterSoundKey(kind,event)]).filter((file):file is string=>!!file)))];
+      const files=this.monsterFiles(kinds);
       if(generation!==this.chapterRequest)return;
       this.chapterFiles=new Set(files);
       // Bound chapter requests; repeated calls share the same decode promise.
@@ -167,9 +230,9 @@ export class OriginalSounds {
     const file = this.manifest?.mapping[resourceKey],
       buffer = file ? this.buffers.get(file) : undefined;
     if (!buffer) {
-      if(monster && file && !this.queued.has(key)){
+      if(file && !this.queued.has(key)){
         this.queued.add(key);const requestedAt=this.context.currentTime;
-        void this.loadBuffer(file).then(()=>{this.queued.delete(key);if(this.context && this.context.currentTime-requestedAt<=1)this.play(key);}).catch(()=>{this.queued.delete(key);this.error="部分怪物音效未加载，重新开关声音可重试";});
+        void this.loadBuffer(file).then(()=>{this.queued.delete(key);if(this.context && this.context.currentTime-requestedAt<=1)this.play(key);}).catch(()=>{this.queued.delete(key);this.error="部分音效未加载，重新开关声音可重试";});
       }
       return;
     }
