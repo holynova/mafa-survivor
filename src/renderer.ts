@@ -996,6 +996,43 @@ class BattleScene extends Phaser.Scene {
   }
 }
 let engine: Phaser.Game | null = null;
+/** Draw from Phaser's resident originals, including lazily loaded equipment. */
+export function drawSurvivorArt(ctx: CanvasRenderingContext2D, name: string, portrait = false) {
+  if (!engine || !assets) return false;
+  const direction = 4;
+  const appearance = portrait ? resolveAppearance(game.classId, game.equipment) : null;
+  const body = appearance && assets.animations[`${appearance.body}/idle/${direction}`]?.[0];
+  const index = body ? Number(body.split("/").at(-1)) : 0;
+  const weapon = appearance?.weapon && assets.animations[`${appearance.weapon}/idle/${direction}`]
+    ?.find(frame => Number(frame.split("/").at(-1)) === index);
+  const names = portrait
+    ? (weapon && weaponBehind("idle", direction, index) ? [weapon, body] : [body, weapon])
+    : [name.startsWith("item/") && assets.frames[name.replace("item/", "package/")]
+      ? name.replace("item/", "package/") : name];
+  const layers = names.flatMap(key => {
+    const meta = key && assets.frames[key];
+    if (!meta || !engine!.textures.exists(meta.texture)) return [];
+    const frame = engine!.textures.getFrame(meta.texture, key);
+    const image=frame?.source.image;
+    if (!frame || !image || image instanceof Uint8Array) return [];
+    return [{frame, image, x: portrait ? -meta.originX : 0, y: portrait ? -meta.originY : 0}];
+  });
+  if (!layers.length || (portrait && layers.length !== names.filter(Boolean).length)) return false;
+  const left = Math.min(...layers.map(layer => layer.x));
+  const top = Math.min(...layers.map(layer => layer.y));
+  const width = Math.max(...layers.map(layer => layer.x + layer.frame.cutWidth)) - left;
+  const height = Math.max(...layers.map(layer => layer.y + layer.frame.cutHeight)) - top;
+  const scale = Math.min((ctx.canvas.width - 4) / width, (ctx.canvas.height - 4) / height);
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.imageSmoothingEnabled = false;
+  for (const {frame, image, x, y} of layers) {
+    ctx.drawImage(image, frame.cutX, frame.cutY, frame.cutWidth, frame.cutHeight,
+      (ctx.canvas.width - width * scale) / 2 + (x - left) * scale,
+      (ctx.canvas.height - height * scale) / 2 + (y - top) * scale,
+      frame.cutWidth * scale, frame.cutHeight * scale);
+  }
+  return true;
+}
 export function boot() {
   if (engine) return;
   engine = new Phaser.Game({

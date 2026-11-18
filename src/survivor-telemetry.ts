@@ -51,6 +51,13 @@ export class SurvivorTelemetry {
   if(r.events.length<MAX_EVENTS)r.events.push({at:g.clock,type,details});else r.omittedEvents++;
   this.version++;
  }
+ equipmentFinds(runId:string){
+  return this.report?.runId===runId
+   ? this.report.events.flatMap(e=>e.type==='equipment'&&typeof e.details.to==='string'&&typeof e.details.slot==='string'
+     ? [{slot:e.details.slot,to:e.details.to,from:typeof e.details.from==='string'?e.details.from:null}]
+     : [])
+   : [];
+ }
  step(g:Game,dt:number){
   if(!this.ensure(g)||!Number.isFinite(dt)||dt<=0)return;
   const t=this.report!.totals;t.observedSeconds+=dt;if(g.player.hp/g.maxHP<.3)t.lowHpSeconds+=dt;this.version++;

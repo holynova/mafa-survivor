@@ -1,0 +1,611 @@
+.survivor-bronze {
+  --bronze-ink:#f8e7bc;
+  --bronze-muted:#d1bb8d;
+  --bronze-line:#8b7047;
+  --bronze-dark:#201a12;
+  --bronze-title:"Songti SC","Noto Serif CJK SC",SimSun,serif;
+  --bronze-bottom:max(24px,env(safe-area-inset-bottom));
+  --bronze-orb:88px;
+  --survivor-hud-height:117px;
+  color:var(--bronze-ink);
+  font:15px/1.5 var(--bronze-title);
+}
+.survivor-bronze ::selection { color:#1b1209; background:#e4c17c; }
+.survivor-bronze :focus-visible { outline:2px solid #ffe198; outline-offset:2px; }
+.survivor-bronze :is(button,summary) { -webkit-tap-highlight-color:transparent; }
+.survivor-bronze button {
+  border:10px solid transparent;
+  border-image:url('./assets/bronze/button-dark.webp') 14 fill / 10px stretch;
+  border-radius:0;
+  background:none;
+  color:var(--bronze-ink);
+  padding:0 8px;
+  font-weight:600;
+}
+.survivor-bronze button:not(:disabled):active { filter:brightness(1.18); }
+.survivor-bronze a { color:#e4c985; }
+.survivor-bronze .survivor-panel {
+  scrollbar-width:thin;
+  scrollbar-color:#8b7047 #201a12;
+  box-sizing:border-box;
+  max-width:400px;
+  inset:max(12px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));
+  padding:17px 15px;
+  height:fit-content;
+  max-height:calc(100% - max(24px,env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+  margin:auto;
+  overflow:auto;
+  border:12px solid transparent;
+  border-image:url('./assets/bronze/panel-frame.webp') 15 / 15px stretch;
+  border-radius:0;
+  background:url('./assets/bronze/panel-surface.webp') repeat padding-box,var(--bronze-dark);
+  background-clip:padding-box;
+  box-shadow:inset 0 0 38px #0007,0 8px 28px #0504018c;
+  z-index:6;
+}
+.survivor-bronze .survivor-panel :is(h1,h2) {
+  color:#fae7b8;
+  text-align:center;
+  font-family:var(--bronze-title);
+  font-weight:700;
+  line-height:1.2;
+  letter-spacing:.09em;
+  text-shadow:0 2px 3px #0e0905;
+}
+.survivor-bronze .survivor-panel h2 { font-size:29px; }
+.survivor-bronze .survivor-panel p { color:var(--bronze-muted); }
+.survivor-bronze .survivor-primary,
+.survivor-bronze .survivor-tabs button[aria-pressed=true] {
+  border:12px solid transparent;
+  border-image:url('./assets/bronze/button-gold.webp') 17 fill / 12px stretch;
+  background:none;
+  color:#1d130a;
+  font-weight:800;
+}
+.survivor-bronze .survivor-primary {
+  display:block;
+  width:100%;
+  min-height:58px;
+  margin:14px 0 4px;
+  font-size:22px;
+  letter-spacing:.09em;
+}
+.survivor-bronze .survivor-secondary { margin:7px 0 3px; min-height:49px; }
+.survivor-bronze .survivor-tabs button { min-width:0; }
+.survivor-bronze .bronze-return {
+  display:block;
+  margin:3px auto 0;
+  border:0;
+  background:none;
+  color:var(--bronze-muted);
+  font-size:14px;
+  text-decoration:underline;
+  text-underline-offset:4px;
+}
+.survivor-bronze .bronze-plaque {
+  display:grid;
+  place-items:center;
+  min-height:53px;
+  margin:0 auto 18px;
+  width:min(100%,242px);
+  padding:8px 24px;
+  box-sizing:border-box;
+  background:url('./assets/bronze/title-plaque.webp') center/100% 100% no-repeat;
+}
+.survivor-bronze[data-phase=lobby] { pointer-events:auto; }
+.survivor-bronze :is(.survivor-lobby,.survivor-chapters) {
+  inset:0;
+  height:100%;
+  max-height:none;
+  max-width:460px;
+  padding:0;
+  border:0;
+  border-left:1px solid #6a5737;
+  border-right:1px solid #6a5737;
+  background:#21190e;
+}
+.survivor-bronze .survivor-lobby {
+  background:url('./assets/bronze/lobby-floor.webp') center bottom/100% auto no-repeat,
+    url('./assets/bronze/panel-surface.webp') repeat,#21190e;
+}
+.bronze-lobby-hero {
+  height:49dvh;
+  min-height:212px;
+  max-height:459px;
+  background:url('./assets/bronze/lobby-gate.webp') center 59%/cover no-repeat;
+  position:relative;
+}
+.bronze-lobby-hero::after {
+  content:"";
+  position:absolute;
+  inset:auto 0 0;
+  height:24px;
+  background:linear-gradient(transparent,#241b10);
+}
+.survivor-bronze .bronze-lobby-hero h1 {
+  position:absolute;
+  inset:max(7.2dvh,env(safe-area-inset-top) + 20px) 0 auto;
+  margin:0;
+}
+.bronze-lobby-hero h1 img { display:block; width:75%; height:auto; margin:auto; }
+.bronze-lobby-menu {
+  position:relative;
+  z-index:1;
+  display:grid;
+  gap:9px;
+  margin:-5px auto 0;
+  width:calc(100% - 64px);
+}
+.survivor-bronze .bronze-lobby-entry,
+.survivor-bronze .bronze-chapter {
+  display:grid;
+  grid-template-columns:46px minmax(0,1fr) auto;
+  gap:12px;
+  align-items:center;
+  width:100%;
+  box-sizing:border-box;
+  min-height:59px;
+  padding:0 10px;
+  text-align:left;
+  cursor:pointer;
+  border:9px solid transparent;
+  border-image:url('./assets/bronze/entry-frame.webp') 11 / 9px stretch;
+  background:url('./assets/bronze/panel-surface.webp') repeat padding-box,var(--bronze-dark);
+  background-clip:padding-box;
+  color:var(--bronze-ink);
+  font-size:21px;
+  font-weight:700;
+  letter-spacing:.06em;
+}
+.bronze-lobby-entry :is(.mir-skill-icon,.mir-skill-fallback) {
+  width:44px;
+  height:43px;
+  box-sizing:border-box;
+  padding:2px;
+  border:1px solid #9b8050;
+  background:#211a12;
+}
+.bronze-lobby-entry::-webkit-details-marker { display:none; }
+.bronze-lobby-entry::marker { content:""; }
+.bronze-lobby-entry small { font-size:13px; color:var(--bronze-muted); letter-spacing:0; }
+.bronze-chevron {
+  width:7px; height:7px;
+  border-top:2px solid #eed4a3;
+  border-right:2px solid #eed4a3;
+  transform:rotate(45deg);
+  margin-right:2px;
+}
+.survivor-bronze .bronze-lobby-map,
+.survivor-bronze .bronze-chapter { grid-template-columns:40% minmax(0,1fr) auto; padding:0; min-height:67px; }
+.bronze-lobby-map > span,.bronze-chapter > span { padding:4px 6px 4px 0; overflow-wrap:anywhere; }
+.bronze-lobby-map > i { margin-right:7px; }
+.bronze-chapter-thumb { align-self:stretch; width:100%; height:100%; min-height:40px; object-fit:cover; }
+.bronze-lobby-menu .survivor-primary { justify-self:center; width:90%; min-height:69px; margin:13px 0 0; font-size:29px; }
+.bronze-lobby-menu .bronze-role-options { margin:0; }
+.survivor-bronze .bronze-lobby-more {
+  margin:8px auto max(12px,env(safe-area-inset-bottom));
+  width:calc(100% - 64px);
+  text-align:center;
+}
+.survivor-bronze .bronze-lobby-more[open] { text-align:left; background:#21190ef0; padding:10px; }
+.bronze-lobby-more > summary { font-size:13px; }
+.survivor-bronze .survivor-chapters {
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  padding:max(20px,env(safe-area-inset-top) + 12px) 22px max(14px,env(safe-area-inset-bottom));
+  background:linear-gradient(#12110870,#1e170dd1 93%),url('./assets/bronze/chapter-background.webp') center/cover;
+}
+.survivor-chapters > .bronze-plaque { margin:32px auto 18px; flex:none; }
+.bronze-chapter-list { min-height:0; overflow:auto; display:grid; align-content:start; gap:7px; overscroll-behavior:contain; padding:4px 3px 8px; }
+.survivor-bronze .bronze-chapter { min-height:83px; gap:13px; }
+.survivor-bronze .bronze-chapter[aria-pressed=true] { border-image-source:url('./assets/bronze/button-gold.webp'); box-shadow:0 0 10px #d5a24c65; }
+.survivor-bronze .survivor-chapters .survivor-primary { flex:none; align-self:center; width:82%; min-height:65px; font-size:27px; }
+.survivor-chapters .bronze-return { flex:none; }
+.survivor-bronze .bronze-hud-top {
+  position:absolute;
+  inset:max(20px,env(safe-area-inset-top) + 6px) max(12px,env(safe-area-inset-right)) auto max(12px,env(safe-area-inset-left));
+  display:grid;
+  place-items:center;
+  height:44px;
+  z-index:4;
+}
+.bronze-clock {
+  display:grid;
+  place-items:center;
+  min-width:113px;
+  height:37px;
+  padding:0 9px;
+  background:url('./assets/bronze/clock-plaque.webp') center/100% 100%;
+  color:#fff0c6;
+  font-size:20px;
+  font-variant-numeric:tabular-nums;
+  text-shadow:0 1px 2px #000;
+}
+.survivor-bronze .bronze-pause-button {
+  position:absolute;
+  right:0;
+  min-width:44px;
+  min-height:44px;
+  border:0;
+  padding:0;
+  background:url('./assets/bronze/pause.webp') center/40px 44px no-repeat;
+}
+.survivor-bronze[data-building=true] .bronze-hud-top,
+.survivor-bronze[data-phase=upgrade] .bronze-hud-top { visibility:hidden; }
+.survivor-bronze[data-phase=paused][data-building=false] :is(.mir-survival-hud,.bronze-hud-top) { filter:brightness(.58); }
+.survivor-bronze .mir-survival-hud {
+  position:absolute;
+  inset:auto max(10px,env(safe-area-inset-right)) var(--bronze-bottom) max(10px,env(safe-area-inset-left));
+  height:var(--survivor-hud-height);
+  display:grid;
+  grid-template-columns:var(--bronze-orb) minmax(0,1fr);
+  grid-template-rows:14px 1fr 20px;
+  gap:4px 5px;
+  align-items:center;
+  align-content:stretch;
+  padding:0;
+  box-sizing:border-box;
+  max-width:700px;
+  margin:auto;
+  background:none;
+  font-family:var(--bronze-title);
+  filter:drop-shadow(0 2px 2px #030201a0);
+}
+.survivor-bronze .mir-vital {
+  grid-area:1 / 1 / 3 / 2;
+  position:relative;
+  width:var(--bronze-orb);
+  height:var(--bronze-orb);
+  background:url('./assets/bronze/health-orb-empty.webp') center/100% 100% no-repeat;
+}
+.mir-orb-fill { position:absolute; inset:0; background:url('./assets/bronze/health-orb.webp') center/100% 100% no-repeat; }
+.survivor-bronze .mir-vital > span {
+  inset:auto 0 15% 0;
+  width:100%;
+  text-align:center;
+  color:#fff4da;
+  font:16px/1 var(--bronze-title);
+  font-variant-numeric:tabular-nums;
+  text-shadow:0 2px 3px #000,1px 1px #120904;
+}
+.survivor-bronze .mir-ready-bar,
+.survivor-bronze .mir-experience progress {
+  display:block;
+  box-sizing:border-box;
+  width:100%;
+  padding:2px;
+  border:1px solid #9e8455;
+  box-shadow:inset 0 0 0 1px #332618;
+  background:#100a05;
+}
+.survivor-bronze .mir-ready-bar { grid-area:1 / 2; height:12px; border-radius:4px; }
+.survivor-bronze progress::-webkit-progress-bar { background:#1a1109; }
+.survivor-bronze .mir-ready-bar::-webkit-progress-value { background:linear-gradient(#78a9f4,#215eb6); }
+.survivor-bronze .mir-ready-bar::-moz-progress-bar { background:#397bd4; }
+.survivor-bronze .mir-skill-dock {
+  grid-area:2 / 2;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  justify-items:stretch;
+  gap:5px;
+}
+.survivor-bronze .mir-survival-hud[data-skills="5"] .mir-skill-dock {grid-template-columns:repeat(5,minmax(0,1fr));}
+.survivor-bronze .mir-survival-hud[data-skills="6"] .mir-skill-dock {grid-template-columns:repeat(6,minmax(0,1fr));}
+.survivor-bronze .mir-skill-slot,
+.survivor-bronze .bronze-item-slot {
+  width:100%;
+  min-width:0;
+  min-height:44px;
+  height:auto;
+  max-width:64px;
+  max-height:none;
+  aspect-ratio:1;
+  box-sizing:border-box;
+  padding:4px;
+  border:1px solid #9d8459;
+  box-shadow:inset 0 0 0 2px #4e3e2a,inset 0 0 0 3px #130f0a;
+  background:#241a10;
+  position:relative;
+  overflow:hidden;
+  border-radius:2px;
+}
+.survivor-bronze .mir-skill-slot.is-evolved,
+.survivor-bronze .bronze-item-slot[aria-pressed=true] { border-color:#f4d68f; box-shadow:inset 0 0 0 2px #73552c; }
+.survivor-bronze .mir-cooldown-number { font-family:var(--bronze-title); font-size:17px; }
+.mir-experience {
+  grid-area:3 / 1 / 4 / 3;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  height:20px;
+  padding:0 6px;
+  background:#140d08e0;
+  border-block:1px solid #856739;
+  font-size:15px;
+  line-height:1;
+}
+.survivor-bronze .mir-experience progress {height:10px;}
+.mir-experience progress::-webkit-progress-value {background:linear-gradient(#f4cc71,#c08a33);}
+.mir-experience progress::-moz-progress-bar {background:#d7a345;}
+.survivor-bronze .encounter-hud {
+  inset:calc(max(20px,env(safe-area-inset-top) + 6px) + 51px) max(12px,env(safe-area-inset-right)) auto max(12px,env(safe-area-inset-left));
+  max-width:540px;
+}
+.survivor-bronze .boss-health {
+  box-sizing:border-box;
+  padding:7px 11px 8px;
+  background:url('./assets/bronze/boss-frame.webp') center/100% 100% no-repeat,#25170c;
+  border:0;
+  box-shadow:0 2px 6px #0008;
+}
+.survivor-bronze .boss-health>div { margin:0 0 2px; }
+.survivor-bronze .boss-health strong {letter-spacing:.04em;font-size:16px;}
+.survivor-bronze .boss-health progress { height:9px; }
+.survivor-bronze .boss-health progress::-webkit-progress-value { background:linear-gradient(#f2806d,#b33128 62%,#74181b); }
+.survivor-bronze .boss-health.is-enraged { outline:1px solid #e36649; }
+.survivor-bronze .survivor-guide:not(.is-inline) { top:calc(max(20px,env(safe-area-inset-top) + 6px) + 51px); }
+.survivor-bronze:has(.boss-health) .survivor-guide:not(.is-inline) { top:calc(max(20px,env(safe-area-inset-top) + 6px) + 119px); }
+.survivor-bronze .survivor-controls {
+  bottom:calc(var(--survivor-hud-height) + var(--bronze-bottom) + 14px);
+  left:max(13px,env(safe-area-inset-left));
+  right:max(13px,env(safe-area-inset-right));
+  max-width:700px;
+}
+.survivor-bronze .survivor-controls button { min-height:44px; background:none; font-size:14px; }
+.survivor-bronze .survivor-controls button:disabled { opacity:.64; }
+.survivor-bronze .survivor-touch-field.is-fixed .survivor-stick { bottom:calc(var(--survivor-hud-height) + var(--bronze-bottom) + 16px); }
+.survivor-bronze :is(.survivor-upgrade,.survivor-skill-panel,.survivor-pause):not(.survivor-result) {
+  margin-block:auto;
+  transform:translateY(-25px);
+  max-height:calc(100% - var(--survivor-hud-height) - var(--bronze-bottom) - 47px);
+}
+.survivor-bronze :is(.survivor-upgrade,.survivor-pause) h2 {
+  margin:0 0 15px;
+  padding:0 0 12px;
+  border-bottom:1px solid #7c633c;
+}
+.survivor-bronze .survivor-choices { display:grid; gap:12px; margin:12px 0; }
+.survivor-bronze .survivor-choices .survivor-choice {
+  display:grid;
+  grid-template-columns:56px minmax(0,1fr);
+  align-items:center;
+  gap:10px;
+  min-height:86px;
+  padding:9px!important;
+  border:1px solid #81683f;
+  background:#593f241c;
+  box-shadow:inset 0 0 0 2px #130f09;
+  letter-spacing:0;
+}
+.survivor-bronze .survivor-choice .mir-skill-icon,
+.survivor-bronze .survivor-choice .mir-skill-fallback,
+.survivor-bronze .survivor-choice .mir-passive-icon {
+  width:54px;
+  height:54px;
+  box-sizing:border-box;
+  padding:3px;
+  border:1px solid #b0925e;
+  background:#241b12;
+}
+.survivor-bronze .survivor-choice .mir-passive-icon { display:grid; place-items:center; font-size:27px; }
+.bronze-choice-copy { min-width:0; overflow-wrap:anywhere; }
+.survivor-bronze .bronze-choice-copy strong { color:#f7e5ba; margin:0 0 3px; font-size:20px; }
+.survivor-bronze .bronze-choice-copy > span { color:var(--bronze-muted); font-size:14px; }
+.survivor-bronze .survivor-recipe { margin-top:3px; color:#e6bb6b; }
+.survivor-bronze .bronze-reroll { display:block; margin:12px auto 0; min-width:47%; }
+.bronze-reroll small { margin-left:4px; color:var(--bronze-muted); }
+.survivor-bronze .bronze-quick-settings { margin:22px 0 9px; padding:4px 12px; border:1px solid #745b36; }
+.bronze-quick-settings legend { padding:0 5px; font-size:18px; font-weight:700; }
+.bronze-toggle { display:flex; align-items:center; justify-content:space-between; position:relative; gap:10px; min-height:49px; cursor:pointer; }
+.bronze-toggle + .bronze-toggle { border-top:1px solid #4f3d26; }
+.bronze-toggle input { position:absolute; inset:0; width:100%; height:100%; margin:0; opacity:0; cursor:pointer; }
+.bronze-switch {
+  flex:0 0 43px;
+  box-sizing:border-box;
+  height:24px;
+  border:1px solid #a1814a;
+  border-radius:12px;
+  background:#1b130b;
+  display:flex;
+  align-items:center;
+  padding:2px;
+}
+.bronze-switch::after { content:""; width:18px; height:18px; background:#b29a6c; border-radius:50%; box-shadow:inset 0 0 0 1px #5b4424; }
+.bronze-toggle input:checked + .bronze-switch { justify-content:flex-end; background:#795525; }
+.bronze-toggle input:checked + .bronze-switch::after { background:#ffe0a1; }
+.bronze-toggle input:focus-visible + .bronze-switch { outline:2px solid #ffe198; outline-offset:4px; }
+.bronze-toggle input:disabled + .bronze-switch { opacity:.45; }
+.survivor-bronze :is(.bronze-more-settings,.bronze-end-run) { margin-top:8px; }
+.survivor-bronze .bronze-end-run > summary {
+  text-align:center;
+  border:10px solid transparent;
+  border-image:url('./assets/bronze/button-dark.webp') 14 fill / 10px stretch;
+  padding:2px 8px;
+  min-height:49px;
+  list-style:none;
+}
+.bronze-end-run > summary::-webkit-details-marker { display:none; }
+.survivor-bronze .bronze-build-tabs { margin:0 0 12px; }
+.bronze-paper-doll {
+  display:grid;
+  grid-template-columns:60px minmax(0,1fr) 60px;
+  position:relative;
+  min-height:228px;
+  padding:9px 3px;
+}
+.bronze-paper-doll-figure {
+  grid-column:2;
+  grid-row:1;
+  display:grid;
+  place-items:center;
+  min-width:0;
+}
+.bronze-portrait-art { width:min(100%,116px); height:auto; image-rendering:pixelated; }
+.bronze-gear-column { display:grid; align-content:space-between; gap:4px; justify-items:center; }
+.bronze-gear-column:nth-child(2) { grid-column:3; grid-row:1; }
+.survivor-bronze .bronze-item-slot { display:grid; place-items:center; align-self:start; width:50px; height:50px; }
+.bronze-item-art { width:100%; height:100%; display:block; image-rendering:pixelated; }
+.bronze-empty-slot { color:#aa936c; font-size:11px; text-align:center; line-height:1.15; }
+.bronze-gear-compare {
+  display:flex;
+  align-items:start;
+  flex-wrap:wrap;
+  gap:8px 12px;
+  padding:8px;
+  margin-top:8px;
+  border:1px solid #6d5432;
+  background:#1c140ba0;
+}
+.bronze-gear-compare > p { margin:4px 0; }
+.bronze-gear-readout { flex:1 1 107px; min-width:0; display:grid; grid-template-columns:38px minmax(0,1fr); gap:7px; }
+.survivor-bronze .bronze-gear-readout .bronze-item-slot { width:38px; height:38px; min-height:38px; }
+.bronze-gear-readout small,.bronze-gear-readout p { font-size:12px; display:block; }
+.bronze-gear-readout p { margin:0; overflow-wrap:anywhere; }
+.survivor-bronze .survivor-result { max-width:389px; display:block; padding-top:13px; }
+.survivor-bronze .survivor-result .bronze-plaque {
+  width:100%;
+  height:90px;
+  padding:18px 12px 0;
+  font-size:33px;
+  margin:-8px auto 12px;
+  background-image:url('./assets/bronze/result-plaque.webp');
+}
+.bronze-result-time {
+  display:flex;
+  justify-content:center;
+  align-items:baseline;
+  gap:12px;
+  margin:10px 0 16px;
+  font-size:19px;
+}
+.bronze-result-time strong { color:#fff0c4; font-size:31px; font-variant-numeric:tabular-nums; letter-spacing:.04em; }
+.bronze-result-ledger { margin:0; }
+.bronze-result-ledger > div { display:flex; justify-content:space-between; gap:8px; border-top:1px solid #655034; padding:10px 5px; }
+.bronze-result-ledger dd { margin:0; font-variant-numeric:tabular-nums; }
+.survivor-bronze .survivor-result .bronze-result-section { font-size:19px; margin:14px 0 11px; }
+.bronze-loot { display:flex; justify-content:center; gap:13px; list-style:none; margin:0 0 16px; padding:0; }
+.bronze-loot-empty { text-align:center; min-height:42px; }
+.bronze-result-extra { margin-top:12px; text-align:left; }
+@media (max-width:389px) {
+  .survivor-bronze { --bronze-orb:76px; --bronze-bottom:max(15px,env(safe-area-inset-bottom)); }
+  .survivor-bronze .survivor-panel { padding-inline:11px; }
+  .survivor-bronze :is(.survivor-lobby,.survivor-chapters) { padding-inline:0; }
+  .survivor-bronze .survivor-chapters { padding-inline:15px; }
+  .bronze-lobby-menu,.survivor-bronze .bronze-lobby-more { width:calc(100% - 40px); }
+  .survivor-bronze .mir-survival-hud:is([data-skills="5"],[data-skills="6"]) {
+    grid-template-rows:14px 36px 44px 20px;
+    height:calc(var(--survivor-hud-height) + 17px);
+  }
+  .survivor-bronze .mir-survival-hud:is([data-skills="5"],[data-skills="6"]) .mir-vital { height:54px; width:54px; }
+  .survivor-bronze .mir-survival-hud:is([data-skills="5"],[data-skills="6"]) .mir-vital > span { font-size:12px; }
+  .survivor-bronze .mir-survival-hud:is([data-skills="5"],[data-skills="6"]) .mir-skill-dock { grid-area:3 / 1 / 4 / 3; }
+  .survivor-bronze .mir-survival-hud:is([data-skills="5"],[data-skills="6"]) .mir-experience { grid-area:4 / 1 / 5 / 3; }
+  .survivor-bronze:has(.mir-survival-hud:is([data-skills="5"],[data-skills="6"])) .survivor-controls { transform:translateY(-17px); }
+}
+@media (max-height:640px) {
+  .survivor-bronze .bronze-lobby-hero { height:42dvh; }
+  .survivor-chapters > .bronze-plaque { margin-top:9px; }
+  .survivor-bronze .survivor-chapters .bronze-chapter { min-height:66px; }
+  .survivor-bronze :is(.survivor-upgrade,.survivor-skill-panel,.survivor-pause):not(.survivor-result) {
+    transform:none;
+    max-height:calc(100% - 32px);
+  }
+}
+@media (orientation:landscape) and (max-height:500px) {
+  .survivor-bronze { --survivor-hud-height:83px; --bronze-orb:58px; --bronze-bottom:max(8px,env(safe-area-inset-bottom)); }
+  .survivor-bronze .mir-survival-hud { max-width:545px; grid-template-rows:9px 46px 18px; }
+  .survivor-bronze .mir-ready-bar { height:8px; }
+  .survivor-bronze .mir-skill-dock { grid-template-columns:repeat(4,44px); justify-content:start; }
+  .survivor-bronze .mir-survival-hud[data-skills="5"] .mir-skill-dock { grid-template-columns:repeat(5,44px); }
+  .survivor-bronze .mir-survival-hud[data-skills="6"] .mir-skill-dock { grid-template-columns:repeat(6,44px); }
+  .survivor-bronze .mir-vital>span { font-size:12px; }
+  .survivor-bronze .bronze-lobby-hero { min-height:167px; height:45dvh; }
+  .survivor-bronze .bronze-lobby-hero h1 { top:14px; }
+  .bronze-lobby-hero h1 img { width:62%; }
+  .survivor-bronze .survivor-upgrade { max-width:730px; }
+  .survivor-bronze .survivor-upgrade .survivor-choices { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .survivor-bronze .survivor-upgrade .survivor-choice { grid-template-columns:42px minmax(0,1fr); }
+  .survivor-bronze .survivor-upgrade .survivor-choice :is(.mir-skill-icon,.mir-skill-fallback,.mir-passive-icon) { width:42px; height:42px; }
+}
+
+/* Keep the cut bronze edge against the panel itself at every dialog size. */
+.survivor-bronze .survivor-panel:not(.survivor-lobby,.survivor-chapters) {
+  background-clip:border-box;
+  clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 12px),
+    calc(100% - 12px) 100%,12px 100%,0 calc(100% - 12px),0 12px);
+}
+.survivor-bronze .bronze-lobby-entry::before { content:none; }
+.survivor-bronze .survivor-start-picker .bronze-lobby-entry { grid-template-columns:46px minmax(0,1fr); }
+.bronze-toggle > span:first-child,
+.bronze-result-ledger dt { display:flex; align-items:center; gap:9px; }
+.bronze-toggle > span:first-child::before,
+.bronze-result-ledger dt::before {
+  content:""; width:24px; height:23px; flex:0 0 24px; background-position:center; background-size:contain; background-repeat:no-repeat;
+}
+.bronze-toggle[data-icon=sound] > span:first-child::before {background-image:url('./assets/bronze/icon-sound.webp');}
+.bronze-toggle[data-icon=numbers] > span:first-child::before {background-image:url('./assets/bronze/icon-numbers.webp');}
+.bronze-result-ledger > div:first-child dt::before {background-image:url('./assets/bronze/icon-gold.webp');}
+.bronze-result-ledger > div:nth-child(2) dt::before {background-image:url('./assets/bronze/icon-damage.webp');}
+.survivor-bronze .bronze-chapter-list { max-height:calc(5 * 83px + 4 * 7px + 11px); }
+.survivor-bronze .survivor-chapters .survivor-primary { margin-top:28px; }
+.survivor-bronze .mir-survival-hud[data-skills="6"] .mir-skill-dock { gap:2px; }
+.survivor-bronze .survivor-choices .survivor-choice {
+  border:7px solid transparent;
+  border-image:url('./assets/bronze/entry-frame.webp') 10 / 7px stretch;
+  box-shadow:none;
+  padding:5px 7px!important;
+}
+.survivor-bronze .survivor-upgrade .bronze-reroll { min-height:51px; margin-top:18px; }
+.survivor-bronze .survivor-result .bronze-result-section {
+  display:flex; align-items:center; justify-content:center; gap:10px;
+}
+.bronze-result-section::before,.bronze-result-section::after {
+  content:""; width:18%; height:1px; background:#947749;
+}
+@media (min-height:700px) {
+  .survivor-bronze .survivor-upgrade {
+    min-height:min(63dvh,540px);
+    transform:translateY(-37px);
+    padding-top:23px;
+  }
+  .survivor-bronze .survivor-upgrade .survivor-choices {gap:14px;}
+  .survivor-bronze .survivor-upgrade .survivor-choice { min-height:98px; }
+}
+@media (max-width:389px) {
+  .survivor-bronze .mir-survival-hud[data-skills="6"] .mir-skill-dock { gap:5px; }
+}
+@media (max-height:640px) {
+  .survivor-bronze .bronze-chapter-list { max-height:calc(5 * 66px + 4 * 7px + 11px); }
+  .survivor-bronze .survivor-chapters .survivor-primary { margin-top:12px; }
+}
+
+.survivor-bronze:is([data-phase=won],[data-phase=dead],[data-phase=paused][data-building=false])::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  background:#06040242;
+}
+.bronze-gear-compare[data-compare=true] { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); }
+.bronze-gear-arrow { align-self:center; font-size:22px; color:#edc17d; }
+.bronze-gear-readout[data-after=true] p { color:#c9d89d; }
+@media (min-height:760px) {
+  .survivor-bronze .bronze-chapter { min-height:92px; }
+  .survivor-bronze .bronze-chapter-list { max-height:calc(5 * 92px + 4 * 7px + 11px); }
+  .survivor-bronze .survivor-chapters .survivor-primary { margin-top:56px; }
+}
+
+/* The original-art-free verification build keeps the same controls and layout. */
+.survivor-bronze[data-graybox=true] :is(button,.bronze-lobby-entry,.survivor-panel) {
+  border:1px solid var(--bronze-line);
+  background-color:var(--bronze-dark);
+}
+.survivor-bronze[data-graybox=true] .survivor-primary {
+  background-color:#d6b46c;
+}
+.survivor-bronze[data-graybox=true] .mir-vital,
+.survivor-bronze[data-graybox=true] .mir-orb-fill { border-radius:50%; }
+.survivor-bronze[data-graybox=true] .mir-vital {background-color:#331b17;}
+.survivor-bronze[data-graybox=true] .mir-orb-fill {background-color:#a43932;}
+.survivor-bronze[data-graybox=true] .bronze-pause-button::after { content:"暂停"; }

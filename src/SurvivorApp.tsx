@@ -4,11 +4,14 @@ import {TELEMETRY_KEY} from "./survivor-telemetry";
 import {SurvivorDiagnostics} from "./SurvivorDiagnostics";
 import {SurvivorGuide} from './SurvivorGuide';
 import {survivorGuide} from './survivor-guide';
-import {SurvivorRecap} from './SurvivorRecap';
+import {SurvivorResult} from './SurvivorResult';
+import {ChapterPicker,ChapterThumbnail,SurvivorQuickSettings} from './SurvivorBronze';
+import lobbyTitle from './assets/bronze/lobby-title.webp';
+import warriorIcon from './assets/bronze/icon-warrior.webp';
+import edgeCharm from './assets/bronze/charm-edge.webp';
 import {ControlSettings} from './ControlSettings';
 import {visualPreferences} from './visual-settings';
 import {VisualSettings} from './VisualSettings';
-import {SurvivorEquipment} from './SurvivorEquipment';
 import {SurvivorSupplies} from './SurvivorSupplies';
 import {mainRecipeForChoice} from './survivor-focus';
 import {writeSurvivalCheckpoint} from './survivor-persistence';
@@ -22,30 +25,33 @@ import {SurvivorGrowthBook} from './SurvivorGrowthBook';
 import {useEffect,useLayoutEffect,useReducer,useRef,useState} from 'react';
 import {game} from './game';
 import {CLASS_IDS,CLASSES,type ClassId} from './classes';
-import {getSkill,getItem,MAPS,type MapId} from './content';
+import {getSkill,MAPS,type MapId} from './content';
 import {isReady,readyListeners,setBattleInset} from './renderer';
 import {sounds} from './sound';
 import {AudioSettings} from './AudioSettings';
 import {SURVIVAL_OPEN_MAP_TEST,CHARMS,EVOLUTIONS,survivalChoices,survivalStarter} from './survivor';
-import {releaseVersion,repositoryUrl} from './release';
+import {isGraybox,releaseVersion,repositoryUrl} from './release';
 import {ShareCardButton} from './ShareCard';
 import './survivor.css';
+import './survivor-bronze.css';
 import {readSurvivalSave,SURVIVOR_SAVE_KEY,type SurvivorSave} from './survivor-save';
 import {CHAPTER_PATH,chapterRequirement,chapterUnlocked,chapterGoal,newSurvivorProgress,readSurvivorProgress,updateSurvivorProgress} from './survivor-progress';
 import {readSurvivorRecords,recordSurvival} from './survivor-records';
 const clock=(n:number)=>`${Math.floor(n/60).toString().padStart(2,'0')}:${Math.floor(n%60).toString().padStart(2,'0')}`;
-export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,setReady]=useState(isReady());const [error,setError]=useState('');const [saved,setSaved]=useState<SurvivorSave|null>(()=>{try{return readSurvivalSave(localStorage);}catch{return null;}});const [progress,setProgress]=useState(()=>{try{return readSurvivorProgress(localStorage);}catch{return newSurvivorProgress();}});const [role,setRole]=useState<ClassId>('wizard');const [map,setMap]=useState<MapId>('biche');
+export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,setReady]=useState(isReady());const [error,setError]=useState('');const [saved,setSaved]=useState<SurvivorSave|null>(()=>{try{return readSurvivalSave(localStorage);}catch{return null;}});const [progress,setProgress]=useState(()=>{try{return readSurvivorProgress(localStorage);}catch{return newSurvivorProgress();}});const [role,setRole]=useState<ClassId>('warrior');const [map,setMap]=useState<MapId>('biche');
  const [starts,setStarts]=useState<Partial<Record<ClassId,SkillId>>>({});
  const root=useRef<HTMLDivElement>(null);
+ const [choosingMap,setChoosingMap]=useState(false);
+ const [choosingRole,setChoosingRole]=useState(false);
  useLayoutEffect(()=>{
   const hud=root.current?.querySelector<HTMLElement>('.mir-survival-hud');
   if(!hud){setBattleInset(0);return;}
-  const measure=()=>setBattleInset(hud.getBoundingClientRect().height);measure();
+  const measure=()=>setBattleInset(window.innerHeight-hud.getBoundingClientRect().top);measure();
   const observer=new ResizeObserver(measure);observer.observe(hud);
   return()=>{observer.disconnect();setBattleInset(0);};
  },[game.phase]);
  const starter=availableSurvivorStarts(role,progress.roleBest).includes(starts[role]!)?starts[role]!:survivalStarter(role);
- const [skillPanel,setSkillPanel]=useState<SkillId|null|undefined>(undefined);
+ const [skillPanel,setSkillPanel]=useState<{tab:'skills'|'equipment';skill:SkillId|null}>();
  const persist=()=>{try{const cp=writeSurvivalCheckpoint(game,localStorage);if(cp){game.telemetry.persist(game,localStorage);setProgress(updateSurvivorProgress(game,localStorage));setSaved(cp);setError(e=>e.startsWith('存档未保存')?'':e);return true;}return false;}catch{setError('存档未保存：本机存储不可用或已满，请勿刷新。');return false;}};
  const discard=()=>{try{localStorage.removeItem(SURVIVOR_SAVE_KEY);setSaved(null);return true;}catch{setError('无法清除本机存档，请检查浏览器存储。');return false;}};
  useEffect(()=>{let phase=game.phase;const unsub=game.subscribe(()=>{survivorGuide.observe(game);if(game.phase!=='paused')setSkillPanel(undefined);if(game.result&&game.mode==='normal')try{setProgress(updateSurvivorProgress(game,localStorage));recordSurvival(game,localStorage);game.telemetry.persist(game,localStorage);localStorage.removeItem(SURVIVOR_SAVE_KEY);setSaved(null);}catch{setError('本机存储不可用，本局战绩未保存。');}else if(game.phase!==phase)persist();phase=game.phase;update();});
@@ -58,37 +64,128 @@ export function SurvivorApp(){const [,update]=useReducer(x=>x+1,0);const [ready,
  const resume=()=>{if(!saved)return;setRole(saved.state.classId);setMap(saved.state.mapId);setError('');void sounds.unlock();let diagnosticRaw:string|null=null;try{diagnosticRaw=localStorage.getItem(TELEMETRY_KEY);}catch{}if(!game.resumeSurvival(saved))setError('存档无法读取，请另开新局。');else game.telemetry.restore(game,{getItem:()=>diagnosticRaw});};
  const leave=()=>{try{setProgress(updateSurvivorProgress(game,localStorage));}catch{setError('章节进度未保存，请检查浏览器存储后重试。');return;}if(!discard())return;game.touchInput={x:0,y:0};game.phase='lobby';game.emit();};
  const saveAndLeave=()=>{if(!persist())return;game.touchInput={x:0,y:0};game.phase='lobby';game.emit();};
- const title=(id:typeof game.skills[number]['id'])=>game.survival.evolved.includes(id)?EVOLUTIONS[id]?.name??getSkill(id).name:getSkill(id).name;
  const recentEvolution=game.survival.evolved.at(-1);
  const selectingEvolution=game.phase==='upgrade'&&game.choices.some(c=>c.id.startsWith('evo:'));
- return <div ref={root} className="survivor-ui" data-text-size={visualPreferences.textSize}>{error&&<p className="survivor-error" role="alert">{error}</p>}{game.phase==='lobby'?<section className="survivor-panel survivor-lobby">
- <p className="survivor-eyebrow">连续生存 · {releaseVersion}</p><h1>玛法幸存者</h1><p className="survivor-subtitle">生存 20 分钟 · 决战最多加时 2 分钟</p>
- <div className="survivor-tabs" aria-label="选择职业">{CLASS_IDS.map(id=><button key={id} aria-pressed={role===id} onClick={()=>setRole(id)}>{CLASSES[id].name}</button>)}</div>
- <details className="survivor-more survivor-start-picker"><summary>起手 · {getSkill(starter).name}</summary><div className="survivor-choices" aria-label="选择起手技能">{SURVIVOR_STARTS[role].map(id=>{const unlocked=availableSurvivorStarts(role,progress.roleBest).includes(id);return <button className="survivor-choice" key={id} disabled={!unlocked} aria-pressed={starter===id} onClick={()=>setStarts(s=>({...s,[role]:id}))}><span className="survivor-choice-title"><SkillIcon id={id}/><strong>{getSkill(id).name}</strong>{starter===id&&<small>已选</small>}</span><span>{START_DESCRIPTIONS[id]}</span>{!unlocked&&<small>本职业普通局生存5分钟解锁 · 最佳 {clock(progress.roleBest[role]??0)}</small>}</button>;})}</div><p>每局仍从一个1级技能开始，不增加永久属性；不影响继续上局。</p></details>
- <fieldset className="survivor-map-picker"><legend>选择章节</legend><div>{CHAPTER_PATH.map(id=><button key={id} aria-pressed={map===id} disabled={!SURVIVAL_OPEN_MAP_TEST&&!chapterUnlocked(progress,id)} onClick={()=>setMap(id)}>{MAPS[id].name}</button>)}</div></fieldset>
- <p className="survivor-goal">{SURVIVAL_OPEN_MAP_TEST?'全地图已开放 · 自由测试':chapterGoal(progress,map)}</p>
- {saved&&<button className="survivor-primary" disabled={!ready} onClick={resume}>继续上局 · {clock(saved.state.clock)}</button>}
- <button className={saved?'survivor-secondary':'survivor-primary'} disabled={!ready} onClick={start}>{!ready?'加载中…':saved?'另开新局（覆盖存档）':'开始游戏'}</button>
- <p className="survivor-hint">拖动移动 · 自动攻击 · 自动存档</p>
- <details className="survivor-more"><summary>玩法与图鉴</summary><p>{survivorStartGuide(role,starter).text}</p>{role==='warrior'&&<p>战士击杀回复0.5点生命，与装备回复共用每秒5点上限。</p>}<p>18分钟最终首领登场。生存满20分钟且击败首领即可通关；未击败时停止刷新普通怪，最多再战2分钟。暂停和升级选择不计时。</p><p>完成一次普通局悬赏可解锁守阵。以后每局可在悬赏和守阵中任选一项。</p><p>最多携带6个技能与6个被动。技能升至8级，搭配被动与精英宝箱完成进化。</p><SurvivorGrowthBook classId={role}/><p>电脑使用 WASD／方向键移动，Q 使用血瓶。</p></details>
- <details className="survivor-more"><summary>章节与战绩</summary>{CHAPTER_PATH.map(id=>{const r=chapterRequirement(id);return <p key={id}>{MAPS[id].name} · {progress.won.includes(id)?'已通关':(SURVIVAL_OPEN_MAP_TEST||chapterUnlocked(progress,id))?`最佳 ${clock(progress.best[id]??0)}`:`需${MAPS[r!.map].name}生存${r!.seconds/60}分钟`}</p>;})}{readSurvivorRecords(localStorage).slice(0,5).map(r=><p key={r.runId}>{CLASSES[r.classId].name} · {MAPS[r.mapId].name} · {clock(r.seconds)} · {r.won?'生还':'倒下'}</p>)}</details>
- <ShareCardButton/><a className="survivor-legacy" href={repositoryUrl} target="_blank" rel="noreferrer">GitHub 源码</a><a className="survivor-legacy" href="?">返回原版</a>
- </section>:<>
- {game.phase==='battle'&&<><SurvivorHud onSkillClick={id=>{game.pause();setSkillPanel(id);}}/><EncounterHud/></>}
- {game.phase==='battle'&&<><SurvivorGuide place="battle"/><SurvivorJoystick/><div className="survivor-controls"><div><ChapterChallenge compact wardUnlocked={progress.wardUnlocked}/>{game.survival.chests.length>0&&<p>宝箱 {game.survival.chests.length} · 靠近拾取</p>}{game.skills.some(s=>s.id==='teleport')&&<button onClick={()=>game.useManualSkill()}>瞬息移动</button>}<button aria-label={`使用血瓶，剩余${game.potions.reserve.length}瓶`} disabled={!game.potions.reserve.length} onClick={()=>game.useBloodPotion()}>血瓶 ×{game.potions.reserve.length}</button></div></div></>}
- {game.phase==='upgrade'&&<section className="survivor-panel survivor-upgrade"><h2>{selectingEvolution?'选择武器进化':game.survival.choiceChest?'宝箱强化':'选择强化'}</h2><p>Lv.{game.level} · 选择后继续</p><SurvivorGuide place="upgrade"/><div className="survivor-choices">{game.choices.map(c=><button className="survivor-choice" key={c.id} onClick={()=>game.choose(c.id)}><span className="survivor-choice-title">{c.skill?<SkillIcon id={c.skill}/>:<span className="mir-passive-icon" aria-label="被动属性">{c.name.slice(0,1)}</span>}<strong>{c.name}</strong></span><span>{c.description}</span>{!selectingEvolution&&c.skill&&game.survival.mainSkills.includes(c.skill)&&<small className="survivor-recipe">主修技能</small>}{!selectingEvolution&&mainRecipeForChoice(game,c).length>0&&<small className="survivor-recipe">{mainRecipeForChoice(game,c).map(id=>getSkill(id).name).join('／')}的进化配方</small>}</button>)}</div>{!game.choices.length&&<button onClick={()=>{game.player.hp=game.maxHP;game.phase='battle';game.emit();}}>恢复生命并继续</button>}{!selectingEvolution&&<button disabled={game.survival.rerolls<=0} onClick={()=>{if(game.survival.rerolls>0){game.survival.rerolls--;game.choices=survivalChoices(game);game.emit();}}}>重掷 · 剩余 {game.survival.rerolls}</button>}</section>}
- {game.phase==='paused'&&skillPanel!==undefined&&<SurvivorSkillPanel initialSelected={skillPanel} onBack={()=>setSkillPanel(undefined)}/>}
- {game.phase==='paused'&&skillPanel===undefined&&<section className="survivor-panel survivor-pause"><p className="survivor-eyebrow">{MAPS[game.mapId].name} · {clock(game.clock)}</p><h2>{game.survival.toast||'已暂停'}</h2>{game.survival.toast.startsWith('进化完成')&&recentEvolution&&<p>{EVOLUTIONS[recentEvolution]?.description}</p>}
- <button className="survivor-primary" onClick={()=>{game.survival.toast='';game.pause();}}>继续战斗</button>
- <button className="survivor-secondary" onClick={()=>setSkillPanel(null)}>管理技能与构筑 · {game.skills.length}/6</button>
- <SurvivorEquipment/>
- {game.skills.some(s=>s.id==='poison')&&<div className="survivor-tabs"><button aria-pressed={game.tao.poisonMode==='green'} onClick={()=>game.setPoisonMode('green')}>绿毒 · 伤害</button><button aria-pressed={game.tao.poisonMode==='red'} onClick={()=>game.setPoisonMode('red')}>红毒 · 减防</button></div>}
- <details className="survivor-more"><summary>被动与属性 · {Object.keys(game.survival.charms).length}/6</summary>{Object.entries(game.survival.charms).map(([id,n])=><p key={id}>{CHARMS.find(c=>c.id===id)?.name} · {n}/5</p>)}<p>侦测 {Math.round(game.detectionRange)} · 移速 +{Math.round(game.stats.move_speed??0)}%</p><p>击败 {game.kills}</p></details>
- <ChapterChallenge wardUnlocked={progress.wardUnlocked}/><SurvivorSupplies/>
- <ControlSettings/><button className="survivor-guide-reset" onClick={()=>{survivorGuide.reset();game.emit();}}>重新查看新手提示</button><VisualSettings/><AudioSettings/><SurvivorDiagnostics/><ShareCardButton/>
- <button className="survivor-secondary" onClick={saveAndLeave}>保存并退出</button>
- <details className="survivor-exit"><summary>放弃本局</summary><p>本局无法继续，已达成的章节进度保留。</p><button onClick={leave}>确认放弃</button></details>
- </section>}
- {(game.phase==='won'||game.phase==='dead')&&<section className="survivor-panel survivor-result"><p className="survivor-eyebrow">{MAPS[game.mapId].name} · {CLASSES[game.classId].name}</p><h1>{game.phase==='won'?'荒野生还':'本局结束'}</h1>{game.survival.timedOut&&<p>决战时间已用尽，未能击败最终首领。</p>}<p className="survivor-result-time">{clock(game.clock)}<small>生存时间</small></p><div className="survivor-result-stats"><div><b>{game.level}</b><span>等级</span></div><div><b>{game.kills}</b><span>击败</span></div><div><b>{game.survival.evolved.length}</b><span>进化</span></div></div><p className="survivor-goal">{chapterGoal(progress,game.mapId)}</p>{(progress.roleBest[game.classId]??0)>=START_UNLOCK_SECONDS&&<p>已开放{getSkill(SURVIVOR_STARTS[game.classId][1]).name}起手，可在开局页切换。</p>}<button className="survivor-primary" onClick={start}>再来一局</button><button className="survivor-secondary" onClick={leave}>返回开局</button><SurvivorRecap/><SurvivorDiagnostics/><details className="survivor-more"><summary>伤害统计</summary>{Object.entries(game.damageDealt).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([id,n])=><div className="survivor-row survivor-rule" key={id}><span>{id==='basic'?'普通攻击':id.startsWith('evolution:')?(EVOLUTIONS[id.slice(10) as keyof typeof EVOLUTIONS]?.name??id):(()=>{try{return getSkill(id as typeof game.skills[number]['id']).name;}catch{return id;}})()}</span><b>{Math.round(n)}</b></div>)}</details></section>}
- </>}</div>;
+ const openSkills=(id:SkillId)=>{
+  game.pause();
+  setSkillPanel({tab:'skills',skill:id});
+ };
+ const continueBattle=()=>{game.survival.toast='';game.pause();};
+ return <div ref={root} className="survivor-ui survivor-bronze" data-text-size={visualPreferences.textSize} data-phase={game.phase}
+  data-building={game.phase==='paused'&&!!skillPanel} data-graybox={isGraybox}>
+  {error&&<p className="survivor-error" role="alert">{error}</p>}
+  {game.phase==='lobby'?(choosingMap
+   ?<ChapterPicker map={map} progress={progress} onChange={id=>{setMap(id);setChoosingMap(false);}} onClose={()=>setChoosingMap(false)}/>
+   :<section className="survivor-panel survivor-lobby" aria-labelledby="bronze-lobby-title">
+     <div className="bronze-lobby-hero">
+      <h1 id="bronze-lobby-title" aria-label="玛法幸存者">{isGraybox?"玛法幸存者":<img src={lobbyTitle} alt=""/>}</h1>
+     </div>
+     <div className="bronze-lobby-menu">
+      <button className="bronze-lobby-entry" aria-expanded={choosingRole} onClick={()=>setChoosingRole(open=>!open)}>
+       {!isGraybox&&role==='warrior'?<img src={warriorIcon} className="mir-skill-icon" alt=""/>:<SkillIcon id={survivalStarter(role)}/>}<span>{CLASSES[role].name}</span><i className="bronze-chevron" aria-hidden="true"/>
+      </button>
+      {choosingRole&&<div className="survivor-tabs bronze-role-options" aria-label="选择职业">
+       {CLASS_IDS.map(id=><button key={id} aria-pressed={role===id} onClick={()=>{setRole(id);setChoosingRole(false);}}>{CLASSES[id].name}</button>)}
+      </div>}
+      <details className="survivor-start-picker">
+       <summary className="bronze-lobby-entry"><SkillIcon id={starter}/><span><small>起手</small> {getSkill(starter).name}</span></summary>
+       <div className="survivor-choices" aria-label="选择起手技能">{SURVIVOR_STARTS[role].map(id=>{
+        const unlocked=availableSurvivorStarts(role,progress.roleBest).includes(id);
+        return <button className="survivor-choice" key={id} disabled={!unlocked} aria-pressed={starter===id} onClick={event=>{
+         setStarts(s=>({...s,[role]:id}));
+         const disclosure=event.currentTarget.closest('details');if(disclosure)disclosure.open=false;
+        }}>
+         <SkillIcon id={id}/><span className="bronze-choice-copy"><strong>{getSkill(id).name}</strong>
+          {unlocked?START_DESCRIPTIONS[id]:`本职业普通局生存5分钟解锁 · 最佳 ${clock(progress.roleBest[role]??0)}`}
+         </span>
+        </button>;
+       })}</div>
+      </details>
+      <button className="bronze-lobby-entry bronze-lobby-map" onClick={()=>setChoosingMap(true)} aria-label={`选择章节 · ${MAPS[map].name}`}>
+       <ChapterThumbnail map={map}/><span>{MAPS[map].name}</span><i className="bronze-chevron" aria-hidden="true"/>
+      </button>
+      {!SURVIVAL_OPEN_MAP_TEST&&<p className="survivor-goal">{chapterGoal(progress,map)}</p>}
+      {saved&&<button className="survivor-primary" disabled={!ready} onClick={resume}>继续上局 · {clock(saved.state.clock)}</button>}
+      <button className={saved?'survivor-secondary':'survivor-primary'} disabled={!ready} onClick={start}>
+       {!ready?'加载中…':saved?'另开新局（覆盖存档）':'出战'}
+      </button>
+     </div>
+     <details className="bronze-lobby-more">
+      <summary>图鉴与战绩</summary>
+      <p>{releaseVersion} · 拖动移动 · 自动攻击 · 自动存档</p>
+      <details className="survivor-more"><summary>玩法与技能图鉴</summary><p>{survivorStartGuide(role,starter).text}</p>
+       {role==='warrior'&&<p>战士击杀回复0.5点生命，与装备回复共用每秒5点上限。</p>}
+       <p>18分钟最终首领登场。生存满20分钟且击败首领即可通关；未击败时最多再战2分钟。暂停和升级选择不计时。</p>
+       <p>完成一次普通局悬赏可解锁守阵。以后每局可在悬赏和守阵中任选一项。</p>
+       <p>最多携带6个技能与6个被动。技能升至8级，搭配被动与精英宝箱完成进化。</p>
+       <SurvivorGrowthBook classId={role}/><p>电脑可用 WASD 或方向键移动，按 Q 使用血瓶。</p>
+      </details>
+      <details className="survivor-more"><summary>章节与战绩</summary>
+       {CHAPTER_PATH.map(id=>{const r=chapterRequirement(id);return <p key={id}>{MAPS[id].name} · {progress.won.includes(id)?'已通关':(SURVIVAL_OPEN_MAP_TEST||chapterUnlocked(progress,id))?`最佳 ${clock(progress.best[id]??0)}`:`需${MAPS[r!.map].name}生存${r!.seconds/60}分钟`}</p>;})}
+       {readSurvivorRecords(localStorage).slice(0,5).map(r=><p key={r.runId}>{CLASSES[r.classId].name} · {MAPS[r.mapId].name} · {clock(r.seconds)} · {r.won?'生还':'倒下'}</p>)}
+      </details>
+      <ShareCardButton/><a className="survivor-legacy" href={repositoryUrl} target="_blank" rel="noreferrer">GitHub 源码</a>
+      <a className="survivor-legacy" href="?">返回原版</a>
+     </details>
+    </section>
+  ):<>
+   {(game.phase==='battle'||game.phase==='paused'||game.phase==='upgrade')&&
+    <SurvivorHud onSkillClick={openSkills} interactive={game.phase==='battle'}/>}
+   {game.phase==='battle'&&<>
+    <EncounterHud/><SurvivorGuide place="battle"/><SurvivorJoystick/>
+    <div className="survivor-controls"><div>
+     <ChapterChallenge compact wardUnlocked={progress.wardUnlocked}/>
+     {game.survival.chests.length>0&&<p>宝箱 {game.survival.chests.length} · 靠近拾取</p>}
+     {game.skills.some(s=>s.id==='teleport')&&<button onClick={()=>game.useManualSkill()}>瞬息移动</button>}
+     <button aria-label={`使用血瓶，剩余${game.potions.reserve.length}瓶`} disabled={!game.potions.reserve.length} onClick={()=>game.useBloodPotion()}>
+      血瓶 ×{game.potions.reserve.length}
+     </button>
+    </div></div>
+   </>}
+   {game.phase==='upgrade'&&<section className="survivor-panel survivor-upgrade" aria-labelledby="bronze-upgrade-title">
+    <h2 id="bronze-upgrade-title">{selectingEvolution?'选择武器进化':game.survival.choiceChest?'宝箱强化':'选择强化'}</h2>
+    <SurvivorGuide place="upgrade"/>
+    <div className="survivor-choices">{game.choices.map(c=>{
+     const recipes=selectingEvolution?[]:mainRecipeForChoice(game,c);
+     return <button className="survivor-choice" key={c.id} onClick={()=>game.choose(c.id)}>
+      {c.skill?<SkillIcon id={c.skill}/>:!isGraybox&&c.name.startsWith('锋锐戒指')?<img className="mir-skill-icon" src={edgeCharm} alt=""/>:<span className="mir-passive-icon" aria-label="被动属性">{c.name.slice(0,1)}</span>}
+      <span className="bronze-choice-copy"><strong>{c.name}</strong><span>{c.description}</span>
+       {!selectingEvolution&&c.skill&&game.survival.mainSkills.includes(c.skill)&&<small className="survivor-recipe">主修技能</small>}
+       {recipes.length>0&&<small className="survivor-recipe">{recipes.map(id=>getSkill(id).name).join('／')}的进化配方</small>}
+      </span>
+     </button>;
+    })}</div>
+    {!game.choices.length&&<button className="survivor-primary" onClick={()=>{game.player.hp=game.maxHP;game.phase='battle';game.emit();}}>恢复生命并继续</button>}
+    {!selectingEvolution&&<button className="bronze-reroll" disabled={game.survival.rerolls<=0} onClick={()=>{
+     if(game.survival.rerolls>0){game.survival.rerolls--;game.choices=survivalChoices(game);game.emit();}
+    }}>重掷 <small>剩余 {game.survival.rerolls}</small></button>}
+   </section>}
+   {game.phase==='paused'&&skillPanel&&<SurvivorSkillPanel initialSelected={skillPanel.skill} initialTab={skillPanel.tab} onBack={()=>setSkillPanel(undefined)}/>}
+   {game.phase==='paused'&&!skillPanel&&<section className="survivor-panel survivor-pause" aria-labelledby="bronze-pause-title">
+    <h2 id="bronze-pause-title">{game.survival.toast||'暂停'}</h2>
+    {game.survival.toast.startsWith('进化完成')&&recentEvolution&&<p>{EVOLUTIONS[recentEvolution]?.description}</p>}
+    <button className="survivor-primary" onClick={continueBattle}>继续</button>
+    <SurvivorQuickSettings/>
+    <button className="survivor-secondary bronze-open-build" onClick={()=>setSkillPanel({tab:'equipment',skill:null})}>技能与装备</button>
+    <details className="survivor-more bronze-more-settings"><summary>更多设置与本局信息</summary>
+     {game.skills.some(s=>s.id==='poison')&&<div className="survivor-tabs">
+      <button aria-pressed={game.tao.poisonMode==='green'} onClick={()=>game.setPoisonMode('green')}>绿毒 · 伤害</button>
+      <button aria-pressed={game.tao.poisonMode==='red'} onClick={()=>game.setPoisonMode('red')}>红毒 · 减防</button>
+     </div>}
+     <details className="survivor-more"><summary>被动与属性 · {Object.keys(game.survival.charms).length}/6</summary>
+      {Object.entries(game.survival.charms).map(([id,n])=><p key={id}>{CHARMS.find(c=>c.id===id)?.name} · {n}/5</p>)}
+      <p>侦测 {Math.round(game.detectionRange)} · 移速 +{Math.round(game.stats.move_speed??0)}%</p><p>击败 {game.kills}</p>
+     </details>
+     <ChapterChallenge wardUnlocked={progress.wardUnlocked}/><SurvivorSupplies/>
+     <ControlSettings/><VisualSettings/><AudioSettings/><SurvivorDiagnostics/><ShareCardButton/>
+     <button className="survivor-guide-reset" onClick={()=>{survivorGuide.reset();game.emit();}}>重新查看新手提示</button>
+    </details>
+    <details className="bronze-end-run"><summary>结束本局</summary>
+     <button className="survivor-secondary" onClick={saveAndLeave}>保存并退出</button>
+     <details className="survivor-exit"><summary>放弃本局</summary><p>本局无法继续，已达成的章节进度保留。</p><button onClick={leave}>确认放弃</button></details>
+    </details>
+   </section>}
+   {(game.phase==='won'||game.phase==='dead')&&<SurvivorResult progress={progress} clock={clock(game.clock)} onRetry={start} onLeave={leave}/>}
+  </>}
+ </div>;
 }
