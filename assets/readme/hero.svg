@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 440" width="100%">
+  <title>玛法幸存者 Mafa Survivor — 战法道三职业，33 技能八级成长，十章地图</title>
+  <desc>Dark ember hero: three class seals — warrior, wizard, taoist — with a fireball arcing between them.</desc>
+  <defs>
+    <radialGradient id="ember" cx="75%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#e25822" stop-opacity="0.20"/>
+      <stop offset="100%" stop-color="#e25822" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <g>
+    <rect width="1200" height="440" rx="16" fill="#14100c"/>
+    <rect width="1200" height="440" rx="16" fill="url(#ember)"/>
+    <rect width="1200" height="440" rx="16" fill="none" stroke="#2e2418" stroke-width="1.5"/>
+  </g>
+  <!-- left copy -->
+  <g>
+    <g>
+      <rect x="60" y="52" width="212" height="32" rx="16" fill="#1f1710" stroke="#c9a86a" stroke-width="1.2"/>
+      <text x="166" y="74" text-anchor="middle" font-family="'SF Mono', Monaco, Consolas, monospace" font-size="15" font-weight="700" letter-spacing="1" fill="#e8b04b">ALPHA 42 · 手机优先</text>
+    </g>
+    <text x="60" y="152" font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="58" font-weight="800" fill="#f5e6c8">玛法幸存者</text>
+    <text x="60" y="198" font-family="'SF Mono', Monaco, Consolas, monospace" font-size="20" letter-spacing="3" fill="#c9a86a">MAFA SURVIVOR</text>
+    <text x="60" y="240" font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="21" fill="#d8c9a8">战法道三职业，33 技能八级成长</text>
+    <g font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="18" font-weight="700">
+      <g>
+        <rect x="60" y="278" width="110" height="44" rx="10" fill="#1f1710" stroke="#c9a86a" stroke-width="1"/>
+        <text x="115" y="307" text-anchor="middle" fill="#f5e6c8">3 职业</text>
+      </g>
+      <g>
+        <rect x="186" y="278" width="140" height="44" rx="10" fill="#1f1710" stroke="#c9a86a" stroke-width="1"/>
+        <text x="256" y="307" text-anchor="middle" fill="#f5e6c8">33 技能</text>
+      </g>
+      <g>
+        <rect x="342" y="278" width="132" height="44" rx="10" fill="#1f1710" stroke="#c9a86a" stroke-width="1"/>
+        <text x="408" y="307" text-anchor="middle" fill="#f5e6c8">10 张地图</text>
+      </g>
+    </g>
+    <text x="60" y="372" font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="18" fill="#b3a284">20 分钟一局，12 波怪潮，技能进化 + 装备构筑</text>
+  </g>
+  <!-- right: three class seals -->
+  <g>
+    <!-- warrior seal -->
+    <g transform="translate(640, 96)">
+      <rect x="0" y="0" width="150" height="248" rx="14" fill="#2a1410" stroke="#c0392b" stroke-width="2"/>
+      <circle cx="75" cy="70" r="42" fill="#3a1a12" stroke="#e74c3c" stroke-width="2"/>
+      <text x="75" y="86" text-anchor="middle" font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="40" font-weight="800" fill="#e74c3c">战</text>
+      <text x="75" y="152" text-anchor="middle" font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="700" fill="#f5e6c8">战士</text>
+      <text x="75" y="180" text-anchor="middle" font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="15" fill="#c9b896">近身挥砍</text>
+      <text x="75" y="202" text-anchor="middle" font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="15" fill="#c9b896">HP 185 · 高防</text>
+      <text x="75" y="230" text-anchor="middle" font-family="'SF Mono', Monaco, Consolas, monospace" font-size="14" fill="#a8906a">半月 / 烈火</text>
+    </g>
+    <!-- wizard seal (taller, center) -->
+    <g transform="translate(806, 60)">
+      <rect x="0" y="0" width="150" height="284" rx="14" fill="#101a2a" stroke="#4aa3ff" stroke-width="2"/>
+      <circle cx="75" cy="70" r="42" fill="#16233a" stroke="#7ec8ff" stroke-width="2"/>
+      <text x="75" y="86" text-anchor="middle" font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="40" font-weight="800" fill="#7ec8ff">法</text>
+      <text x="75" y="152" text-anchor="middle" font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="700" fill="#f5e6c8">法师</text>
+      <text x="75" y="180" text-anchor="middle" font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="15" fill="#c9b896">远程施法</text>
+      <text x="75" y="202" text-anchor="middle" font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="15" fill="#c9b896">HP 100 · 范围压制</text>
+      <text x="75" y="230" text-anchor="middle" font-family="'SF Mono', Monaco, Consolas, monospace" font-size="14" fill="#a8906a">火球 / 雷电</text>
+      <!-- fireball -->
+      <g>
+        <circle cx="75" cy="282" r="14" fill="#e25822"/>
+        <circle cx="75" cy="282" r="8" fill="#ffb347"/>
+        <circle cx="60" cy="292" r="4" fill="#e25822" fill-opacity="0.6"/>
+        <circle cx="92" cy="290" r="3" fill="#e25822" fill-opacity="0.5"/>
+      </g>
+    </g>
+    <!-- taoist seal -->
+    <g transform="translate(972, 96)">
+      <rect x="0" y="0" width="150" height="248" rx="14" fill="#12241a" stroke="#27ae60" stroke-width="2"/>
+      <circle cx="75" cy="70" r="42" fill="#1a3022" stroke="#5ad06e" stroke-width="2"/>
+      <text x="75" y="86" text-anchor="middle" font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="40" font-weight="800" fill="#5ad06e">道</text>
+      <text x="75" y="152" text-anchor="middle" font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="700" fill="#f5e6c8">道士</text>
+      <text x="75" y="180" text-anchor="middle" font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="15" fill="#c9b896">符毒牵制</text>
+      <text x="75" y="202" text-anchor="middle" font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="15" fill="#c9b896">HP 135 · 治疗召唤</text>
+      <text x="75" y="230" text-anchor="middle" font-family="'SF Mono', Monaco, Consolas, monospace" font-size="14" fill="#a8906a">火符 / 神兽</text>
+    </g>
+    <!-- timer chip -->
+    <g>
+      <rect x="715" y="368" width="330" height="32" rx="16" fill="#1f1710" stroke="#c9a86a" stroke-width="1"/>
+      <text x="880" y="390" text-anchor="middle" font-family="'SF Mono', Monaco, Consolas, monospace" font-size="15" font-weight="700" fill="#e8b04b">20:00 · 12 波 · 最终首领</text>
+    </g>
+  </g>
+</svg>
